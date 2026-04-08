@@ -589,7 +589,7 @@ const ReturnActionButton = useCallback(({ payment, onClick, canEdit }: any) => {
         return (
             <Box p={3}>
                 <Typography color="warning">
-                    You don't have permission to view Purchase Returns.
+                    You do not have permission to view Purchase Returns.
                 </Typography>
             </Box>
         );
