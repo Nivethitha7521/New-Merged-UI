@@ -26,9 +26,10 @@ import {
   InputLabel,
   IconButton,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { returnGrn, fetchGrns, setSelectedGrnId, fetchReturnReasons, addReturnReason, setSnackbarMessageGRN, setSnackbarOpenGRN } from '../../../features/yen-purchase/GRN/grnSlice';
+import { returnGrn, fetchGrns, setSelectedGrnId, fetchReturnReasons, addReturnReason, setSnackbarMessageGRN, setSnackbarOpenGRN, fetchGrnById } from '../../../features/yen-purchase/GRN/grnSlice';
 import { ReturnGRNRequest, ItemDetail, ReturnReason } from '@/Models/grnModel';
 import { AppDispatch, RootState } from '@/redux/store';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
@@ -76,7 +77,14 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
   const [selectedItemsForReturn, setSelectedItemsForReturn] = useState<Set<string>>(new Set());
   const [editedItems, setEditedItems] = useState<{ [itemId: string]: EditedItem }>({});
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Local loading state for submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 🔥 New state for amount limit validation
+  const [grnOriginalAmount, setGrnOriginalAmount] = useState<number>(0);
+  const [totalExistingReturns, setTotalExistingReturns] = useState<number>(0);
+  const [availableReturnAmount, setAvailableReturnAmount] = useState<number>(0);
+  const [amountLimitError, setAmountLimitError] = useState<string | null>(null);
+  const [backendErrorDetail, setBackendErrorDetail] = useState<any>(null);
 
   // Filter out "Other" option - only use dropdown reasons
   const dropdownReasons = returnReasons.filter(r => r.reason !== 'Other');
@@ -93,11 +101,81 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
     return customRound(returnedQuantity * (item.unitPrice || 0));
   };
 
-  const toggleFullScreen = () => {
-    setIsFullScreen(!isFullScreen);
+  // 🔥 Calculate total return amount for selected items
+  const calculateTotalReturnAmount = (): number => {
+    if (returnScenario === 'full') {
+      return dialogItems.reduce((total, item) => {
+        const maxReturnable = getMaxReturnable(item);
+        return total + calculateItemTotal(item, maxReturnable);
+      }, 0);
+    } else if (returnScenario === 'partial') {
+      return Array.from(selectedItemsForReturn).reduce((total, itemId) => {
+        const item = dialogItems.find(i => i.itemId === itemId);
+        const edited = editedItems[itemId];
+        if (item && edited && edited.returnedQuantity > 0) {
+          return total + calculateItemTotal(item, edited.returnedQuantity);
+        }
+        return total;
+      }, 0);
+    }
+    return 0;
   };
 
-  // Calculate nos and eachQuantity based on returnedQuantity
+  // 🔥 Fetch GRN details to get original amount and existing returns
+  useEffect(() => {
+    const fetchGrnDetails = async () => {
+      if (selectedGrnId) {
+        try {
+          const grnData = await dispatch(fetchGrnById(selectedGrnId)).unwrap();
+          
+          // Get original GRN amount
+          const originalAmount = grnData.grandTotal || grnData.totalReceivedAmount || 0;
+          setGrnOriginalAmount(originalAmount);
+          
+          // Calculate total existing returns from GRN
+          const existingReturns = grnData.itemDetails?.reduce((total: number, item: any) => {
+            return total + (item.returnedFinalPrice || 0);
+          }, 0) || 0;
+          setTotalExistingReturns(existingReturns);
+          
+          const available = originalAmount - existingReturns;
+          setAvailableReturnAmount(available > 0 ? available : 0);
+          
+          console.log('GRN Return Limits:', {
+            originalAmount,
+            existingReturns,
+            availableReturnAmount: available > 0 ? available : 0
+          });
+        } catch (error) {
+          console.error('Failed to fetch GRN details:', error);
+        }
+      }
+    };
+    
+    fetchGrnDetails();
+  }, [selectedGrnId, dispatch]);
+
+  // 🔥 Check if current return would exceed available amount
+  const checkAmountLimit = (): { isExceeded: boolean; message: string } => {
+    const totalReturnAmount = calculateTotalReturnAmount();
+    
+    if (totalReturnAmount > availableReturnAmount && availableReturnAmount > 0) {
+      return {
+        isExceeded: true,
+        message: `Return amount ₹${totalReturnAmount.toFixed(2)} exceeds available limit ₹${availableReturnAmount.toFixed(2)}. Total returns cannot exceed GRN value ₹${grnOriginalAmount.toFixed(2)}.`
+      };
+    }
+    
+    if (totalReturnAmount > grnOriginalAmount) {
+      return {
+        isExceeded: true,
+        message: `Return amount ₹${totalReturnAmount.toFixed(2)} exceeds GRN original value ₹${grnOriginalAmount.toFixed(2)}.`
+      };
+    }
+    
+    return { isExceeded: false, message: '' };
+  };
+
   const calculateNosAndEachQuantity = (item: ItemDetail, returnedQuantity: number): { nos: number; eachQuantity: number } => {
     const maxReturnable = getMaxReturnable(item);
     const originalEachQuantity = item.eachQuantity || 1;
@@ -111,7 +189,6 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
       return { nos: originalNos, eachQuantity: originalEachQuantity };
     }
 
-    // Prioritize maintaining original eachQuantity
     let nos = Math.floor(returnedQuantity / originalEachQuantity);
     let eachQuantity = originalEachQuantity;
     let remaining = returnedQuantity % originalEachQuantity;
@@ -124,14 +201,16 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
     return { nos: customRound(nos), eachQuantity: customRound(eachQuantity) };
   };
 
-  // Fetch return reasons only once on mount
   useEffect(() => {
     if (returnReasons.length === 0) {
       dispatch(fetchReturnReasons());
     }
   }, [dispatch, returnReasons.length]);
+  // ✅ Add this function - Toggle Full Screen
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+  };
 
-  // Handle changes to returnedQuantity or returnReason
   const handleEditReturn = (itemId: string, field: string, value: number | string) => {
     const dialogItem = dialogItems.find((i) => i.itemId === itemId);
     if (!dialogItem) return;
@@ -141,7 +220,6 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
     if (field === 'returnedQuantity') {
       const enteredQuantity = Number(value);
       if (enteredQuantity > maxReturnable) {
-        // Use setTimeout to defer dispatch calls outside of render cycle
         setTimeout(() => {
           dispatch(setSnackbarMessageGRN(`Cannot return more than ${maxReturnable} units for ${dialogItem.itemName ?? 'this item'}.`));
           dispatch(setSnackbarOpenGRN(true));
@@ -175,6 +253,10 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
     if (returnScenario === 'partial' && field === 'returnedQuantity') {
       setSelectedItemsForReturn((prev) => new Set(prev).add(itemId));
     }
+    
+    // 🔥 Clear amount limit error when user changes quantities
+    setAmountLimitError(null);
+    setBackendErrorDetail(null);
   };
 
   const handleCheckboxChange = (itemId: string) => {
@@ -204,25 +286,29 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
       }
       return newSet;
     });
+    
+    setAmountLimitError(null);
+    setBackendErrorDetail(null);
   };
 
   const handleReturnClick = (scenario: 'full' | 'partial') => {
-    // Clear previous selections when switching scenarios
     setReturnReason('');
     setCustomReason('');
     setSelectedItemsForReturn(new Set());
     setEditedItems({});
-    
+    setAmountLimitError(null);
+    setBackendErrorDetail(null);
     setReturnScenario(scenario);
   };
 
   const handleClearSelections = () => {
-    // Clear all selections and reset to initial state
     setReturnReason('');
     setCustomReason('');
     setSelectedItemsForReturn(new Set());
     setEditedItems({});
-    setReturnScenario(null); // Reset scenario to enable both buttons
+    setReturnScenario(null);
+    setAmountLimitError(null);
+    setBackendErrorDetail(null);
   };
 
   const handleSubmit = async () => {
@@ -234,6 +320,15 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
 
     if (!returnScenario) {
       dispatch(setSnackbarMessageGRN('Please select a return scenario.'));
+      dispatch(setSnackbarOpenGRN(true));
+      return;
+    }
+
+    // 🔥 Check amount limit before submission
+    const amountCheck = checkAmountLimit();
+    if (amountCheck.isExceeded) {
+      setAmountLimitError(amountCheck.message);
+      dispatch(setSnackbarMessageGRN(amountCheck.message));
       dispatch(setSnackbarOpenGRN(true));
       return;
     }
@@ -285,96 +380,90 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
       setDialogReturnOpen(false);
     }
   };
-const handleReturn = async () => {
-  if (!selectedGrnId || isSubmitting) {
-    return;
-  }
 
-  setIsSubmitting(true);
-  const returnedBy = username || 'unknown_user'; // Fallback to 'unknown_user' if username is null
-  const returnData: ReturnGRNRequest = {
-    scenario: returnScenario!,
-    returnedDate: new Date().toISOString(),
-    returnedBy: returnedBy, // Replace with actual user ID
-    comments: returnReason,
-    items: returnScenario === 'partial'
-      ? Array.from(selectedItemsForReturn).map((itemId) => {
-          const edited = editedItems[itemId];
-          return {
-            itemId,
-            nos: edited.nos,
-            eachQuantity: edited.eachQuantity,
-            returnedQuantity: edited.returnedQuantity,
-            returnReason: edited.returnReason,
-          };
-        })
-      : dialogItems.map((item) => {
-          const maxReturnable = getMaxReturnable(item);
-          const { nos, eachQuantity } = calculateNosAndEachQuantity(item, maxReturnable);
-          return {
-            itemId: item.itemId,
-            nos,
-            eachQuantity,
-            returnedQuantity: maxReturnable,
-            returnReason: returnReason,
-          };
-        }),
+  const handleReturn = async () => {
+    if (!selectedGrnId || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    const returnedBy = username || 'unknown_user';
+    const returnData: ReturnGRNRequest = {
+      scenario: returnScenario!,
+      returnedDate: new Date().toISOString(),
+      returnedBy: returnedBy,
+      comments: returnReason,
+      items: returnScenario === 'partial'
+        ? Array.from(selectedItemsForReturn).map((itemId) => {
+            const edited = editedItems[itemId];
+            return {
+              itemId,
+              nos: edited.nos,
+              eachQuantity: edited.eachQuantity,
+              returnedQuantity: edited.returnedQuantity,
+              returnReason: edited.returnReason,
+            };
+          })
+        : dialogItems.map((item) => {
+            const maxReturnable = getMaxReturnable(item);
+            const { nos, eachQuantity } = calculateNosAndEachQuantity(item, maxReturnable);
+            return {
+              itemId: item.itemId,
+              nos,
+              eachQuantity,
+              returnedQuantity: maxReturnable,
+              returnReason: returnReason,
+            };
+          }),
+    };
+
+    try {
+      const resultAction = await dispatch(returnGrn({ grnId: selectedGrnId, returnData })).unwrap();
+      dispatch(setSnackbarMessageGRN('Items returned successfully.'));
+      dispatch(setSnackbarOpenGRN(true));
+      const fromDateObj = fromDate ? new Date(fromDate) : undefined;
+      const toDateObj = toDate ? new Date(toDate) : undefined;
+      await dispatch(
+        fetchGrns({ page: currentPage, size: pageSize, status, fromDate: fromDateObj, toDate: toDateObj })
+      );
+      setDialogOpen(false);
+      setDialogReturnOpen(false);
+      setSelectedItemsForReturn(new Set());
+      setReturnReason('');
+      setCustomReason('');
+      setEditedItems({});
+      setReturnScenario(null);
+      setAmountLimitError(null);
+      setBackendErrorDetail(null);
+      dispatch(setSelectedGrnId(null));
+      onReturnComplete();
+    } catch (error: any) {
+      let errorMessage = 'Failed to return items. Please try again.';
+      
+      // 🔥 Parse backend error response
+      if (error?.detail) {
+        if (typeof error.detail === 'string') {
+          errorMessage = error.detail;
+        } else if (error.detail.message) {
+          errorMessage = error.detail.message;
+          setBackendErrorDetail(error.detail);
+        } else if (typeof error.detail === 'object') {
+          errorMessage = JSON.stringify(error.detail);
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      dispatch(setSnackbarMessageGRN(errorMessage));
+      dispatch(setSnackbarOpenGRN(true));
+      console.error('Error returning items:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  try {
-    const resultAction = await dispatch(returnGrn({ grnId: selectedGrnId, returnData })).unwrap();
-    dispatch(setSnackbarMessageGRN('Items returned successfully.'));
-    dispatch(setSnackbarOpenGRN(true));
-    const fromDateObj = fromDate ? new Date(fromDate) : undefined;
-    const toDateObj = toDate ? new Date(toDate) : undefined;
-    await dispatch(
-      fetchGrns({ page: currentPage, size: pageSize, status, fromDate: fromDateObj, toDate: toDateObj })
-    );
-    setDialogOpen(false);
-    setDialogReturnOpen(false);
-    setSelectedItemsForReturn(new Set());
-    setReturnReason('');
-    setCustomReason('');
-    setEditedItems({});
-    setReturnScenario(null);
-    dispatch(setSelectedGrnId(null));
-    onReturnComplete();
-  } catch (error: any) {
-    // Enhanced error handling for API error responses
-    let errorMessage = 'Failed to return items. Please try again.';
-    
-    if (error?.detail) {
-      // Check if error.detail is a string or an object
-      if (typeof error.detail === 'string') {
-        errorMessage = error.detail;
-      } else if (error.detail.message) {
-        // This is the object format we're seeing in the error
-        errorMessage = error.detail.message;
-        
-        // You can add more details if needed
-        if (error.detail.available_amount !== undefined) {
-          errorMessage += ` Available amount: ${error.detail.available_amount}`;
-        }
-        if (error.detail.existing_notes_count !== undefined) {
-          errorMessage += ` (${error.detail.existing_notes_count} existing debit notes)`;
-        }
-      } else if (typeof error.detail === 'object') {
-        // Try to extract any message from the object
-        errorMessage = JSON.stringify(error.detail);
-      }
-    } else if (error?.message) {
-      errorMessage = error.message;
-    }
-    
-    dispatch(setSnackbarMessageGRN(errorMessage));
-    dispatch(setSnackbarOpenGRN(true));
-    console.error('Error returning items:', error);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-  // Combined loading state
   const isLoading = loading || isSubmitting;
+  const totalReturnAmount = calculateTotalReturnAmount();
 
   return (
     <>
@@ -437,6 +526,62 @@ const handleReturn = async () => {
           height: isFullScreen ? 'calc(100vh - 120px)' : 'auto',
           overflow: 'auto'
         }}>
+          {/* 🔥 Amount Limit Warning */}
+          {availableReturnAmount > 0 && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                <strong>Return Limits:</strong> GRN Value: ₹{grnOriginalAmount.toFixed(2)} | 
+                Already Returned: ₹{totalExistingReturns.toFixed(2)} | 
+                Available: ₹{availableReturnAmount.toFixed(2)}
+              </Typography>
+            </Alert>
+          )}
+
+          {/* 🔥 Amount Limit Error */}
+          {amountLimitError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                {amountLimitError}
+              </Typography>
+              <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+                Total return amount: ₹{totalReturnAmount.toFixed(2)}
+              </Typography>
+            </Alert>
+          )}
+
+          {/* 🔥 Backend Error Detail */}
+          {backendErrorDetail && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight="bold">
+                {backendErrorDetail.message || 'Return amount limit exceeded'}
+              </Typography>
+              {backendErrorDetail.original_payable_amount !== undefined && (
+                <Typography variant="body2">GRN Value: ₹{backendErrorDetail.original_payable_amount.toFixed(2)}</Typography>
+              )}
+              {backendErrorDetail.total_existing_debit !== undefined && (
+                <Typography variant="body2">Already Returned: ₹{backendErrorDetail.total_existing_debit.toFixed(2)}</Typography>
+              )}
+              {backendErrorDetail.available_amount !== undefined && (
+                <Typography variant="body2">Available: ₹{backendErrorDetail.available_amount.toFixed(2)}</Typography>
+              )}
+            </Alert>
+          )}
+
+          {/* Show current return amount while selecting */}
+          {returnScenario && totalReturnAmount > 0 && !amountLimitError && (
+            <Alert severity={totalReturnAmount <= availableReturnAmount ? "success" : "warning"} sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                <strong>Return Amount:</strong> ₹{totalReturnAmount.toFixed(2)}
+                {totalReturnAmount <= availableReturnAmount && availableReturnAmount > 0 && (
+                  <span> ✓ Within limit (₹{availableReturnAmount.toFixed(2)} available)</span>
+                )}
+                {totalReturnAmount > availableReturnAmount && availableReturnAmount > 0 && (
+                  <span style={{ color: 'red' }}> ✗ Exceeds available limit by ₹{(totalReturnAmount - availableReturnAmount).toFixed(2)}</span>
+                )}
+              </Typography>
+            </Alert>
+          )}
+
           <Typography variant="h6" gutterBottom>
             Select a return option below.
           </Typography>
@@ -569,17 +714,17 @@ const handleReturn = async () => {
             onClick={handleSubmit}
             color="primary"
             variant="outlined"
-            disabled={!returnScenario || !selectedGrnId || isLoading}
+            disabled={!returnScenario || !selectedGrnId || isLoading || (amountLimitError !== null)}
           >
             {isLoading ? 'Submitting...' : 'Submit'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog - Buttons disabled immediately when submitting */}
+      {/* Confirmation Dialog */}
       <Dialog 
         open={dialogReturnOpen} 
-        onClose={!isSubmitting ? handleReturnCancel : undefined} // Prevent closing when submitting
+        onClose={!isSubmitting ? handleReturnCancel : undefined}
         disableEscapeKeyDown={isSubmitting}
       >
         <DialogTitle>Confirm GRN Return</DialogTitle>

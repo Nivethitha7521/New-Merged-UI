@@ -30,7 +30,7 @@ import {
   selectCurrentPage,
   selectPageSize,
   selectTotalItems, setPagination, setSearchQueryItem,
-  setRandomQueryItem
+  setRandomQueryItem,setShowStockLogsDialog
 } from '../../../../features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { AppDispatch } from '@/redux/store';
@@ -54,7 +54,8 @@ import { POsearchPurchaseItems } from '@/features/yen-purchase/PurchaseMaster/pu
 import VendorSearchAutocomplete from '../../../../components/vendorsearchautocomplete';
 import PurchaseOrderRandomIdSearch from '../../../../components/yen-purchase/pendingpo/infiniteScroll';
 import { VendorSearch } from '@/Models/vendor';
-
+import StockUpdateLogsDialog from '../Component/StockUpdateLogsPage';
+import InventoryIcon from '@mui/icons-material/Inventory';
 // Helper function to add footer with "Page X of Y" and "This is computer generated" centered at the bottom
 const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
   const pageHeight = doc.internal.pageSize.height;
@@ -1077,7 +1078,13 @@ const RejectedPo: React.FC = () => {
     document.body.removeChild(link);
     handleClose();
   };
-  
+  const handleViewStockLogs = (order: any) => {
+    // Dispatch the Redux action to open the dialog with the selected PO
+    dispatch(setShowStockLogsDialog({ 
+      show: true, 
+      purchaseOrderId: order.purchaseOrderId 
+    }));
+  };
   const handleExportCSV = (): void => {
     const csvContent = generateCSVContent();
     downloadCSV(csvContent, 'POReturnedVendorwise.csv'); // Name your CSV file
@@ -1481,7 +1488,16 @@ const RejectedPo: React.FC = () => {
                               <PictureAsPdfIcon />
                             </IconButton>
                           </Tooltip>
-
+     <Tooltip title="View Stock & Price Update History">
+                            <IconButton
+                              onClick={() => handleViewStockLogs(order)}
+                              color="info"
+                              sx={{ mr: 0.5 }}
+                              size="small"
+                            >
+                              <InventoryIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -1725,7 +1741,7 @@ const RejectedPo: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+      <StockUpdateLogsDialog />
       <Snackbar
         open={snackbarOpen}
         message={snackbarMessage}

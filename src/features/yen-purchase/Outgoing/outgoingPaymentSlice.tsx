@@ -13,7 +13,7 @@ export const fetchOutgoings = createAsyncThunk<
   'outgoings/fetchOutgoings',
   async (args, { rejectWithValue }) => {
     try {
-      const url = 'https://yenerp.com/purchaseapi/outgoingpayments/';
+      const url = 'https://yenerp.com/purchasetestapi/outgoingpayments/';
       const params: any = {
         skip: (args.page - 1) * args.size,
         limit: args.size,

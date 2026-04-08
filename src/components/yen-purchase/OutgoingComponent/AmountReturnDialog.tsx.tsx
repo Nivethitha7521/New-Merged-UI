@@ -27,7 +27,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ConfirmationDialog from '@/components/confirmationDialog';
 
-// Main Component
 interface AmountReturnDialogProps {
   open: boolean;
   onClose: () => void;
@@ -60,44 +59,50 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-const isValidForm =
-  debitAmount > 0 &&
-  debitAmount <= maxAmount &&
-  reason.trim().length > 0;
+  const [backendError, setBackendError] = useState<{
+    message: string;
+    available_amount?: number;
+    requested_amount?: number;
+    original_amount?: number;
+    total_existing_debit?: number;
+  } | null>(null);
 
+  const isValidForm = debitAmount > 0 && reason.trim().length > 0;
 
   const handleAmountChange = (value: number) => {
     const numValue = Number(value) || 0;
     setDebitAmount(numValue);
+    setBackendError(null); // Clear backend error when user changes amount
     
     if (numValue > maxAmount) {
-      setErrorMessage(`Amount cannot exceed maximum: ₹${maxAmount.toFixed(2)}`);
+      setErrorMessage(`Amount cannot exceed maximum available: ₹${maxAmount.toFixed(2)}`);
     } else {
       setErrorMessage('');
     }
   };
 
- const handleConfirmClick = () => {
-  if (!isValidForm) {
-    if (debitAmount <= 0) {
-      setErrorMessage('Amount must be greater than 0');
-    } else if (debitAmount > maxAmount) {
-      setErrorMessage(`Amount cannot exceed maximum: ₹${maxAmount.toFixed(2)}`);
-    } else if (!reason.trim()) {
-      setErrorMessage('Reason is required');
+  const handleConfirmClick = () => {
+    if (!isValidForm) {
+      if (debitAmount <= 0) {
+        setErrorMessage('Amount must be greater than 0');
+      } else if (debitAmount > maxAmount) {
+        setErrorMessage(`Amount cannot exceed maximum available: ₹${maxAmount.toFixed(2)}`);
+      } else if (!reason.trim()) {
+        setErrorMessage('Reason is required');
+      }
+      return;
     }
-    return;
-  }
 
-  setErrorMessage('');
-  setConfirmDialogOpen(true);
-};
-
+    setErrorMessage('');
+    setBackendError(null);
+    setConfirmDialogOpen(true);
+  };
 
   const handleSubmit = async () => {
     try {
       setConfirmDialogOpen(false);
       setIsSubmitting(true);
+      setBackendError(null);
       
       const payload = {
         documentId,
@@ -110,7 +115,6 @@ const isValidForm =
 
       const result = await dispatch(createAmountOnlyDebitNote(payload)).unwrap();
       
-      // Show success message from backend
       dispatch(setSnackbarMessageGRN(result.message || 'Debit note created successfully'));
       dispatch(setSnackbarOpenGRN(true));
       
@@ -122,23 +126,69 @@ const isValidForm =
     } catch (error: any) {
       console.error('Failed to create amount-only debit note:', error);
       
-      // Handle validation errors from backend
+      // 🔥 Parse the backend error response
       let errorMsg = 'Failed to create debit note';
+      let availableAmount = 0;
+      let requestedAmount = debitAmount;
+      let originalAmount = 0;
+      let totalExistingDebit = 0;
+      
+      // Check for error from the rejected thunk
       if (error.payload) {
         try {
-          const errorData = JSON.parse(error.payload);
-          if (errorData.message) {
-            errorMsg = errorData.message;
-          } else if (errorData.available_amount !== undefined) {
-            errorMsg = `Cannot create debit note. Available amount: ₹${errorData.available_amount.toFixed(2)}`;
+          // If payload is a string, try to parse it
+          if (typeof error.payload === 'string') {
+            const parsedError = JSON.parse(error.payload);
+            errorMsg = parsedError.message || parsedError.detail?.message || error.payload;
+            availableAmount = parsedError.available_amount || 0;
+            requestedAmount = parsedError.requested_amount || debitAmount;
+            originalAmount = parsedError.original_payable_amount || 0;
+            totalExistingDebit = parsedError.total_existing_debit || 0;
+          } 
+          // If payload is an object
+          else if (typeof error.payload === 'object') {
+            errorMsg = error.payload.message || error.payload.detail?.message || 'Amount exceeds available limit';
+            availableAmount = error.payload.available_amount || 0;
+            requestedAmount = error.payload.requested_amount || debitAmount;
+            originalAmount = error.payload.original_payable_amount || 0;
+            totalExistingDebit = error.payload.total_existing_debit || 0;
           }
         } catch {
           errorMsg = error.payload || 'Failed to create debit note';
         }
       }
       
-      dispatch(setSnackbarMessageGRN(errorMsg));
-      dispatch(setSnackbarOpenGRN(true));
+      // Check for error from HTTP response
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (typeof errorData === 'object') {
+          errorMsg = errorData.message || errorData.detail?.message || 'Amount exceeds available limit';
+          availableAmount = errorData.available_amount || 0;
+          requestedAmount = errorData.requested_amount || debitAmount;
+          originalAmount = errorData.original_payable_amount || 0;
+          totalExistingDebit = errorData.total_existing_debit || 0;
+        }
+      }
+      
+      // Check for error detail in the rejection
+      if (error.detail) {
+        if (typeof error.detail === 'object') {
+          errorMsg = error.detail.message || error.detail.detail?.message || 'Amount exceeds available limit';
+          availableAmount = error.detail.available_amount || 0;
+        } else if (typeof error.detail === 'string') {
+          errorMsg = error.detail;
+        }
+      }
+      
+      // Set backend error to display in UI
+      setBackendError({
+        message: errorMsg,
+        available_amount: availableAmount,
+        requested_amount: requestedAmount,
+        original_amount: originalAmount,
+        total_existing_debit: totalExistingDebit,
+      });
+      
       setIsSubmitting(false);
     }
   };
@@ -151,6 +201,7 @@ const isValidForm =
     setDebitAmount(0);
     setReason('');
     setErrorMessage('');
+    setBackendError(null);
   };
 
   const handleClose = () => {
@@ -161,6 +212,11 @@ const isValidForm =
   };
 
   const isLoading = loading || isSubmitting;
+
+  // Calculate available amount display
+  const availableAmount = backendError?.available_amount !== undefined 
+    ? backendError.available_amount 
+    : maxAmount;
 
   return (
     <>
@@ -195,13 +251,36 @@ const isValidForm =
         <DialogContent sx={{ p: 3 }}>
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography variant="body2">
-              <strong>Note:</strong> This creates a financial debit note without modifying item quantities. 
-              Maximum available amount: <strong>₹{maxAmount.toFixed(2)}</strong>
+              <strong>Note:</strong> This creates a financial debit note without modifying item quantities.
             </Typography>
           </Alert>
 
-          {errorMessage && (
+          {/* 🔥 Display Backend Error with Details */}
+          {backendError && (
             <Alert severity="error" sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" fontWeight="bold">
+                {backendError.message}
+              </Typography>
+              <Box sx={{ mt: 1, fontSize: '0.875rem' }}>
+                {backendError.original_amount !== undefined && (
+                  <div>📄 Original GRN Amount: ₹{backendError.original_amount.toFixed(2)}</div>
+                )}
+                {backendError.total_existing_debit !== undefined && (
+                  <div>📋 Already Returned Amount: ₹{backendError.total_existing_debit.toFixed(2)}</div>
+                )}
+                {backendError.available_amount !== undefined && (
+                  <div>✅ Available for Return: ₹{backendError.available_amount.toFixed(2)}</div>
+                )}
+                {backendError.requested_amount !== undefined && (
+                  <div>❌ Requested Amount: ₹{backendError.requested_amount.toFixed(2)}</div>
+                )}
+              </Box>
+            </Alert>
+          )}
+
+          {/* Frontend Validation Error */}
+          {errorMessage && !backendError && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
               {errorMessage}
             </Alert>
           )}
@@ -216,7 +295,7 @@ const isValidForm =
                       Document Type:
                     </Typography>
                     <Typography fontWeight="medium">
-                      {documentType === 'grn' ? 'GRN' : 'Outgoing Payment'}
+                      {documentType === 'grn' ? 'GRN' : 'Purchase Return'}
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>
@@ -229,29 +308,28 @@ const isValidForm =
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="body2" color="text.secondary">
-                      Maximum Amount:
+                      Available for Return:
                     </Typography>
-                    <Typography fontWeight="bold" color="primary">
-                      ₹{maxAmount.toFixed(2)}
+                    <Typography fontWeight="bold" color="primary" fontSize="1.1rem">
+                      ₹{availableAmount.toFixed(2)}
                     </Typography>
                   </Grid>
                 </Grid>
               </Paper>
             </Grid>
 
-            {/* Amount and Reason in single row */}
-            <Grid item xs={6}>
+            {/* Amount Field */}
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 required
-                label="Debit Amount (₹)"
+                label="Return Amount (₹)"
                 type="number"
                 value={debitAmount || ''}
                 onChange={(e) => handleAmountChange(Number(e.target.value) || 0)}
                 InputProps={{
                   inputProps: { 
                     min: 0.01, 
-                    max: maxAmount, 
                     step: 0.01
                   },
                   startAdornment: (
@@ -260,21 +338,24 @@ const isValidForm =
                     </InputAdornment>
                   ),
                 }}
-                helperText={`Max: ₹${maxAmount.toFixed(2)}`}
-                error={debitAmount > maxAmount}
+                helperText={`Maximum available: ₹${availableAmount.toFixed(2)}`}
+                error={debitAmount > availableAmount || !!errorMessage}
                 autoComplete="off"
                 disabled={isLoading}
               />
             </Grid>
 
-            <Grid item xs={6}>
+            {/* Reason Field */}
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 required
-                label="Reason"
+                label="Reason for Return"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Enter reason..."
+                placeholder="Enter reason for return..."
+                multiline
+                rows={2}
                 autoComplete="off"
                 disabled={isLoading}
               />
@@ -290,7 +371,7 @@ const isValidForm =
             variant="contained"
             color="error"
             onClick={handleConfirmClick}
-            disabled={!isValidForm || isLoading}
+            disabled={!isValidForm || debitAmount > availableAmount || isLoading}
             startIcon={
               isLoading ? 
                 <CircularProgress size={20} color="inherit" /> : 
@@ -318,7 +399,7 @@ const isValidForm =
               <Typography variant="body2"><strong>Amount:</strong> ₹{debitAmount.toFixed(2)}</Typography>
               <Typography variant="body2"><strong>Reason:</strong> {reason}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Remaining available: ₹{(maxAmount - debitAmount).toFixed(2)}
+                Remaining available after this: ₹{(availableAmount - debitAmount).toFixed(2)}
               </Typography>
             </Box>
           </Box>

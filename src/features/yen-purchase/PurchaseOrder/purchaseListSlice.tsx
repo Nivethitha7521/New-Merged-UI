@@ -10,7 +10,7 @@ import purchaseApi from "@/utils/api";
 
 
 const LIMIT = 20;
-const API_BASE_URL = 'https://yenerp.com/purchaseapi';
+const API_BASE_URL = 'https://yenerp.com/purchasetestapi';
 
 export const fetchPurchaseOrderRandomIds = createAsyncThunk(
   "purchaseOrder/fetchRandomIds",
@@ -268,6 +268,22 @@ export const fetchPendingPurchaseOrders = createAsyncThunk(
     }
   }
 );
+
+export const fetchStockUpdateLogs = createAsyncThunk(
+  'purchaseOrders/fetchStockUpdateLogs',
+  async (purchaseOrderId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get(`/purchaseorders/stock-logs/${purchaseOrderId}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching stock update logs:', error);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || 'Failed to fetch stock update logs'
+      );
+    }
+  }
+);
+
 // Async thunk to fetch all purchase orders
 export const fetchAllPurchaseOrders = createAsyncThunk(
   "purchaseOrders/fetchAll",
@@ -811,6 +827,42 @@ const purchaseListSlice = createSlice({
       state.showStockUpdateDialog = false;
       state.stockUpdateResult = null;
     },
+setShowStockLogsDialog: (state, action: PayloadAction<{ show: boolean; purchaseOrderId?: string }>) => {
+  state.showStockLogsDialog = action.payload.show;
+  state.selectedStockLogsPOId = action.payload.purchaseOrderId || null;
+  if (!action.payload.show) {
+    state.stockLogs = {
+      data: null,
+      loading: false,
+      error: null,
+    };
+  }
+},
+updateLocalPOFreights: (state, action: PayloadAction<{
+  purchaseOrderId: string;
+  freights: FreightData[];
+  newTotal: number;
+}>) => {
+  const { purchaseOrderId, freights, newTotal } = action.payload;
+  const po = state.purchaseList.find(p => p.purchaseOrderId === purchaseOrderId);
+  if (po) {
+    po.freights = freights;
+    po.pendingOrderAmount = newTotal;
+  }
+},
+// ADD THIS RIGHT AFTER updateLocalPOFreights:
+updateLocalPendingPOFreights: (state, action: PayloadAction<{
+  purchaseOrderId: string;
+  freights: FreightData[];
+  newTotal: number;
+}>) => {
+  const { purchaseOrderId, freights, newTotal } = action.payload;
+  const po = state.pendingPurchaseList.find(p => p.purchaseOrderId === purchaseOrderId);
+  if (po) {
+    po.freights = freights;
+    po.pendingOrderAmount = newTotal;
+  }
+},
 
   },
   extraReducers: (builder) => {
@@ -1243,11 +1295,26 @@ const purchaseListSlice = createSlice({
     console.log('Fetch GRN converted purchase orders - REJECTED', action.error);
     state.loading = false;
     state.error = action.error.message || 'Failed to fetch GRN converted purchase orders';
-  });
+  })
+  .addCase(fetchStockUpdateLogs.pending, (state) => {
+  state.stockLogs.loading = true;
+  state.stockLogs.error = null;
+})
+.addCase(fetchStockUpdateLogs.fulfilled, (state, action) => {
+  state.stockLogs.loading = false;
+  state.stockLogs.data = action.payload;
+  state.stockLogs.error = null;
+})
+.addCase(fetchStockUpdateLogs.rejected, (state, action) => {
+  state.stockLogs.loading = false;
+  state.stockLogs.error = action.payload as string;
+  state.stockLogs.data = null;
+})
+;
   },
 });
 
-export const { setSearchQueryItem, setRandomQueryItem, resetPurchaseOrderState, setSelectedOrder, setOrderImageUrls, setPoRandomIds, closeStockUpdateDialog, clearSelectedOrder, resetRandomIds, setPagination, clearSnackbarMessage, addGrn, updateInvoiceDetails, setImageUrls, setPoDialogOpen, setSelectedPo
+export const { setSearchQueryItem, setRandomQueryItem, resetPurchaseOrderState, setSelectedOrder, setOrderImageUrls, setPoRandomIds, closeStockUpdateDialog, clearSelectedOrder, resetRandomIds, setPagination, clearSnackbarMessage, addGrn, updateInvoiceDetails, setImageUrls, setPoDialogOpen, setSelectedPo,  setShowStockLogsDialog,updateLocalPOFreights, updateLocalPendingPOFreights  // Add this
 } = purchaseListSlice.actions;
 
 export const selectOrderImages = (purchaseOrderId: string) => (state: RootState) =>
@@ -1267,5 +1334,16 @@ export const selectPurchaseListState = (state: RootState) => state.purchaseList;
 export const selectCurrentPage = (state: RootState) => state.purchaseList.currentPage;
 export const selectPageSize = (state: RootState) => state.purchaseList.pageSize;
 export const selectTotalItems = (state: RootState) => state.purchaseList.totalItems;
+// Add these selectors
+export const selectStockLogs = (state: RootState) => ({
+  data: state.purchaseList.stockLogs.data,
+  loading: state.purchaseList.stockLogs.loading,
+  error: state.purchaseList.stockLogs.error,
+});
+
+export const selectShowStockLogsDialog = (state: RootState) => ({
+  open: state.purchaseList.showStockLogsDialog,
+  purchaseOrderId: state.purchaseList.selectedStockLogsPOId,
+});
 
 export default purchaseListSlice.reducer;

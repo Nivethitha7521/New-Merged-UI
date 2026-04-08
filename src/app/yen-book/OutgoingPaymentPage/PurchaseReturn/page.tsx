@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo,useCallback} from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
     Grid,
     Typography,
@@ -28,7 +28,6 @@ import DownloadIcon from '@mui/icons-material/Download';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ReturnIcon from '@mui/icons-material/KeyboardReturn';
-
 import { ClearIcon } from '@mui/x-date-pickers/icons';
 import {
     fetchOutgoings,
@@ -53,7 +52,7 @@ import {
 } from '@/features/yen-purchase/GRN/grnSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { Outgoing, VendorDetail } from '@/Models/outgoingModel';
-import { GrnResponse, ItemDetail,ItemDetailResponse } from '@/Models/grnModel';
+import { GrnResponse, ItemDetail, ItemDetailResponse } from '@/Models/grnModel';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { format } from 'date-fns';
@@ -74,27 +73,20 @@ import { usePermissions } from "@/hooks/usePermissions";
 import ReturnStockUpdateDialog from '@/app/yen-purchase/GrnPage/Components/ReturnStockUpdateDialog';
 import GrnDialog from '@/components/yen-purchase/OutgoingComponent/GRNDialog';
 
-// Define interface for ReturnActionButton props
-interface ReturnActionButtonProps {
-    payment: {
-        totalPayableAmount?: number;
-        [key: string]: any;
-    };
-    onClick: (payment: any) => void;
-     canEdit: boolean;
-}
 const PurchaseReturnPage = React.memo(() => {
     const dispatch = useDispatch<AppDispatch>();
-     const { isModuleVisible, hasPermission } = usePermissions();
-  // 🔐 Purchase Return READ = OR condition
-  const canReadPurchaseReturn =
-    hasPermission("yenerp", "outgoingpayment", "read") ||
-    hasPermission("yenerp", "partialpayment", "read") ||
-    hasPermission("yenerp", "paymentdone", "read");
-const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
-  // 👁️ Purchase Return VISIBLE (hide = false)
-  const canShowPurchaseReturn =
-    isModuleVisible("yenerp", "purchasereturn") && canReadPurchaseReturn;
+    const { isModuleVisible, hasPermission } = usePermissions();
+    
+    // 🔐 Purchase Return READ permissions
+    const canReadPurchaseReturn =
+        hasPermission("yenerp", "outgoingpayment", "read") ||
+        hasPermission("yenerp", "partialpayment", "read") ||
+        hasPermission("yenerp", "paymentdone", "read");
+    const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
+    
+    // 👁️ Purchase Return VISIBLE
+    const canShowPurchaseReturn =
+        isModuleVisible("yenerp", "purchasereturn") && canReadPurchaseReturn;
 
     const { outgoings, snackbarMessage, snackbarOpen, outgoingvendor } = useSelector(selectOutgoings);
     const { itemwise, snackbarMessageGRN, snackbarOpenGRN,
@@ -104,6 +96,7 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
     const currentPage = useSelector(selectCurrentPage);
     const pageSize = useSelector(selectPageSize);
     const totalItems = useSelector(selectTotalItems);
+    
     const [selectedVendorName, setSelectedVendorName] = useState<VendorDetail | null>(null);
     const [openDownloadDialog, setOpenDownloadDialog] = useState(false);
     const [isFilterActive, setIsFilterActive] = useState(false);
@@ -112,10 +105,12 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         endDate: new Date(),
         key: 'selection',
     });
-     // State for GRN view dialog
+    
+    // State for GRN view dialog
     const [viewGrnDialogOpen, setViewGrnDialogOpen] = useState(false);
     const [selectedGrnForView, setSelectedGrnForView] = useState<GrnResponse | null>(null);
-    // New state for both return types
+    
+    // State for return dialogs
     const [returnOptionOpen, setReturnOptionOpen] = useState(false);
     const [itemWiseDialogOpen, setItemWiseDialogOpen] = useState(false);
     const [amountWiseDialogOpen, setAmountWiseDialogOpen] = useState(false);
@@ -126,22 +121,34 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
     const [maxDebitAmount, setMaxDebitAmount] = useState<number>(0);
     
     const dateField = 'invoiceDate';
-    const fromDate = moment().utc().startOf('day').toDate();
-    const toDate = moment().utc().endOf('day').toDate();
+    
+    // Wide date range to include all financial years
+    const fromDate = new Date(2024, 0, 1); // From Jan 1, 2024
+    const toDate = new Date(2030, 11, 31); // To Dec 31, 2030
 
-    const filteredPayments = useMemo(() => {
+    // Process payments - DO NOT filter out zero amount payments
+    const processedPayments = useMemo(() => {
         if (!outgoings.length) return [];
-
+        
         return outgoings.map(payment => {
             const totalPaid =
                 (payment.advanceAmount || 0) +
                 (payment.partialAmount || 0) +
                 (payment.fullPaymentAmount || 0);
             const total = payment.payableAmount || 0;
-            return { ...payment, totalPaid, total };
+            const remainingAmount = (payment.totalPayableAmount || 0);
+            return { 
+                ...payment, 
+                totalPaid, 
+                total,
+                remainingAmount 
+            };
         });
+        // REMOVED: .filter(payment => payment.remainingAmount > 0);
+        // Now shows ALL outgoing payments including those with 0 remaining amount
     }, [outgoings]);
- // Function to handle GRN click and show details
+
+    // Function to handle GRN click
     const handleGrnClick = useCallback(async (grnId: string) => {
         try {
             const result = await dispatch(fetchGrnById(grnId)).unwrap();
@@ -176,46 +183,83 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
             console.error('Failed to fetch GRN details:', error);
         }
     }, [dispatch]);
+    
+    // Fetch data - IMPORTANT: Do NOT use filterByAmount
     useEffect(() => {
-         if (!canReadPurchaseReturn) return;
-        dispatch(fetchOutgoings({
+        if (!canReadPurchaseReturn) return;
+        
+        // For Purchase Return, we want ALL payments (including zero amount)
+        // Do NOT use filterByAmount: true
+        const fetchParams: any = {
             page: currentPage,
             size: pageSize,
-            fromDate,
-            toDate,
-        }));
+            filterBy: dateField,
+        };
+        
+        // Only add date filters if they are set and filter is active
+        if (isFilterActive && selectionRange.startDate && selectionRange.endDate) {
+            fetchParams.fromDate = moment(selectionRange.startDate).startOf('day').toDate();
+            fetchParams.toDate = moment(selectionRange.endDate).endOf('day').toDate();
+        } else {
+            // Wide date range to include all financial years
+            fetchParams.fromDate = fromDate;
+            fetchParams.toDate = toDate;
+        }
+        
+        if (selectedVendorName?.vendorName) {
+            fetchParams.vendorName = selectedVendorName.vendorName;
+        }
+        
+        dispatch(fetchOutgoings(fetchParams));
         dispatch(fetchItemwiseGrns());
         dispatch(fetchVendorDetails({ fetchAll: true }));
         dispatch(fetchReturnReasons());
-    }, [dispatch, currentPage, pageSize]);
+    }, [dispatch, currentPage, pageSize, isFilterActive, selectedVendorName]);
 
-   const handlePageChange = useCallback((newPage: number) => {
+    const handlePageChange = useCallback((newPage: number) => {
         if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) return;
         dispatch(setPagination({ page: newPage, size: pageSize }));
-        dispatch(fetchOutgoings({
+        
+        const fetchParams: any = {
             page: newPage,
             size: pageSize,
-            fromDate: isFilterActive ? moment(selectionRange.startDate).startOf('day').toDate() : fromDate,
-            toDate: isFilterActive ? moment(selectionRange.endDate).endOf('day').toDate() : toDate,
-            vendorName: selectedVendorName?.vendorName,
-        }));
+            filterBy: dateField,
+        };
+        
+        if (isFilterActive && selectionRange.startDate && selectionRange.endDate) {
+            fetchParams.fromDate = moment(selectionRange.startDate).startOf('day').toDate();
+            fetchParams.toDate = moment(selectionRange.endDate).endOf('day').toDate();
+        } else {
+            fetchParams.fromDate = fromDate;
+            fetchParams.toDate = toDate;
+        }
+        
+        if (selectedVendorName?.vendorName) {
+            fetchParams.vendorName = selectedVendorName.vendorName;
+        }
+        
+        dispatch(fetchOutgoings(fetchParams));
     }, [dispatch, pageSize, totalItems, isFilterActive, selectionRange, selectedVendorName]);
 
-    const handleFilterClick = () => {
+    const handleFilterClick = useCallback(() => {
         setIsFilterActive(true);
-        const filterParams = {
+        
+        const filterParams: any = {
             page: 1,
             size: pageSize,
+            filterBy: dateField,
             fromDate: moment(selectionRange.startDate).startOf('day').toDate(),
             toDate: moment(selectionRange.endDate).endOf('day').toDate(),
-            vendorName: selectedVendorName?.vendorName,
-            filterBy: 'paymentDate' as const,
         };
-
+        
+        if (selectedVendorName?.vendorName) {
+            filterParams.vendorName = selectedVendorName.vendorName;
+        }
+        
         dispatch(setPagination({ page: 1, size: pageSize }));
         dispatch(fetchOutgoings(filterParams)).then(response => {
             let outgoingData: Outgoing[] = [];
-
+            
             if (typeof response.payload === 'string') {
                 dispatch(setSnackbarMessage(response.payload));
                 dispatch(setSnackbarOpen(true));
@@ -225,7 +269,7 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
             } else if (response.payload && typeof response.payload === 'object' && 'outgoings' in response.payload) {
                 outgoingData = response.payload.outgoings;
             }
-
+            
             if (outgoingData.length === 0) {
                 dispatch(setSnackbarMessage('No matching Outgoing Payment found.'));
                 dispatch(setSnackbarOpen(true));
@@ -234,85 +278,100 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
             dispatch(setSnackbarMessage(error.message || 'Error fetching outgoing'));
             dispatch(setSnackbarOpen(true));
         });
-    };
+    }, [dispatch, pageSize, selectionRange, selectedVendorName]);
 
     const handleFilterClose = useCallback(() => {
         setIsFilterActive(false);
         setSelectionRange({ startDate: new Date(), endDate: new Date(), key: 'selection' });
         setSelectedVendorName(null);
+        
+        // Reset to wide date range
         dispatch(fetchOutgoings({
             page: 1,
             size: pageSize,
             filterBy: dateField,
-            fromDate,
-            toDate,
+            fromDate: fromDate,
+            toDate: toDate,
         }));
     }, [dispatch, pageSize]);
 
-    // Modified handleReturnProcess to show option dialog
-     const handleReturnProcess = useCallback(async (outgoing: any) => {
-        try {
-            const grnId = outgoing.grnId;
-            const outgoingId = outgoing.outgoingId || outgoing._id;
-            const randomId = outgoing.randomId;
-            const totalPayableAmount = outgoing.totalPayableAmount || 0;
+const handleReturnProcess = useCallback(async (outgoing: any) => {
+    try {
+        const grnId = outgoing.grnId;
+        const outgoingId = outgoing.outgoingId || outgoing._id;
+        const randomId = outgoing.randomId;
+        
+        // 🔥 CRITICAL FIX: For returns, use ORIGINAL GRN total, NOT remaining payable amount
+        // Even if payment is fully done (totalPayableAmount = 0), return should be allowed
+        let maxDebitAmount = 0;
+        
+        if (grnId) {
+            // Fetch GRN to get original total amount
+            const grnResult = await dispatch(fetchGrnById(grnId)).unwrap();
+            // Use grandTotal or totalReceivedAmount from GRN
+            maxDebitAmount = grnResult.grandTotal || grnResult.totalReceivedAmount || 0;
+            
+            console.log('Original GRN amount for return:', maxDebitAmount);
+            console.log('Payment status - totalPayableAmount:', outgoing.totalPayableAmount);
+        } else {
+            // Fallback to invoice total if no GRN
+            maxDebitAmount = outgoing.totalPrice || outgoing.payableAmount || 0;
+        }
 
-            console.log('Processing return for:', { grnId, outgoingId, randomId });
+        console.log('Processing return for:', { grnId, outgoingId, randomId, maxDebitAmount });
 
-            setSelectedDocumentId(outgoingId);
-            setSelectedDocumentNumber(randomId);
-            setMaxDebitAmount(totalPayableAmount);
+        setSelectedDocumentId(outgoingId);
+        setSelectedDocumentNumber(randomId);
+        setMaxDebitAmount(maxDebitAmount);  // Now uses original GRN amount, not remaining
 
-            if (grnId) {
-                const result = await dispatch(fetchGrnById(grnId)).unwrap();
+        if (grnId) {
+            const result = await dispatch(fetchGrnById(grnId)).unwrap();
 
-                const transformedItems: ItemDetail[] = result.itemDetails?.map((item: any) => ({
-                    itemId: item.itemId,
-                    itemName: item.itemName ?? 'Unknown',
-                    receivedQuantity: Number(item.receivedQuantity) || 0,
-                    returnedQuantity: Number(item.returnedQuantity) || 0,
-                    quantity: Number(item.quantity) || 0,
-                    unitPrice: Number(item.unitPrice) || 0,
-                    totalPrice: Number(item.totalPrice) || 0,
-                    purchasetaxName: item.purchasetaxName || 'N/A',
-                    discountAmount: Number(item.discountAmount) || 0,
-                    finalPrice: Number(item.finalPrice) || 0,
-                    nos: item.nos || 0,
-                    eachQuantity: item.eachQuantity || 0,
-                    hsnCode: item.hsnCode || '',
-                    befTaxDiscount: item.befTaxDiscount || 0,
-                })) || [];
+            const transformedItems: ItemDetail[] = result.itemDetails?.map((item: any) => ({
+                itemId: item.itemId,
+                itemName: item.itemName ?? 'Unknown',
+                receivedQuantity: Number(item.receivedQuantity) || 0,
+                returnedQuantity: Number(item.returnedQuantity) || 0,
+                quantity: Number(item.quantity) || 0,
+                unitPrice: Number(item.unitPrice) || 0,
+                totalPrice: Number(item.totalPrice) || 0,
+                purchasetaxName: item.purchasetaxName || 'N/A',
+                discountAmount: Number(item.discountAmount) || 0,
+                finalPrice: Number(item.finalPrice) || 0,
+                nos: item.nos || 0,
+                eachQuantity: item.eachQuantity || 0,
+                hsnCode: item.hsnCode || '',
+                befTaxDiscount: item.befTaxDiscount || 0,
+            })) || [];
 
-                setSelectedGrnId(grnId);
-                setSelectedGrnItems(transformedItems);
+            setSelectedGrnId(grnId);
+            setSelectedGrnItems(transformedItems);
 
-                if (transformedItems.length > 0) {
-                    setReturnOptionOpen(true);
-                } else {
-                    setAmountWiseDialogOpen(true);
-                }
+            if (transformedItems.length > 0) {
+                setReturnOptionOpen(true);
             } else {
                 setAmountWiseDialogOpen(true);
             }
-        } catch (error) {
-            console.error('Error in handleReturnProcess:', error);
-            dispatch(setSnackbarMessageGRN('Failed to fetch details.'));
-            dispatch(setSnackbarOpenGRN(true));
+        } else {
+            setAmountWiseDialogOpen(true);
         }
-    }, [dispatch]);
-
+    } catch (error) {
+        console.error('Error in handleReturnProcess:', error);
+        dispatch(setSnackbarMessageGRN('Failed to fetch details.'));
+        dispatch(setSnackbarOpenGRN(true));
+    }
+}, [dispatch]);
     const handleSelectItemWise = useCallback(() => {
         setReturnOptionOpen(false);
         setItemWiseDialogOpen(true);
     }, []);
 
-     const handleSelectAmountWise = useCallback(() => {
+    const handleSelectAmountWise = useCallback(() => {
         setReturnOptionOpen(false);
         setAmountWiseDialogOpen(true);
     }, []);
 
-    // Handle return completion
-     const handleReturnComplete = useCallback(() => {
+    const handleReturnComplete = useCallback(() => {
         console.log('Return completed, closing dialogs...');
 
         setReturnOptionOpen(false);
@@ -325,13 +384,26 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         setSelectedGrnItems([]);
         setMaxDebitAmount(0);
 
-        dispatch(fetchOutgoings({
+        // Refresh the list after return
+        const fetchParams: any = {
             page: currentPage,
             size: pageSize,
-            fromDate: isFilterActive ? moment(selectionRange.startDate).startOf('day').toDate() : fromDate,
-            toDate: isFilterActive ? moment(selectionRange.endDate).endOf('day').toDate() : toDate,
-            vendorName: selectedVendorName?.vendorName,
-        }));
+            filterBy: dateField,
+        };
+        
+        if (isFilterActive && selectionRange.startDate && selectionRange.endDate) {
+            fetchParams.fromDate = moment(selectionRange.startDate).startOf('day').toDate();
+            fetchParams.toDate = moment(selectionRange.endDate).endOf('day').toDate();
+        } else {
+            fetchParams.fromDate = fromDate;
+            fetchParams.toDate = toDate;
+        }
+        
+        if (selectedVendorName?.vendorName) {
+            fetchParams.vendorName = selectedVendorName.vendorName;
+        }
+        
+        dispatch(fetchOutgoings(fetchParams));
     }, [dispatch, currentPage, pageSize, isFilterActive, selectionRange, selectedVendorName]);
 
     const handleStockUpdateClose = useCallback(() => {
@@ -339,7 +411,7 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         dispatch(clearLastReturnData());
     }, [dispatch]);
 
- const handleReturnCancel = useCallback(() => {
+    const handleReturnCancel = useCallback(() => {
         console.log('Return cancelled, closing all dialogs');
         setReturnOptionOpen(false);
         setItemWiseDialogOpen(false);
@@ -351,13 +423,12 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         setMaxDebitAmount(0);
     }, []);
 
-      const getRandomId = useCallback((grnId: string): string | undefined => {
+    const getRandomId = useCallback((grnId: string): string | undefined => {
         const grn = itemwise.find(grn => grn.grnId === grnId);
         return grn?.randomId;
     }, [itemwise]);
 
-    // Rest of your existing functions (generatePDF, generateCSV, etc.)
-   const generateOutgoingInvoicePDF = useCallback(() => {
+    const generateOutgoingInvoicePDF = useCallback(() => {
         const doc = new jsPDF();
         let yOffset = 10;
         const titleX = 80;
@@ -369,7 +440,7 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         doc.line(titleX, yOffset + 12, titleX + titleWidth, yOffset + 12);
         yOffset += 25;
 
-        const totalPayableAmount = filteredPayments.reduce((sum, outgoing) => sum + (outgoing.totalPayableAmount || 0), 0);
+        const totalPayableAmount = processedPayments.reduce((sum, outgoing) => sum + (outgoing.totalPayableAmount || 0), 0);
         const today = new Date();
         const currentDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
         doc.setFontSize(10);
@@ -392,7 +463,7 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
             ],
         ];
 
-        const rows = filteredPayments.map((outgoing, index) => [
+        const rows = processedPayments.map((outgoing, index) => [
             `${index + 1}`,
             getRandomId(outgoing.grnId) || "N/A",
             outgoing.randomId?.toString(),
@@ -434,7 +505,8 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         }
         doc.save('PurchaseReturns.pdf');
         setOpenDownloadDialog(false);
-    }, [filteredPayments, getRandomId]);
+    }, [processedPayments, getRandomId]);
+    
     const generateOutgoingSummaryCSV = useCallback(() => {
         const headers = [
             "No",
@@ -449,7 +521,7 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
             "Remaining Amount",
         ];
 
-        const rows = filteredPayments.map((outgoing, index) => [
+        const rows = processedPayments.map((outgoing, index) => [
             `${index + 1}`,
             getRandomId(outgoing.grnId) || "N/A",
             outgoing.randomId?.toString(),
@@ -472,19 +544,15 @@ const canEditPurchaseReturn = hasPermission("yenerp", "purchasereturn", "edit");
         link.click();
         document.body.removeChild(link);
         setOpenDownloadDialog(false);
-    }, [filteredPayments, getRandomId]);
-const ReturnActionButton = useCallback(
-({ payment, onClick, canEdit }: ReturnActionButtonProps) => {
-
-    const noAmount = !payment.totalPayableAmount || payment.totalPayableAmount <= 0;
-
-    // ✅ Final disable logic
-    const isDisabled = noAmount || !canEdit;
+    }, [processedPayments, getRandomId]);
+const ReturnActionButton = useCallback(({ payment, onClick, canEdit }: any) => {
+    // Only disable if no GRN ID (can't return without GRN)
+    // REMOVED the remaining amount check
+    const isDisabled = !payment.grnId || !canEdit;
 
     let tooltipTitle = "Process Return";
-
-    if (noAmount) {
-        tooltipTitle = "No amount available for return";
+    if (!payment.grnId) {
+        tooltipTitle = "Cannot process return - No GRN associated";
     } else if (!canEdit) {
         tooltipTitle = "No permission to return";
     }
@@ -505,27 +573,27 @@ const ReturnActionButton = useCallback(
         </Tooltip>
     );
 }, []);
- // ⛔ HIDE true → page itself block
-  if (!isModuleVisible("yenerp", "purchasereturn")) {
-    return (
-      <Box p={3}>
-        <Typography color="error">
-          You do not have access to Purchase Return module.
-        </Typography>
-      </Box>
-    );
-  }
+    // ⛔ HIDE check
+    if (!isModuleVisible("yenerp", "purchasereturn")) {
+        return (
+            <Box p={3}>
+                <Typography color="error">
+                    You do not have access to Purchase Return module.
+                </Typography>
+            </Box>
+        );
+    }
 
-  // ⛔ READ false → permission block
-  if (!canReadPurchaseReturn) {
-    return (
-      <Box p={3}>
-        <Typography color="warning">
-          You don’t have permission to view Purchase Returns.
-        </Typography>
-      </Box>
-    );
-  }
+    // ⛔ READ check
+    if (!canReadPurchaseReturn) {
+        return (
+            <Box p={3}>
+                <Typography color="warning">
+                    You don't have permission to view Purchase Returns.
+                </Typography>
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ p: 1, backgroundColor: 'white' }}>
@@ -533,60 +601,56 @@ const ReturnActionButton = useCallback(
             <Box display="flex" alignItems="center" justifyContent="space-between" marginTop={1}>
                 <Box display="flex" alignItems="center">
                     {isModuleVisible("yenerp", "outgoingpayment") && (
-            <Link href={"/yen-book/OutgoingPaymentPage"}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mr: "5px", ml: "15px" }}
-              >
-                Outgoing Payment
-              </Button>
-            </Link>
-          )}
-                  {isModuleVisible("yenerp", "advancepayment") && (
-            <Link href={"/yen-book/OutgoingPaymentPage/PreOutgoing"}>
-              <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
-                Advance Payment
-              </Button>
-            </Link>
-          )}
-                  {isModuleVisible("yenerp", "partialpayment") && (
-            <Link href={"/yen-book/OutgoingPaymentPage/PendingPayment"}>
-              <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
-                Partial Payment
-              </Button>
-            </Link>
-          )}
+                        <Link href={"/yen-book/OutgoingPaymentPage"}>
+                            <Button variant="contained" color="primary" sx={{ mr: "5px", ml: "15px" }}>
+                                Outgoing Payment
+                            </Button>
+                        </Link>
+                    )}
+                    {isModuleVisible("yenerp", "advancepayment") && (
+                        <Link href={"/yen-book/OutgoingPaymentPage/PreOutgoing"}>
+                            <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
+                                Advance Payment
+                            </Button>
+                        </Link>
+                    )}
+                    {isModuleVisible("yenerp", "partialpayment") && (
+                        <Link href={"/yen-book/OutgoingPaymentPage/PendingPayment"}>
+                            <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
+                                Partial Payment
+                            </Button>
+                        </Link>
+                    )}
                     {isModuleVisible("yenerp", "paymentdone") && (
-            <Link href={"/yen-book/OutgoingPaymentPage/PaidPayment"}>
-              <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
-                Payment Done
-              </Button>
-            </Link>
-          )}
-                     {isModuleVisible("yenerp", "ledger") && (
-            <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
-              <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
-                Ledger
-              </Button>
-            </Link>
-          )}
-                      {canShowPurchaseReturn && (
-            <Link href={"/yen-book/OutgoingPaymentPage/PurchaseReturn"}>
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: "white", // White background
-                  color: "black", // Black text
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.8)", // Slightly darker on hover
-                  },
-                }}
-              >
-                Purchase Return
-              </Button>
-            </Link>
-          )}
+                        <Link href={"/yen-book/OutgoingPaymentPage/PaidPayment"}>
+                            <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
+                                Payment Done
+                            </Button>
+                        </Link>
+                    )}
+                    {isModuleVisible("yenerp", "ledger") && (
+                        <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
+                            <Button variant="contained" color="primary" sx={{ mr: "2px" }}>
+                                Ledger
+                            </Button>
+                        </Link>
+                    )}
+                    {canShowPurchaseReturn && (
+                        <Link href={"/yen-book/OutgoingPaymentPage/PurchaseReturn"}>
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: "white",
+                                    color: "black",
+                                    "&:hover": {
+                                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                                    },
+                                }}
+                            >
+                                Purchase Return
+                            </Button>
+                        </Link>
+                    )}
                 </Box>
             </Box>
             
@@ -601,7 +665,7 @@ const ReturnActionButton = useCallback(
                         />
                     </Box>
                 </Grid>
-  <Grid item xs={6} sm={4} md={2}>
+                <Grid item xs={6} sm={4} md={2}>
                     <FormControl fullWidth>
                         <Autocomplete
                             value={selectedVendorName}
@@ -674,7 +738,7 @@ const ReturnActionButton = useCallback(
                             className="icon-button-outline"
                             size="small"
                             sx={{ p: 0.3 }}
-                            disabled={!filteredPayments || filteredPayments.length === 0}
+                            disabled={!processedPayments || processedPayments.length === 0}
                         >
                             <DownloadIcon fontSize="small" />
                         </IconButton>
@@ -684,6 +748,7 @@ const ReturnActionButton = useCallback(
                     </Box>
                 </Grid>
             </Grid>
+            
             <Grid container spacing={2}>
                 <Grid item xs={12} ml={2}>
                     <TableContainer
@@ -707,15 +772,15 @@ const ReturnActionButton = useCallback(
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {filteredPayments.length === 0 ? (
+                                {processedPayments.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={13} style={{ textAlign: 'center' }}>
+                                        <TableCell colSpan={11} style={{ textAlign: 'center' }}>
                                             No data available
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredPayments.map((payment, index) => (
-                                       <TableRow key={payment.outgoingId || index}>
+                                    processedPayments.map((payment, index) => (
+                                        <TableRow key={payment.outgoingId || index}>
                                             <TableCell>{(currentPage - 1) * pageSize + index + 1}</TableCell>
                                             <TableCell>
                                                 {payment.grnId ? (
@@ -739,17 +804,22 @@ const ReturnActionButton = useCallback(
                                             <TableCell>
                                                 {payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : ''}
                                             </TableCell>
-                                             <TableCell align="right">{(payment.totalPrice || 0).toFixed(2)}</TableCell>
+                                            <TableCell align="right">{(payment.totalPrice || 0).toFixed(2)}</TableCell>
                                             <TableCell align="right">{(payment.payableAmount || 0).toFixed(2)}</TableCell>
                                             <TableCell align="right">{(payment.totalPaid || 0).toFixed(2)}</TableCell>
-                                            <TableCell align="right">{(payment.totalPayableAmount || 0).toFixed(2)}</TableCell>
+                                            <TableCell align="right" sx={{ 
+                                                fontWeight: 'bold', 
+                                                color: (payment.totalPayableAmount || 0) > 0 ? 'red' : 'green'
+                                            }}>
+                                                {(payment.totalPayableAmount || 0).toFixed(2)}
+                                            </TableCell>
                                             <TableCell>
                                                 <Box display="flex" alignItems="center">
-                                                  <ReturnActionButton
-    payment={payment}
-    onClick={() => handleReturnProcess(payment)}
-    canEdit={canEditPurchaseReturn}
-/>
+                                                    <ReturnActionButton
+                                                        payment={payment}
+                                                        onClick={() => handleReturnProcess(payment)}
+                                                        canEdit={canEditPurchaseReturn}
+                                                    />
                                                 </Box>
                                             </TableCell>
                                         </TableRow>
@@ -758,7 +828,7 @@ const ReturnActionButton = useCallback(
                             </TableBody>
                         </Table>
                     </TableContainer>
-                   <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', mt: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', mt: 2 }}>
                         <IconButton
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
@@ -769,7 +839,7 @@ const ReturnActionButton = useCallback(
                             Page {currentPage} of {Math.ceil(totalItems / pageSize)}
                         </Typography>
                         <IconButton
-                             onClick={() => handlePageChange(currentPage + 1)}
+                            onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage >= Math.ceil(totalItems / pageSize)}
                         >
                             <ChevronRight />
@@ -777,12 +847,14 @@ const ReturnActionButton = useCallback(
                     </Box>
                 </Grid>
             </Grid>
- {/* GRN View Dialog */}
+            
+            {/* GRN View Dialog */}
             <GrnDialog
                 open={viewGrnDialogOpen}
                 onClose={() => setViewGrnDialogOpen(false)}
                 grn={selectedGrnForView}
             />
+            
             {/* Return Option Dialog */}
             <ReturnOptionDialog
                 open={returnOptionOpen}
@@ -811,7 +883,7 @@ const ReturnActionButton = useCallback(
             {/* Amount-wise Return Dialog */}
             {amountWiseDialogOpen && selectedDocumentId && (
                 <AmountReturnDialog
-                     open={amountWiseDialogOpen}
+                    open={amountWiseDialogOpen}
                     onClose={handleReturnCancel}
                     onSuccess={handleReturnComplete}
                     documentId={selectedDocumentId}
@@ -822,13 +894,15 @@ const ReturnActionButton = useCallback(
                     pageSize={pageSize}
                 />
             )}
-     {/* Stock Update Dialog */}
+            
+            {/* Stock Update Dialog */}
             <ReturnStockUpdateDialog
                 open={showReturnStockUpdateDialog}
                 stockUpdates={lastReturnStockUpdates}
                 grnId={lastReturnedGrnId}
                 onClose={handleStockUpdateClose}
             />
+            
             {/* Download Dialog */}
             <Dialog open={openDownloadDialog} onClose={() => setOpenDownloadDialog(false)}>
                 <DialogTitle>Choose a file format</DialogTitle>

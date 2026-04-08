@@ -38,7 +38,7 @@ interface UpdatePermissionsPayload {
 export const fetchPermissions = createAsyncThunk(
   'permissions/fetchPermissions',
   async (): Promise<PermissionRecord[]> => {
-    const response = await fetch('https://yenerp.com/purchaseapi/permissions');
+    const response = await fetch('https://yenerp.com/purchasetestapi/permissions');
     return await response.json();
   }
 );
@@ -46,7 +46,7 @@ export const fetchPermissions = createAsyncThunk(
 export const updatePermissions = createAsyncThunk(
   'permissions/updatePermissions',
   async ({ roleName, permissions }: UpdatePermissionsPayload): Promise<PermissionRecord> => {
-    const response = await fetch(`https://yenerp.com/purchaseapi/permissions/${roleName}`, {
+    const response = await fetch(`https://yenerp.com/purchasetestapi/permissions/${roleName}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ permissions })

@@ -355,6 +355,26 @@ export interface StockUpdateResult {
   items: StockUpdateItem[];
   timestamp: string;
 }
+// Add this interface near your other imports
+export interface StockLogsResponse {
+  success: boolean;
+  file_path: string;
+  total_logs_found: number;
+  logs: string[];
+  parsed_updates: Array<{
+    timestamp: string;
+    type: 'price_update' | 'inventory_update' | 'summary';
+    random_id?: string;
+    old_price?: number;
+    new_price?: number;
+    old_stock?: number;
+    new_stock?: number;
+    operation?: string;
+    price_updates?: number;
+    stock_updates?: number;
+  }>;
+  message?: string;
+}
 
 // Define the structure of the state for purchaseList
 export interface PurchaseListState {
@@ -399,6 +419,14 @@ export interface PurchaseListState {
   isCalculatingDiscount: boolean;
   stockUpdateResult: StockUpdateResult | null;
   showStockUpdateDialog: boolean;
+    stockLogs: {
+    data: StockLogsResponse | null;
+    loading: boolean;
+    error: string | null;
+  };
+  showStockLogsDialog: boolean;
+  selectedStockLogsPOId: string | null;
+
 
 }
 export const initialState: PurchaseListState = {
@@ -444,6 +472,13 @@ export const initialState: PurchaseListState = {
   totalGrnConvertedItems: 0,
   stockUpdateResult: null,
   showStockUpdateDialog: false,
+  stockLogs: {
+    data: null,
+    loading: false,
+    error: null
+  },
+  showStockLogsDialog: false,
+  selectedStockLogsPOId: null
 };
 // Define the Item type for the payload
 export interface PurchaseOrderItem {
@@ -504,5 +539,6 @@ export interface CalculateOverallDiscountPayload {
   applyOverallDiscount: boolean;
 
 }
+
 // In your purchaseModel.ts, add this export
 export type NewItem = Item; // Since NewItem is essentially the same as Item

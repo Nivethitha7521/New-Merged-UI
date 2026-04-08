@@ -15,7 +15,7 @@ import {
   Autocomplete
 } from '@mui/material';
 import { usePermissions } from "@/hooks/usePermissions";
-
+import InventoryIcon from '@mui/icons-material/Inventory';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -32,7 +32,7 @@ import {
   selectTotalItems,
   setPagination,
   setSearchQueryItem,
-  setRandomQueryItem
+  setRandomQueryItem,setShowStockLogsDialog
 } from '../../../../features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import { AppDispatch } from '@/redux/store';
 import YenPurchasePage from '../../page';
@@ -55,6 +55,7 @@ import VendorSearchAutocomplete from '../../../../components/vendorsearchautocom
 import PurchaseOrderRandomIdSearch from '../../../../components/yen-purchase/pendingpo/infiniteScroll';
 import { VendorSearch } from '@/Models/vendor';
 import { fetchGrnConvertedPurchaseOrders, selectGrnConvertedPurchaseList, selectTotalGrnConvertedItems } from '../../../../features/yen-purchase/PurchaseOrder/purchaseListSlice';
+import StockUpdateLogsDialog from '../Component/StockUpdateLogsPage';
 
 // Helper function to add footer with "Page X of Y" and "This is computer generated" centered at the bottom
 const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
@@ -264,7 +265,13 @@ const handlePageChange = (newPage: number) => {
   
   dispatch(fetchGrnConvertedPurchaseOrders(params));
 };
-
+const handleViewStockLogs = (order: any) => {
+  // Dispatch the Redux action to open the dialog with the selected PO
+  dispatch(setShowStockLogsDialog({ 
+    show: true, 
+    purchaseOrderId: order.purchaseOrderId 
+  }));
+};
 // Helper function to check if date range is default (today to today)
 const isDefaultDateRange = (range: any) => {
   if (!range?.startDate || !range?.endDate) return true;
@@ -1639,6 +1646,16 @@ if (!canRead) {
                               <PictureAsPdfIcon />
                             </IconButton>
                           </Tooltip>
+                               <Tooltip title="View Stock & Price Update History">
+                                                      <IconButton
+                                                        onClick={() => handleViewStockLogs(order)}
+                                                        color="info"
+                                                        sx={{ mr: 0.5 }}
+                                                        size="small"
+                                                      >
+                                                        <InventoryIcon fontSize="small" />
+                                                      </IconButton>
+                                                    </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -1918,7 +1935,7 @@ if (!canRead) {
           </Button>
         </DialogActions>
       </Dialog>
-      
+      <StockUpdateLogsDialog />
       <Snackbar
         open={snackbarOpen}
         message={snackbarMessage}

@@ -21,7 +21,7 @@ import {
   resetPurchaseOrderState,
   fetchPurchaseOrderRandomIds,
   fetchAllImages,
-  setOrderImageUrls
+  setOrderImageUrls,setShowStockLogsDialog  
 } from '../../../features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import {
   Box, Button, Typography, Table, TableContainer, TableHead, TableRow, TableCell, TableBody,
@@ -143,9 +143,6 @@ const Polist: React.FC = () => {
   const [pendingDiscountAmount, setPendingDiscountAmount] = useState<number>(
     selectedOrder ? selectedOrder.pendingDiscountAmount || 0 : 0
   );
-  // Add these with your other state declarations
-  const [stockLogsDialogOpen, setStockLogsDialogOpen] = useState(false);
-  const [selectedPOForLogs, setSelectedPOForLogs] = useState<any>(null);
   const [pendingTaxAmount, setPendingTaxAmount] = useState<number>(0); // New state for total tax
   const [taxDetails, setTaxDetails] = useState<TaxDetails>({});
   const [openPhotoDialog, setOpenPhotoDialog] = useState(false); // State to control dialog
@@ -339,11 +336,13 @@ const Polist: React.FC = () => {
     handleOpen(); // Perform itemwise action
     handleCloseAnchor(); // Close the dropdown after the action
   };
-  const handleViewStockLogs = (order: any) => {
-    console.log('Selected PO:', order); // இந்த line add பண்ணுங்க
-    setSelectedPOForLogs(order);
-    setStockLogsDialogOpen(true);
-  };
+const handleViewStockLogs = (order: any) => {
+  // Dispatch the Redux action to open the dialog with the selected PO
+  dispatch(setShowStockLogsDialog({ 
+    show: true, 
+    purchaseOrderId: order.purchaseOrderId 
+  }));
+};
   const handleVendorChange = (vendor: VendorSearch | null) => {
     setSelectedVendor(vendor);
     setSelectedVendorName(vendor ? vendor.vendorName : '');
@@ -2032,7 +2031,6 @@ const Polist: React.FC = () => {
                               </IconButton>
                             </span>
                           </Tooltip>
-                          {/* NEW: Stock Update Logs Button - For ALL Orders
                           <Tooltip title="View Stock & Price Update History">
                             <IconButton
                               onClick={() => handleViewStockLogs(order)}
@@ -2042,7 +2040,7 @@ const Polist: React.FC = () => {
                             >
                               <InventoryIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip> */}
+                          </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -2167,16 +2165,8 @@ const Polist: React.FC = () => {
           </DialogActions>
         </Dialog>
         {/* Stock Update Logs Dialog */}
-        <StockUpdateLogsDialog
-          open={stockLogsDialogOpen}
-          onClose={() => {
-            setStockLogsDialogOpen(false);
-            setSelectedPOForLogs(null);
-          }}
-          purchaseOrderId={selectedPOForLogs?.purchaseOrderId || ''}
-          poRandomId={selectedPOForLogs?.randomId}
-          poStatus={selectedPOForLogs?.poStatus}
-        />
+      {/* Stock Update Logs Dialog - No props needed anymore */}
+<StockUpdateLogsDialog />
         <Snackbar
           open={snackbarOpen}
           message={snackbarMessage}

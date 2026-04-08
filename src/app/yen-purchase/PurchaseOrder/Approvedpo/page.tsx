@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import InventoryIcon from '@mui/icons-material/Inventory';
 import {
   Box,
   TextField,
@@ -40,8 +41,6 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import InfoIcon from '@mui/icons-material/Info';
-require('react-date-range/dist/styles.css');
-require('react-date-range/dist/theme/default.css');
 import { ChevronLeft, ChevronRight, Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
 import Link from "next/link";
 import { format, startOfDay } from "date-fns";
@@ -63,7 +62,8 @@ import {
   fetchInvoiceNumbers,
   fetchAllImages,
   calculateOverallDiscount, closeStockUpdateDialog,
-  downloadPurchaseOrderPDF, // New thunk import
+  downloadPurchaseOrderPDF,
+  setShowStockLogsDialog, // New thunk import
 } from "../../../../features/yen-purchase/PurchaseOrder/purchaseListSlice";
 import { AppDispatch } from "@/redux/store";
 import YenPurchasePage from "../../page";
@@ -90,6 +90,7 @@ import StockUpdateDialog from "../Component/StockUpdateDialog";
 import LocationAutocomplete from "@/components/yen-purchase/pocreationcomponent/locationautocomplete";
 import { Location } from "@/Models/storagelocation";
 import { UnifiedDatePicker } from "../Component/UnifiedDatePicker";
+import StockUpdateLogsDialog from "../Component/StockUpdateLogsPage";
 // Add this import at the top with your other imports:
 const parseLocalDate = (dateStr: string | null | undefined): Date | null => {
   if (!dateStr) return null;
@@ -1310,85 +1311,85 @@ const ApprovedPurchase: React.FC = () => {
 
     return !hasErrors;
   }, [updatedItems, touched]);
-const handleQuantityChange = useCallback(
-  (itemId: string, field: "receivedQuantity", value: string | number) => {
-    console.log("Quantity Change:", { itemId, field, value });
-    const index = updatedItems.findIndex((item) => item.itemId === itemId);
-    const originalItem = selectedOrder?.items.find((original) => original.itemId === itemId);
-    const originalPendingTotalQuantity = originalItem?.pendingTotalQuantity || 0;
-    
-    setTouched((prev) => ({
-      ...prev,
-      [index]: { ...prev[index], [field]: true },
-    }));
-    
-    const received = Number(value) || 0;
-    
-    if (!/^\d*\.?\d*$/.test(String(value))) {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], [field]: "Invalid number" },
-      }));
-      return;
-    }
-    
-    if (received < 0) {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], [field]: "Received quantity cannot be negative" },
-      }));
-      return;
-    }
-    
-    if (originalPendingTotalQuantity === 0) {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], [field]: "Item is already fully received" },
-      }));
-      setExcessDialogMessage(
-        `Item "${updatedItems[index].itemName}" is already fully received (pending total quantity = 0).`
-      );
-      setExcessDialogOpen(true);
-      return;
-    }
-    
-    if (received > originalPendingTotalQuantity) {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], [field]: `Cannot exceed pending quantity of ${originalPendingTotalQuantity}` },
-      }));
-      setExcessDialogMessage(
-        `Received quantity for item "${updatedItems[index].itemName}" (${received}) exceeds the pending total quantity (${originalPendingTotalQuantity}).`
-      );
-      setExcessDialogOpen(true);
-      return;
-    }
-    
-    setUpdatedItems((prevItems) =>
-      prevItems.map((item) =>
-        item.itemId === itemId ? { ...item, receivedQuantity: received } : item
-      )
-    );
-    
-    // CRITICAL FIX: Clear expiry date error and touched state when received quantity becomes 0
-    if (received === 0) {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], [field]: "", expiryDate: "" },
-      }));
+  const handleQuantityChange = useCallback(
+    (itemId: string, field: "receivedQuantity", value: string | number) => {
+      console.log("Quantity Change:", { itemId, field, value });
+      const index = updatedItems.findIndex((item) => item.itemId === itemId);
+      const originalItem = selectedOrder?.items.find((original) => original.itemId === itemId);
+      const originalPendingTotalQuantity = originalItem?.pendingTotalQuantity || 0;
+
       setTouched((prev) => ({
         ...prev,
-        [index]: { ...prev[index], [field]: true, expiryDate: false },
+        [index]: { ...prev[index], [field]: true },
       }));
-    } else {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], [field]: "" },
-      }));
-    }
-  },
-  [updatedItems, selectedOrder, setExcessDialogMessage, setExcessDialogOpen]
-);
+
+      const received = Number(value) || 0;
+
+      if (!/^\d*\.?\d*$/.test(String(value))) {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: "Invalid number" },
+        }));
+        return;
+      }
+
+      if (received < 0) {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: "Received quantity cannot be negative" },
+        }));
+        return;
+      }
+
+      if (originalPendingTotalQuantity === 0) {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: "Item is already fully received" },
+        }));
+        setExcessDialogMessage(
+          `Item "${updatedItems[index].itemName}" is already fully received (pending total quantity = 0).`
+        );
+        setExcessDialogOpen(true);
+        return;
+      }
+
+      if (received > originalPendingTotalQuantity) {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: `Cannot exceed pending quantity of ${originalPendingTotalQuantity}` },
+        }));
+        setExcessDialogMessage(
+          `Received quantity for item "${updatedItems[index].itemName}" (${received}) exceeds the pending total quantity (${originalPendingTotalQuantity}).`
+        );
+        setExcessDialogOpen(true);
+        return;
+      }
+
+      setUpdatedItems((prevItems) =>
+        prevItems.map((item) =>
+          item.itemId === itemId ? { ...item, receivedQuantity: received } : item
+        )
+      );
+
+      // CRITICAL FIX: Clear expiry date error and touched state when received quantity becomes 0
+      if (received === 0) {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: "", expiryDate: "" },
+        }));
+        setTouched((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: true, expiryDate: false },
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: "" },
+        }));
+      }
+    },
+    [updatedItems, selectedOrder, setExcessDialogMessage, setExcessDialogOpen]
+  );
   const handlePriceChange = useCallback(
     (itemId: string, value: string) => {
       const index = updatedItems.findIndex((item) => item.itemId === itemId);
@@ -1442,61 +1443,61 @@ const handleQuantityChange = useCallback(
     },
     [updatedItems]
   );
-const handleExpiryDateChange = useCallback(
-  (itemId: string, value: Date | null) => {
-    const index = updatedItems.findIndex((item) => item.itemId === itemId);
-    // Convert receivedQuantity to number safely
-    const receivedQuantityRaw = updatedItems[index]?.receivedQuantity || 0;
-    const receivedQuantity = typeof receivedQuantityRaw === 'string' 
-      ? parseFloat(receivedQuantityRaw) || 0 
-      : receivedQuantityRaw || 0;
-    
-    setTouched((prev) => ({
-      ...prev,
-      [index]: { ...prev[index], expiryDate: true },
-    }));
-    
-    if (value) {
-      const utcDate = new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
-      setUpdatedItems((prevItems) =>
-        prevItems.map((item) =>
-          item.itemId === itemId
-            ? {
+  const handleExpiryDateChange = useCallback(
+    (itemId: string, value: Date | null) => {
+      const index = updatedItems.findIndex((item) => item.itemId === itemId);
+      // Convert receivedQuantity to number safely
+      const receivedQuantityRaw = updatedItems[index]?.receivedQuantity || 0;
+      const receivedQuantity = typeof receivedQuantityRaw === 'string'
+        ? parseFloat(receivedQuantityRaw) || 0
+        : receivedQuantityRaw || 0;
+
+      setTouched((prev) => ({
+        ...prev,
+        [index]: { ...prev[index], expiryDate: true },
+      }));
+
+      if (value) {
+        const utcDate = new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
+        setUpdatedItems((prevItems) =>
+          prevItems.map((item) =>
+            item.itemId === itemId
+              ? {
                 ...item,
                 expiryDate: utcDate
               }
-            : item
-        )
-      );
-      // Clear error when date is set
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], expiryDate: "" },
-      }));
-    } else {
-      setUpdatedItems((prevItems) =>
-        prevItems.map((item) =>
-          item.itemId === itemId
-            ? { ...item, expiryDate: null }
-            : item
-        )
-      );
-      // Only set error if received quantity > 0
-      if (receivedQuantity > 0) {
-        setErrors((prev) => ({
-          ...prev,
-          [index]: { ...prev[index], expiryDate: "Expiry date is required" },
-        }));
-      } else {
+              : item
+          )
+        );
+        // Clear error when date is set
         setErrors((prev) => ({
           ...prev,
           [index]: { ...prev[index], expiryDate: "" },
         }));
+      } else {
+        setUpdatedItems((prevItems) =>
+          prevItems.map((item) =>
+            item.itemId === itemId
+              ? { ...item, expiryDate: null }
+              : item
+          )
+        );
+        // Only set error if received quantity > 0
+        if (receivedQuantity > 0) {
+          setErrors((prev) => ({
+            ...prev,
+            [index]: { ...prev[index], expiryDate: "Expiry date is required" },
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            [index]: { ...prev[index], expiryDate: "" },
+          }));
+        }
       }
-    }
-  },
-  [updatedItems]
-);
+    },
+    [updatedItems]
+  );
   // Update handleSaveChanges to include the validation
   const handleSaveChanges = useCallback(async () => {
     console.log("Saving Changes:", { updatedItems, invoiceNumber, invoiceDate, roundOffAmount, freights });
@@ -1534,29 +1535,29 @@ const handleExpiryDateChange = useCallback(
       setSnackbarInvoiceOpen(true);
       return;
     }
-// In handleSaveChanges function, update the expiry date validation section:
-if (!validateExpiryDates()) {
-  // Create a more descriptive error message
-  const itemsNeedingExpiry = updatedItems.filter(item => {
-    const receivedQty = typeof item.receivedQuantity === 'string'
-      ? parseFloat(item.receivedQuantity) || 0
-      : item.receivedQuantity || 0;
-    const pendingQty = item.pendingTotalQuantity || 0;
-    // CRITICAL FIX: Only include items with received quantity > 0
-    return pendingQty > 0 && receivedQty > 0 && !item.expiryDate;
-  });
+    // In handleSaveChanges function, update the expiry date validation section:
+    if (!validateExpiryDates()) {
+      // Create a more descriptive error message
+      const itemsNeedingExpiry = updatedItems.filter(item => {
+        const receivedQty = typeof item.receivedQuantity === 'string'
+          ? parseFloat(item.receivedQuantity) || 0
+          : item.receivedQuantity || 0;
+        const pendingQty = item.pendingTotalQuantity || 0;
+        // CRITICAL FIX: Only include items with received quantity > 0
+        return pendingQty > 0 && receivedQty > 0 && !item.expiryDate;
+      });
 
-    if (itemsNeedingExpiry.length > 0) {
-    const itemNames = itemsNeedingExpiry.map(item => item.itemName).join(', ');
-    setSnackbarInvoiceMessage(`Please provide expiry dates for: ${itemNames}`);
-  } else {
-    // If no items need expiry dates but validateExpiryDates returned false,
-    // it means the errors are cleared
-    setSnackbarInvoiceMessage("");
-  }
-  setSnackbarInvoiceOpen(true);
-  return;
-}
+      if (itemsNeedingExpiry.length > 0) {
+        const itemNames = itemsNeedingExpiry.map(item => item.itemName).join(', ');
+        setSnackbarInvoiceMessage(`Please provide expiry dates for: ${itemNames}`);
+      } else {
+        // If no items need expiry dates but validateExpiryDates returned false,
+        // it means the errors are cleared
+        setSnackbarInvoiceMessage("");
+      }
+      setSnackbarInvoiceOpen(true);
+      return;
+    }
 
     const hasErrors = Object.values(errors).some((errorObj) =>
       Object.values(errorObj).some((error) => error)
@@ -1965,50 +1966,50 @@ if (!validateExpiryDates()) {
       setOpenDialog(true);
     }
   };
-const handleDownload = useCallback(
-  async (poid: string) => {
-    try {
-      setLoading(true);
+  const handleDownload = useCallback(
+    async (poid: string) => {
+      try {
+        setLoading(true);
 
-      const purchaseOrder = purchaseList.find((order) => order.purchaseOrderId === poid);
-      if (!purchaseOrder) {
-        setSnackbarInvoiceMessage('Purchase Order not found');
+        const purchaseOrder = purchaseList.find((order) => order.purchaseOrderId === poid);
+        if (!purchaseOrder) {
+          setSnackbarInvoiceMessage('Purchase Order not found');
+          setSnackbarInvoiceOpen(true);
+          return;
+        }
+
+        const result = await dispatch(downloadPurchaseOrderPDF(poid)).unwrap();
+
+        // ✅ FIX: vendorName + randomId filename
+        const vendorName = (purchaseOrder.vendorName || 'Vendor')
+          .replace(/[^\w\s-]/g, '')   // special chars நீக்கு
+          .trim()
+          .replace(/[\s-]+/g, '_');   // spaces -> underscore
+
+        const randomId = purchaseOrder.randomId || poid;
+        const filename = `${randomId}_${vendorName}.pdf`;  // ✅ PO2459_SRI_VINAYAGA_MARKETING.pdf
+
+        const url = window.URL.createObjectURL(new Blob([result.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);  // ✅ Fixed
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        setSnackbarInvoiceMessage('PDF downloaded successfully');
         setSnackbarInvoiceOpen(true);
-        return;
+
+      } catch (error: any) {
+        setSnackbarInvoiceMessage(error.message || 'Failed to download PDF');
+        setSnackbarInvoiceOpen(true);
+      } finally {
+        setLoading(false);
       }
-
-      const result = await dispatch(downloadPurchaseOrderPDF(poid)).unwrap();
-
-      // ✅ FIX: vendorName + randomId filename
-      const vendorName = (purchaseOrder.vendorName || 'Vendor')
-        .replace(/[^\w\s-]/g, '')   // special chars நீக்கு
-        .trim()
-        .replace(/[\s-]+/g, '_');   // spaces -> underscore
-
-      const randomId = purchaseOrder.randomId || poid;
-      const filename = `${randomId}_${vendorName}.pdf`;  // ✅ PO2459_SRI_VINAYAGA_MARKETING.pdf
-
-      const url = window.URL.createObjectURL(new Blob([result.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);  // ✅ Fixed
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      setSnackbarInvoiceMessage('PDF downloaded successfully');
-      setSnackbarInvoiceOpen(true);
-
-    } catch (error: any) {
-      setSnackbarInvoiceMessage(error.message || 'Failed to download PDF');
-      setSnackbarInvoiceOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  },
-  [dispatch, purchaseList, setSnackbarInvoiceMessage, setSnackbarInvoiceOpen]
-);
+    },
+    [dispatch, purchaseList, setSnackbarInvoiceMessage, setSnackbarInvoiceOpen]
+  );
   const handleExportAllVendorsPDF = useCallback(
     ({ filteredOrders, businesses, setSnackbarInvoiceMessage, setSnackbarInvoiceOpen }: ExportProps) => {
       const doc = new jsPDF();
@@ -2434,6 +2435,13 @@ const handleDownload = useCallback(
       return receivedQuantity > 0 && pendingTotalQuantity > 0;
     });
   }, [updatedItems, selectedOrder]);
+  const handleViewStockLogs = (order: any) => {
+    // Dispatch the Redux action to open the dialog with the selected PO
+    dispatch(setShowStockLogsDialog({
+      show: true,
+      purchaseOrderId: order.purchaseOrderId
+    }));
+  };
   const handleApplyDiscount = useCallback(async () => {
     if (overallDiscountAmount <= 0 || !isReceivedQuantityValid()) {
       setSnackbarInvoiceMessage('Invalid discount amount or no valid items.');
@@ -2722,6 +2730,16 @@ const handleDownload = useCallback(
                           <PictureAsPdfIcon />
                         </IconButton>
                       </Tooltip>
+                      <Tooltip title="View Stock & Price Update History">
+                        <IconButton
+                          onClick={() => handleViewStockLogs(order)}
+                          color="info"
+                          sx={{ mr: 0.5 }}
+                          size="small"
+                        >
+                          <InventoryIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))
@@ -2930,6 +2948,7 @@ const handleDownload = useCallback(
           onClose={() => setSnackbarInvoiceOpen(false)}
           message={snackbarInvoiceMessage}
         />
+        <StockUpdateLogsDialog />
         <StockUpdateDialog
           open={showStockUpdateDialog}
           onClose={() => {
