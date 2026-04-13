@@ -41,7 +41,8 @@ import {
   selectTotalPayableAmount,
   toggleOutgoingSelection,
   syncSelectionsWithCurrentData, // ADD THIS SELECTOR FOR OVERALL TOTAL
-  clearSelection, // ADD THIS FOR CLEAR ALL
+  clearSelection,
+  fetchOutgoingStatuses, // ADD THIS FOR CLEAR ALL
 } from '../../../features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import { fetchGrnById, fetchItemwiseGrns, selectGrn } from '@/features/yen-purchase/GRN/grnSlice';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -77,7 +78,6 @@ import { Alert } from "@mui/material";
 const OutgoingPaymentComponent = React.memo(() => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, isModuleVisible } = usePermissions();
-
   const canRead = hasPermission("yenerp", "outgoingpayment", "read");
   const { outgoings, snackbarMessage, snackbarOpen, selection, outgoingvendor, banks // ADD THIS IF MISSING
   } = useSelector(selectOutgoings);
@@ -122,6 +122,7 @@ const OutgoingPaymentComponent = React.memo(() => {
   const [errors, setErrors] = useState<{ [outgoingId: string]: string }>({});
   // Add this to your component's state
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
   const [confirmDialogProps, setConfirmDialogProps] = useState<{
     title: string;
     description: string | JSX.Element;
@@ -175,6 +176,19 @@ const OutgoingPaymentComponent = React.memo(() => {
       dispatch(fetchVendorDetails({ filterByAmount: true }));
     }
   }, [loadingState, dispatch]);
+  // Add this useEffect to fetch statuses when component mounts
+  useEffect(() => {
+    if (!canRead) return;
+    const loadStatuses = async () => {
+      try {
+        const statuses = await fetchOutgoingStatuses();
+        setAvailableStatuses(statuses);
+      } catch (error) {
+        console.error("Failed to fetch statuses:", error);
+      }
+    };
+    loadStatuses();
+  }, [canRead]);
   // REMOVE this client-side sorting completely - replace with simple mapping
   const filteredPayments = useMemo(() => {
     return outgoings.map(payment => {
@@ -197,12 +211,6 @@ const OutgoingPaymentComponent = React.memo(() => {
       };
     });
   }, [outgoings]); // Only depend on outgoings - NO sorting logic here
-  useEffect(() => {
-    // This ensures that when pagination changes, we don't have stale selections
-    // that don't exist on the current page
-    // To persist across pages, do nothing here - selections stay in Redux
-    // Only sync objects if needed, but keep IDs
-  }, [outgoings, dispatch]);
   const handleApClick = (invoiceId: string | undefined) => {
     if (!invoiceId) {
       dispatch(setSnackbarMessage('Invalid AP Invoice ID'));
@@ -511,18 +519,20 @@ const OutgoingPaymentComponent = React.memo(() => {
   useEffect(() => {
     dispatch(syncSelectionsWithCurrentData());
   }, [outgoings, dispatch]);
-  // Fix handleFilterClick to preserve current sorting
   const handleFilterClick = () => {
     setIsFilterActive(true);
+
     const formattedStartDate = selectionRange?.startDate instanceof Date
       ? moment(selectionRange.startDate).startOf('day').toISOString()
       : fromDate?.toISOString();
+
     const formattedEndDate = selectionRange?.endDate instanceof Date
       ? moment(selectionRange.endDate).endOf('day').toISOString()
       : toDate?.toISOString();
+
     const newPage = 1;
     dispatch(setPagination({ page: newPage, size: pageSize }));
-    // Map current sort column to backend field
+
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -533,31 +543,48 @@ const OutgoingPaymentComponent = React.memo(() => {
       invoiceDate: 'invoiceDate',
       vendorName: 'vendorName'
     };
+
     const backendSortField = sortColumn ? sortFieldMap[sortColumn] : 'createdDate';
     const backendSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
+
     const filterParams: any = {
       page: newPage,
       size: pageSize,
       filterByAmount: true,
-      sortBy: backendSortField, // PRESERVE SORTING
-      sortOrder: backendSortOrder // PRESERVE SORTING
+      filterByStatus: false,  // ✅ ALWAYS FALSE - backend status param handles it
+      sortBy: backendSortField,
+      sortOrder: backendSortOrder
     };
+
     if (formattedStartDate) {
       filterParams.fromDate = new Date(formattedStartDate);
     }
     if (formattedEndDate) {
       filterParams.toDate = new Date(formattedEndDate);
     }
-    if (selectedVendorName?.vendorName && selectedVendorName.vendorName.trim() !== '' && selectedVendorName.vendorName !== 'none') {
+    if (
+      selectedVendorName?.vendorName &&
+      selectedVendorName.vendorName.trim() !== '' &&
+      selectedVendorName.vendorName !== 'none'
+    ) {
       filterParams.vendorName = selectedVendorName.vendorName.trim();
     }
     if (dateField && dateField.trim() !== '') {
       filterParams.filterBy = dateField.trim();
     }
-    if (status && status.trim() !== '' && status !== 'none' && status !== 'all') {
+
+    // ✅ FIXED - clean status, no filterByStatus conflict
+    if (
+      status &&
+      status.trim() !== '' &&
+      status.trim().toLowerCase() !== 'none' &&
+      status.trim().toLowerCase() !== 'all'
+    ) {
       filterParams.status = status.trim();
     }
+
     console.log('Applying filters with sorting:', filterParams);
+
     if (!canRead) return;
 
     dispatch(fetchOutgoings(filterParams));
@@ -870,24 +897,24 @@ const OutgoingPaymentComponent = React.memo(() => {
     document.body.removeChild(link);
     setOpenDialog(false);
   };
-const handlePayClick = () => {
-  if (selectedOutgoings.length === 0) {
-    dispatch(setSnackbarMessage('Please select at least one outgoing payment to process'));
-    dispatch(setSnackbarOpen(true));
-    return;
-  }
-  
-  // Check if ALL selected outgoings are verified
-  const allVerified = selectedOutgoings.every(outgoing => outgoing.isVerified === true);
-  if (!allVerified) {
-    dispatch(setSnackbarMessage('All selected payments must be verified before processing multiple payments'));
-    dispatch(setSnackbarOpen(true));
-    return;
-  }
-  
-  console.log('Selected payments across all pages:', selectedOutgoings.length);
-  setIsBulkPaymentOpen(true);
-};
+  const handlePayClick = () => {
+    if (selectedOutgoings.length === 0) {
+      dispatch(setSnackbarMessage('Please select at least one outgoing payment to process'));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+
+    // Check if ALL selected outgoings are verified
+    const allVerified = selectedOutgoings.every(outgoing => outgoing.isVerified === true);
+    if (!allVerified) {
+      dispatch(setSnackbarMessage('All selected payments must be verified before processing multiple payments'));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+
+    console.log('Selected payments across all pages:', selectedOutgoings.length);
+    setIsBulkPaymentOpen(true);
+  };
   // NEW: Clear all selections across pages
   const handleClearAllSelections = () => {
     dispatch(clearSelection());
@@ -1319,6 +1346,33 @@ Description:<br />
                 }}
               />
             </Grid>
+            {/* Status Filter Dropdown */}
+            <Grid item xs={6} sm={4} md={2}>
+              <FormControl fullWidth size="small">
+                <Autocomplete
+                  value={status || null}
+                  onChange={(event, newValue) => {
+                    setStatus(newValue || '');
+                  }}
+                  options={availableStatuses}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Filter by Status"
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        ...params.InputProps,
+                        style: { fontSize: '12px' },
+                        // Removed the custom IconButton for ClearIcon
+                      }}
+                    />
+                  )}
+                  isOptionEqualToValue={(option, value) => option === value}
+                  sx={{ fontSize: '12px' }}
+                />
+              </FormControl>
+            </Grid>
             {/* Filter Button */}
             <Grid item xs="auto">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -1536,6 +1590,8 @@ Description:<br />
                     <TableCell align="center" sx={{ cursor: 'pointer' }} onClick={() => handleSort('paymentTerms')}>
                       Payment Terms {sortColumn === 'paymentTerms' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                     </TableCell>
+                    <TableCell>Verified By</TableCell>
+                    <TableCell>Verified Date</TableCell>
                     <TableCell align="center">Action</TableCell>
                   </TableRow>
                 </TableHead>
@@ -1683,6 +1739,10 @@ Description:<br />
                             {payment.intimationDays}
                           </TableCell>
                           <TableCell align="center">{payment.paymentTerms}</TableCell> {/* ADD align="center" */}
+                          <TableCell align="left">{payment.verifiedByName}</TableCell> {/* ADD align="left" */}
+                          <TableCell align="center">
+                            {payment.verifiedDate ? format(new Date(payment.verifiedDate), 'dd-MM-yyyy HH:mm') : '-'}
+                          </TableCell>
                           <TableCell>
                             <Box display="flex" alignItems="center">
                               <Tooltip title={payment.isVerified ? "Pay" : "Payment not allowed - Not Verified"}>

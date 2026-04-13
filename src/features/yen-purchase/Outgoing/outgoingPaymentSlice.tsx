@@ -5,6 +5,7 @@ import purchaseApi from "@/utils/api";
 import { RootState } from '../../../redux/store';
 import { Bank, BulkPaymentRequest, BulkPaymentResponse, DebitNote, FetchOutgoingsArgs, GRN, initialState, Outgoing, PaymentDetails, PaymentDone, PaymentHistory, ProcessPaymentRequest, TaxDetail, VendorDetail, VendorPayment } from '@/Models/outgoingModel';
 
+// In outgoingPaymentSlice.ts - fetchOutgoings
 export const fetchOutgoings = createAsyncThunk<
   { outgoings: Outgoing[]; totalItems: number; totalPayableAmount: number },
   FetchOutgoingsArgs,
@@ -13,12 +14,12 @@ export const fetchOutgoings = createAsyncThunk<
   'outgoings/fetchOutgoings',
   async (args, { rejectWithValue }) => {
     try {
-      const url = 'https://yenerp.com/purchasetestapi/outgoingpayments/';
+      const url = 'https://yenerp.com/purchaseapi/outgoingpayments/';
       const params: any = {
         skip: (args.page - 1) * args.size,
         limit: args.size,
         filterByAmount: args.filterByAmount ?? false,
-        filterByStatus: args.filterByStatus ?? false,
+        filterByStatus: false,
         sortOrder: args.sortOrder,
         filterAll: args.filterAll,
         sortBy: args.sortBy,
@@ -28,19 +29,12 @@ export const fetchOutgoings = createAsyncThunk<
       if (args.toDate) params.toDate = args.toDate.toISOString();
       if (args.vendorName) params.vendorName = args.vendorName;
       if (args.filterBy) params.filterBy = args.filterBy;
-      if (args.status) params.status = args.status;
+      if (args.status) params.status = args.status;  // ✅ Make sure this line exists
+      if (args.status && args.status !== '') params.status = args.status;  // Only add if not empty
 
       console.log('🔍 API Call Params:', params);
 
       const response = await purchaseApi.get("/outgoingpayments/", { params });
-
-      // DEBUG: Log the actual API response
-      console.log('🔍 RAW API RESPONSE:', response.data);
-      console.log('🔍 Response keys:', Object.keys(response.data));
-      console.log('🔍 Has totalPayableAmount?', 'totalPayableAmount' in response.data);
-      console.log('🔍 totalPayableAmount value:', response.data.totalPayableAmount);
-      console.log('🔍 totalItems value:', response.data.totalItems);
-      console.log('🔍 outgoings count:', response.data.outgoings?.length);
 
       return response.data;
     } catch (error: any) {
@@ -49,6 +43,11 @@ export const fetchOutgoings = createAsyncThunk<
     }
   }
 );
+// In your API service
+export const fetchOutgoingStatuses = async (): Promise<string[]> => {
+    const response = await purchaseApi.get("/outgoingpayments/getStatusfilter/statuses");
+    return response.data.statuses;
+};
 export const fetchVendorDetails = createAsyncThunk(
   'outgoing/fetchVendorDetails',
   async (filters: {

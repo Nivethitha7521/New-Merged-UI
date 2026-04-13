@@ -13,7 +13,8 @@ interface VendorSearchAutocompleteProps {
   helperText?: string;
   fullWidth?: boolean;
   required?: boolean;
-  limit?: number; // Added limit as optional prop
+  limit?: number;
+  initialRandomId?: string;
 }
 
 const VendorSearchAutocomplete: React.FC<VendorSearchAutocompleteProps> = ({
@@ -24,62 +25,99 @@ const VendorSearchAutocomplete: React.FC<VendorSearchAutocompleteProps> = ({
   helperText = "",
   fullWidth = true,
   required = false,
-  limit = 50 // Default limit if not provided
+  limit = 50,
+  initialRandomId
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [open, setOpen] = useState(false);
   const [vendors, setVendors] = useState<VendorSearch[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [skip, setSkip] = useState(0);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [hasMore, setHasMore] = useState(true);
   const [noResultsFound, setNoResultsFound] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   
-  // Ref to track if we've already checked for no results
   const hasCheckedNoResultsRef = useRef(false);
+  const isInitialLoadRef = useRef(true);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Memoize fetchVendors to prevent unnecessary re-renders
-  const fetchVendors = useCallback((vendor_name: string, skipValue: number, forceRefresh = false) => {
+  // Load vendor by randomId if provided
+  useEffect(() => {
+    if (initialRandomId && !value && isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      setLoading(true);
+      
+      dispatch(searchVendorsByExactName({ 
+        vendor_name: '', 
+        random_id: initialRandomId,
+        skip: 0, 
+        limit: 1,
+        forceRefresh: true
+      }))
+        .unwrap()
+        .then((vendorsList) => {
+          if (vendorsList && vendorsList.length > 0) {
+            const foundVendor = vendorsList[0];
+            onChange(foundVendor);
+            setInputValue(foundVendor.vendorName);
+          } else {
+            console.warn(`No vendor found with randomId: ${initialRandomId}`);
+          }
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching vendor by randomId:', error);
+          setLoading(false);
+        });
+    }
+  }, [initialRandomId, dispatch, onChange, value]);
+
+  // Fetch vendors function
+  const fetchVendors = useCallback((searchText: string, skipValue: number, forceRefresh = false) => {
     if (loading || (!forceRefresh && skipValue > 0 && !hasMore)) return;
     
-    // Reset the no results check when search query changes
     if (skipValue === 0) {
       hasCheckedNoResultsRef.current = false;
       setNoResultsFound(false);
     }
     
     setLoading(true);
-    dispatch(searchVendorsByExactName({ vendor_name, skip: skipValue, limit, forceRefresh }))
+    dispatch(searchVendorsByExactName({ 
+      vendor_name: searchText, 
+      skip: skipValue, 
+      limit, 
+      forceRefresh 
+    }))
       .unwrap()
       .then((newVendors) => {
         if (skipValue === 0) {
           setVendors(newVendors);
-          // Check if no results were found on initial load
-          if (newVendors.length === 0) {
+          // Only set no results if we have a search term and no vendors
+          if (newVendors.length === 0 && searchText && searchText.trim().length > 0) {
             setNoResultsFound(true);
             hasCheckedNoResultsRef.current = true;
+          } else {
+            setNoResultsFound(false);
           }
         } else {
-          const existingVendorsMap = new Map(vendors.map(vendor => [vendor.vendorId, vendor]));
-          
-          newVendors.forEach(vendor => {
-            if (!existingVendorsMap.has(vendor.vendorId)) {
-              existingVendorsMap.set(vendor.vendorId, vendor);
-            }
+          setVendors(prevVendors => {
+            const existingVendorsMap = new Map(prevVendors.map(vendor => [vendor.vendorId, vendor]));
+            newVendors.forEach(vendor => {
+              if (!existingVendorsMap.has(vendor.vendorId)) {
+                existingVendorsMap.set(vendor.vendorId, vendor);
+              }
+            });
+            return Array.from(existingVendorsMap.values());
           });
-          
-          setVendors(Array.from(existingVendorsMap.values()));
         }
         
-        // Update hasMore based on whether we got fewer results than limit
         if (newVendors.length > 0) {
           setSkip(skipValue + limit);
           setHasMore(newVendors.length === limit);
         } else {
           setHasMore(false);
-          // Only set noResultsFound if this is the initial search (skipValue === 0)
-          if (skipValue === 0 && !hasCheckedNoResultsRef.current) {
+          if (skipValue === 0 && searchText && searchText.trim().length > 0 && !hasCheckedNoResultsRef.current) {
             setNoResultsFound(true);
             hasCheckedNoResultsRef.current = true;
           }
@@ -87,78 +125,116 @@ const VendorSearchAutocomplete: React.FC<VendorSearchAutocompleteProps> = ({
         
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Error fetching vendors:', error);
         setLoading(false);
-        // On error, assume no more results to prevent infinite retries
         setHasMore(false);
-        if (skipValue === 0 && !hasCheckedNoResultsRef.current) {
+        if (skipValue === 0 && searchText && searchText.trim().length > 0 && !hasCheckedNoResultsRef.current) {
           setNoResultsFound(true);
           hasCheckedNoResultsRef.current = true;
         }
       });
-  }, [dispatch, loading, vendors, setLoading, setVendors, setSkip, limit, hasMore]);
+  }, [dispatch, loading, limit, hasMore]);
 
-  // Handle input change with debounce
-  const handleInputChange = (_: React.SyntheticEvent, newInputValue: string) => {
-    setInputValue(newInputValue);
-    setSearchQuery(newInputValue);
-    setSkip(0);
-    setHasMore(true);
-    hasCheckedNoResultsRef.current = false;
-    setNoResultsFound(false);
-    
-    if (newInputValue.length === 0 || newInputValue.length >= 1) {
-      setVendors([]);
-      fetchVendors(newInputValue, 0);
+  // Debounced search
+  const debouncedSearch = useCallback((searchText: string) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
-  };
+    
+    if (!searchText || searchText.trim().length === 0) {
+      setVendors([]);
+      setHasMore(true);
+      setSkip(0);
+      setNoResultsFound(false);
+      setLoading(false);
+      return;
+    }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      setSkip(0);
+      setHasMore(true);
+      setVendors([]);
+      setNoResultsFound(false); // Reset before search
+      fetchVendors(searchText, 0, true);
+    }, 300);
+  }, [fetchVendors]);
 
-  // Handle scrolling to load more results
-  const handleScroll = (event: React.UIEvent<HTMLUListElement>) => {
+  // Handle input change - FIXED to always allow typing
+  const handleInputChange = useCallback((_: React.SyntheticEvent, newInputValue: string) => {
+    // Always allow typing
+    setInputValue(newInputValue);
+    setSearchTerm(newInputValue);
+    
+    // Clear selection when input changes
+    if (value && value.vendorName !== newInputValue) {
+      onChange(null);
+    }
+    
+    // Reset no results flag when typing new input
+    if (newInputValue !== searchTerm) {
+      setNoResultsFound(false);
+      hasCheckedNoResultsRef.current = false;
+    }
+    
+    // Trigger debounced search for non-empty input
+    if (newInputValue && newInputValue.trim().length > 0) {
+      debouncedSearch(newInputValue);
+    } else {
+      // Clear results if input is empty
+      setVendors([]);
+      setHasMore(true);
+      setSkip(0);
+      setNoResultsFound(false);
+      setLoading(false);
+    }
+  }, [debouncedSearch, onChange, value, searchTerm]);
+
+  // Handle scroll to load more
+  const handleScroll = useCallback((event: React.UIEvent<HTMLUListElement>) => {
     const target = event.currentTarget;
     
-    // Don't fetch more if we know there are no results or we've already found no results
-    if (noResultsFound || !hasMore) return;
+    if (noResultsFound || !hasMore || loading) return;
     
-    // Check if user has scrolled near the bottom
     if (target.scrollHeight - target.scrollTop - target.clientHeight < 50) {
-      fetchVendors(searchQuery, skip);
+      if (searchTerm) {
+        fetchVendors(searchTerm, skip);
+      }
     }
-  };
+  }, [noResultsFound, hasMore, loading, fetchVendors, searchTerm, skip]);
 
-  // Initial load when component opens
+  // Cleanup debounce on unmount
   useEffect(() => {
-    if (open && vendors.length === 0 && !loading && !noResultsFound) {
-      fetchVendors(searchQuery, 0);
-    }
-  }, [open, fetchVendors, loading, searchQuery, vendors, noResultsFound]);
-
-  // Filter vendors locally based on search query for more responsive UI
-  const filteredVendors = vendors.filter(vendor => {
-    if (!searchQuery) return true;
-    
-    const name = vendor.vendorName.toLowerCase();
-    const search = searchQuery.toLowerCase();
-    
-    return name.startsWith(search) || name.includes(search);
-  });
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Autocomplete
       fullWidth={fullWidth}
-      options={filteredVendors}
-      getOptionLabel={(option: VendorSearch) => option.vendorName || ''}
-      isOptionEqualToValue={(option: VendorSearch, value: VendorSearch | null) => 
-        option.vendorId === value?.vendorId
+      options={vendors}
+      getOptionLabel={(option: VendorSearch) => option?.vendorName || ''}
+      isOptionEqualToValue={(option: VendorSearch, val: VendorSearch | null) => 
+        option?.vendorId === val?.vendorId || option?.randomId === val?.randomId
       }
       value={value}
       inputValue={inputValue}
       onInputChange={handleInputChange}
-      onChange={(_, newValue) => onChange(newValue)}
+      onChange={(_, newValue) => {
+        onChange(newValue);
+        if (newValue) {
+          setInputValue(newValue.vendorName);
+          setSearchTerm(newValue.vendorName);
+          setNoResultsFound(false);
+        }
+      }}
       open={open}
       onOpen={() => setOpen(true)}
       onClose={() => setOpen(false)}
-      filterOptions={(options) => options}
+      filterOptions={(options) => options} // Disable local filtering
       renderInput={(params) => (
         <TextField
           {...params}
@@ -168,6 +244,7 @@ const VendorSearchAutocomplete: React.FC<VendorSearchAutocompleteProps> = ({
           error={error}
           helperText={helperText}
           required={required}
+          placeholder="Type to search vendors..."
           InputProps={{
             ...params.InputProps,
             endAdornment: (
@@ -185,14 +262,16 @@ const VendorSearchAutocomplete: React.FC<VendorSearchAutocompleteProps> = ({
         </li>
       )}
       ListboxProps={{
-        onScroll: handleScroll as React.UIEventHandler<HTMLUListElement>,
+        onScroll: handleScroll,
         style: {
-          maxHeight: 200, // Limit height to prevent infinite scroll area
+          maxHeight: 200,
         }
       }}
       loading={loading}
       loadingText="Loading vendors..."
       noOptionsText={noResultsFound ? "No vendors found" : "Type to search vendors"}
+      // IMPORTANT: Removed the disabled prop that was blocking input
+      // The component now always allows typing
     />
   );
 };

@@ -148,10 +148,32 @@ const TableRowMemo = React.memo(
           type="number"
           autoComplete="off"
           value={item.receivedQuantity ?? ""}
-          onChange={(e) => handleQuantityChange(item.itemId, "receivedQuantity", e.target.value)}
-          onBlur={(e) => handleQuantityBlur(item.itemId, "receivedQuantity", e.target.value)}
-          inputProps={{ step: "0.01" }}
-          sx={{ width: "80px" }}
+          onChange={(e) => {
+            let value = e.target.value;
+            // Restrict to 3 decimal places
+            if (value.includes('.')) {
+              const parts = value.split('.');
+              if (parts[1] && parts[1].length > 3) {
+                value = `${parts[0]}.${parts[1].slice(0, 3)}`;
+              }
+            }
+            handleQuantityChange(item.itemId, "receivedQuantity", value);
+          }}
+          onBlur={(e) => {
+            let value = e.target.value;
+            // Round to 3 decimal places on blur
+            if (value && !isNaN(parseFloat(value))) {
+              value = parseFloat(value).toFixed(3);
+              handleQuantityBlur(item.itemId, "receivedQuantity", value);
+            } else {
+              handleQuantityBlur(item.itemId, "receivedQuantity", value);
+            }
+          }}
+          inputProps={{
+            step: "0.001",
+            min: "0"
+          }}
+          sx={{ width: "100px" }}
           disabled={item.pendingTotalQuantity === 0 || item.status === "Received"}
           error={touched[index]?.receivedQuantity && !!errors[index]?.receivedQuantity}
           helperText={touched[index]?.receivedQuantity && errors[index]?.receivedQuantity}
@@ -336,12 +358,12 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
-
   const handleQuantityBlur = useCallback(
     (itemId: string, field: "receivedQuantity", value: string | number) => {
       const index = updatedItems.findIndex((item) => item.itemId === itemId);
       const originalItem = selectedOrder?.items.find((original) => original.itemId === itemId);
       const originalPendingTotalQuantity = originalItem?.pendingTotalQuantity || 0;
+
       if (value === "") {
         setErrors((prev) => ({
           ...prev,
@@ -349,14 +371,26 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
         }));
         return;
       }
-      if (!/^\d*\.?\d*$/.test(String(value))) {
+
+      // Allow up to 3 decimal places
+      if (!/^\d*\.?\d{0,3}$/.test(String(value))) {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], [field]: "Maximum 3 decimal places allowed" },
+        }));
+        return;
+      }
+
+      const received = Number(value);
+
+      if (isNaN(received)) {
         setErrors((prev) => ({
           ...prev,
           [index]: { ...prev[index], [field]: "Invalid number" },
         }));
         return;
       }
-      const received = Number(value);
+
       if (received < 0) {
         setErrors((prev) => ({
           ...prev,
@@ -364,6 +398,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
         }));
         return;
       }
+
       if (originalPendingTotalQuantity === 0) {
         setErrors((prev) => ({
           ...prev,
@@ -371,13 +406,19 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
         }));
         return;
       }
-      if (received > originalPendingTotalQuantity) {
+
+      // Round to 3 decimals for comparison
+      const roundedReceived = Math.round(received * 1000) / 1000;
+      const roundedPending = Math.round(originalPendingTotalQuantity * 1000) / 1000;
+
+      if (roundedReceived > roundedPending) {
         setErrors((prev) => ({
           ...prev,
-          [index]: { ...prev[index], [field]: `Cannot exceed pending quantity of ${originalPendingTotalQuantity}` },
+          [index]: { ...prev[index], [field]: `Cannot exceed pending quantity of ${originalPendingTotalQuantity.toFixed(3)}` },
         }));
         return;
       }
+
       setErrors((prev) => ({
         ...prev,
         [index]: { ...prev[index], [field]: "" },
@@ -1987,7 +2028,7 @@ const ApprovedPurchase: React.FC = () => {
           .replace(/[\s-]+/g, '_');   // spaces -> underscore
 
         const randomId = purchaseOrder.randomId || poid;
-        const filename = `${randomId}_${vendorName}.pdf`;  // ✅ PO2459_SRI_VINAYAGA_MARKETING.pdf
+        const filename = `${vendorName}_${randomId}.pdf`;  // ✅ SRI_VINAYAGA_MARKETING_PO2459.pdf
 
         const url = window.URL.createObjectURL(new Blob([result.data]));
         const link = document.createElement('a');
@@ -2704,7 +2745,12 @@ const ApprovedPurchase: React.FC = () => {
                     <TableCell>{order.vendorName}</TableCell>
                     <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
                     <TableCell>{order.approvedDate ? format(new Date(order.approvedDate), "dd-MM-yyyy") : ""}</TableCell>
-                    <TableCell className='table-number-right'>{order.items.reduce((acc, item) => acc + (item.pendingTotalQuantity || 0), 0)}</TableCell>
+                    <TableCell className='table-number-right'>
+                      {(() => {
+                        const total = order.items.reduce((acc, item) => acc + (item.pendingTotalQuantity || 0), 0);
+                        return total.toFixed(3);
+                      })()}
+                    </TableCell>
                     <TableCell className='table-number-right'>{(order.pendingOrderAmount || 0).toFixed(2)}</TableCell>
                     <TableCell>{order.poStatus}</TableCell>
                     <TableCell>

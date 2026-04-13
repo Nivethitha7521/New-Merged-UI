@@ -2,6 +2,7 @@ import { list } from "postcss";
 
 export interface VendorSummary {
   vendorId: string;
+  randomId:string;
   vendorName?: string;
   contactpersonPhone?: string;
   contactpersonEmail?: string;
@@ -14,11 +15,12 @@ export interface VendorSummary {
   postalCode?: number;
   gstNumber?: string;
 }
+// In your vendor.ts or VendorSearch interface file
 export interface VendorSearch {
   vendorId: string;
   vendorName: string;
+  randomId?: string; // Add optional randomId field
 }
-
 // Updated interfaces for CSV import
 export interface CsvImportError {
   row: number;

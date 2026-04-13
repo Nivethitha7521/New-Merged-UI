@@ -26,7 +26,6 @@ import {
   IconButton,
 } from '@mui/material';
 import { usePermissions } from "@/hooks/usePermissions";
-
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';

@@ -68,6 +68,9 @@ export interface Outgoing {
   gstNumber: string;
   contactpersonEmail: string;
   isVerified: boolean;  // Flag only - no verifiedBy or verifiedDate
+  verifiedBy?: string;      // Who verified it
+  verifiedByName?:string;
+  verifiedDate?: string;    // When it was verified
 }
 
 export interface ItemDetail {

@@ -1874,6 +1874,7 @@ const handleViewStockLogs = (order: any) => {
               <TableRow>
                 <TableCell className="table-number-right">S.No</TableCell>
                 <TableCell className="table-text-left">Order ID</TableCell>
+                <TableCell className='teble-text-left'>Order Date</TableCell>
                 <TableCell className="table-text-left">Vendor Name</TableCell>
                 <TableCell className="table-text-left">Uploaded Photo</TableCell>
                 <TableCell className="table-number-right">Total PO Items</TableCell>
@@ -1910,6 +1911,7 @@ const handleViewStockLogs = (order: any) => {
                     <TableRow key={order.purchaseOrderId}>
                       <TableCell className="table-number-right">{index + 1}</TableCell>
                       <TableCell className="table-text-left">{order.randomId}</TableCell>
+                       <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
                       <TableCell className="table-text-left">{order.vendorName}</TableCell>
                       <TableCell>
                         <PhotoDisplay

@@ -138,110 +138,121 @@ const CreatePurchasePage: React.FC = () => {
 
   const [isExpectedDateValid, setIsExpectedDateValid] = useState(true);
   useEffect(() => {
-    if (isEditMode && editId) {
-      setOrderLoading(true);
-      sessionStorage.removeItem('editOrderData');
+  if (isEditMode && editId) {
+    setOrderLoading(true);
+    sessionStorage.removeItem('editOrderData');
 
-      dispatch(fetchPurchaseOrderById(editId))
-        .unwrap()
-        .then(async (data: PurchaseOrderData) => {
-          // Parse dates correctly
-          if (data.orderDate) {
-            try {
-              const dateStr = data.orderDate;
-              const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
-              const localDate = new Date(year, month - 1, day);
-              setOrderDate(localDate);
-              setIsOrderDateValid(true);
-            } catch (e) {
-              console.error('Error parsing order date:', e);
-              setOrderDate(new Date());
-            }
+    dispatch(fetchPurchaseOrderById(editId))
+      .unwrap()
+      .then(async (data: PurchaseOrderData) => {
+        // Parse dates correctly
+        if (data.orderDate) {
+          try {
+            const dateStr = data.orderDate;
+            const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+            const localDate = new Date(year, month - 1, day);
+            setOrderDate(localDate);
+            setIsOrderDateValid(true);
+          } catch (e) {
+            console.error('Error parsing order date:', e);
+            setOrderDate(new Date());
           }
+        }
 
-          if (data.expectedDeliveryDate) {
-            try {
-              const dateStr = data.expectedDeliveryDate;
-              const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
-              const localDate = new Date(year, month - 1, day);
-              setExpectedDeliveryDate(localDate);
-            } catch (e) {
-              console.error('Error parsing expected delivery date:', e);
-            }
+        if (data.expectedDeliveryDate) {
+          try {
+            const dateStr = data.expectedDeliveryDate;
+            const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+            const localDate = new Date(year, month - 1, day);
+            setExpectedDeliveryDate(localDate);
+          } catch (e) {
+            console.error('Error parsing expected delivery date:', e);
           }
+        }
 
-          // CRITICAL FIX: If the PO has a location, fetch items with stock for that location
-          let itemsWithStock = data.items || [];
+        // CRITICAL FIX: If the PO has a location, fetch items with stock for that location
+        let itemsWithStock = data.items || [];
 
-          if (data.locationId && data.items && data.items.length > 0) {
-            // Fetch fresh stock data for each item based on the PO's location
-            const itemsWithFreshStock = await Promise.all(
-              data.items.map(async (item) => {
-                if (item.randomId) {
-                  try {
-                    // Search for this specific item with the PO's location
-                    const searchResult = await dispatch(searchPurchaseItems({
-                      searchQuery: item.itemName,
-                      skip: 0,
-                      limit: 1,
-                      locationId: data.locationId,
-                      forceRefresh: true
-                    })).unwrap();
+        if (data.locationId && data.items && data.items.length > 0) {
+          // Fetch fresh stock data for each item based on the PO's location
+          const itemsWithFreshStock = await Promise.all(
+            data.items.map(async (item) => {
+              if (item.randomId) {
+                try {
+                  // Search for this specific item with the PO's location
+                  const searchResult = await dispatch(searchPurchaseItems({
+                    searchQuery: item.itemName,
+                    skip: 0,
+                    limit: 1,
+                    locationId: data.locationId,
+                    forceRefresh: true
+                  })).unwrap();
 
-                    if (searchResult && searchResult.length > 0) {
-                      const freshStock = searchResult[0].availableStock || 0;
-                      return {
-                        ...item,
-                        availableStock: freshStock,
-                        locationId: data.locationId
-                      };
-                    }
-                  } catch (error) {
-                    console.error(`Failed to fetch stock for ${item.itemName}:`, error);
+                  if (searchResult && searchResult.length > 0) {
+                    const freshStock = searchResult[0].availableStock || 0;
+                    return {
+                      ...item,
+                      availableStock: freshStock,
+                      locationId: data.locationId
+                    };
                   }
+                } catch (error) {
+                  console.error(`Failed to fetch stock for ${item.itemName}:`, error);
                 }
-                return {
-                  ...item,
-                  availableStock: item.availableStock || 0,
-                  locationId: item.locationId || data.locationId || '',
-                };
-              })
-            );
+              }
+              return {
+                ...item,
+                availableStock: item.availableStock || 0,
+                locationId: item.locationId || data.locationId || '',
+              };
+            })
+          );
 
-            itemsWithStock = itemsWithFreshStock;
-          } else {
-            // If no location, ensure each item has its own stock
-            itemsWithStock = data.items?.map((item: Item) => ({
-              ...item,
-              availableStock: Number(item.availableStock ?? 0),
-              locationId: item.locationId || '',
-            })) || [];
-          }
+          itemsWithStock = itemsWithFreshStock;
+        } else {
+          // If no location, ensure each item has its own stock
+          itemsWithStock = data.items?.map((item: Item) => ({
+            ...item,
+            availableStock: Number(item.availableStock ?? 0),
+            locationId: item.locationId || '',
+          })) || [];
+        }
 
-          const dataWithStock: PurchaseOrderData = {
-            ...data,
-            items: itemsWithStock,
-          };
+        const dataWithStock: PurchaseOrderData = {
+          ...data,
+          items: itemsWithStock,
+        };
 
-          dispatch({
-            type: 'purchaseOrder/fetchPurchaseOrderById/fulfilled',
-            payload: dataWithStock,
-          });
-
-          setFreights(data.freights || []);
-          if (data.overallDiscountValue !== undefined) setOverallDiscountValue(data.overallDiscountValue);
-          if (data.roundOffValue !== undefined) setRoundOffValue(data.roundOffValue);
-          setOrderLoading(false);
-        })
-        .catch((error) => {
-          console.error('Failed to load PO:', error);
-          dispatch(setSnackbarMessage('Failed to load purchase order data.'));
-          dispatch(setSnackbarOpen(true));
-          setOrderLoading(false);
-          router.push('/yen-purchase/PurchaseOrder');
+        dispatch({
+          type: 'purchaseOrder/fetchPurchaseOrderById/fulfilled',
+          payload: dataWithStock,
         });
-    }
-  }, [isEditMode, editId, dispatch, router]);
+
+        setFreights(data.freights || []);
+        if (data.overallDiscountValue !== undefined) setOverallDiscountValue(data.overallDiscountValue);
+        if (data.roundOffValue !== undefined) setRoundOffValue(data.roundOffValue);
+        
+        // Find and set the vendor search object to ensure vendorCode is preserved
+        if (data.vendorName && vendors.length > 0) {
+          const matchedVendor = vendors.find((vendor: VendorSummary) => 
+            vendor.vendorName === data.vendorName
+          );
+          if (matchedVendor) {
+            setVendorSearch(matchedVendor);
+          }
+        }
+        
+        setOrderLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to load PO:', error);
+        dispatch(setSnackbarMessage('Failed to load purchase order data.'));
+        dispatch(setSnackbarOpen(true));
+        setOrderLoading(false);
+        router.push('/yen-purchase/PurchaseOrder');
+      });
+  }
+}, [isEditMode, editId, dispatch, router, vendors]);
 
   // Replace the existing useEffect for location
   useEffect(() => {
@@ -357,12 +368,12 @@ const CreatePurchasePage: React.FC = () => {
       }
     }
   }, [isEditMode, purchaseOrderData.locationName, locations, locationSearch]);
-  // NEW: Set freights in edit mode after data loads
-  useEffect(() => {
-    if (isEditMode && purchaseOrderData.freights && purchaseOrderData.freights.length > 0) {
-      setFreights(purchaseOrderData.freights);
-    }
-  }, [isEditMode, purchaseOrderData.freights]);
+  // // NEW: Set freights in edit mode after data loads
+  // useEffect(() => {
+  //   if (isEditMode && purchaseOrderData.freights && purchaseOrderData.freights.length > 0) {
+  //     setFreights(purchaseOrderData.freights);
+  //   }
+  // }, [isEditMode, purchaseOrderData.freights]);
   // Reset form when component mounts in create mode
   useEffect(() => {
     if (!isEditMode) {
@@ -477,6 +488,10 @@ const CreatePurchasePage: React.FC = () => {
       dispatch(setSnackbarOpen(true));
     }
   }, [purchaseOrderData.items, overallDiscountValue, dispatch]);
+  const formatStockValue = (value: number | string | null | undefined): string => {
+    const num = parseFloat(String(value ?? '0'));
+    return isNaN(num) ? '0' : num.toFixed(2).replace(/\.?0+$/, '');
+  };
   // Calculate totals
   const calculateTotals = useMemo(() => {
     let subTotal = 0;
@@ -928,6 +943,7 @@ const CreatePurchasePage: React.FC = () => {
     dispatch(setPurchaseOrderData({
       purchaseOrderId: '',
       vendorName: '',
+      vendorCode: '',  // Add this
       vendorContact: '',
       orderDate: currentDate,
       expectedDeliveryDate: currentDate,
@@ -1016,22 +1032,22 @@ const CreatePurchasePage: React.FC = () => {
         }
       }
     } else if (name === 'newPrice') {
-  // Allow: Any number of digits before decimal, max 4 digits after decimal
-  if (value === '' || /^\d*(\.\d{0,4})?$/.test(value)) {
-    setNewPriceTypeInput(value);
-    let parsedValue = value === '' ? 0 : parseFloat(value) || 0;
-    
-    // Limit to 4 decimal places
-    parsedValue = Math.round(parsedValue * 10000) / 10000;
-    
-    dispatch(setNewItemData({
-      ...newItem,
-      newPrice: parsedValue,
-      priceVariance: newItem.existingPrice - parsedValue,
-    }));
-    setErrors({ ...errors, newPrice: false });
-  }
-} else if (['befTaxDiscount', 'afTaxDiscount', 'befTaxDiscountAmount', 'afTaxDiscountAmount'].includes(name)) {
+      // Allow: Any number of digits before decimal, max 4 digits after decimal
+      if (value === '' || /^\d*(\.\d{0,4})?$/.test(value)) {
+        setNewPriceTypeInput(value);
+        let parsedValue = value === '' ? 0 : parseFloat(value) || 0;
+
+        // Limit to 4 decimal places
+        parsedValue = Math.round(parsedValue * 10000) / 10000;
+
+        dispatch(setNewItemData({
+          ...newItem,
+          newPrice: parsedValue,
+          priceVariance: newItem.existingPrice - parsedValue,
+        }));
+        setErrors({ ...errors, newPrice: false });
+      }
+    } else if (['befTaxDiscount', 'afTaxDiscount', 'befTaxDiscountAmount', 'afTaxDiscountAmount'].includes(name)) {
       let validationPattern;
       if (discountMode === 'percentage' && (name === 'befTaxDiscount' || name === 'afTaxDiscount')) {
         validationPattern = /^\d{0,2}(\.\d{0,2})?$/;
@@ -1093,6 +1109,7 @@ const CreatePurchasePage: React.FC = () => {
       dispatch(setPurchaseOrderData({
         ...purchaseOrderData,
         vendorName: vendor.vendorName,
+        vendorCode:vendor.randomId,
         vendorId: vendor.vendorId,
         vendorContact: vendor.contactpersonPhone,
         contactpersonEmail: vendor.contactpersonEmail,
@@ -1116,6 +1133,7 @@ const CreatePurchasePage: React.FC = () => {
       dispatch(setPurchaseOrderData({
         ...purchaseOrderData,
         vendorName: '',
+         vendorCode: '',  // Clear vendorCode when vendor is deselected
         vendorContact: '',
         creditLimit: 0,
         contactpersonEmail: '',
@@ -1192,144 +1210,144 @@ const CreatePurchasePage: React.FC = () => {
     setQuantityInput(item.pendingQuantity.toString());
     setNewPriceTypeInput(item.newPrice.toString());
   };
- const handleAddItem = useCallback(async () => {
-  setErrors({
-    itemName: !newItem.itemName,
-    pendingCount: !newItem.pendingCount,
-    pendingQuantity: !newItem.pendingQuantity,
-    newPrice: !newItem.newPrice,
-  });
-  
-  if (!newItem.itemName || !newItem.pendingCount || !newItem.pendingQuantity || !newItem.newPrice) {
-    return;
-  }
-  
-  if (newItem.pendingTotalQuantity <= 0 || newItem.newPrice <= 0) {
-    dispatch(setSnackbarMessage('Quantity and price must be greater than zero.'));
-    dispatch(setSnackbarOpen(true));
-    return;
-  }
-  
-  let finalBef = newItem.befTaxDiscount || 0;
-  let finalBefAmount = newItem.befTaxDiscountAmount || 0;
-  let finalAf = newItem.afTaxDiscount || 0;
-  let finalAfAmount = newItem.afTaxDiscountAmount || 0;
-  
-  if (finalBef > 0 || finalBefAmount > 0) {
-    finalAf = 0;
-    finalAfAmount = 0;
-    dispatch(setNewItemData({ ...newItem, afTaxDiscount: 0, afTaxDiscountAmount: 0 }));
-  } else if (finalAf > 0 || finalAfAmount > 0) {
-    finalBef = 0;
-    finalBefAmount = 0;
-    dispatch(setNewItemData({ ...newItem, befTaxDiscount: 0, befTaxDiscountAmount: 0 }));
-  }
-  
-  setLoading(true);
-  try {
-    const params: {
-      pendingTotalQuantity: number;
-      poQuantity: number;
-      newPrice: number;
-      taxPercentage: number;
-      taxType: 'cgst_sgst' | 'igst';
-      befTaxDiscount?: number;
-      befTaxDiscountAmount?: number;
-      afTaxDiscount?: number;
-      afTaxDiscountAmount?: number;
-    } = {
-      pendingTotalQuantity: newItem.pendingTotalQuantity,
-      poQuantity: newItem.pendingTotalQuantity,
-      newPrice: newItem.newPrice,
-      taxPercentage: newItem.taxPercentage || 0,
-      taxType: newItem.taxType,
-    };
-    
-    if (discountMode === 'percentage') {
-      if (finalBef > 0) params.befTaxDiscount = finalBef;
-      if (finalAf > 0) params.afTaxDiscount = finalAf;
-    } else {
-      if (finalBefAmount > 0) params.befTaxDiscountAmount = finalBefAmount;
-      if (finalAfAmount > 0) params.afTaxDiscountAmount = finalAfAmount;
+  const handleAddItem = useCallback(async () => {
+    setErrors({
+      itemName: !newItem.itemName,
+      pendingCount: !newItem.pendingCount,
+      pendingQuantity: !newItem.pendingQuantity,
+      newPrice: !newItem.newPrice,
+    });
+
+    if (!newItem.itemName || !newItem.pendingCount || !newItem.pendingQuantity || !newItem.newPrice) {
+      return;
     }
-    
-    await dispatch(calculateItemTotals(params)).unwrap();
-    dispatch(addItemToPurchaseOrder());
-    
-    // CRITICAL: Reset ALL form fields including the Autocomplete
-    setNewItemsearch(null);  // This will trigger the Autocomplete's useEffect
-    
-    dispatch(setNewItemData({
-      itemId: '',
-      itemName: '',
-      quantity: 0,
-      count: 0,
-      eachQuantity: 0,
-      existingPrice: 0,
-      newPrice: 0,
-      taxPercentage: 0,
-      totalPrice: 0,
-      befTaxDiscount: 0,
-      afTaxDiscount: 0,
-      befTaxDiscountAmount: 0,
-      afTaxDiscountAmount: 0,
-      uom: '',
-      pendingCount: 0,
-      itemCode: '',
-      pendingQuantity: 0,
-      pendingTotalQuantity: 0,
-      purchasecategoryName: '',
-      purchasesubcategoryName: '',
-      hsnCode: '',
-      taxType: 'cgst_sgst',
-      pendingTotalPrice: 0,
-      befTaxDiscountType: discountMode,
-      afTaxDiscountType: discountMode,
-      poQuantity: 0,
-      poQuantitypendingTotalPrice: 0,
-      poQuantitypendingFinalPrice: 0,
-      poQuantityTaxAmount: 0,
-      poQuantityDiscountAmount: 0,
-      poQuantitysgst: 0,
-      poQuantitycgst: 0,
-      poQuantityigst: 0,
-      availableStock: 0,
-      locationId: '',
-    }));
-    
-    setCountInput('');
-    setQuantityInput('');
-    setNewPriceTypeInput('');
-    
-    // Force focus after a slight delay to ensure DOM is updated
-    setTimeout(() => {
-      if (itemNameRef.current) {
-        // Focus the input field
-        itemNameRef.current.focus();
-        
-        // Optionally, trigger a blur and focus to ensure it's ready
-        itemNameRef.current.blur();
-        setTimeout(() => {
-          itemNameRef.current?.focus();
-        }, 50);
+
+    if (newItem.pendingTotalQuantity <= 0 || newItem.newPrice <= 0) {
+      dispatch(setSnackbarMessage('Quantity and price must be greater than zero.'));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+
+    let finalBef = newItem.befTaxDiscount || 0;
+    let finalBefAmount = newItem.befTaxDiscountAmount || 0;
+    let finalAf = newItem.afTaxDiscount || 0;
+    let finalAfAmount = newItem.afTaxDiscountAmount || 0;
+
+    if (finalBef > 0 || finalBefAmount > 0) {
+      finalAf = 0;
+      finalAfAmount = 0;
+      dispatch(setNewItemData({ ...newItem, afTaxDiscount: 0, afTaxDiscountAmount: 0 }));
+    } else if (finalAf > 0 || finalAfAmount > 0) {
+      finalBef = 0;
+      finalBefAmount = 0;
+      dispatch(setNewItemData({ ...newItem, befTaxDiscount: 0, befTaxDiscountAmount: 0 }));
+    }
+
+    setLoading(true);
+    try {
+      const params: {
+        pendingTotalQuantity: number;
+        poQuantity: number;
+        newPrice: number;
+        taxPercentage: number;
+        taxType: 'cgst_sgst' | 'igst';
+        befTaxDiscount?: number;
+        befTaxDiscountAmount?: number;
+        afTaxDiscount?: number;
+        afTaxDiscountAmount?: number;
+      } = {
+        pendingTotalQuantity: newItem.pendingTotalQuantity,
+        poQuantity: newItem.pendingTotalQuantity,
+        newPrice: newItem.newPrice,
+        taxPercentage: newItem.taxPercentage || 0,
+        taxType: newItem.taxType,
+      };
+
+      if (discountMode === 'percentage') {
+        if (finalBef > 0) params.befTaxDiscount = finalBef;
+        if (finalAf > 0) params.afTaxDiscount = finalAf;
+      } else {
+        if (finalBefAmount > 0) params.befTaxDiscountAmount = finalBefAmount;
+        if (finalAfAmount > 0) params.afTaxDiscountAmount = finalAfAmount;
       }
-    }, 100);
-    
-  } catch (error) {
-    dispatch(setSnackbarMessage('Failed to add item. Please try again.'));
-    dispatch(setSnackbarOpen(true));
-  } finally {
-    setLoading(false);
-  }
-  
-  if ((newItem.befTaxDiscount > 0 || newItem.afTaxDiscount > 0 ||
+
+      await dispatch(calculateItemTotals(params)).unwrap();
+      dispatch(addItemToPurchaseOrder());
+
+      // CRITICAL: Reset ALL form fields including the Autocomplete
+      setNewItemsearch(null);  // This will trigger the Autocomplete's useEffect
+
+      dispatch(setNewItemData({
+        itemId: '',
+        itemName: '',
+        quantity: 0,
+        count: 0,
+        eachQuantity: 0,
+        existingPrice: 0,
+        newPrice: 0,
+        taxPercentage: 0,
+        totalPrice: 0,
+        befTaxDiscount: 0,
+        afTaxDiscount: 0,
+        befTaxDiscountAmount: 0,
+        afTaxDiscountAmount: 0,
+        uom: '',
+        pendingCount: 0,
+        itemCode: '',
+        pendingQuantity: 0,
+        pendingTotalQuantity: 0,
+        purchasecategoryName: '',
+        purchasesubcategoryName: '',
+        hsnCode: '',
+        taxType: 'cgst_sgst',
+        pendingTotalPrice: 0,
+        befTaxDiscountType: discountMode,
+        afTaxDiscountType: discountMode,
+        poQuantity: 0,
+        poQuantitypendingTotalPrice: 0,
+        poQuantitypendingFinalPrice: 0,
+        poQuantityTaxAmount: 0,
+        poQuantityDiscountAmount: 0,
+        poQuantitysgst: 0,
+        poQuantitycgst: 0,
+        poQuantityigst: 0,
+        availableStock: 0,
+        locationId: '',
+      }));
+
+      setCountInput('');
+      setQuantityInput('');
+      setNewPriceTypeInput('');
+
+      // Force focus after a slight delay to ensure DOM is updated
+      setTimeout(() => {
+        if (itemNameRef.current) {
+          // Focus the input field
+          itemNameRef.current.focus();
+
+          // Optionally, trigger a blur and focus to ensure it's ready
+          itemNameRef.current.blur();
+          setTimeout(() => {
+            itemNameRef.current?.focus();
+          }, 50);
+        }
+      }, 100);
+
+    } catch (error) {
+      dispatch(setSnackbarMessage('Failed to add item. Please try again.'));
+      dispatch(setSnackbarOpen(true));
+    } finally {
+      setLoading(false);
+    }
+
+    if ((newItem.befTaxDiscount > 0 || newItem.afTaxDiscount > 0 ||
       newItem.befTaxDiscountAmount > 0 || newItem.afTaxDiscountAmount > 0) &&
       overallDiscountValue > 0) {
-    setOverallDiscountValue(0);
-    dispatch(setSnackbarMessage('Overall discount reset - item with discount added'));
-    dispatch(setSnackbarOpen(true));
-  }
-}, [dispatch, newItem, discountMode, overallDiscountValue]);
+      setOverallDiscountValue(0);
+      dispatch(setSnackbarMessage('Overall discount reset - item with discount added'));
+      dispatch(setSnackbarOpen(true));
+    }
+  }, [dispatch, newItem, discountMode, overallDiscountValue]);
   const saveShippingAddress = () => {
     if (updatedShippingRow) {
       dispatch(addShipping({ ...updatedShippingRow, shippingId: '', randomId: '' }))
@@ -1575,6 +1593,7 @@ const CreatePurchasePage: React.FC = () => {
         ...purchaseOrderData,
         orderDate,
         expectedDeliveryDate,
+        vendorCode: purchaseOrderData.vendorCode, // Ensure this is included
         pendingOrderAmount: roundedTotalOrderAmount,
         pendingDiscountAmount: roundedTotalDiscount,
         pendingTaxAmount: roundedTotalTax,
@@ -1863,16 +1882,16 @@ const CreatePurchasePage: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12} sm={3} md={2}>
-                <LocationAutocomplete
-                  value={locationSearch}
-                  onChange={handleLocationChange}
-                  label="Location"
-                  error={formErrors.locationName}
-                  helperText={formErrors.locationName ? 'Location is required' : ''}
-                  locationId={purchaseOrderData.locationId}     // Pass the location ID from PO
-                  locationName={purchaseOrderData.locationName} // Pass the location name from PO
-                  isEditMode={isEditMode}                       // Pass edit mode flag
-                />
+              <LocationAutocomplete
+                value={locationSearch}
+                onChange={handleLocationChange}
+                label="Location"
+                error={formErrors.locationName}
+                helperText={formErrors.locationName ? 'Location is required' : ''}
+                locationId={purchaseOrderData.locationId}     // Pass the location ID from PO
+                locationName={purchaseOrderData.locationName} // Pass the location name from PO
+                isEditMode={isEditMode}                       // Pass edit mode flag
+              />
             </Grid>
           </Grid>
           {/* Add Item Section */}
@@ -1959,7 +1978,7 @@ const CreatePurchasePage: React.FC = () => {
                   fullWidth
                   disabled
                   label="Available Stock"
-                  value={selectedItemStock !== null ? `${selectedItemStock} ${newItem.uom || ''}` : '-'}
+                  value={selectedItemStock !== null ? `${formatStockValue(selectedItemStock)} ${newItem.uom || ''}` : '-'}
                   size="small"
                   sx={{
                     '& .MuiInputBase-input': {
@@ -2025,23 +2044,23 @@ const CreatePurchasePage: React.FC = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={4} md={0.8}>
-               <TextField
-  fullWidth
-  autoComplete='off'
-  label="New Price"
-  name="newPrice"
-  type="text"
-  value={newPriceInput}
-  onChange={handleItemChange}
-  size="small"
-  inputProps={{ 
-    min: '0',
-    step: '0.0001',  // Changed to allow 4 decimal places
-    pattern: '^\\d*(\\.\\d{0,4})?$'
-  }}
-  error={errors.newPrice}
-  helperText={errors.newPrice ? 'New price is required (max 4 decimal places)' : ''}
-/>
+                <TextField
+                  fullWidth
+                  autoComplete='off'
+                  label="New Price"
+                  name="newPrice"
+                  type="text"
+                  value={newPriceInput}
+                  onChange={handleItemChange}
+                  size="small"
+                  inputProps={{
+                    min: '0',
+                    step: '0.0001',  // Changed to allow 4 decimal places
+                    pattern: '^\\d*(\\.\\d{0,4})?$'
+                  }}
+                  error={errors.newPrice}
+                  helperText={errors.newPrice ? 'New price is required (max 4 decimal places)' : ''}
+                />
               </Grid>
               <Grid item xs={12} sm={2} md={0.8}>
                 <TextField
@@ -2245,7 +2264,7 @@ const CreatePurchasePage: React.FC = () => {
                         <TableCell sx={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis' }} className="table-text-left">{item.itemName || 'N/A'}</TableCell>
                         <TableCell className='table-number-right'>
                           <Chip
-                            label={`${item.availableStock !== undefined && item.availableStock !== null ? item.availableStock : 0} ${item.uom || ''}`}
+                            label={`${item.availableStock !== undefined && item.availableStock !== null ? formatStockValue(item.availableStock) : '0'} ${item.uom || ''}`}
                             size="small"
                             color={
                               (item.availableStock === undefined || item.availableStock === null || item.availableStock === 0) ? 'error' :

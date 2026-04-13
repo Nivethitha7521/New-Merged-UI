@@ -79,6 +79,9 @@ export interface Outgoing {
   selectedAdvancePayments?: string[]; // ADDED: Missing property
   itemDetails?: ItemDetails[];
   isVerified: boolean;  // Flag only - no verifiedBy or verifiedDate
+  verifiedBy?: string;      // Who verified it
+  verifiedByName?:string;
+  verifiedDate?: string;    // When it was verified
 }
 
 export interface TaxDetail {

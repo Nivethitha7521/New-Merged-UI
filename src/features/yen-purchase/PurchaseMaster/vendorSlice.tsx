@@ -112,11 +112,11 @@ const clearAllVendorCaches = () => {
 // ----------------------------------------------
 export const searchVendorsByExactName = createAsyncThunk<
   VendorSearch[],
-  { vendor_name: string; skip: number; limit: number; forceRefresh?: boolean }
+  { vendor_name: string; random_id?: string; skip: number; limit: number; forceRefresh?: boolean }
 >(
   'vendors/searchVendorsByExactName',
-  async ({ vendor_name, skip, limit, forceRefresh = false }) => {
-    const cacheKey = `searchVendorsExact_${vendor_name}_${skip}_${limit}`;
+  async ({ vendor_name, random_id, skip, limit, forceRefresh = false }) => {
+    const cacheKey = `searchVendorsExact_${vendor_name || 'all'}_${random_id || 'none'}_${skip}_${limit}`;
     const now = Date.now();
 
     const cachedData = localStorage.getItem(cacheKey);
@@ -127,9 +127,13 @@ export const searchVendorsByExactName = createAsyncThunk<
       localStorage.removeItem(cacheKey);
     }
 
+    const params: any = { skip, limit };
+    if (vendor_name) params.vendor_name = vendor_name;
+    if (random_id) params.random_id = random_id;
+
     const response = await purchaseApi.get<VendorSearch[]>(`/vendors/exact-name/`, {
-      params: { vendor_name, skip, limit },
-    }); // ✅ URL + purchaseApi
+      params,
+    });
 
     localStorage.setItem(
       cacheKey,
@@ -139,7 +143,6 @@ export const searchVendorsByExactName = createAsyncThunk<
     return response.data;
   }
 );
-
 
 // ----------------------------------------------
 // SEARCH (LIKE) VENDORS

@@ -5,7 +5,7 @@ import { ApInvoice, ApInvoiceRandomId, ApInvoiceState, initialState } from '@/Mo
 import purchaseApi from "@/utils/api";
 
 
-const BASE_URL = 'https://yenerp.com/purchasetestapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 // Fetch AP Invoices with pagination and advanced filtering
 // Add this async thunk for loading more statuses
 export const loadMoreStatuses = createAsyncThunk(
@@ -89,6 +89,7 @@ export const fetchApInvoices = createAsyncThunk(
       search?: string;
       status?: string;
       vendorName?: string;
+      vendorCode?: string;  // ADD THIS LINE
       fromDate?: string;
       toDate?: string;
       invoiceType?: string;
@@ -97,29 +98,18 @@ export const fetchApInvoices = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      // Calculate skip from page
       const page = params.page || 1;
       const limit = params.limit || 50;
       const skip = (page - 1) * limit;
 
-      console.log('Fetching invoices with params:', {
-        ...params,
-        page,
-        limit,
-        skip
-      });
-
-      // Build query parameters for the API
       const queryParams: any = {
         limit: limit
       };
 
-      // Add skip parameter (important for pagination)
       if (skip > 0) {
         queryParams.skip = skip;
       }
 
-      // Add other filters
       if (params.date_filter_field) {
         queryParams.date_filter_field = params.date_filter_field;
       }
@@ -128,6 +118,10 @@ export const fetchApInvoices = createAsyncThunk(
       }
       if (params.toDate) {
         queryParams.toDate = params.toDate;
+      }
+      // CHANGE THIS: Send vendorCode if present
+      if (params.vendorCode) {
+        queryParams.vendorCode = params.vendorCode;
       }
       if (params.vendorName) {
         queryParams.vendorName = params.vendorName;
@@ -139,34 +133,26 @@ export const fetchApInvoices = createAsyncThunk(
         queryParams.status = params.status;
       }
 
-     const response = await purchaseApi.get(`/apinvoices/`, {
-     params: queryParams,
+      const response = await purchaseApi.get(`/apinvoices/`, {
+        params: queryParams,
       });
 
-      // CRITICAL: Check the actual response structure
-      console.log('Full backend response:', response.data);
-      console.log('Response keys:', Object.keys(response.data));
-
-      // Check if data is directly in response.data or in nested property
+      // ... rest of the code remains the same
       let invoiceData = [];
       let totalCount = 0;
       let totalPages = 1;
 
-      // Case 1: Data is directly in response.data (array)
       if (Array.isArray(response.data)) {
         invoiceData = response.data;
         totalCount = response.data.length;
         totalPages = Math.ceil(response.data.length / limit);
       }
-      // Case 2: Data is in response.data.data (common pattern)
       else if (response.data.data !== undefined) {
         invoiceData = response.data.data || [];
         totalCount = response.data.total || invoiceData.length;
         totalPages = response.data.totalPages || Math.ceil(totalCount / limit);
       }
-      // Case 3: Data might be in a different property
       else {
-        // Try to find any array in the response
         const keys = Object.keys(response.data);
         for (const key of keys) {
           if (Array.isArray(response.data[key])) {
@@ -177,14 +163,6 @@ export const fetchApInvoices = createAsyncThunk(
         totalCount = invoiceData.length;
         totalPages = Math.ceil(invoiceData.length / limit);
       }
-
-      console.log('Extracted data:', {
-        invoiceCount: invoiceData.length,
-        totalCount,
-        totalPages,
-        page,
-        limit
-      });
 
       return {
         data: invoiceData,

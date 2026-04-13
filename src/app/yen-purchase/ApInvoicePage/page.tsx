@@ -280,8 +280,7 @@ const VerifiedApInvoicePage: React.FC = () => {
     setSelectedInvoice(invoice);
     setDetailsDialogOpen(true);
   };
-
-  const refetchWithFilters = useCallback((
+const refetchWithFilters = useCallback((
     page: number = currentPage,
     fromDateOverride?: string,
     toDateOverride?: string
@@ -290,46 +289,52 @@ const VerifiedApInvoicePage: React.FC = () => {
       page,
       limit: pageSize,
     };
-
+ 
     const fromDate = fromDateOverride
       ?? (selectionRange.startDate ? moment(selectionRange.startDate).startOf('day').toISOString() : undefined);
     const toDate = toDateOverride
       ?? (selectionRange.endDate ? moment(selectionRange.endDate).endOf('day').toISOString() : undefined);
-
+ 
     if (fromDate && toDate) {
       filters.date_filter_field = dateField;
       filters.fromDate = fromDate;
       filters.toDate = toDate;
     }
-
-    if (selectedVendorName) filters.vendorName = selectedVendorName;
+ 
+    // CHANGE THIS: Use vendorCode instead of vendorName
+    if (selectedVendor?.randomId) {
+      filters.vendorCode = selectedVendor.randomId;  // Send randomId as vendorCode
+    }
+    
     if (invoiceTypeFilter !== 'all') filters.invoiceType = invoiceTypeFilter;
     if (selectedStatus && selectedStatus.trim() !== '') filters.status = selectedStatus;
-
+ 
     dispatch(setCurrentPage(page));
     dispatch(fetchApInvoices(filters));
   }, [
     dispatch, pageSize, currentPage,
-    selectionRange, selectedVendorName, invoiceTypeFilter, selectedStatus
+    selectionRange, selectedVendor, invoiceTypeFilter, selectedStatus
   ]);
-
   const handlePageChange = useCallback((newPage: number) => {
-    if (newPage < 1 || newPage > totalPages || loading) return;
+  if (newPage < 1 || newPage > totalPages || loading) return;
 
-    const filters: any = {
-      page: newPage,
-      limit: pageSize,
-    };
+  const filters: any = {
+    page: newPage,
+    limit: pageSize,
+  };
 
-    if (selectedVendorName) filters.vendorName = selectedVendorName;
-    if (invoiceTypeFilter !== 'all') filters.invoiceType = invoiceTypeFilter;
-    if (selectedStatus && selectedStatus.trim() !== '') filters.status = selectedStatus;
+  // CHANGE THIS: Use vendorCode instead of vendorName
+  if (selectedVendor?.randomId) {
+    filters.vendorCode = selectedVendor.randomId;
+  }
+  if (invoiceTypeFilter !== 'all') filters.invoiceType = invoiceTypeFilter;
+  if (selectedStatus && selectedStatus.trim() !== '') filters.status = selectedStatus;
 
-    console.log('Page change with filters:', filters);
+  console.log('Page change with filters:', filters);
 
-    dispatch(setCurrentPage(newPage));
-    dispatch(fetchApInvoices(filters));
-  }, [dispatch, pageSize, totalPages, loading, selectedVendorName, invoiceTypeFilter, selectedStatus]);
+  dispatch(setCurrentPage(newPage));
+  dispatch(fetchApInvoices(filters));
+}, [dispatch, pageSize, totalPages, loading, selectedVendor, invoiceTypeFilter, selectedStatus]);
 
   const handleNextPage = useCallback(() => {
     if (currentPage < totalPages) {
@@ -442,30 +447,27 @@ const VerifiedApInvoicePage: React.FC = () => {
 
     refetchWithFilters(1, fromDate, toDate);
   };
+const handleFilterClose = () => {
+  const today = new Date();
+  setSelectionRange({
+    startDate: today,
+    endDate: today,
+    key: 'selection',
+  });
 
-  const handleFilterClose = () => {
-    const today = new Date();
-    setSelectionRange({
-      startDate: today,
-      endDate: today,
-      key: 'selection',
-    });
+  setSelectedVendor(null);
+  setInvoiceTypeFilter('all');
+  dispatch(clearStatus());
+  dispatch(setCurrentPage(1));
 
-    setSelectedVendor(null);
-    setSelectedVendorName('');
-    setInvoiceTypeFilter('all');
-    dispatch(clearStatus());
-    dispatch(setCurrentPage(1));
-
-    dispatch(fetchApInvoices({
-      page: 1,
-      limit: pageSize,
-      vendorName: undefined,
-      invoiceType: undefined,
-      status: undefined,
-    }));
-  };
-
+  dispatch(fetchApInvoices({
+    page: 1,
+    limit: pageSize,
+    vendorCode: undefined,  // CHANGE: Clear vendorCode filter
+    invoiceType: undefined,
+    status: undefined,
+  }));
+};
   // Download handlers
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorElDownload(event.currentTarget as HTMLElement);
@@ -486,37 +488,43 @@ const VerifiedApInvoicePage: React.FC = () => {
   };
 
   const handleSingleVerification = (invoice: ApInvoice | null) => {
-  if (!invoice) return;
-  if (!canApprove) {
-    dispatch(setSnackbarMessage('Only admin users can verify invoices'));
+    if (!invoice) return;
+    if (!canApprove) {
+      dispatch(setSnackbarMessage('Only admin users can verify invoices'));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    setSelectedInvoice(invoice);
+    setVerificationDialogOpen(true);
+  };
+
+const confirmVerification = async () => {
+  if (!selectedInvoice) return;
+  
+  try {
+    await dispatch(verifyApInvoice(selectedInvoice.invoiceId)).unwrap();
+    
+    // Close dialog only after successful verification
+    setVerificationDialogOpen(false);
+    setDetailsDialogOpen(false);  // ← ADD THIS LINE
+
+    // Refresh data
+    refetchWithFilters();
+    
+    // Optional: Show success message
+    dispatch(setSnackbarMessage('Invoice verified successfully!'));
     dispatch(setSnackbarOpen(true));
-    return;
+    
+  } catch (error) {
+    console.error('Verification failed:', error);
+    // Keep dialog open on error so user can retry
+    dispatch(setSnackbarMessage('Verification failed. Please try again.'));
+    dispatch(setSnackbarOpen(true));
+  } finally {
   }
-  setSelectedInvoice(invoice);
-  setVerificationDialogOpen(true);
 };
 
-  const confirmVerification = async () => {
-    try {
-      if (selectedInvoice) {
-        await dispatch(verifyApInvoice(selectedInvoice.invoiceId)).unwrap();
-      }
-      setVerificationDialogOpen(false);
-      // Refresh data
-      refetchWithFilters();
-  
-      dispatch(fetchApInvoices({
-        page: 1,
-        limit: pageSize,
-        vendorName: undefined,
-        invoiceType: undefined,
-        status: undefined,
-      }));
-    } catch (error) {
-      console.error('Verification failed:', error);
-    }
-  };
-  // ==================== END VERIFICATION HANDLERS ====================
+// ==================== END VERIFICATION HANDLERS ====================
 
   const handleDownload = async (apinvoiceId: string) => {
     const apinvoice = apInvoices.find((invoice: ApInvoice) => invoice.invoiceId === apinvoiceId);
@@ -2134,21 +2142,22 @@ const VerifiedApInvoicePage: React.FC = () => {
                   </span>
                 </Tooltip>
               )}
-            {/* Verify button in dialog */}
-            {canApprove && selectedInvoice?.status !== 'Verified' && (
-              <Tooltip title="Verify Invoice">
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={() => handleSingleVerification(selectedInvoice)}
-                  startIcon={<VerifiedIcon />}
-                  sx={{ minWidth: '150px' }}
-                  disabled={verificationLoading}
-                >
-                  {verificationLoading ? 'Verifying...' : 'Verify Invoice'}
-                </Button>
-              </Tooltip>
-            )}
+            {canApprove &&
+              selectedInvoice?.status !== 'Verified' &&
+              selectedInvoice?.status !== 'Fully Paid' && (
+                <Tooltip title="Verify Invoice">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => handleSingleVerification(selectedInvoice)}
+                    startIcon={<VerifiedIcon />}
+                    sx={{ minWidth: '150px' }}
+                    disabled={verificationLoading}
+                  >
+                    {verificationLoading ? 'Verifying...' : 'Verify Invoice'}
+                  </Button>
+                </Tooltip>
+              )}
             <Button variant="contained" onClick={handleCloseDetailsDialog}>Close</Button>
           </DialogActions>
         </Dialog>
@@ -2158,7 +2167,7 @@ const VerifiedApInvoicePage: React.FC = () => {
           <DialogTitle>Confirm Verification</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to verify AP Invoice {selectedInvoice?.randomId}? 
+              Are you sure you want to verify AP Invoice {selectedInvoice?.randomId}?
               Once verified, this invoice will be available for payment in the Outgoing Payment section.
             </DialogContentText>
             {verificationLoading && (
@@ -2168,15 +2177,15 @@ const VerifiedApInvoicePage: React.FC = () => {
             )}
           </DialogContent>
           <DialogActions>
-            <Button 
-              onClick={() => setVerificationDialogOpen(false)} 
+            <Button
+              onClick={() => setVerificationDialogOpen(false)}
               disabled={verificationLoading}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={confirmVerification} 
-              color="primary" 
+            <Button
+              onClick={confirmVerification}
+              color="primary"
               variant="contained"
               disabled={verificationLoading}
             >
@@ -2252,7 +2261,7 @@ const VerifiedApInvoicePage: React.FC = () => {
               variant="outlined"
             >
               Cancel
-            </Button> 
+            </Button>
           </DialogActions>
         </Dialog>
 
