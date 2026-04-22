@@ -91,6 +91,8 @@ import LocationAutocomplete from "@/components/yen-purchase/pocreationcomponent/
 import { Location } from "@/Models/storagelocation";
 import { UnifiedDatePicker } from "../Component/UnifiedDatePicker";
 import StockUpdateLogsDialog from "../Component/StockUpdateLogsPage";
+import { GrnSettings, grnSettingsService } from "../../service/grnpriceservice";
+import { fetchGRNPriceSettings, validateGRNPrice } from "@/app/yen-settings/Features/GRNSettingsSlice";
 // Add this import at the top with your other imports:
 const parseLocalDate = (dateStr: string | null | undefined): Date | null => {
   if (!dateStr) return null;
@@ -110,8 +112,12 @@ const TableRowMemo = React.memo(
     handleDiscountChange,
     handleExpiryDateChange,
     handleQuantityBlur,
-    discountType, // Pass discountType to disable fields
-    applyingDiscount, // Pass to disable during apply
+    discountType,
+    applyingDiscount,
+    poPrice, // Add PO price from parent
+    validateGrnPrice, // Add validation function
+    priceValidationError, // Add validation error state
+    setPriceValidationError, // Add setter for validation error
   }: {
     item: ItemWithCalculations;
     index: number;
@@ -136,118 +142,153 @@ const TableRowMemo = React.memo(
     ) => void;
     discountType: 'before' | 'after';
     applyingDiscount: boolean;
-  }) => (
-    <TableRow>
-      <TableCell className='table-number-right'>{index + 1}</TableCell>
-      <TableCell>{item.itemName}</TableCell>
-      <TableCell>{item.uom}</TableCell>
-      <TableCell className='table-number-right'>{item.pendingTotalQuantity}</TableCell>
-      <TableCell className='table-number-right'>{item.poQuantity}</TableCell>
-      <TableCell className='table-number-right'>
-        <TextField
-          type="number"
-          autoComplete="off"
-          value={item.receivedQuantity ?? ""}
-          onChange={(e) => {
-            let value = e.target.value;
-            // Restrict to 3 decimal places
-            if (value.includes('.')) {
-              const parts = value.split('.');
-              if (parts[1] && parts[1].length > 3) {
-                value = `${parts[0]}.${parts[1].slice(0, 3)}`;
+    poPrice: number; // PO price (non-editable)
+    validateGrnPrice: (itemId: string, grnPrice: number, poPrice: number) => Promise<boolean>;
+    priceValidationError: Record<string, string>;
+    setPriceValidationError: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  }) => {
+    // Get validation error for this item
+    const validationError = priceValidationError[item.itemId];
+
+    return (
+      <TableRow>
+        <TableCell className='table-number-right'>{index + 1}</TableCell>
+        <TableCell>{item.itemName}</TableCell>
+        <TableCell>{item.uom}</TableCell>
+        <TableCell className='table-number-right'>{item.pendingTotalQuantity}</TableCell>
+        <TableCell className='table-number-right'>{item.poQuantity}</TableCell>
+        <TableCell className='table-number-right'>
+          <TextField
+            type="number"
+            autoComplete="off"
+            value={item.receivedQuantity ?? ""}
+            onChange={(e) => {
+              let value = e.target.value;
+              if (value.includes('.')) {
+                const parts = value.split('.');
+                if (parts[1] && parts[1].length > 3) {
+                  value = `${parts[0]}.${parts[1].slice(0, 3)}`;
+                }
               }
+              handleQuantityChange(item.itemId, "receivedQuantity", value);
+            }}
+            onBlur={(e) => {
+              let value = e.target.value;
+              if (value && !isNaN(parseFloat(value))) {
+                value = parseFloat(value).toFixed(3);
+                handleQuantityBlur(item.itemId, "receivedQuantity", value);
+              } else {
+                handleQuantityBlur(item.itemId, "receivedQuantity", value);
+              }
+            }}
+            inputProps={{ step: "0.001", min: "0" }}
+            sx={{ width: "100px" }}
+            disabled={item.pendingTotalQuantity === 0 || item.status === "Received"}
+            error={touched[index]?.receivedQuantity && !!errors[index]?.receivedQuantity}
+            helperText={touched[index]?.receivedQuantity && errors[index]?.receivedQuantity}
+          />
+        </TableCell>
+
+        {/* NEW: PO Price Column - Non-editable */}
+        <TableCell className='table-number-right'>
+         {poPrice}
+        </TableCell>
+{/* GRN Price Column - Editable with validation */}
+<TableCell className='table-number-right'>
+  <TextField
+    type="text"  // ← CHANGE from "number" to "text"
+    autoComplete="off"
+    value={item.grnPrice !== undefined && item.grnPrice !== null ? item.grnPrice : ''}
+    onChange={(e) => {
+      const newPrice = e.target.value;
+      // Allow empty string or valid numbers with decimal
+      if (newPrice === '' || /^\d*\.?\d*$/.test(newPrice)) {
+        handlePriceChange(item.itemId, newPrice);
+        
+        // Clear validation error when user starts typing
+        if (validationError) {
+          setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
+        }
+      }
+    }}
+    onBlur={async (e) => {
+      const value = e.target.value;
+      if (value === '') {
+        // Clear any validation error when field is empty
+        setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
+        return;
+      }
+      const grnPrice = Number(value);
+      if (!isNaN(grnPrice) && grnPrice > 0 && poPrice > 0) {
+        const isValid = await validateGrnPrice(item.itemId, grnPrice, poPrice);
+        if (!isValid && grnPrice > poPrice) {
+          // Keep the error
+        }
+      } else if (grnPrice === 0 && value !== '') {
+        setPriceValidationError(prev => ({ ...prev, [item.itemId]: 'Price cannot be zero' }));
+      }
+    }}
+    inputProps={{ step: "0.01" }}
+    sx={{ width: "100px" }}
+    error={!!validationError || (touched[index]?.grnPrice && !!errors[index]?.grnPrice)}
+    helperText={validationError || (touched[index]?.grnPrice && errors[index]?.grnPrice)}
+    placeholder="Enter price"
+  />
+</TableCell>
+
+        <TableCell className='table-number-right'>{(item.perUnit || 0).toFixed(2)}</TableCell>
+        <TableCell className='table-number-right'>
+          <TextField
+            autoComplete="off"
+            type="number"
+            value={item.befTaxDiscount === 0 || item.befTaxDiscount === undefined ? "" : item.befTaxDiscount}
+            onChange={(e) => handleDiscountChange(item.itemId, "befTaxDiscount", e.target.value)}
+            error={touched[index]?.befTaxDiscount && !!errors[index]?.befTaxDiscount}
+            helperText={touched[index]?.befTaxDiscount && errors[index]?.befTaxDiscount}
+            inputProps={{ step: "0.01" }}
+            sx={{ width: "80px" }}
+            disabled={discountType === 'after' || applyingDiscount}
+          />
+        </TableCell>
+        <TableCell className='table-number-right'>
+          <TextField
+            autoComplete="off"
+            type="number"
+            value={item.afTaxDiscount === 0 || item.afTaxDiscount === undefined ? "" : item.afTaxDiscount}
+            onChange={(e) => handleDiscountChange(item.itemId, "afTaxDiscount", e.target.value)}
+            error={touched[index]?.afTaxDiscount && !!errors[index]?.afTaxDiscount}
+            helperText={touched[index]?.afTaxDiscount && errors[index]?.afTaxDiscount}
+            inputProps={{ step: "0.01" }}
+            sx={{ width: "80px" }}
+            disabled={discountType === 'before' || applyingDiscount}
+          />
+        </TableCell>
+        <TableCell className='table-number-right'>{item.taxPercentage}%</TableCell>
+        <TableCell>
+          <TextField
+            label="Expiry Date"
+            type="date"
+            value={
+              item.expiryDate && isValid(item.expiryDate)
+                ? format(item.expiryDate, 'yyyy-MM-dd')
+                : ''
             }
-            handleQuantityChange(item.itemId, "receivedQuantity", value);
-          }}
-          onBlur={(e) => {
-            let value = e.target.value;
-            // Round to 3 decimal places on blur
-            if (value && !isNaN(parseFloat(value))) {
-              value = parseFloat(value).toFixed(3);
-              handleQuantityBlur(item.itemId, "receivedQuantity", value);
-            } else {
-              handleQuantityBlur(item.itemId, "receivedQuantity", value);
+            onChange={(e) =>
+              handleExpiryDateChange(
+                item.itemId,
+                e.target.value ? new Date(e.target.value) : null
+              )
             }
-          }}
-          inputProps={{
-            step: "0.001",
-            min: "0"
-          }}
-          sx={{ width: "100px" }}
-          disabled={item.pendingTotalQuantity === 0 || item.status === "Received"}
-          error={touched[index]?.receivedQuantity && !!errors[index]?.receivedQuantity}
-          helperText={touched[index]?.receivedQuantity && errors[index]?.receivedQuantity}
-        />
-      </TableCell>
-      <TableCell className='table-number-right'>
-        <TextField
-          type="number"
-          autoComplete="off"
-          value={item.grnPrice !== undefined ? item.grnPrice : item.newPrice}
-          onChange={(e) => handlePriceChange(item.itemId, e.target.value)}
-          inputProps={{ step: "0.01" }}
-          sx={{ width: "80px" }}
-          error={touched[index]?.grnPrice && !!errors[index]?.grnPrice}
-          helperText={touched[index]?.grnPrice && errors[index]?.grnPrice}
-        />
-      </TableCell>
-      <TableCell className='table-number-right'>{(item.perUnit || 0).toFixed(2)}</TableCell>
-      <TableCell className='table-number-right'>
-        <TextField
-          autoComplete="off"
-          type="number"
-          value={item.befTaxDiscount === 0 || item.befTaxDiscount === undefined ? "" : item.befTaxDiscount}
-          onChange={(e) => handleDiscountChange(item.itemId, "befTaxDiscount", e.target.value)}
-          error={touched[index]?.befTaxDiscount && !!errors[index]?.befTaxDiscount}
-          helperText={touched[index]?.befTaxDiscount && errors[index]?.befTaxDiscount}
-          inputProps={{ step: "0.01" }}
-          sx={{ width: "80px" }}
-          disabled={discountType === 'after' || applyingDiscount} // Disable if 'after' selected or applying
-          label={discountType === 'after' ? "Disabled (After Selected)" : undefined}
-        />
-      </TableCell>
-      <TableCell className='table-number-right'>
-        <TextField
-          autoComplete="off"
-          type="number"
-          value={item.afTaxDiscount === 0 || item.afTaxDiscount === undefined ? "" : item.afTaxDiscount}
-          onChange={(e) => handleDiscountChange(item.itemId, "afTaxDiscount", e.target.value)}
-          error={touched[index]?.afTaxDiscount && !!errors[index]?.afTaxDiscount}
-          helperText={touched[index]?.afTaxDiscount && errors[index]?.afTaxDiscount}
-          inputProps={{ step: "0.01" }}
-          sx={{ width: "80px" }}
-          disabled={discountType === 'before' || applyingDiscount} // Disable if 'before' selected or applying
-          label={discountType === 'before' ? "Disabled (Before Selected)" : undefined}
-        />
-      </TableCell>
-      <TableCell className='table-number-right'>{item.taxPercentage}%</TableCell>
-      <TableCell>
-        <TextField
-          label="Expiry Date"
-          type="date"
-          value={
-            item.expiryDate && isValid(item.expiryDate)
-              ? format(item.expiryDate, 'yyyy-MM-dd')
-              : ''
-          }
-          onChange={(e) =>
-            handleExpiryDateChange(
-              item.itemId,
-              e.target.value ? new Date(e.target.value) : null
-            )
-          }
-          InputLabelProps={{ shrink: true }}
-          inputProps={{
-            min: format(new Date(), 'yyyy-MM-dd'),
-          }}
-          error={touched[index]?.expiryDate && !!errors[index]?.expiryDate}
-          helperText={touched[index]?.expiryDate && errors[index]?.expiryDate}
-        />
-      </TableCell>
-      {/* UPDATED: Now shows Item Total (final price after all discounts and tax) */}
-      <TableCell className='table-number-right'>{(item.calculatedTotalPrice || 0).toFixed(2)}</TableCell>
-    </TableRow>
-  )
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ min: format(new Date(), 'yyyy-MM-dd') }}
+            error={touched[index]?.expiryDate && !!errors[index]?.expiryDate}
+            helperText={touched[index]?.expiryDate && errors[index]?.expiryDate}
+          />
+        </TableCell>
+        <TableCell className='table-number-right'>{(item.calculatedTotalPrice || 0).toFixed(2)}</TableCell>
+      </TableRow>
+    );
+  }
 );
 TableRowMemo.displayName = "TableRowMemo";
 interface OrderDetailsDialogProps {
@@ -299,7 +340,7 @@ interface OrderDetailsDialogProps {
   receivingLocation: Location | null;
   setReceivingLocation: React.Dispatch<React.SetStateAction<Location | null>>;
   poLocationId?: string; // Add this to pass PO's location ID
-
+  onPriceValidationError?: (message: string) => void; // Add this
 }
 const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   open,
@@ -349,11 +390,26 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   receivingLocation,  // This comes from parent
   setReceivingLocation,  // This comes from parent
   poLocationId,  // This comes from parent
-
+  onPriceValidationError,  // ← ADD THIS LINE
 }) => {
+
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [openFreightDialog, setOpenFreightDialog] = useState(false);
+  // Add these state variables inside OrderDetailsDialog component
+  const [priceValidationErrors, setPriceValidationErrors] = useState<Record<string, string>>({});
+  const dispatch = useDispatch<AppDispatch>();
+  const [isValidatingPrice, setIsValidatingPrice] = useState(false);
+const { settings: grnSettings, validationResult, loading: settingsLoading } = useSelector(
+  (state: any) => state.grnPriceSettings
+);
+// Load settings when dialog opens
+useEffect(() => {
+  if (open) {
+    dispatch(fetchGRNPriceSettings());
+  }
+}, [open, dispatch]);
+
 
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
@@ -426,17 +482,79 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
     },
     [updatedItems, selectedOrder, setErrors]
   );
-  const handleOpenConfirmDialog = () => {
-    const finalTotal = totalOrderAmount + roundOffAmount;
-    if (finalTotal < 0) {
-      setErrors((prev) => ({
+
+// Add this function - checks if there are any active price validation errors
+const hasPriceValidationErrors = useCallback((): boolean => {
+  return Object.values(priceValidationErrors).some(error => error !== '');
+}, [priceValidationErrors]);
+  // Validate GRN price function
+// Validate price function using Redux
+const validateGrnPrice = useCallback(async (
+  itemId: string,
+  grnPrice: number,
+  poPrice: number
+): Promise<boolean> => {
+  if (!grnSettings?.isActive) {
+    setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
+    return true;
+  }
+
+  // If price is below or equal to PO price, always allow
+  if (grnPrice <= poPrice) {
+    setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
+    return true;
+  }
+
+  setIsValidatingPrice(true);
+
+  try {
+    const item = updatedItems.find(i => i.itemId === itemId);
+    const itemName = item?.itemName || 'Item';
+
+    const result = await dispatch(validateGRNPrice({
+      poPrice,
+      grnPrice,
+      itemName
+    })).unwrap();
+
+    if (!result.valid) {
+      setPriceValidationErrors(prev => ({
         ...prev,
-        roundOff: "Round off amount cannot make total negative"
+        [itemId]: result.message
       }));
-      return;
+      return false;
+    } else {
+      setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
+      return true;
     }
-    setOpenConfirmDialog(true);
-  };
+  } catch (error) {
+    console.error('Validation error:', error);
+    return true; // Allow on error
+  } finally {
+    setIsValidatingPrice(false);
+  }
+}, [grnSettings, updatedItems, dispatch]);
+// Then in the save button logic, add this check:
+const handleOpenConfirmDialog = () => {
+  // Check for price validation errors
+  if (hasPriceValidationErrors()) {
+    // You need access to snackbar state - add this to props
+    if (onPriceValidationError) {
+      onPriceValidationError("Please fix price validation errors before converting to GRN.");
+    }
+    return;
+  }
+  
+  const finalTotal = totalOrderAmount + roundOffAmount;
+  if (finalTotal < 0) {
+    setErrors((prev) => ({
+      ...prev,
+      roundOff: "Round off amount cannot make total negative"
+    }));
+    return;
+  }
+  setOpenConfirmDialog(true);
+};
   const handleCloseConfirmDialog = () => {
     setOpenConfirmDialog(false);
   };
@@ -666,7 +784,8 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                   <TableCell className='table-number-right'>Pending Qty</TableCell>
                   <TableCell className='table-number-right'>Total Qty</TableCell>
                   <TableCell className='table-number-right'>Received Qty</TableCell>
-                  <TableCell className='table-number-right'>Price</TableCell>
+                  <TableCell className='table-number-right'>PO Price</TableCell>  {/* NEW */}
+                  <TableCell className='table-number-right'>GRN Price</TableCell> {/* Updated label */}
                   <TableCell className='table-number-right'>Taxable Amt</TableCell>
                   <TableCell className='table-number-right'>BefTax Discount</TableCell>
                   <TableCell className='table-number-right'>AfTax Discount</TableCell>
@@ -678,34 +797,42 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
               <TableBody>
                 {calculatedItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={13} align="center">
+                    <TableCell colSpan={14} align="center">  {/* Changed from 13 to 14 */}
                       No items available
                     </TableCell>
                   </TableRow>
                 ) : (
                   calculatedItems
                     .filter((item) => item.status !== "Received")
-                    .map((item: ItemWithCalculations, index: number) => (
-                      <TableRowMemo
-                        key={item.itemId}
-                        item={item}
-                        index={index}
-                        touched={touched}
-                        errors={errors}
-                        handleQuantityChange={handleQuantityChange}
-                        handlePriceChange={handlePriceChange}
-                        handleDiscountChange={handleDiscountChange}
-                        handleExpiryDateChange={handleExpiryDateChange}
-                        handleQuantityBlur={handleQuantityBlur}
-                        discountType={discountType}
-                        applyingDiscount={applyingDiscount}
-                      />
-                    ))
+                    .map((item: ItemWithCalculations, index: number) => {
+                      const poPrice = item.newPrice || 0;
+                      return (
+                        <TableRowMemo
+                          key={item.itemId}
+                          item={item}
+                          index={index}
+                          touched={touched}
+                          errors={errors}
+                          handleQuantityChange={handleQuantityChange}
+                          handlePriceChange={handlePriceChange}
+                          handleDiscountChange={handleDiscountChange}
+                          handleExpiryDateChange={handleExpiryDateChange}
+                          handleQuantityBlur={handleQuantityBlur}
+                          discountType={discountType}
+                          applyingDiscount={applyingDiscount}
+                          poPrice={poPrice}
+                          validateGrnPrice={validateGrnPrice}
+                          priceValidationError={priceValidationErrors}
+                          setPriceValidationError={setPriceValidationErrors}
+                        />
+                      );
+                    })
                 )}
-                {/* Subtotal */}
+
+                {/* Subtotal Row - Update colSpan */}
                 {calculatedItems.length > 0 && calculatedItems.some(item => item.status !== "Received" && (item.pendingTotalQuantity || 0) > 0) && (
                   <TableRow sx={{ fontWeight: 'bold', backgroundColor: '#e8f5e8' }}>
-                    <TableCell colSpan={11} />
+                    <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                     <TableCell><strong>Sub Total :</strong></TableCell>
                     <TableCell className='table-number-right'>
                       {customRoundDigit(
@@ -716,26 +843,28 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     </TableCell>
                   </TableRow>
                 )}
+
                 {/* Empty row for spacing */}
                 {calculatedItems.length > 0 && calculatedItems.some(item => item.status !== "Received") && (
                   <TableRow>
-                    <TableCell colSpan={13} />
+                    <TableCell colSpan={14} />  {/* Changed from 13 to 14 */}
                   </TableRow>
                 )}
-                {/* Tax Details */}
+
+                {/* Tax Details - Update colSpan */}
                 {Object.entries(taxDetails).map(([key, tax]: [string, { amount: number; percentage: number; type: string }]) => (
                   <TableRow key={key}>
-                    <TableCell colSpan={11} />
+                    <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                     <TableCell>
                       <strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong>
                     </TableCell>
                     <TableCell className='table-number-right'>{tax.amount.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
-                {/* FREIGHT CHARGES SECTION - UPDATED: Always show freight amount row and tax row near each other */}
-                {/* Freight Amount Row - Always shown */}
+
+                {/* Freight Amount Row - Update colSpan */}
                 <TableRow>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <strong>Freight Amount:</strong>
                   </TableCell>
@@ -743,9 +872,10 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     {freightTotalAmount.toFixed(2)}
                   </TableCell>
                 </TableRow>
-                {/* Freight Tax Row - Always shown, with Add/Edit button */}
+
+                {/* Freight Tax Row - Update colSpan */}
                 <TableRow sx={{ fontWeight: 'bold', backgroundColor: '#f0f8ff' }}>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <strong>Freight Tax:</strong>
@@ -764,13 +894,15 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     {freightTaxTotal.toFixed(2)}
                   </TableCell>
                 </TableRow>
-                {/* Discount Section */}
+
+                {/* Discount Section - Update colSpan */}
                 <TableRow sx={{ fontWeight: 'bold' }}>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <strong>Discount:</strong>
                   </TableCell>
                   <TableCell className='table-number-right'>
+                    {/* Discount content remains the same */}
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <TextField
                         autoComplete='off'
@@ -834,17 +966,19 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     </Box>
                   </TableCell>
                 </TableRow>
-                {/* Before RoundOff */}
+
+                {/* Before RoundOff - Update colSpan */}
                 <TableRow>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <strong>Before RoundOff:</strong>
                   </TableCell>
                   <TableCell className='table-number-right'>{totalOrderAmount.toFixed(2)}</TableCell>
                 </TableRow>
-                {/* Round Off */}
+
+                {/* Round Off - Update colSpan */}
                 <TableRow sx={{ fontWeight: 'bold' }}>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <strong>Round Off Amount:</strong>
                   </TableCell>
@@ -871,7 +1005,8 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     </Box>
                   </TableCell>
                 </TableRow>
-                {/* Tax Amount */}
+
+                {/* Tax Amount - Update colSpan */}
                 <TableRow sx={{
                   backgroundColor: '#f5f5f5',
                   '& td': {
@@ -879,7 +1014,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     fontSize: '1.1em'
                   }
                 }}>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <strong>Tax Amount:</strong>
                   </TableCell>
@@ -887,7 +1022,8 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     {Object.values(taxDetails).reduce((sum, tax) => sum + tax.amount, 0).toFixed(2)}
                   </TableCell>
                 </TableRow>
-                {/* Final Total */}
+
+                {/* Final Total - Update colSpan */}
                 <TableRow sx={{
                   backgroundColor: '#f5f5f5',
                   '& td': {
@@ -895,7 +1031,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     fontSize: '1.1em'
                   }
                 }}>
-                  <TableCell colSpan={11} />
+                  <TableCell colSpan={12} />  {/* Changed from 11 to 12 */}
                   <TableCell>
                     <strong>Final Amount:</strong>
                   </TableCell>
@@ -950,7 +1086,8 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     !isReceivedQuantityValid() ||
                     isInvoiceDuplicate ||
                     !invoiceNumber ||
-                    finalTotalAmount < 0
+                    finalTotalAmount < 0 ||
+                    hasPriceValidationErrors()  // Add this condition
                   }
                   sx={{ ml: 1 }}
                 >
@@ -1431,33 +1568,49 @@ const ApprovedPurchase: React.FC = () => {
     },
     [updatedItems, selectedOrder, setExcessDialogMessage, setExcessDialogOpen]
   );
-  const handlePriceChange = useCallback(
-    (itemId: string, value: string) => {
-      const index = updatedItems.findIndex((item) => item.itemId === itemId);
-      setTouched((prev) => ({
+const handlePriceChange = useCallback(
+  (itemId: string, value: string) => {
+    const index = updatedItems.findIndex((item) => item.itemId === itemId);
+    setTouched((prev) => ({
+      ...prev,
+      [index]: { ...prev[index], grnPrice: true },
+    }));
+    
+    // Allow empty string to clear the field
+    if (value === "") {
+      setUpdatedItems((prevItems) =>
+        prevItems.map((item) =>
+          item.itemId === itemId ? { ...item, grnPrice: undefined } : item
+        )
+      );
+      setErrors((prev) => ({
         ...prev,
-        [index]: { ...prev[index], grnPrice: true },
+        [index]: { ...prev[index], grnPrice: "" },
       }));
-      if (value === "" || /^\d*\.?\d*$/.test(value)) {
-        const priceValue = value === "" ? undefined : Number(value);
-        setUpdatedItems((prevItems) =>
-          prevItems.map((item) =>
-            item.itemId === itemId ? { ...item, grnPrice: priceValue } : item
-          )
-        );
-        setErrors((prev) => ({
-          ...prev,
-          [index]: { ...prev[index], grnPrice: "" },
-        }));
-      } else {
-        setErrors((prev) => ({
-          ...prev,
-          [index]: { ...prev[index], grnPrice: "Invalid number" },
-        }));
-      }
-    },
-    [updatedItems]
-  );
+      return;
+    }
+    
+    // Validate number format
+    if (/^\d*\.?\d*$/.test(value)) {
+      const priceValue = Number(value);
+      setUpdatedItems((prevItems) =>
+        prevItems.map((item) =>
+          item.itemId === itemId ? { ...item, grnPrice: priceValue } : item
+        )
+      );
+      setErrors((prev) => ({
+        ...prev,
+        [index]: { ...prev[index], grnPrice: "" },
+      }));
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        [index]: { ...prev[index], grnPrice: "Invalid number" },
+      }));
+    }
+  },
+  [updatedItems]
+);
   const handleDiscountChange = useCallback(
     (itemId: string, field: "befTaxDiscount" | "afTaxDiscount", value: string) => {
       const index = updatedItems.findIndex((item) => item.itemId === itemId);
@@ -2851,6 +3004,10 @@ const ApprovedPurchase: React.FC = () => {
           receivingLocation={receivingLocation}  // Add this
           setReceivingLocation={setReceivingLocation}  // Add this
           poLocationId={selectedOrder?.locationId}  // Add this to pass PO's location ID
+            onPriceValidationError={(message) => {
+    setSnackbarInvoiceMessage(message);
+    setSnackbarInvoiceOpen(true);
+  }}
         />
         <Dialog open={openEditDialog} onClose={handleCloseDialogs}>
           <DialogTitle>Confirm Submission</DialogTitle>

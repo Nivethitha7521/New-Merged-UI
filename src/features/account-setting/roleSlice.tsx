@@ -55,8 +55,8 @@ export const fetchRoles = createAsyncThunk(
   async () => {
     try {
       const [roleRes, permRes] = await Promise.all([
-        fetch('https://yenerp.com/purchaseapi/roles'),
-        fetch('https://yenerp.com/purchaseapi/permissions')
+        fetch('http:// 192.168.1.111:8000/purchasetestapi/roles'),
+        fetch('http:// 192.168.1.111:8000/purchasetestapi/permissions')
       ]);
 
       const roles = await roleRes.json();

@@ -247,7 +247,7 @@ const displayedData = showDeactivated
         sx={{ 
           mb: 4,
           flexWrap: 'wrap',
-          gap: 2
+          gap: 2,ml:2,
         }}
       >
         <TextField
@@ -304,9 +304,8 @@ const displayedData = showDeactivated
           />
         </Box>
       </Box>
-
-      {/* Table Section */}
-      <TableContainer 
+<Box ml={2}>
+     <TableContainer 
         component={Paper} 
         sx={{ 
           borderRadius: 2,
@@ -479,6 +478,9 @@ const displayedData = showDeactivated
           </TableBody>
         </Table>
       </TableContainer>
+</Box>
+      {/* Table Section */}
+   
 
       {/* Add/Edit Dialog */}
       <Dialog 

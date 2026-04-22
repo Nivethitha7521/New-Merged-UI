@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://yenerp.com/purchaseapi',
+  baseURL: 'http:// 192.168.1.111:8000/purchasetestapi',
 });
 
 axiosInstance.interceptors.response.use(

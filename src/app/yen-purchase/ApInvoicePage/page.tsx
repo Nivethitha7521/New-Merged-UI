@@ -1960,6 +1960,9 @@ const confirmVerification = async () => {
                     <strong>Vendor:</strong> {selectedInvoice.vendorName}
                   </Typography>
                   <Typography variant="h6">
+                    <strong>Invoice No:</strong> {selectedInvoice.invoiceNo}
+                  </Typography>
+                  <Typography variant="h6">
                     <strong>Invoice Date:</strong>{' '}
                     {selectedInvoice?.invoiceDate
                       ? format(new Date(selectedInvoice.invoiceDate), 'dd-MM-yyyy')

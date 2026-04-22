@@ -51,7 +51,7 @@ export const fetchExpenseSubcategories = createAsyncThunk<ExpenseSubcategory[]>(
   'expenseSubcategory/fetch',
   async () => {
     try {
-      const response = await axios.get('https://www.yenerp.com/masterapi/expensesubcategorys/');
+      const response = await axios.get('https://yenerp.com/yenerpliveapi/expensesubcategorys/');
       return response.data;
     } catch (error: any) {
       throw Error(`Failed to fetch purchase subcategories: ${error.message}`);
@@ -64,7 +64,7 @@ export const addExpenseSubcategory = createAsyncThunk<ExpenseSubcategory, Expens
   'expenseSubcategory/add',
   async (expenseSubcategory) => {
     try {
-      const response = await axios.post('https://www.yenerp.com/masterapi/expensesubcategorys/', expenseSubcategory);
+      const response = await axios.post('https://yenerp.com/yenerpliveapi/expensesubcategorys/', expenseSubcategory);
       return response.data;
     } catch (error: any) {
       throw Error(`Failed to add Expense subcategory: ${error.message}`);
@@ -77,7 +77,7 @@ export const updateExpenseSubcategory = createAsyncThunk<ExpenseSubcategory, { e
   'expenseSubcategory/update',
   async ({ expenseSubcategoryId, expensesubcategory }) => {
     try {
-      const response = await axios.patch(`https://www.yenerp.com/masterapi/expensesubcategorys/${expenseSubcategoryId}`, expensesubcategory);
+      const response = await axios.patch(`https://yenerp.com/yenerpliveapi/expensesubcategorys/${expenseSubcategoryId}`, expensesubcategory);
       return response.data;
     } catch (error: any) {
       throw Error(`Failed to update expense subcategory: ${error.message}`);
@@ -90,7 +90,7 @@ export const deactivateExpenseSubcategory = createAsyncThunk<ExpenseSubcategory,
   'expenseSubcategory/deactivate',
   async (expenseSubcategoryId) => {
     try {
-      const response = await axios.patch(`https://www.yenerp.com/masterapi/expensesubcategorys/${expenseSubcategoryId}`, { status: 'deactivated' });
+      const response = await axios.patch(`https://yenerp.com/yenerpliveapi/expensesubcategorys/${expenseSubcategoryId}`, { status: 'deactivated' });
       return response.data;
     } catch (error: any) {
       throw Error(`Failed to deactivate expense subcategory: ${error.message}`);
@@ -103,7 +103,7 @@ export const activateExpenseSubcategory = createAsyncThunk<ExpenseSubcategory, s
   'expenseSubcategory/activate',
   async (expenseSubcategoryId) => {
     try {
-      const response = await axios.patch(`https://www.yenerp.com/masterapi/expensesubcategorys/${expenseSubcategoryId}`, { status: 'active' });
+      const response = await axios.patch(`https://yenerp.com/yenerpliveapi/expensesubcategorys/${expenseSubcategoryId}`, { status: 'active' });
       return response.data;
     } catch (error: any) {
       throw Error(`Failed to activate expense subcategory: ${error.message}`);

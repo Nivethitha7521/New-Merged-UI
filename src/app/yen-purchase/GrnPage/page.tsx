@@ -128,7 +128,7 @@ const GrnPage = () => {
     }
   }>({});
   const { selectedPo, poDialogOpen } = useSelector(selectPurchaseListState);
-
+const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogSaveOpen, setDialogSaveOpen] = useState(false);
   const [apInvoiceDate, setApInvoiceDate] = useState<Date | null>(new Date());
@@ -215,14 +215,14 @@ const GrnPage = () => {
   const canReturnRead = grnsReturnPermission?.read ?? false;
   //const canReturnEdit = grnsReturnPermission?.edit ?? false;
   const isHidden = grnsPermission?.hide ?? false;
-const canConvertToAP = (grnsPermission?.edit ?? false) && 
-  (grnsPermission?.edit_actions?.convert_to_ap ?? true);
+  const canConvertToAP = (grnsPermission?.edit ?? false) &&
+    (grnsPermission?.edit_actions?.convert_to_ap ?? true);
 
-const canReturnGRN = (grnsPermission?.edit ?? false) && 
-  (grnsPermission?.edit_actions?.return_grn ?? true);
+  const canReturnGRN = (grnsPermission?.edit ?? false) &&
+    (grnsPermission?.edit_actions?.return_grn ?? true);
 
-const canRevertToPO = (grnsPermission?.edit ?? false) && 
-  (grnsPermission?.edit_actions?.revert_to_po ?? true);
+  const canRevertToPO = (grnsPermission?.edit ?? false) &&
+    (grnsPermission?.edit_actions?.revert_to_po ?? true);
 
   const grnIds = useMemo(() => sortedGrns.map((grn) => grn.grnId), [sortedGrns]);
   const [isConvertedToAP, setIsConvertedToAP] = useState(false);
@@ -1926,7 +1926,7 @@ const canRevertToPO = (grnsPermission?.edit ?? false) &&
                               <IconButton
                                 color="primary"
                                 onClick={() => handleReturnClick(grn.grnId)}
-                               disabled={!canReturnGRN}
+                                disabled={!canReturnGRN}
                               >
                                 <ExitToAppIcon />
                               </IconButton>
@@ -2363,7 +2363,7 @@ const canRevertToPO = (grnsPermission?.edit ?? false) &&
               variant="contained"
               color="primary"
               onClick={handleVerify}
-             disabled={!canConvertToAP}
+              disabled={!canConvertToAP}
             >
               Convert to AP
             </Button>
@@ -2371,7 +2371,7 @@ const canRevertToPO = (grnsPermission?.edit ?? false) &&
               variant="contained"
               color="warning"
               onClick={handleOpenConfirmDialog} // Changed: Open dialog instead of direct call
-            disabled={loading || !selectedGrnId || !canRevertToPO}
+              disabled={loading || !selectedGrnId || !canRevertToPO}
             >
               Revert to PO
             </Button>
@@ -2528,6 +2528,7 @@ const canRevertToPO = (grnsPermission?.edit ?? false) &&
           <GrnReturnDialog
             dialogItems={selectedGrnItems}
             selectedGrnId={selectedGrnId}
+            grnOriginalAmount={selectedGrnAmount} // ✅ New prop
             currentPage={currentPage}
             pageSize={pageSize}
             status={status}

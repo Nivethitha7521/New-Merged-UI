@@ -11,6 +11,7 @@ import { RootState } from "@/redux/store";
 import SettingsIcon from '@mui/icons-material/Settings';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import PriceCheckIcon from '@mui/icons-material/PriceCheck'; // ADD THIS IMPORT
 import BuildIcon from '@mui/icons-material/Build';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -21,6 +22,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 
 // Import your existing Date Settings component
 import DateSettingsPage from './DateSettings/page';
+import GRNPriceSettingPage from './GrnPriceSettingPage/page';
 
 // Define types
 interface SubSetting {
@@ -130,6 +132,13 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
           icon: <DateRangeIcon sx={{ fontSize: 20 }} />,
           component: DateSettingsPage // Using the same Date Settings component
         },
+            {
+        id: "grnprice",  // ADD THIS NEW SUB-SETTING
+        title: "GRN Price Setting",
+        description: "Configure GRN price tolerance (min: no restriction, max: configurable %)",
+        icon: <PriceCheckIcon sx={{ fontSize: 20 }} />,
+        component: GRNPriceSettingPage
+      },
         {
           id: "common",
           title: "Common Setting",

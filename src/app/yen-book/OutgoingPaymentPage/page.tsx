@@ -29,27 +29,28 @@ import {
 } from '@mui/material';
 import YenBookPage from '../page';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DescriptionIcon from '@mui/icons-material/Description'; // CSV icon
+import DescriptionIcon from '@mui/icons-material/Description';
 import DownloadIcon from '@mui/icons-material/Download';
-import FilterAltIcon from '@mui/icons-material/FilterAlt'; // Import the filter icon
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import PaymentIcon from '@mui/icons-material/Payment';
+import SettingsIcon from '@mui/icons-material/Settings';
 import {
   fetchOutgoings,
   selectOutgoings, fetchVendorDetails, fetchBank, selectTotalItems, setPagination,
   setSnackbarMessage, clearSnackbarMessage, setSnackbarOpen, selectCurrentPage, selectPageSize,
   selectTotalPayableAmount,
   toggleOutgoingSelection,
-  syncSelectionsWithCurrentData, // ADD THIS SELECTOR FOR OVERALL TOTAL
+  syncSelectionsWithCurrentData,
   clearSelection,
-  fetchOutgoingStatuses, // ADD THIS FOR CLEAR ALL
+  fetchOutgoingStatuses,
 } from '../../../features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import { fetchGrnById, fetchItemwiseGrns, selectGrn } from '@/features/yen-purchase/GRN/grnSlice';
 import { AppDispatch, RootState } from '@/redux/store';
 import { Outgoing, VendorDetail } from '@/Models/outgoingModel';
 import { GrnResponse, ItemDetail, ItemDetailResponse } from '@/Models/grnModel';
 import jsPDF from 'jspdf';
-import "jspdf-autotable"; // Ensure this plugin is available for autoTable functionality
+import "jspdf-autotable";
 import { fetchBusinesses, fetchPhoto, selectBusinesses } from '@/features/account-setting/businessSlice';
 import { format } from 'date-fns';
 import Papa from 'papaparse';
@@ -74,20 +75,25 @@ import { ServiceData } from '@/app/yen-purchase/ServiceOrder/Models/servicepo';
 import ServiceDialog from '@/app/yen-purchase/ServiceOrder/Components/ServiceDialog';
 import { fetchServiceById } from '@/app/yen-purchase/ServiceOrder/Features/servicelist';
 import { usePermissions } from "@/hooks/usePermissions";
-import { Alert } from "@mui/material";
+import ColumnSettingsDialog from '../OutgoingPaymentPage/Components/ColumnSettingsDialog';
+import {
+  initializePreferences,
+  selectVisibleColumns,
+} from '../OutgoingPaymentPage/Features/columnPreferencesSlice';
+
 const OutgoingPaymentComponent = React.memo(() => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, isModuleVisible } = usePermissions();
   const canRead = hasPermission("yenerp", "outgoingpayment", "read");
-  const { outgoings, snackbarMessage, snackbarOpen, selection, outgoingvendor, banks // ADD THIS IF MISSING
-  } = useSelector(selectOutgoings);
+  const { outgoings, snackbarMessage, snackbarOpen, selection, outgoingvendor, banks } = useSelector(selectOutgoings);
   const { itemwise } = useSelector(selectGrn);
   const { randomIdap, apDialogOpen, selectedinvoiceId, itemwiseap } = useSelector(selectApinvoice);
   const { businesses } = useSelector(selectBusinesses);
   const { selectedPo, poDialogOpen, loading } = useSelector(selectPurchaseListState);
+
   const [selectedOutgoing, setSelectedOutgoing] = useState<any>(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const [selectedVendorName, setSelectedVendorName] = useState<VendorDetail | null>(null); // Default is null
+  const [selectedVendorName, setSelectedVendorName] = useState<VendorDetail | null>(null);
   const [viewItemsDialogOpen, setViewItemsDialogOpen] = useState(false);
   const [selectedGrn, setSelectedGrn] = useState<GrnResponse | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -95,21 +101,19 @@ const OutgoingPaymentComponent = React.memo(() => {
   const [paymentTypeMultiple, setPaymentTypeMultiple] = useState<{ [outgoingId: string]: 'full' | 'partial' }>({});
   const [loadingState, setLoadingState] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
   const [fetchedBusinessIds, setFetchedBusinessIds] = useState(new Set());
-  const [status, setStatus] = useState(''); // Default status filter is "Pending"
+  const [status, setStatus] = useState('');
   const selectedRows = selection.selectedOutgoingIds;
   const selectedOutgoings = selection.selectedOutgoings;
   const [paymentTerms, setPaymentTerms] = useState("");
-  const [openDialog, setOpenDialog] = useState(false); // Control dialog visibility
-  // State for the selected filter (number or empty string for all data)
+  const [openDialog, setOpenDialog] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  // Sort the outgoings data in descending order by 'dueDays' field
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null); // Default: no sorting
-  const [sortColumn, setSortColumn] = useState<string | null>(null); // Default: no column sorted
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
   const currentPage = useSelector(selectCurrentPage);
   const pageSize = useSelector(selectPageSize);
   const totalItems = useSelector(selectTotalItems);
-  const totalPayableAmount = useSelector(selectTotalPayableAmount); // USE REDUX SELECTOR FOR OVERALL TOTAL
+  const totalPayableAmount = useSelector(selectTotalPayableAmount);
   const newPage = useSelector(selectCurrentPage);
   const [selectionRange, setSelectionRange] = useState({
     startDate: new Date(),
@@ -117,10 +121,10 @@ const OutgoingPaymentComponent = React.memo(() => {
     key: 'selection',
   });
   const dateField = 'invoiceDate';
-  const fromDate = moment().utc().startOf('day').toDate(); // Start of the day (in UTC)
-  const toDate = moment().utc().endOf('day').toDate(); // End of the day (in UTC)
-  const [errors, setErrors] = useState<{ [outgoingId: string]: string }>({});
-  // Add this to your component's state
+  const fromDate = moment().utc().startOf('day').toDate();
+  const toDate = moment().utc().endOf('day').toDate();
+  const [columnSettingsOpen, setColumnSettingsOpen] = useState(false);
+  const visibleColumns = useSelector(selectVisibleColumns);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
   const [confirmDialogProps, setConfirmDialogProps] = useState<{
@@ -133,19 +137,22 @@ const OutgoingPaymentComponent = React.memo(() => {
     onConfirm: () => { },
   });
   const debitCreditNotes = useSelector((state: RootState) => selectDebitCreditNote(state).debitCreditNotes);
-  // Compute selectedApInvoice from itemwise and selectedinvoiceId
+
   const selectedApInvoice = useMemo(() => {
     if (!selectedinvoiceId) return null;
     return itemwiseap.find(ap => ap.invoiceId === selectedinvoiceId) || null;
   }, [selectedinvoiceId, itemwiseap]);
-  // Fix useEffect that fetches initial data to include default sorting
+
+  // Initialize column preferences
+  useEffect(() => {
+    dispatch(initializePreferences());
+  }, [dispatch]);
+
   useEffect(() => {
     if (!canRead) return;
     if (loadingState === 'idle') {
-      // Set default sorting if not set
       const defaultSortBy = sortColumn ? sortColumn : 'createdDate';
       const defaultSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
-      // Map frontend column to backend field
       const sortFieldMap: { [key: string]: string } = {
         dueDays: 'intimationDays',
         paymentTerms: 'paymentTerms',
@@ -162,21 +169,22 @@ const OutgoingPaymentComponent = React.memo(() => {
         size: pageSize,
         filterByAmount: true,
         filterBy: 'invoiceDate',
-        sortBy: backendSortField, // INCLUDE SORTING
-        sortOrder: defaultSortOrder // INCLUDE SORTING
+        sortBy: backendSortField,
+        sortOrder: defaultSortOrder
       }));
     }
-  }, [dispatch, loadingState, dateField, newPage, pageSize, sortColumn, sortOrder]);
+  }, [dispatch, loadingState, dateField, newPage, pageSize, sortColumn, sortOrder, canRead]);
+
   useEffect(() => {
     if (!canRead) return;
     if (loadingState === 'idle') {
       dispatch(fetchItemwiseGrns());
       dispatch(fetchRandomIDApInvoices());
-      dispatch(fetchItemwiseAps()); // Ensure itemwise is fetched
+      dispatch(fetchItemwiseAps());
       dispatch(fetchVendorDetails({ filterByAmount: true }));
     }
-  }, [loadingState, dispatch]);
-  // Add this useEffect to fetch statuses when component mounts
+  }, [loadingState, dispatch, canRead]);
+
   useEffect(() => {
     if (!canRead) return;
     const loadStatuses = async () => {
@@ -189,42 +197,41 @@ const OutgoingPaymentComponent = React.memo(() => {
     };
     loadStatuses();
   }, [canRead]);
-  // REMOVE this client-side sorting completely - replace with simple mapping
+
   const filteredPayments = useMemo(() => {
     return outgoings.map(payment => {
-      // Calculate totalPaid correctly
       const totalPaid = (
         (payment.advanceAmount || 0) +
         (payment.partialAmount || 0) +
         (payment.fullPaymentAmount || 0)
       );
-      // Calculate remaining amount
       const remainingAmount = Math.max(0, (payment.totalPayableAmount || 0) - totalPaid);
       return {
         ...payment,
         totalPaid,
         remainingAmount,
-        // Ensure other amounts have proper defaults
         totalPrice: payment.totalPrice || 0,
         payableAmount: payment.payableAmount || 0,
         discountDetails: payment.discountDetails || 0,
       };
     });
-  }, [outgoings]); // Only depend on outgoings - NO sorting logic here
+  }, [outgoings]);
+
   const handleApClick = (invoiceId: string | undefined) => {
     if (!invoiceId) {
       dispatch(setSnackbarMessage('Invalid AP Invoice ID'));
       dispatch(setSnackbarOpen(true));
       return;
     }
-    // Set selectedinvoiceId and open dialog
     dispatch(setSelectedinvoiceId(invoiceId));
     dispatch(setApDialogOpen(true));
   };
+
   const handleCloseApDialog = () => {
     dispatch(setApDialogOpen(false));
     dispatch(setSelectedinvoiceId(null));
   };
+
   const handlePoClick = async (poId: string) => {
     try {
       const result = await dispatch(fetchPoById(poId)).unwrap();
@@ -233,7 +240,7 @@ const OutgoingPaymentComponent = React.memo(() => {
           purchaseOrderId: result.purchaseOrderId,
           randomId: result.randomId,
           vendorName: result.vendorName,
-          orderDate: typeof result.orderDate === 'string' ? result.orderDate : result.orderDate?.toISOString() || null, // Ensure orderDate is a string
+          orderDate: typeof result.orderDate === 'string' ? result.orderDate : result.orderDate?.toISOString() || null,
           itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
             itemId: item.itemId ?? 'N/A',
             itemName: item.itemName ?? 'Unknown',
@@ -248,9 +255,8 @@ const OutgoingPaymentComponent = React.memo(() => {
             finalPrice: Number(item.finalPrice) || 0,
           })) as ItemDetailResponsePO[],
         };
-        console.log('transformedPo:', transformedPo); // Debug: Verify orderDate
         dispatch(setSelectedPo(transformedPo));
-        setPoDialogOpen(true); // Open PODialog
+        setPoDialogOpen(true);
       } else {
         dispatch(setSnackbarMessage('Purchase Order not found.'));
         dispatch(setSnackbarOpen(true));
@@ -261,131 +267,77 @@ const OutgoingPaymentComponent = React.memo(() => {
       console.error('Failed to fetch PO details:', error);
     }
   };
+
   const handleCloseServiceDialog = () => {
     setDialogOpen(false);
-    setSelectedService(null); // Clear it
+    setSelectedService(null);
   };
+
   const handleServiceClick = async (identifier: string) => {
     if (!identifier) {
       dispatch(setSnackbarMessage('Invalid Service ID'));
       dispatch(setSnackbarOpen(true));
       return;
     }
-
     try {
-      // Fetch the service data
       const result = await dispatch(fetchServiceById(identifier)).unwrap();
-
-      // IMPORTANT: Set the fetched service to local state
-      setSelectedService(result); // Make sure result matches ServiceData type
-
-      // Open the dialog
+      setSelectedService(result);
       setDialogOpen(true);
-
     } catch (error) {
       dispatch(setSnackbarMessage('Failed to load service details'));
       dispatch(setSnackbarOpen(true));
       console.error('Service fetch error:', error);
     }
   };
+
   const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoiceId?: string) => {
-    console.log('Opening DebitCreditNoteDialog:', {
-      outgoingId,
-      grnId,
-      apInvoiceId
-    });
-
-    // Clear any previous data first
     dispatch(clearDebitCreditNotes());
-
-    // Determine which document ID to use based on availability
     let documentIdToUse = '';
     let documentTypeToUse = '';
 
-    // Priority logic:
-    // 1. If GRN exists, use GRN for item-wise notes
-    // 2. If AP Invoice exists, use AP Invoice for amount-wise notes
-    // 3. Otherwise, use Outgoing Payment for amount-wise notes
-
     if (grnId) {
-      // Item-wise debit note for GRN
       documentIdToUse = grnId;
       documentTypeToUse = 'grn';
-      console.log('🔍 Using GRN for item-wise debit notes:', grnId);
     } else if (apInvoiceId) {
-      // Amount-wise debit note for AP Invoice
       documentIdToUse = apInvoiceId;
       documentTypeToUse = 'ap_invoice';
-      console.log('🔍 Using AP Invoice for amount-wise debit notes:', apInvoiceId);
     } else {
-      // Amount-wise debit note for Outgoing Payment
       documentIdToUse = outgoingId;
       documentTypeToUse = 'outgoing_payment';
-      console.log('🔍 Using Outgoing Payment for amount-wise debit notes:', outgoingId);
     }
 
-    console.log('📌 Using document:', {
-      documentId: documentIdToUse,
-      documentType: documentTypeToUse
-    });
-
-    // Set document details in Redux
     dispatch(setDebitCreditDocumentId(documentIdToUse));
     dispatch(setDebitCreditDocumentType(documentTypeToUse));
-
-    // Open the dialog
     dispatch(setDebitCreditDialogOpen(true));
 
     try {
-      // IMPORTANT: Use the correct thunk that requires documentType
-      console.log('📤 Fetching debit notes with params:', {
+      await dispatch(fetchAllDebitNotesComprehensive({
         documentId: documentIdToUse,
         documentType: documentTypeToUse,
         includeCleared: true,
         includeActive: true,
-      });
-
-      // Use fetchAllDebitNotesComprehensive which requires documentType parameter
-      await dispatch(fetchAllDebitNotesComprehensive({
-        documentId: documentIdToUse,
-        documentType: documentTypeToUse, // This is REQUIRED
-        includeCleared: true,
-        includeActive: true,
       })).unwrap();
-
-      console.log('✅ Debit notes loaded successfully');
-
     } catch (error: any) {
-      console.error('❌ Error fetching debit notes:', error);
-
-      // Fallback: Try the older endpoint if comprehensive fails
       try {
-        console.log('🔄 Trying fallback API...');
         await dispatch(fetchAllDebitNotesForDocument({
           documentId: documentIdToUse,
-          documentType: 'outgoing',  // This is now required
+          documentType: 'outgoing',
           includeCleared: true,
           includeActive: true,
         })).unwrap();
-        console.log('✅ Fallback succeeded');
       } catch (fallbackError) {
-        console.error('❌ Fallback also failed:', fallbackError);
-
-        // Show appropriate error message
         let errorMessage = 'Failed to load debit notes';
-
         if (error?.includes('422')) {
           errorMessage = 'Document type is required for this request';
         } else if (error?.includes('404')) {
           errorMessage = 'No debit notes found for this document';
         }
-
         dispatch(setSnackbarMessage(errorMessage));
         dispatch(setSnackbarOpen(true));
       }
     }
   };
-  // Precompute isDisabled and tooltipTitle based on hasDebitCreditNotes
+
   const outgoingCreditNoteStatus = useMemo(() => {
     const statusMap: { [key: string]: { isDisabled: boolean; tooltipTitle: string } } = {};
     outgoings.forEach((outgoingdebit) => {
@@ -397,17 +349,18 @@ const OutgoingPaymentComponent = React.memo(() => {
     });
     return statusMap;
   }, [outgoings, debitCreditNotes]);
+
   useEffect(() => {
     if (!canRead) return;
     dispatch(fetchBusinesses());
     dispatch(fetchBank());
-  }, [dispatch]);
+  }, [dispatch, canRead]);
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
       return;
     }
     dispatch(setPagination({ page: newPage, size: pageSize }));
-    // Map current sort column to backend field
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -435,8 +388,8 @@ const OutgoingPaymentComponent = React.memo(() => {
         toDate: appliedToDate,
         filterByAmount: true,
         vendorName: selectedVendorName?.vendorName,
-        sortBy: backendSortField, // PRESERVE SORTING
-        sortOrder: backendSortOrder // PRESERVE SORTING
+        sortBy: backendSortField,
+        sortOrder: backendSortOrder
       }));
     } else {
       dispatch(fetchOutgoings({
@@ -446,21 +399,24 @@ const OutgoingPaymentComponent = React.memo(() => {
         filterByAmount: true,
         fromDate: fromDate,
         toDate: toDate,
-        sortBy: backendSortField, // PRESERVE SORTING
-        sortOrder: backendSortOrder // PRESERVE SORTING
+        sortBy: backendSortField,
+        sortOrder: backendSortOrder
       }));
     }
   };
+
   const handleNextPage = () => {
     if (currentPage * pageSize) {
       handlePageChange(currentPage + 1);
     }
   };
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       handlePageChange(currentPage - 1);
     }
   };
+
   useEffect(() => {
     businesses.forEach((business) => {
       if (!fetchedBusinessIds.has(business.businessId)) {
@@ -469,22 +425,24 @@ const OutgoingPaymentComponent = React.memo(() => {
       }
     });
   }, [businesses, fetchedBusinessIds, dispatch]);
+
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
+
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+
   const handleViewDetails = (outgoing: any) => {
     setSelectedOutgoing(outgoing);
     setOpenDetailsDialog(true);
   };
-  // Fix handleSort to work properly
+
   const handleSort = (column: 'dueDays' | 'paymentTerms' | 'payableAmount' | 'totalPaid' | 'remainingAmount' | 'totalPrice' | 'invoiceDate' | 'vendorName') => {
     const newSortOrder = sortColumn === column && sortOrder === 'asc' ? 'desc' : 'asc';
     setSortOrder(newSortOrder);
     setSortColumn(column);
-    // Map frontend column names to backend field names
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -497,7 +455,6 @@ const OutgoingPaymentComponent = React.memo(() => {
     };
     const backendSortField = sortFieldMap[column];
     const backendSortOrder = newSortOrder === 'asc' ? 'ascending' : 'descending';
-    // Prepare filter parameters
     const appliedFromDate = selectionRange?.startDate instanceof Date
       ? moment(selectionRange.startDate).startOf('day').toDate()
       : fromDate;
@@ -505,7 +462,7 @@ const OutgoingPaymentComponent = React.memo(() => {
       ? moment(selectionRange.endDate).endOf('day').toDate()
       : toDate;
     dispatch(fetchOutgoings({
-      page: 1, // RESET TO PAGE 1 ON SORT TO AVOID INCONSISTENCIES
+      page: 1,
       size: pageSize,
       filterBy: dateField,
       fromDate: appliedFromDate,
@@ -516,23 +473,21 @@ const OutgoingPaymentComponent = React.memo(() => {
       sortOrder: backendSortOrder
     }));
   };
+
   useEffect(() => {
     dispatch(syncSelectionsWithCurrentData());
   }, [outgoings, dispatch]);
+
   const handleFilterClick = () => {
     setIsFilterActive(true);
-
     const formattedStartDate = selectionRange?.startDate instanceof Date
       ? moment(selectionRange.startDate).startOf('day').toISOString()
       : fromDate?.toISOString();
-
     const formattedEndDate = selectionRange?.endDate instanceof Date
       ? moment(selectionRange.endDate).endOf('day').toISOString()
       : toDate?.toISOString();
-
     const newPage = 1;
     dispatch(setPagination({ page: newPage, size: pageSize }));
-
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -543,53 +498,35 @@ const OutgoingPaymentComponent = React.memo(() => {
       invoiceDate: 'invoiceDate',
       vendorName: 'vendorName'
     };
-
     const backendSortField = sortColumn ? sortFieldMap[sortColumn] : 'createdDate';
     const backendSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
-
     const filterParams: any = {
       page: newPage,
       size: pageSize,
       filterByAmount: true,
-      filterByStatus: false,  // ✅ ALWAYS FALSE - backend status param handles it
+      filterByStatus: false,
       sortBy: backendSortField,
       sortOrder: backendSortOrder
     };
-
     if (formattedStartDate) {
       filterParams.fromDate = new Date(formattedStartDate);
     }
     if (formattedEndDate) {
       filterParams.toDate = new Date(formattedEndDate);
     }
-    if (
-      selectedVendorName?.vendorName &&
-      selectedVendorName.vendorName.trim() !== '' &&
-      selectedVendorName.vendorName !== 'none'
-    ) {
+    if (selectedVendorName?.vendorName && selectedVendorName.vendorName.trim() !== '' && selectedVendorName.vendorName !== 'none') {
       filterParams.vendorName = selectedVendorName.vendorName.trim();
     }
     if (dateField && dateField.trim() !== '') {
       filterParams.filterBy = dateField.trim();
     }
-
-    // ✅ FIXED - clean status, no filterByStatus conflict
-    if (
-      status &&
-      status.trim() !== '' &&
-      status.trim().toLowerCase() !== 'none' &&
-      status.trim().toLowerCase() !== 'all'
-    ) {
+    if (status && status.trim() !== '' && status.trim().toLowerCase() !== 'none' && status.trim().toLowerCase() !== 'all') {
       filterParams.status = status.trim();
     }
-
-    console.log('Applying filters with sorting:', filterParams);
-
     if (!canRead) return;
-
     dispatch(fetchOutgoings(filterParams));
   };
-  // Update handleFilterClose to clear selection if needed
+
   const handleFilterClose = () => {
     setIsFilterActive(false);
     setSelectionRange({
@@ -599,8 +536,6 @@ const OutgoingPaymentComponent = React.memo(() => {
     });
     setStatus('');
     setSelectedVendorName(null);
-    // Optionally clear selection when filters change
-    // dispatch(clearSelection());
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -613,7 +548,6 @@ const OutgoingPaymentComponent = React.memo(() => {
     };
     const backendSortField = sortColumn ? sortFieldMap[sortColumn] : 'createdDate';
     if (!canRead) return;
-
     dispatch(fetchOutgoings({
       page: currentPage,
       size: pageSize,
@@ -623,58 +557,47 @@ const OutgoingPaymentComponent = React.memo(() => {
       sortOrder: sortOrder === 'asc' ? 'ascending' : 'descending'
     }));
   };
-  // Close the dialog
+
   const handleCloseViewItemsDialog = () => {
     setViewItemsDialogOpen(false);
-    setSelectedGrn(null); // Clear the selected GRN details
+    setSelectedGrn(null);
   };
+
   const getRandomId = (grnId: string): string | undefined => {
     const grn = itemwise.find(grn => grn.grnId === grnId);
     return grn?.randomId;
   };
+
   const getApRandomId = (apinvoiceId: string): string | undefined => {
     const ap = randomIdap.find(ap => ap.invoiceId === apinvoiceId);
     return ap?.randomId;
   };
-  const groupedOutgoingsByVendor = (outgoings: Outgoing[]): Record<string, Outgoing[]> => {
-    return outgoings.reduce((acc: Record<string, Outgoing[]>, outgoing: Outgoing) => {
-      const vendorName = outgoing.vendorName ?? 'Unknown Vendor'; // Handle undefined vendorName
-      if (!acc[vendorName]) {
-        acc[vendorName] = [];
-      }
-      acc[vendorName].push(outgoing);
-      return acc;
-    }, {});
-  };
-  console.log(filteredPayments);
+
   const handleRowSelect = (outgoingId: string) => {
     const outgoing = outgoings.find(o => o.outgoingId === outgoingId);
     if (outgoing) {
       dispatch(toggleOutgoingSelection({ outgoingId, outgoing }));
     }
   };
-  // NEW: Handle select all on current page (toggle)
+
   const handleSelectAllCurrentPage = (checked: boolean) => {
-    // If unchecking (clear), deselect all on current page
-    // If checking, select all on current page
-    // Note: This does NOT affect other pages' selections
     outgoings.forEach((outgoing) => {
       const outgoingId = outgoing.outgoingId || '';
       const currentlySelected = selectedRows.includes(outgoingId);
       if (checked && !currentlySelected) {
-        // Select if not already
         dispatch(toggleOutgoingSelection({ outgoingId, outgoing }));
       } else if (!checked && currentlySelected) {
-        // Deselect if selected
         dispatch(toggleOutgoingSelection({ outgoingId, outgoing }));
       }
     });
   };
+
   const handlePaymentTypeChangeMultiple = (outgoingId: string, value: 'full' | 'partial') => {
     if (outgoingId) {
       setPaymentTypeMultiple(prev => ({ ...prev, [outgoingId]: value }));
     }
   };
+
   const handleGrnClick = async (grnId: string) => {
     try {
       const result = await dispatch(fetchGrnById(grnId)).unwrap();
@@ -709,75 +632,47 @@ const OutgoingPaymentComponent = React.memo(() => {
       console.error('Failed to fetch GRN details:', error);
     }
   };
+
   const generateOutgoingInvoicePDF = () => {
-    console.log(filteredPayments); // Log the filtered data to ensure it has data
-    // Initialize jsPDF instance
     const doc = new jsPDF();
-    // Starting yOffset for content
     let yOffset = 10;
-    // Define the logo and title position
-    const logoX = 14; // Position for logo
-    const titleX = 80; // Position for title and summary text
-    // Add business image on the left side (adjust as needed)
+    const logoX = 14;
+    const titleX = 80;
     const business = businesses.length > 0 ? businesses[0] : null;
     if (business && business.imageUrl) {
       try {
-        doc.addImage(business.imageUrl, 'JPEG', logoX, yOffset, 20, 20); // Adjust image size and position
+        doc.addImage(business.imageUrl, 'JPEG', logoX, yOffset, 20, 20);
       } catch (e) {
         console.error("Image failed to load:", e);
       }
     }
-    // Adjust the title and summary below the image
-    doc.setFontSize(12); // Increase title font size
-    doc.text("Outgoing Order Summary", titleX, yOffset + 10); // Title at the top next to the logo
-    // Add underline below the title
-    const titleWidth = doc.getTextWidth("Outgoing Order Summary"); // Get the width of the title text
-    const underlineStartX = titleX; // X position for the start of the underline
-    const underlineEndX = underlineStartX + titleWidth; // X position for the end of the underline
-    doc.setLineWidth(0.5); // Set the thickness of the underline
-    doc.line(underlineStartX, yOffset + 12, underlineEndX, yOffset + 12); // Draw the underline below the title
-    // Update yOffset for next row content (Date and Amount)
-    yOffset += 25; // Adjust position for the next content
-    // Fix the totalPayableAmount calculation
+    doc.setFontSize(12);
+    doc.text("Outgoing Order Summary", titleX, yOffset + 10);
+    const titleWidth = doc.getTextWidth("Outgoing Order Summary");
+    const underlineStartX = titleX;
+    const underlineEndX = underlineStartX + titleWidth;
+    doc.setLineWidth(0.5);
+    doc.line(underlineStartX, yOffset + 12, underlineEndX, yOffset + 12);
+    yOffset += 25;
     const computedTotalPayableAmount = filteredPayments.reduce((total, outgoing) => {
       return total + (outgoing.totalPayableAmount || 0);
     }, 0);
     const today = new Date();
     const currentDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
-    // Display the "Date" on the left and "Total Payable Amount" on the right in the next row
-    doc.setFontSize(10); // Adjust font size for the total row
-    doc.text(`Date: ${currentDate}`, 14, yOffset); // Date on the left
-    doc.text(`Total Payable Amount: ${computedTotalPayableAmount.toFixed(2)}`, 140, yOffset); // Amount on the right
-    yOffset += 5; // Adjust space before the table
-    // Table headers for summary data with added PO No, GRN No, and AP No
-    const headers = [
-      [
-        "S.No",
-        "PO No",
-        "GRN No",
-        "AP No",
-        "Outgoing ID",
-        "Vendor Name",
-        "Invoice No",
-        "Invoice Date",
-        "Total Invoice Amount",
-        "Paid Amount",
-        "Remaining Amount",
-      ],
-    ];
-    // Prepare rows for purchase order summary (filter only the valid orders)
+    doc.setFontSize(10);
+    doc.text(`Date: ${currentDate}`, 14, yOffset);
+    doc.text(`Total Payable Amount: ${computedTotalPayableAmount.toFixed(2)}`, 140, yOffset);
+    yOffset += 5;
+    const headers = [["S.No", "PO No", "GRN No", "AP No", "Outgoing ID", "Vendor Name", "Invoice No", "Invoice Date", "Total Invoice Amount", "Paid Amount", "Remaining Amount"]];
     const rows = (filteredPayments || []).map((outgoing, index) => {
-      const totalPayableAmount = outgoing.totalPayableAmount || 0;
-      const totalDiscount = outgoing.discountDetails || 0;
-      const finalAmount = totalPayableAmount - totalDiscount;
-      if (!outgoing.randomId || !outgoing.vendorName || !outgoing.invoiceDate || totalPayableAmount <= 0) {
-        return null; // Skip invalid rows
+      if (!outgoing.randomId || !outgoing.vendorName || !outgoing.invoiceDate || (outgoing.totalPayableAmount || 0) <= 0) {
+        return null;
       }
       return [
         `${index + 1}`,
-        outgoing.poRandomId || "N/A", // Add PO Random ID
-        getRandomId(outgoing.grnId) || "N/A", // Add GRN Random ID
-        getApRandomId(outgoing.invoiceId) || "N/A", // Add AP Random ID
+        outgoing.poRandomId || "N/A",
+        getRandomId(outgoing.grnId) || "N/A",
+        getApRandomId(outgoing.invoiceId) || "N/A",
         outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo || "N/A",
@@ -787,38 +682,13 @@ const OutgoingPaymentComponent = React.memo(() => {
         outgoing.totalPayableAmount?.toFixed(2) || "0.00",
       ];
     }).filter(row => row !== null);
-    // Add the table to the PDF with custom styles
     doc.autoTable({
       head: headers,
       body: rows,
-      startY: yOffset, // Start the table below the "Date" and "Total Payable Amount"
-      styles: {
-        fillColor: [255, 255, 255], // White background for cells
-        textColor: [0, 0, 0], // Black text color
-        lineColor: [0, 0, 0], // Black table borders
-        fontSize: 8, // Set the font size here
-      },
-      headStyles: {
-        fillColor: [0, 0, 128], // DodgerBlue background for the header
-        textColor: [255, 255, 255], // White text color for header
-      },
-      bodyStyles: {
-        fillColor: [255, 255, 255], // White background for rows
-        textColor: [0, 0, 0], // Black text color for rows
-      },
-      columnStyles: {
-        0: { halign: 'center' }, // S.No
-        1: { halign: 'left' }, // Outgoing ID
-        2: { halign: 'left' }, // Vendor Name
-        3: { halign: 'left' }, // Invoice No
-        4: { halign: 'left' }, // Invoice Date
-        5: { halign: 'left' }, // PO No
-        6: { halign: 'left' }, // GRN No
-        7: { halign: 'left' }, // AP No
-        8: { halign: 'right' }, // Total Invoice Amount
-        9: { halign: 'right' }, // Paid Amount
-        10: { halign: 'right' }, // Remaining Amount
-      },
+      startY: yOffset,
+      styles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], lineColor: [0, 0, 0], fontSize: 8 },
+      headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255] },
+      bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
     });
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
@@ -829,46 +699,22 @@ const OutgoingPaymentComponent = React.memo(() => {
       doc.text("This is computer generated", doc.internal.pageSize.width / 2, computerGeneratedY, { align: 'center' });
       doc.text(`Page ${i} of ${totalPages}`, doc.internal.pageSize.width / 2, pageY, { align: 'center' });
     }
-    // Save the PDF with a dynamic name based on outgoing order ID
-    const pdfFilename = `PendingOutgoing.pdf`;
-    doc.save(pdfFilename);
+    doc.save(`PendingOutgoing.pdf`);
     setOpenDialog(false);
   };
+
   const generateOutgoingSummaryCSV = () => {
-    // Define headers for the CSV
-    const headers = [
-      [
-        "S.No",
-        "PO No",
-        "GRN No",
-        "AP No",
-        "Outgoing No",
-        "Vendor Name",
-        "Invoice No",
-        "Invoice Date",
-        "Total Amount",
-        "Tax Details",
-        "Discount Amount",
-        "Total",
-        "Paid Amount",
-        "Remaining Amount",
-        "Due Days",
-        "Payment Terms"
-      ]
-    ];
-    // Prepare rows for the CSV data
+    const headers = [["S.No", "PO No", "GRN No", "AP No", "Outgoing No", "Vendor Name", "Invoice No", "Invoice Date", "Total Amount", "Tax Details", "Discount Amount", "Total", "Paid Amount", "Remaining Amount", "Due Days", "Payment Terms"]];
     const rows = (filteredPayments || []).map((outgoing, index) => {
-      const totalPayableAmount = outgoing.totalPayableAmount || 0;
-      const totalDiscount = outgoing.discountDetails || 0;
-      if (!outgoing.randomId || !outgoing.vendorName || !outgoing.invoiceDate || totalPayableAmount <= 0) {
+      if (!outgoing.randomId || !outgoing.vendorName || !outgoing.invoiceDate || (outgoing.totalPayableAmount || 0) <= 0) {
         return null;
       }
       return [
         `${index + 1}`,
-        outgoing.poRandomId || "N/A", // PO No
-        getRandomId(outgoing.grnId) || "N/A", // GRN No
-        getApRandomId(outgoing.invoiceId) || "N/A", // AP No
-        outgoing.randomId.toString(), // Outgoing No
+        outgoing.poRandomId || "N/A",
+        getRandomId(outgoing.grnId) || "N/A",
+        getApRandomId(outgoing.invoiceId) || "N/A",
+        outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo || "N/A",
         outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
@@ -882,13 +728,10 @@ const OutgoingPaymentComponent = React.memo(() => {
         outgoing.paymentTerms || "N/A",
       ];
     }).filter(row => row !== null);
-    const csvData = [headers[0], ...rows]; // Combine headers and rows
-    // Use PapaParse to convert array to CSV string and trigger download
+    const csvData = [headers[0], ...rows];
     const csv = Papa.unparse(csvData);
-    // Create a Blob from the CSV string
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    // Trigger download
     const link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", "OutgoingSummary.csv");
@@ -897,28 +740,26 @@ const OutgoingPaymentComponent = React.memo(() => {
     document.body.removeChild(link);
     setOpenDialog(false);
   };
+
   const handlePayClick = () => {
     if (selectedOutgoings.length === 0) {
       dispatch(setSnackbarMessage('Please select at least one outgoing payment to process'));
       dispatch(setSnackbarOpen(true));
       return;
     }
-
-    // Check if ALL selected outgoings are verified
     const allVerified = selectedOutgoings.every(outgoing => outgoing.isVerified === true);
     if (!allVerified) {
       dispatch(setSnackbarMessage('All selected payments must be verified before processing multiple payments'));
       dispatch(setSnackbarOpen(true));
       return;
     }
-
-    console.log('Selected payments across all pages:', selectedOutgoings.length);
     setIsBulkPaymentOpen(true);
   };
-  // NEW: Clear all selections across pages
+
   const handleClearAllSelections = () => {
     dispatch(clearSelection());
   };
+
   const handleDownload = async (outgoingId: string) => {
     const outgoingdetail = outgoings.find((outgoing) => outgoing.outgoingId === outgoingId);
     if (!outgoingdetail) {
@@ -932,28 +773,17 @@ const OutgoingPaymentComponent = React.memo(() => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 128);
     doc.text('Pending Payment', 90, yOffset + 5);
-    // Add underline
-    const textWidth = doc.getTextWidth('Pending Payment'); // Get the width of the text
-    doc.setDrawColor(0, 0, 128); // Set underline color (same as text color)
-    doc.line(90, yOffset + 7, 90 + textWidth, yOffset + 7); // Draw the underline
+    const textWidth = doc.getTextWidth('Pending Payment');
+    doc.setDrawColor(0, 0, 128);
+    doc.line(90, yOffset + 7, 90 + textWidth, yOffset + 7);
     yOffset += 10;
-    // Add Business Logo if available
     if (business && business.imageUrl) {
       try {
-        let logoX = 20; // Position for the logo horizontally
-        let yOffset = 5; // Position for the content vertically
-        doc.addImage(business.imageUrl, 'JPEG', logoX, yOffset, 20, 20); // Adjust image size and position
+        doc.addImage(business.imageUrl, 'JPEG', 20, 5, 20, 20);
       } catch (e) {
         console.error("Image failed to load:", e);
       }
     }
-    // Filter related outgoings based on grnId
-    const relatedOutgoings = outgoings.filter(outgoing => outgoing.grnId === outgoingdetail.grnId);
-    if (relatedOutgoings.length === 0) {
-      console.error('No related outgoing items found!');
-      return;
-    }
-    // Payment Details Section
     const paymentMethod = outgoingdetail.paymentMethod;
     let paymentDetails = '';
     if (paymentMethod === 'neft') {
@@ -961,33 +791,15 @@ const OutgoingPaymentComponent = React.memo(() => {
     } else if (paymentMethod === 'rtgs') {
       paymentDetails = `RTGS No: ${outgoingdetail.rtgsNo}`;
     }
-    // Add Payment details to the PDF
     doc.setFontSize(10);
     doc.text(`Payment Method: ${paymentMethod}`, 14, yOffset + 10);
     doc.text(paymentDetails, 14, yOffset + 20);
     yOffset += 15;
-    // Vendor and Business Details
-    const vendorDetailsRows = [
-      [
-        `Vendor Name: ${outgoingdetail.vendorName || ''}\n` +
-        `GSTIN: ${outgoingdetail.gstNumber || ''}\n` +
-        `Address: ${outgoingdetail.address || ''}\n` +
-        `City: ${outgoingdetail.city || ''}\n` +
-        `State: ${outgoingdetail.state || ''}\n` +
-        `Country: ${outgoingdetail.country || ''}\n` +
-        `Email: ${outgoingdetail.contactpersonEmail || ''}`,
-        `Business Name: ${business?.companyName || ''}\n` +
-        `GSTIN: ${business?.gstIn || ''}\n` +
-        `Address: ${business?.address1 || ''}\n` +
-        `Phone: ${business?.phoneNo || ''}\n` +
-        `Email: ${business?.emailId || ''}`,
-        `Outgoing No: ${outgoingdetail.randomId}\n` +
-        `PO No: ${outgoingdetail.poRandomId}\n` +
-        `GRN No: ${getRandomId(outgoingdetail.grnId)}\n` +
-        `AP No: ${outgoingdetail.apRandomId}\n` +
-        `Date: ${outgoingdetail.createdDate ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy') : ''}`
-      ]
-    ];
+    const vendorDetailsRows = [[
+      `Vendor Name: ${outgoingdetail.vendorName || ''}\nGSTIN: ${outgoingdetail.gstNumber || ''}\nAddress: ${outgoingdetail.address || ''}\nCity: ${outgoingdetail.city || ''}\nState: ${outgoingdetail.state || ''}\nCountry: ${outgoingdetail.country || ''}\nEmail: ${outgoingdetail.contactpersonEmail || ''}`,
+      `Business Name: ${business?.companyName || ''}\nGSTIN: ${business?.gstIn || ''}\nAddress: ${business?.address1 || ''}\nPhone: ${business?.phoneNo || ''}\nEmail: ${business?.emailId || ''}`,
+      `Outgoing No: ${outgoingdetail.randomId}\nPO No: ${outgoingdetail.poRandomId}\nGRN No: ${getRandomId(outgoingdetail.grnId)}\nAP No: ${outgoingdetail.apRandomId}\nDate: ${outgoingdetail.createdDate ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy') : ''}`
+    ]];
     doc.autoTable({
       head: [['Vendor Details', 'Business Details', 'Outgoing Payment Details']],
       body: vendorDetailsRows,
@@ -996,126 +808,51 @@ const OutgoingPaymentComponent = React.memo(() => {
       styles: { fontSize: 9, cellPadding: 4, halign: 'left', valign: 'top', overflow: 'linebreak' },
       columnStyles: { 0: { cellWidth: 60.6 }, 1: { cellWidth: 60.6 }, 2: { cellWidth: 60.6 } },
       headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255], fontStyle: 'bold' },
-      bodyStyles: { lineWidth: 0.1, lineColor: [0, 0, 0], textColor: [0, 0, 0], minCellHeight: 15 },
-      tableLineColor: [0, 0, 0],
-      tableLineWidth: 0.1,
     });
-    yOffset = doc.autoTable.previous.finalY; // Set to finalY directly to avoid extra space
-    // Items Table Header
-    const itemHeader = [
-      'Invoice No',
-      'Invoice Date',
-      'Vendor Name',
-      'Item Name',
-      'Tax Details',
-      'Tax Amount',
-      'Without Tax Value',
-      'With Tax Value'
-    ];
-    const filteredItems = outgoingdetail.grnId
-      ? itemwise.filter(grn => grn.grnId === outgoingdetail.grnId).flatMap(grn => grn.itemDetails)
-      : []; // Default empty array if no matching grnId
-    const tableRows = filteredItems.length > 0
-      ? filteredItems.map((item) => {
-        const unitPrice = item.unitPrice || 0;
-        const quantity = item.quantity || 0;
-        const withoutTaxValue = unitPrice * quantity;
-        const taxAmount = withoutTaxValue * (item.purchasetaxName / 100);
-        const withTaxValue = withoutTaxValue + taxAmount;
-        return [
-          outgoingdetail.invoiceNo || '-', // Invoice No
-          outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided', // Invoice Date
-          outgoingdetail.vendorName || '-', // Vendor Name
-          item.itemName,
-          `${item.purchasetaxName}%`, // Tax Details
-          taxAmount.toFixed(2), // Tax Amount
-          outgoingdetail.totalPrice?.toFixed(2), // Without Tax Value
-          outgoingdetail.payableAmount?.toFixed(2), // With Tax Value
-        ];
-      })
-      : [
-        [
-          outgoingdetail.invoiceNo || '', // Invoice No
-          outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided', // Invoice Date
-          outgoingdetail.vendorName || '-', // Vendor Name
-          '-',
-          '-', // Tax Details (No items, no tax)
-          '0.00', // Tax Amount
-          '0.00', // Without Tax Value
-          '0.00', // With Tax Value
-        ]
-      ]; // Fallback row for when there are no items
+    yOffset = doc.autoTable.previous.finalY;
+    const itemHeader = ['Invoice No', 'Invoice Date', 'Vendor Name', 'Item Name', 'Tax Details', 'Tax Amount', 'Without Tax Value', 'With Tax Value'];
+    const filteredItems = outgoingdetail.grnId ? itemwise.filter(grn => grn.grnId === outgoingdetail.grnId).flatMap(grn => grn.itemDetails) : [];
+    const tableRows = filteredItems.length > 0 ? filteredItems.map((item) => {
+      const unitPrice = item.unitPrice || 0;
+      const quantity = item.quantity || 0;
+      const withoutTaxValue = unitPrice * quantity;
+      const taxAmount = withoutTaxValue * (item.purchasetaxName / 100);
+      return [
+        outgoingdetail.invoiceNo || '-',
+        outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoingdetail.vendorName || '-',
+        item.itemName,
+        `${item.purchasetaxName}%`,
+        taxAmount.toFixed(2),
+        outgoingdetail.totalPrice?.toFixed(2),
+        outgoingdetail.payableAmount?.toFixed(2),
+      ];
+    }) : [[outgoingdetail.invoiceNo || '', outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided', outgoingdetail.vendorName || '-', '-', '-', '0.00', '0.00', '0.00']];
     doc.autoTable({
       head: [itemHeader],
       body: tableRows,
       startY: yOffset,
       theme: 'grid',
       styles: { fontSize: 8, halign: 'center', cellPadding: 2 },
-      headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255], lineWidth: 0.1, lineColor: [0, 0, 0] },
-      bodyStyles: { lineColor: [0, 0, 0], lineWidth: 0.1, textColor: [0, 0, 0], },
-      columnStyles: {
-        0: { halign: 'center' },
-        1: { halign: 'left' },
-        2: { halign: 'left' },
-        3: { halign: 'left' },
-        4: { halign: 'right' },
-        5: { halign: 'right' },
-        6: { halign: 'right' },
-        7: { halign: 'right' },
-      },
+      headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255] },
     });
-    yOffset = doc.autoTable.previous.finalY; // Directly use finalY to avoid any spacing
-    // Overall Total Payable Amount
+    yOffset = doc.autoTable.previous.finalY;
     const discount = outgoingdetail.discountDetails || 0;
-    const totalPayableAmount = outgoingdetail.totalPayableAmount || 0;
-    const fullPaymentAmount = outgoingdetail.fullPaymentAmount || 0;
-    const advanceAmount = outgoingdetail.advanceAmount || 0;
-    const partialAmount = outgoingdetail.partialAmount || 0;
+    const totalPayableAmountVal = outgoingdetail.totalPayableAmount || 0;
     let paidAmount = 0;
-    let pendingAmount = 0;
-    let paymentStatus = '';
     if (outgoingdetail.status === 'Fully Paid') {
-      paidAmount = totalPayableAmount;
+      paidAmount = totalPayableAmountVal;
     } else if (outgoingdetail.status === 'Partially Paid') {
-      paidAmount = partialAmount;
+      paidAmount = outgoingdetail.partialAmount || 0;
     }
-    // Now you can update the summaryTable with payment status, paid amount, and pending amount.
-    const summaryTable = [
-      ['Discount', discount.toFixed(2)],
-      ['Paid Amount', paidAmount.toFixed(2)],
-      ['Remaining Payable Amount', totalPayableAmount.toFixed(2)],
-    ];
+    const summaryTable = [['Discount', discount.toFixed(2)], ['Paid Amount', paidAmount.toFixed(2)], ['Remaining Payable Amount', totalPayableAmountVal.toFixed(2)]];
     doc.autoTable({
       head: [['Description', 'Amount']],
       body: summaryTable,
       startY: yOffset,
       theme: 'grid',
       styles: { fontSize: 8, halign: 'right', cellPadding: 2 },
-      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 },
-      bodyStyles: { lineColor: [0, 0, 0], lineWidth: 0.1 },
     });
-    let statusImage = '';
-    let statusText = '';
-    if (outgoingdetail.status === 'active') {
-      statusImage = '/images/pending.jpeg'; // Path to the pending image
-    } else if (outgoingdetail.status === 'Partially Paid') {
-      statusImage = '/images/partial.jpg'; // Path to the partially paid image
-    } else if (outgoingdetail.status === 'Advance Paid') {
-      statusImage = '/images/advancecash.jpg'; // Path to the advance paid image
-    }
-    // If a status image exists, add it to the PDF
-    if (statusImage) {
-      const img = new Image();
-      img.src = statusImage;
-      // Wait for image to load before adding to the document
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          doc.addImage(img, 'jpg', 150, yOffset + 40, 30, 25);
-          resolve();
-        };
-        img.onerror = reject;
-      });
-    }
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
@@ -1128,477 +865,265 @@ const OutgoingPaymentComponent = React.memo(() => {
     }
     doc.save(`${outgoingdetail.randomId}.pdf`);
   };
+
   const getColorByDueDays = (dueDays: string) => {
-    const dueDaysNumber = parseInt(dueDays, 10); // Convert string to number
-    if (isNaN(dueDaysNumber)) {
-      return 'black'; // Default color if dueDays is not a valid number
-    }
-    if (dueDaysNumber <= 0) {
-      return 'red'; // Overdue (due date has passed)
-    } else if (dueDaysNumber <= 5) {
-      return 'orange'; // Approaching due date (within 5 days)
-    } else if (dueDaysNumber <= 10) {
-      return 'green'; // Approaching due date (within 10 days)
-    } else {
-      return 'black'; // Safe zone (more than 10 days remaining)
-    }
+    const dueDaysNumber = parseInt(dueDays, 10);
+    if (isNaN(dueDaysNumber)) return 'black';
+    if (dueDaysNumber <= 0) return 'red';
+    else if (dueDaysNumber <= 5) return 'orange';
+    else if (dueDaysNumber <= 10) return 'green';
+    else return 'black';
   };
-  const displayTotalPayableAmount = totalPayableAmount > 0
-    ? totalPayableAmount
-    : filteredPayments.reduce((total, outgoing) => total + (outgoing.totalPayableAmount || 0), 0);
-  // UPDATED: Compute signed remaining for display/sorting (negative if overdue)
-  const signedPayments = useMemo(() => {
-    return filteredPayments.map(payment => {
-      const dueDays = typeof payment.intimationDays === 'string' ? parseInt(payment.intimationDays, 10) : payment.intimationDays || 0;
-      const isOverdue = dueDays <= 0;
-      const signedRemaining = isOverdue ? -(payment.remainingAmount || 0) : (payment.remainingAmount || 0);
-      return {
-        ...payment,
-        signedRemainingAmount: signedRemaining, // For display in table
-        dueDays: dueDays, // Ensure numeric for color/sort
-        isOverdue,
-      };
-    });
-  }, [filteredPayments]);
-  // FIX: Calculate selected total from ALL selected items, not current page
+
+  const displayTotalPayableAmount = totalPayableAmount > 0 ? totalPayableAmount : filteredPayments.reduce((total, outgoing) => total + (outgoing.totalPayableAmount || 0), 0);
+
   const selectedPaymentsTotal = useMemo(() => {
-    const total = selectedOutgoings.reduce((total, outgoing) => {
-      const amount = outgoing.totalPayableAmount || 0;
-      return total + amount;
-    }, 0);
-    return total;
-  }, [selectedOutgoings]); // Depend on selectedOutgoings, not filteredPayments
-  // NEW: Compute current page selection state for indeterminate/checked
+    return selectedOutgoings.reduce((total, outgoing) => total + (outgoing.totalPayableAmount || 0), 0);
+  }, [selectedOutgoings]);
+
   const currentPageSelectedCount = useMemo(() => {
     return filteredPayments.filter(payment => selectedRows.includes(payment.outgoingId || '')).length;
   }, [filteredPayments, selectedRows]);
-  const isAllCurrentPageSelected = currentPageSelectedCount === filteredPayments.length && filteredPayments.length > 0;
-  const isIndeterminate = currentPageSelectedCount > 0 && !isAllCurrentPageSelected;
-  const handleVendorChange = (
-    event: React.SyntheticEvent,
-    newValue: VendorDetail | null, // `newValue` is a VendorDetail or null
-    reason: AutocompleteChangeReason
-  ) => {
-    setSelectedVendorName(newValue); // Set the selected vendor directly
+
+  const handleVendorChange = (event: React.SyntheticEvent, newValue: VendorDetail | null, reason: AutocompleteChangeReason) => {
+    setSelectedVendorName(newValue);
   };
+
   const totalPages = Math.ceil(totalItems / pageSize);
-  // Update your Bulk Payment Dialog to show ALL selected payments, not just current page
-  const allSelectedOutgoings = useSelector((state: RootState) =>
-    state.outgoingPayment.selection.selectedOutgoings
-  );
+
   return (
     <Box>
       <YenBookPage />
       <Box sx={{ p: 1, backgroundColor: 'white' }}>
-        <Box>
-          {/* First Row - AP Invoice List, Returned AP buttons, and Typography */}
-          <Box display="flex" alignItems="center" justifyContent="space-between" mb={1} ml={1}>
-            {/* Buttons */}
-            <Box display="flex" alignItems="center">
-              {isModuleVisible("yenerp", "outgoingpayment") && (
-                <Grid item>
-                  <Link href={"/yen-book/OutgoingPaymentPage"}>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "white",
-                        color: "black",
-                        mr: 1,
-                      }}
-                    >
-                      Outgoing Payment
-                    </Button>
-                  </Link>
-                </Grid>
-              )}
-              {isModuleVisible("yenerp", "advancepayment") && (
-                <Grid item>
-                  <Link
-                    href={"/yen-book/OutgoingPaymentPage/PreOutgoing"
-                    }
-                  >
-                    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-                      Advance Payment
-                    </Button>
-                  </Link>
-                </Grid>
-              )}
-              {isModuleVisible("yenerp", "partialpayment") && (
-                <Grid item>
-                  <Link
-                    href={"/yen-book/OutgoingPaymentPage/PendingPayment"
-                    }
-                  >
-                    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-                      Partial Payment
-                    </Button>
-                  </Link>
-                </Grid>
-              )}
-              {isModuleVisible("yenerp", "paymentdone") && (
-                <Grid item>
-                  <Link
-                    href={"/yen-book/OutgoingPaymentPage/PaidPayment"
-                    }
-                  >
-                    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-                      Payment Done
-                    </Button>
-                  </Link>
-                </Grid>
-              )}
-              {isModuleVisible("yenerp", "paymenthistory") && (
-                <Grid item>
-                  <Link href={"/yen-book/OutgoingPaymentPage/PaymentHistory"}>
-                    <Button variant="contained" color="primary" sx={{ mr: 1 }}>Payment History</Button>
-                  </Link>
-                </Grid>
-              )}
-              {isModuleVisible("yenerp", "ledger") && (
-                <Grid item>
-                  <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
-                    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-                      Ledger
-                    </Button>
-                  </Link>
-                </Grid>
-              )}
-              <Grid item>
-                {isModuleVisible("yenerp", "purchasereturn") && (
-                  <Link
-                    href={"/yen-book/OutgoingPaymentPage/PurchaseReturn"
-                    }
-                  >
-                    <Button variant="contained" color="primary">
-                      Purchase Return
-                    </Button>
-                  </Link>
-                )}
-              </Grid>
-            </Box>
-            {/* <Grid item justifyContent={'flex-end'}>
-            <Typography
-    sx={{
-      pl: 2,
-      pr: 2,
-      boxShadow: 3,
-      borderRadius: 1,
-      padding: '8px',
-      textAlign: 'left',
-      maxWidth: '450px',
-      fontWeight: 'bold',
-      flexGrow: 1,
-      ml: 2,
-    }}
->
-Description:<br />
-                This is the Outgoing Payments page, where you can view and process unpaid or partially paid invoices.Payments can only be processed for these invoices from this page.
-              </Typography>
-            </Grid> */}
+        {/* First Row - Module Buttons */}
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={1} ml={1}>
+          <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
+            {isModuleVisible("yenerp", "outgoingpayment") && (
+              <Link href={"/yen-book/OutgoingPaymentPage"}>
+                <Button variant="contained" sx={{ backgroundColor: "white", color: "black" }}>Outgoing Payment</Button>
+              </Link>
+            )}
+            {isModuleVisible("yenerp", "advancepayment") && (
+              <Link href={"/yen-book/OutgoingPaymentPage/PreOutgoing"}>
+                <Button variant="contained" color="primary">Advance Payment</Button>
+              </Link>
+            )}
+            {isModuleVisible("yenerp", "partialpayment") && (
+              <Link href={"/yen-book/OutgoingPaymentPage/PendingPayment"}>
+                <Button variant="contained" color="primary">Partial Payment</Button>
+              </Link>
+            )}
+            {isModuleVisible("yenerp", "paymentdone") && (
+              <Link href={"/yen-book/OutgoingPaymentPage/PaidPayment"}>
+                <Button variant="contained" color="primary">Payment Done</Button>
+              </Link>
+            )}
+            {isModuleVisible("yenerp", "ledger") && (
+              <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
+                <Button variant="contained" color="primary">Ledger</Button>
+              </Link>
+            )}
+            {isModuleVisible("yenerp", "purchasereturn") && (
+              <Link href={"/yen-book/OutgoingPaymentPage/PurchaseReturn"}>
+                <Button variant="contained" color="primary">Purchase Return</Button>
+              </Link>
+            )}
           </Box>
-          {/* Second Row: Filters, Date Range, Vendor Select, Filter/Download Icons */}
-          <Grid container spacing={1} alignItems="center" justifyContent="flex-start" sx={{ mb: 1, mt: 1, ml: 0.1 }}>
-            {/* Date Range Dialog */}
-            <Grid item xs="auto">
-              <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                <DateRangeDialog
-                  selectionRange={selectionRange}
-                  setSelectionRange={setSelectionRange}
-                  onApply={handleFilterClick}
-                />
-              </Box>
-            </Grid>
-            {/* Vendor Search */}
-            <Grid item xs={6} sm={4} md={2}>
-              <FormControl fullWidth>
-                <Autocomplete
-                  value={selectedVendorName} // VendorDetail | null
-                  onChange={handleVendorChange} // Handles VendorDetail object
-                  options={outgoingvendor} // Array of VendorDetail objects
-                  getOptionLabel={(option: VendorDetail) => option.vendorName || ''} // Specify how to display the vendor name
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="All Vendors"
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        ...params.InputProps,
-                        style: { fontSize: '12px' }, // Adjust font size as needed
-                      }}
-                    />
-                  )}
-                  sx={{
-                    fontSize: '12px', // Adjust font size of the Autocomplete input as needed
-                  }}
-                />
-              </FormControl>
-            </Grid>
-            {/* All Data Field */}
-            <Grid item xs={6} sm={4} md={1}>
-              <TextField
-                fullWidth
-                value="All Data"
-                variant="outlined"
-                size="small"
-                InputProps={{
-                  readOnly: true, // Makes the text field non-editable
-                }}
-              />
-            </Grid>
-            {/* Status Filter Dropdown */}
-            <Grid item xs={6} sm={4} md={2}>
-              <FormControl fullWidth size="small">
-                <Autocomplete
-                  value={status || null}
-                  onChange={(event, newValue) => {
-                    setStatus(newValue || '');
-                  }}
-                  options={availableStatuses}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Filter by Status"
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        ...params.InputProps,
-                        style: { fontSize: '12px' },
-                        // Removed the custom IconButton for ClearIcon
-                      }}
-                    />
-                  )}
-                  isOptionEqualToValue={(option, value) => option === value}
-                  sx={{ fontSize: '12px' }}
-                />
-              </FormControl>
-            </Grid>
-            {/* Filter Button */}
-            <Grid item xs="auto">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <IconButton
-                  onClick={handleFilterClick}
-                  className="icon-button-outline"
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <FilterAltIcon fontSize="small" />
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 60,
-                    wordBreak: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Filter
-                </Typography>
-              </Box>
-            </Grid>
-            {/* Filter Clear Button */}
-            <Grid item xs="auto">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <IconButton
-                  onClick={handleFilterClose}
-                  className="icon-button-outline"
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 60,
-                    wordBreak: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Clear
-                </Typography>
-              </Box>
-            </Grid>
-            {/* Spacer to Push Download to the End */}
-            <Grid item xs sx={{ flexGrow: 1 }} />
-            {/* Download Button */}
-            <Grid item xs="auto">
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <IconButton
-                  onClick={handleOpenDialog}
-                  color="primary"
-                  className="icon-button-outline"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                  disabled={!filteredPayments || filteredPayments.length === 0}
-                >
-                  <DownloadIcon fontSize="small" />
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 60,
-                    wordBreak: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Download
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
         </Box>
-        {/* Days Filter */}
-        {/* <Grid item sx={{ minWidth: '150px' }}>
-            <FormControl fullWidth>
-              <Select
-                value={selectedDays} // Ensure default value is "All Data"
-                onChange={handleDaysFilterChange}
-                displayEmpty
-              >
-                <MenuItem value="">All Data</MenuItem>
-                <MenuItem value={30}>30 Days</MenuItem>
-                <MenuItem value={60}>60 Days</MenuItem>
-                <MenuItem value={90}>90 Days</MenuItem>
-              </Select>
-            </FormControl>
+
+        {/* Second Row - Filters */}
+        <Grid container spacing={1} alignItems="center" sx={{ mb: 1, mt: 1, ml: 0.5 }}>
+          <Grid item xs="auto">
+            <DateRangeDialog selectionRange={selectionRange} setSelectionRange={setSelectionRange} onApply={handleFilterClick} />
+          </Grid>
+          <Grid item xs={6} sm={4} md={2}>
+            <Autocomplete
+              value={selectedVendorName}
+              onChange={handleVendorChange}
+              options={outgoingvendor}
+              getOptionLabel={(option: VendorDetail) => option.vendorName || ''}
+              renderInput={(params) => <TextField {...params} label="All Vendors" variant="outlined" size="small" />}
+              size="small"
+              fullWidth
+            />
+          </Grid>
+          {/* <Grid item xs={6} sm={4} md={1}>
+            <TextField fullWidth value="All Data" variant="outlined" size="small" InputProps={{ readOnly: true }} />
           </Grid> */}
-        <Grid container spacing={2} alignItems="center" justifyContent='end' sx={{ mb: 1 }}>
-          <Grid item xs={6} display="flex" alignItems="center" justifyContent="flex-end">
-            <Typography variant="h6" className='fs12' sx={{ fontWeight: 'bold', mr: 1 }}>
-              Total Payable Amount: {displayTotalPayableAmount.toFixed(2)}
+          {/* Status Filter */}
+          <Grid item xs={6} sm={3} md={2}>
+            <Autocomplete
+              value={status || null}
+              onChange={(event, newValue) => setStatus(newValue || '')}
+              options={availableStatuses}
+              renderInput={(params) => <TextField {...params} label="Filter by Status" variant="outlined" size="small" />}
+              size="small"
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs="auto">
+            <Tooltip title="Apply Filter">
+              <IconButton onClick={handleFilterClick} color="primary" size="small" className="icon-button-outline">
+                <FilterAltIcon />
+              </IconButton>
+            </Tooltip>
+          </Grid>
+          <Grid item xs="auto">
+            <Tooltip title="Clear Filter">
+              <IconButton onClick={handleFilterClose} color="secondary" size="small" className="icon-button-outline">
+                <ClearIcon />
+              </IconButton>
+            </Tooltip>
+          </Grid>
+
+          <Grid item xs sx={{ flexGrow: 1 }} />
+
+          {/* Total Payable Amount */}
+          <Grid item>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '14px' }}>
+              Total Payable: ₹{displayTotalPayableAmount.toFixed(2)}
               {selectedRows.length > 0 && (
-                <span style={{ color: 'blue', marginLeft: '10px', fontSize: '14px' }}>
-                  Selected: {selectedPaymentsTotal.toFixed(2)} ({selectedOutgoings.length})
+                <span style={{ color: 'blue', marginLeft: '10px', fontSize: '13px' }}>
+                  ( ₹{selectedPaymentsTotal.toFixed(2)} ({selectedOutgoings.length}) )
                 </span>
               )}
             </Typography>
-            {/* NEW: Clear All Button near Multiple Pay */}
-            {selectedOutgoings.length > 0 && (
+          </Grid>
+
+          {/* Clear Selection Button */}
+          {selectedOutgoings.length > 0 && (
+            <Grid item>
               <Tooltip title="Clear All Selections">
-                <IconButton
-                  onClick={handleClearAllSelections}
-                  color="error"
-                  size="small"
-                  sx={{ mr: 1 }}
-                >
-                  <ClearIcon fontSize="small" />
+                <IconButton onClick={handleClearAllSelections} color="error" size="small" className="icon-button-outline">
+                  <ClearIcon />
                 </IconButton>
               </Tooltip>
-            )}
-            {/* Multiple payments button - only enable if at least one selected outgoing is verified */}
-            {/* Multiple payments button - only enable if ALL selected outgoing are verified */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <IconButton
-                color='primary'
-                className='icon-button-outline'
-                onClick={handlePayClick}
-                size="small"
-                sx={{ p: 0.3 }}
-                disabled={selectedOutgoings.length === 0 || !selectedOutgoings.every(outgoing => outgoing.isVerified === true)}
-              >
-                <PaymentsIcon />
+            </Grid>
+          )}
+
+          {/* Multiple Payments Button */}
+          <Grid item>
+            <Tooltip title="Process Multiple Payments">
+              <span>  {/* Add this wrapper span */}
+                <IconButton
+                  color='primary'
+                  onClick={handlePayClick}
+                  size="small"
+                  className="icon-button-outline"
+                  disabled={selectedOutgoings.length === 0 || !selectedOutgoings.every(outgoing => outgoing.isVerified === true)}
+                >
+                  <PaymentsIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Grid>
+
+          {/* Download Button */}
+          <Grid item>
+            <Tooltip title="Download Report">
+              <span>  {/* Add this wrapper span */}
+                <IconButton
+                  onClick={handleOpenDialog}
+                  color="primary"
+                  size="small"
+                  disabled={!filteredPayments || filteredPayments.length === 0}
+                  className="icon-button-outline"
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Grid>
+
+          {/* Columns Settings Button */}
+          <Grid item>
+            <Tooltip title="Column Settings">
+              <IconButton onClick={() => setColumnSettingsOpen(true)} color="primary" size="small" className="icon-button-outline">
+                <SettingsIcon />
               </IconButton>
-              <Typography
-                variant="caption"
-                align="center"
-                sx={{
-                  maxWidth: 50,
-                  wordBreak: 'break-word',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  lineHeight: 1.1,
-                  mt: 0.2,
-                }}
-              >
-                Multiple payments
-              </Typography>
-            </Box>
+            </Tooltip>
           </Grid>
         </Grid>
+        {/* Third Row - Data Table */}
         <Grid container spacing={2}>
-          <Grid item xs={12} ml={2}>
+          <Grid item xs={12} ml={1}>
             <TableContainer
               component={Paper}
               sx={{
-                maxHeight: 'calc(100vh - 290px)', // Dynamic height based on viewport
+                maxHeight: 'calc(100vh - 260px)',
                 overflowY: 'auto',
-                width: '100%',
+                overflowX: 'auto',  // Enable horizontal scroll
+                position: 'relative'
               }}
             >
-              <Table stickyHeader>
+              <Table
+                stickyHeader
+                size="small"
+                sx={{
+                  minWidth: 1200,  // Minimum width to ensure horizontal scroll
+                  '& .MuiTableCell-root': {
+                    whiteSpace: 'nowrap',  // Force all content to single line
+                    padding: '12px 16px',  // Consistent padding
+                  },
+                  '& .MuiTableCell-head': {
+                    whiteSpace: 'nowrap',  // Force headers to single line
+                    backgroundColor: '#f5f5f5',
+                    fontWeight: 'bold',
+                    borderBottom: '2px solid #e0e0e0',
+                  }
+                }}
+              >
                 <TableHead>
                   <TableRow>
-                    <TableCell>No</TableCell>
-                    <TableCell> Select
-                      <Checkbox
-                        indeterminate={isIndeterminate}
-                        checked={isAllCurrentPageSelected}
-                        onChange={(e) => handleSelectAllCurrentPage(e.target.checked)}
-                        title={isAllCurrentPageSelected ? "Deselect all on this page" : "Select all on this page"}
-                      />
-                    </TableCell>
-                    <TableCell>PO.No/SO.No</TableCell>
-                    <TableCell>GRN No</TableCell>
-                    <TableCell>Ap No</TableCell>
-                    <TableCell>Outgoing No</TableCell>
-                    <TableCell>Vendor Name</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Invoice No</TableCell>
-                    <TableCell>Invoice Date</TableCell>
-                    <TableCell align="right">Invoice Amount</TableCell> {/* ADD align="right" */}
-                    <TableCell>Tax Details</TableCell>
-                    <TableCell align="right">Discount Amount</TableCell> {/* ADD align="right" */}
-                    <TableCell align="right" sx={{ cursor: 'pointer' }} onClick={() => handleSort('payableAmount')}>
-                      Total {sortColumn === 'payableAmount' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
-                    </TableCell>
-                    <TableCell align="right" sx={{ cursor: 'pointer' }} onClick={() => handleSort('totalPaid')}>
-                      Paid Amount {sortColumn === 'totalPaid' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
-                    </TableCell>
-                    <TableCell align="right" sx={{ cursor: 'pointer' }} onClick={() => handleSort('remainingAmount')}>
-                      Remaining Amount {sortColumn === 'remainingAmount' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
-                    </TableCell>
-                    <TableCell align="center" sx={{ cursor: 'pointer' }} onClick={() => handleSort('dueDays')}>
-                      Due Days {sortColumn === 'dueDays' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}
-                    </TableCell>
-                    <TableCell align="center" sx={{ cursor: 'pointer' }} onClick={() => handleSort('paymentTerms')}>
-                      Payment Terms {sortColumn === 'paymentTerms' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
-                    </TableCell>
-                    <TableCell>Verified By</TableCell>
-                    <TableCell>Verified Date</TableCell>
-                    <TableCell align="center">Action</TableCell>
+                    {visibleColumns.map((column) => {
+                      const isMultiWord = column.label.includes(' ');
+
+                      return (
+                        <TableCell
+                          key={column.id}
+                          align={column.align as any}
+                          sx={{
+                            cursor: column.sortable ? 'pointer' : 'default',
+                            backgroundColor: '#f5f5f5',
+                            fontWeight: 'bold',
+                            // Always allow wrapping for multi-word headers on all screens
+                            whiteSpace: isMultiWord ? 'normal' : 'nowrap',
+                            wordBreak: 'break-word',
+                            lineHeight: 1.2,
+                            verticalAlign: 'top',
+                            minWidth: column.id === 'action' ? 120 :
+                              column.id === 'vendorName' ? 150 :
+                                column.id === 'taxDetails' ? 120 :
+                                  column.id === 'invoiceNo' ? 100 : 'auto',
+                            padding: '10px 8px',
+                          }}
+                          onClick={() => column.sortable && handleSort(column.id as any)}
+                        >
+                          {isMultiWord ? (
+                            // Split multi-word labels into 2 rows on ALL screens
+                            column.label.split(' ').map((word, index, array) => (
+                              <React.Fragment key={index}>
+                                {word}
+                                {index < array.length - 1 && <br />}
+                              </React.Fragment>
+                            ))
+                          ) : (
+                            column.label
+                          )}
+                          {column.sortable && sortColumn === column.id && (
+                            <span style={{ marginLeft: '4px' }}>
+                              {sortOrder === 'asc' ? ' ↑' : ' ↓'}
+                            </span>
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredPayments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={18} style={{ textAlign: 'center' }}>
+                      <TableCell colSpan={visibleColumns.length} align="center">
                         No data available
                       </TableCell>
                     </TableRow>
@@ -1606,183 +1131,231 @@ Description:<br />
                     filteredPayments.map((payment, index) => {
                       const { isDisabled, tooltipTitle } = outgoingCreditNoteStatus[payment.outgoingId] || {
                         isDisabled: true,
-                        tooltipTitle: 'No Debit/Credit Notes Available',
+                        tooltipTitle: 'No Debit/Credit Notes Available'
                       };
                       return (
-                        <TableRow key={payment.outgoingId || index}>
-                          <TableCell align="center">{(currentPage - 1) * pageSize + index + 1}</TableCell> {/* ADD align="center" */}
-                          <TableCell align="center"> {/* ADD align="center" */}
-                            <Checkbox
-                              checked={selectedRows.includes(payment.outgoingId || '')}
-                              onChange={() => handleRowSelect(payment.outgoingId || '')}
-                            />
-                          </TableCell>
-                          <TableCell align="left"> {/* ADD align="left" */}
-                            {payment.poRandomId ? (
-                              <span
-                                style={{ color: 'purple', cursor: 'pointer', textDecoration: 'underline' }}
-                                onClick={() => payment.purchaseOrderId && handlePoClick(payment.purchaseOrderId)}
-                              >
-                                {payment.poRandomId}
-                              </span>
-                            ) : payment.serviceId ? (
-                              <span
-                                style={{
-                                  color: '#9c27b0',
-                                  cursor: 'pointer',
-                                  textDecoration: 'underline',
-                                  fontWeight: '600',
-                                }}
-                                onClick={() => handleServiceClick(payment.serOId)}
-                              >
-                                {payment.serviceId}
-                              </span>
-                            ) : (
-                              '-'
-                            )}
-                          </TableCell>
-                          <TableCell align="left"> {/* ADD align="left" */}
-                            {payment.grnId ? (
-                              <span
-                                style={{ color: 'blue', cursor: 'pointer' }}
-                                onClick={() => handleGrnClick(payment.grnId ?? '')}
-                              >
-                                {payment.grnRandomId}
-                              </span>
-                            ) : (
-                              '-'
-                            )}
-                          </TableCell>
-                          <TableCell align="left"> {/* ADD align="left" */}
-                            {payment.invoiceId ? (
-                              <span
-                                style={{ color: 'green', cursor: 'pointer' }}
-                                onClick={() => handleApClick(payment.invoiceId)}
-                              >
-                                {payment.apRandomId}
-                              </span>
-                            ) : (
-                              '-'
-                            )}
-                          </TableCell>
-                          <TableCell align="left">{payment.randomId}</TableCell> {/* ADD align="left" */}
-                          <TableCell align="left">{payment.vendorName}</TableCell> {/* ADD align="left" */}
-                          <TableCell align="left">{payment.invoiceType}</TableCell> {/* ADD align="left" */}
-                          <TableCell align="left">{payment.invoiceNo || '-'}</TableCell> {/* ADD align="left" */}
-                          <TableCell align="left"> {/* ADD align="left" */}
-                            {payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : ''}
-                          </TableCell>
-                          <TableCell align="right">{(payment.totalPrice || 0).toFixed(2)}</TableCell> {/* ADD align="right" */}
-                          <TableCell align="left"> {/* ADD align="left" */}
-                            <Tooltip
-                              title={
-                                Array.isArray(payment.itemDetails) && payment.itemDetails.length > 0 ? (
-                                  <React.Fragment>
-                                    {Object.entries(
-                                      payment.itemDetails.reduce<
-                                        Record<
-                                          string,
-                                          { sgst: number; cgst: number; igst: number; totalAmount: number; purchasetaxName: number }
+                        <TableRow key={payment.outgoingId || index} hover>
+                          {visibleColumns.map((column) => {
+                            switch (column.id) {
+                              case 'serialNo':
+                                return (
+                                  <TableCell key={column.id} align="center" sx={{ whiteSpace: 'nowrap' }}>
+                                    {(currentPage - 1) * pageSize + index + 1}
+                                  </TableCell>
+                                );
+                              case 'select':
+                                return (
+                                  <TableCell key={column.id} align="center" padding="checkbox" sx={{ whiteSpace: 'nowrap' }}>
+                                    <Checkbox
+                                      checked={selectedRows.includes(payment.outgoingId || '')}
+                                      onChange={() => handleRowSelect(payment.outgoingId || '')}
+                                      size="small"
+                                    />
+                                  </TableCell>
+                                );
+                              case 'poNo':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.poRandomId ? (
+                                      <span
+                                        style={{
+                                          color: 'purple',
+                                          cursor: 'pointer',
+                                          textDecoration: 'underline'
+                                        }}
+                                        onClick={() => payment.purchaseOrderId && handlePoClick(payment.purchaseOrderId)}
+                                      >
+                                        {payment.poRandomId}
+                                      </span>
+                                    ) : payment.serviceId ? (
+                                      <span
+                                        style={{
+                                          color: '#9c27b0',
+                                          cursor: 'pointer',
+                                          textDecoration: 'underline',
+                                          fontWeight: '600'
+                                        }}
+                                        onClick={() => handleServiceClick(payment.serOId)}
+                                      >
+                                        {payment.serviceId}
+                                      </span>
+                                    ) : '-'}
+                                  </TableCell>
+                                );
+                              case 'grnNo':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.grnId ? (
+                                      <span
+                                        style={{ color: 'blue', cursor: 'pointer' }}
+                                        onClick={() => handleGrnClick(payment.grnId ?? '')}
+                                      >
+                                        {payment.grnRandomId}
+                                      </span>
+                                    ) : '-'}
+                                  </TableCell>
+                                );
+                              case 'apNo':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.invoiceId ? (
+                                      <span
+                                        style={{ color: 'green', cursor: 'pointer' }}
+                                        onClick={() => handleApClick(payment.invoiceId)}
+                                      >
+                                        {payment.apRandomId}
+                                      </span>
+                                    ) : '-'}
+                                  </TableCell>
+                                );
+                              case 'outgoingNo':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.randomId}
+                                  </TableCell>
+                                );
+                              case 'vendorName':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap', minWidth: 150 }}>
+                                    {payment.vendorName}
+                                  </TableCell>
+                                );
+                              case 'type':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.invoiceType}
+                                  </TableCell>
+                                );
+                              case 'invoiceNo':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.invoiceNo || '-'}
+                                  </TableCell>
+                                );
+                              case 'invoiceDate':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : ''}
+                                  </TableCell>
+                                );
+                              case 'invoiceAmount':
+                                return (
+                                  <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                    {(payment.totalPrice || 0).toFixed(2)}
+                                  </TableCell>
+                                );
+                              case 'taxDetails':
+                                const taxValue = payment.taxDetails;
+                                const taxDisplay = taxValue !== null && taxValue !== undefined ? String(taxValue) : '-';
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    <Tooltip title={taxDisplay !== '-' ? taxDisplay : 'No tax details'} arrow>
+                                      <Typography variant="body2" sx={{ cursor: 'pointer', fontSize: '12px' }}>
+                                        {taxDisplay !== '-' ? (taxDisplay.length > 15 ? taxDisplay.substring(0, 15) + '...' : taxDisplay) : '-'}
+                                      </Typography>
+                                    </Tooltip>
+                                  </TableCell>
+                                );
+                              case 'discountAmount':
+                                return (
+                                  <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                    {(payment.discountDetails || 0).toFixed(2)}
+                                  </TableCell>
+                                );
+                              case 'total':
+                                return (
+                                  <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                    {(payment.payableAmount || 0).toFixed(2)}
+                                  </TableCell>
+                                );
+                              case 'paidAmount':
+                                return (
+                                  <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                    {(payment.paidAmount || 0).toFixed(2)}
+                                  </TableCell>
+                                );
+                              case 'remainingAmount':
+                                return (
+                                  <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
+                                    {(payment.totalPayableAmount || 0).toFixed(2)}
+                                  </TableCell>
+                                );
+                              case 'dueDays':
+                                return (
+                                  <TableCell
+                                    key={column.id}
+                                    align="center"
+                                    sx={{
+                                      fontWeight: 'bold',
+                                      color: getColorByDueDays(payment.intimationDays?.toString() || '0'),
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {payment.intimationDays}
+                                  </TableCell>
+                                );
+                              case 'paymentTerms':
+                                return (
+                                  <TableCell key={column.id} align="center" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.paymentTerms}
+                                  </TableCell>
+                                );
+                              case 'verifiedBy':
+                                return (
+                                  <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.verifiedByName}
+                                  </TableCell>
+                                );
+                              case 'verifiedDate':
+                                return (
+                                  <TableCell key={column.id} align="center" sx={{ whiteSpace: 'nowrap' }}>
+                                    {payment.verifiedDate ? format(new Date(payment.verifiedDate), 'dd-MM-yyyy HH:mm') : '-'}
+                                  </TableCell>
+                                );
+                              case 'action':
+                                return (
+                                  <TableCell key={column.id} align="center" sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
+                                    <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                                      <Tooltip title={payment.isVerified ? "Make Payment" : "Payment not allowed - Not Verified"}>
+                                        <span>
+                                          <IconButton
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => handleViewDetails(payment)}
+                                            disabled={selectedRows.length > 1 || !payment.isVerified}
+                                          >
+                                            <PaymentIcon fontSize="small" />
+                                          </IconButton>
+                                        </span>
+                                      </Tooltip>
+                                      <Tooltip title="Download PDF">
+                                        <IconButton
+                                          size="small"
+                                          color="primary"
+                                          onClick={() => handleDownload(payment.outgoingId ?? '')}
                                         >
-                                      >((acc, itemDetail) => {
-                                        const key = itemDetail.purchasetaxName;
-                                        if (!acc[key]) {
-                                          acc[key] = {
-                                            sgst: itemDetail.sgst,
-                                            cgst: itemDetail.cgst,
-                                            igst: itemDetail.igst,
-                                            totalAmount: itemDetail.taxAmount,
-                                            purchasetaxName: itemDetail.purchasetaxName,
-                                          };
-                                        } else {
-                                          acc[key].sgst += itemDetail.sgst;
-                                          acc[key].cgst += itemDetail.cgst;
-                                          acc[key].igst += itemDetail.igst;
-                                          acc[key].totalAmount += itemDetail.taxAmount;
-                                        }
-                                        return acc;
-                                      }, {})
-                                    ).map(([key, taxDetail], index) => {
-                                      const halfTaxPercentage = taxDetail.purchasetaxName / 2;
-                                      return (
-                                        <div key={key} style={{ fontSize: '14px' }}>
-                                          SGST ({halfTaxPercentage}%): {taxDetail.sgst.toFixed(2)} | CGST ({halfTaxPercentage}%):{' '}
-                                          {taxDetail.cgst.toFixed(2)} | IGST ({taxDetail.purchasetaxName}%): {taxDetail.igst.toFixed(2)} - Total:{' '}
-                                          {taxDetail.totalAmount.toFixed(2)}
-                                        </div>
-                                      );
-                                    })}
-                                  </React.Fragment>
-                                ) : (
-                                  <span style={{ fontSize: '14px' }}>No tax details available</span>
-                                )
-                              }
-                              placement="top"
-                              arrow
-                            >
-                              <Typography variant="body2" sx={{ cursor: 'pointer', fontSize: '12px !important' }}>
-                                {payment.taxDetails || '-'}
-                              </Typography>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell align="right">{(payment.discountDetails || 0).toFixed(2)}</TableCell> {/* ADD align="right" */}
-                          <TableCell align="right">{(payment.payableAmount || 0).toFixed(2)}</TableCell> {/* ADD align="right" */}
-                          <TableCell align="right">{(payment.paidAmount || 0).toFixed(2)}</TableCell> {/* ADD align="right" */}
-                          <TableCell align="right">{(payment.totalPayableAmount || 0).toFixed(2)}</TableCell> {/* ADD align="right" */}
-                          <TableCell
-                            align="center"
-                            sx={{
-                              fontWeight: 'bold',
-                              color: getColorByDueDays(payment.intimationDays?.toString() || '0'),
-                            }}
-                          >
-                            {payment.intimationDays}
-                          </TableCell>
-                          <TableCell align="center">{payment.paymentTerms}</TableCell> {/* ADD align="center" */}
-                          <TableCell align="left">{payment.verifiedByName}</TableCell> {/* ADD align="left" */}
-                          <TableCell align="center">
-                            {payment.verifiedDate ? format(new Date(payment.verifiedDate), 'dd-MM-yyyy HH:mm') : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Box display="flex" alignItems="center">
-                              <Tooltip title={payment.isVerified ? "Pay" : "Payment not allowed - Not Verified"}>
-                                <span> {/* Wrap with span for tooltip to work when disabled */}
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() => handleViewDetails(payment)}
-                                    disabled={selectedRows.length > 1 || !payment.isVerified}
-                                  >
-                                    <PaymentIcon />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-                              <Tooltip title="Download PDF">
-                                <IconButton
-                                  color="primary"
-                                  sx={{ ml: 0.1 }}
-                                  onClick={() => handleDownload(payment.outgoingId ?? '')}
-                                >
-                                  <PictureAsPdfIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title={tooltipTitle}>
-                                <span>
-                                  <IconButton
-                                    color="primary"
-                                    sx={{ ml: 0.1 }}
-                                    onClick={() => handleViewCreditNotes(
-                                      payment.outgoingId,
-                                      payment.grnId,  // Pass GRN ID for item-wise notes
-                                      payment.invoiceId // Pass AP Invoice ID
-                                    )}
-                                    disabled={isDisabled}
-                                  >
-                                    <DescriptionIcon />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
+                                          <PictureAsPdfIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title={tooltipTitle}>
+                                        <span>
+                                          <IconButton
+                                            size="small"
+                                            color="primary"
+                                            onClick={() => handleViewCreditNotes(payment.outgoingId, payment.grnId, payment.invoiceId)}
+                                            disabled={isDisabled}
+                                          >
+                                            <DescriptionIcon fontSize="small" />
+                                          </IconButton>
+                                        </span>
+                                      </Tooltip>
+                                    </Box>
+                                  </TableCell>
+                                );
+                              default:
+                                return null;
+                            }
+                          })}
                         </TableRow>
                       );
                     })
@@ -1790,124 +1363,56 @@ Description:<br />
                 </TableBody>
               </Table>
             </TableContainer>
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center' }}>
-                <IconButton
-                  onClick={handlePreviousPage}
-                  disabled={currentPage === 1}
-                  aria-label="Previous Page"
-                >
-                  <ChevronLeft />
-                </IconButton>
-                <Typography variant="body1" component="span" sx={{ mx: 2 }}>
-                  Page {currentPage} of {totalPages} {/* Show total pages */}
-                </Typography>
-                <IconButton
-                  onClick={handleNextPage}
-                  disabled={currentPage >= totalPages}
-                  aria-label="Next Page"
-                >
-                  <ChevronRight />
-                </IconButton>
-              </Box>
-            </Grid>
-          </Grid>
-          <DebitCreditNoteDialog />
-          <PODialog
-            open={poDialogOpen}
-            onClose={() => {
-              console.log('Dispatching setPoDialogOpen(false)'); // Debug: Log dispatch
-              dispatch(setPoDialogOpen(false));
-            }}
-            po={selectedPo}
-          />
-          <GrnDialog
-            open={viewItemsDialogOpen}
-            onClose={() => setViewItemsDialogOpen(false)}
-            grn={selectedGrn}
-          />
-          <ApInvoiceDialog
-            open={apDialogOpen}
-            onClose={handleCloseApDialog}
-            apInvoice={selectedApInvoice}
-          />
-          <BulkPaymentDialog
-            open={isBulkPaymentOpen}
-            onClose={() => setIsBulkPaymentOpen(false)}
-            selectedOutgoings={selectedOutgoings} // This now contains ALL selected across pages
-          />
-          {/* Dialog for choosing PDF or CSV */}
-          <Dialog open={openDialog} onClose={handleCloseDialog}>
-            <DialogTitle>Choose a file format</DialogTitle>
-            <DialogContent>
-              <Typography component="span">
-                Select the file format you want to download:
+
+            {/* Pagination */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2 }}>
+              <IconButton onClick={handlePreviousPage} disabled={currentPage === 1} size="small">
+                <ChevronLeft />
+              </IconButton>
+              <Typography variant="body2" sx={{ mx: 2 }}>
+                Page {currentPage} of {totalPages}
               </Typography>
-            </DialogContent>
-            <DialogActions>
-              {/* Button to download PDF */}
-              <Button
-                onClick={generateOutgoingInvoicePDF}
-                variant="contained"
-                color="primary"
-                startIcon={<PictureAsPdfIcon />}
-              >
-                Download PDF
-              </Button>
-              {/* Button to download CSV */}
-              <Button
-                onClick={generateOutgoingSummaryCSV}
-                variant="contained"
-                color="secondary"
-                startIcon={<DescriptionIcon />}
-              >
-                Download CSV
-              </Button>
-              {/* Cancel button */}
-              <Button onClick={handleCloseDialog} >
-                Cancel
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Snackbar
-            open={snackbarOpen}
-            message={snackbarMessage}
-            autoHideDuration={3000}
-            onClose={() => dispatch(clearSnackbarMessage())} // Manually close the snackbar when clicked
-          />
-          <ConfirmationDialog
-            open={confirmDialogOpen}
-            onClose={() => setConfirmDialogOpen(false)}
-            onConfirm={confirmDialogProps.onConfirm}
-            title={confirmDialogProps.title}
-            description={confirmDialogProps.description}
-          />
-          <SinglePaymentDialog
-            open={openDetailsDialog}
-            onClose={() => setOpenDetailsDialog(false)}
-            selectedOutgoing={selectedOutgoing}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            dateField={dateField}
-            onPaymentSuccess={() => {
-              if (!canRead) return;
-              dispatch(fetchOutgoings({
-                page: currentPage,
-                size: pageSize,
-                filterBy: dateField,
-                filterByAmount: true,
-              }));
-            }}
-          />
-          <ServiceDialog
-            open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            service={selectedService}
-          />
+              <IconButton onClick={handleNextPage} disabled={currentPage >= totalPages} size="small">
+                <ChevronRight />
+              </IconButton>
+            </Box>
+          </Grid>
         </Grid>
+        {/* Dialogs */}
+        <DebitCreditNoteDialog />
+        <PODialog open={poDialogOpen} onClose={() => dispatch(setPoDialogOpen(false))} po={selectedPo} />
+        <GrnDialog open={viewItemsDialogOpen} onClose={() => setViewItemsDialogOpen(false)} grn={selectedGrn} />
+        <ApInvoiceDialog open={apDialogOpen} onClose={handleCloseApDialog} apInvoice={selectedApInvoice} />
+        <BulkPaymentDialog open={isBulkPaymentOpen} onClose={() => setIsBulkPaymentOpen(false)} selectedOutgoings={selectedOutgoings} />
+
+        {/* Download Dialog */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
+          <DialogTitle>Choose File Format</DialogTitle>
+          <DialogContent>
+            <Typography>Select the file format you want to download:</Typography>
+          </DialogContent>
+          <DialogActions sx={{ p: 2, pt: 0 }}>
+            <Button onClick={generateOutgoingInvoicePDF} variant="contained" color="primary" startIcon={<PictureAsPdfIcon />} fullWidth sx={{ mb: 1 }}>
+              Download PDF
+            </Button>
+            <Button onClick={generateOutgoingSummaryCSV} variant="contained" color="secondary" startIcon={<DescriptionIcon />} fullWidth>
+              Download CSV
+            </Button>
+            <Button onClick={handleCloseDialog} color="inherit" fullWidth>
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Snackbar open={snackbarOpen} message={snackbarMessage} autoHideDuration={3000} onClose={() => dispatch(clearSnackbarMessage())} />
+        <ConfirmationDialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)} onConfirm={confirmDialogProps.onConfirm} title={confirmDialogProps.title} description={confirmDialogProps.description} />
+        <SinglePaymentDialog open={openDetailsDialog} onClose={() => setOpenDetailsDialog(false)} selectedOutgoing={selectedOutgoing} currentPage={currentPage} pageSize={pageSize} dateField={dateField} onPaymentSuccess={() => { if (!canRead) return; dispatch(fetchOutgoings({ page: currentPage, size: pageSize, filterBy: dateField, filterByAmount: true })); }} />
+        <ServiceDialog open={dialogOpen} onClose={() => setDialogOpen(false)} service={selectedService} />
+        <ColumnSettingsDialog open={columnSettingsOpen} onClose={() => setColumnSettingsOpen(false)} />
       </Box>
     </Box>
   );
 });
+
 OutgoingPaymentComponent.displayName = 'OutgoingPaymentComponent';
 export default OutgoingPaymentComponent;

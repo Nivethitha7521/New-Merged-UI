@@ -206,7 +206,7 @@ if (!isModuleVisible('yenerp', 'expensesubcategory')) return null;
               value={searchQuery}
               onChange={handleSearchChange}
               sx={{ 
-minWidth: 300,
+                minWidth: 300,
                 maxWidth: 400,
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2

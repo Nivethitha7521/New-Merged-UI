@@ -865,21 +865,20 @@ const ReturnActionButton = useCallback(({ payment, onClick, canEdit }: any) => {
                 documentNumber={selectedDocumentNumber}
             />
 
-            {/* Item-wise Return Dialog */}
-            {itemWiseDialogOpen && selectedGrnId && selectedGrnItems.length > 0 && (
-                <GrnReturnDialog
-                    dialogItems={selectedGrnItems}
-                    selectedGrnId={selectedGrnId}
-                    currentPage={currentPage}
-                    pageSize={pageSize}
-                    status="active"
-                    fromDate={fromDate.toISOString()}
-                    toDate={toDate.toISOString()}
-                    onReturnComplete={handleReturnComplete}
-                    onCancel={handleReturnCancel}
-                />
-            )}
-
+          {itemWiseDialogOpen && selectedGrnId && selectedGrnItems.length > 0 && (
+    <GrnReturnDialog
+        dialogItems={selectedGrnItems}
+        selectedGrnId={selectedGrnId}
+        grnOriginalAmount={maxDebitAmount}  // ← ADD THIS LINE
+        currentPage={currentPage}
+        pageSize={pageSize}
+        status="active"
+        fromDate={fromDate.toISOString()}
+        toDate={toDate.toISOString()}
+        onReturnComplete={handleReturnComplete}
+        onCancel={handleReturnCancel}
+    />
+)}
             {/* Amount-wise Return Dialog */}
             {amountWiseDialogOpen && selectedDocumentId && (
                 <AmountReturnDialog

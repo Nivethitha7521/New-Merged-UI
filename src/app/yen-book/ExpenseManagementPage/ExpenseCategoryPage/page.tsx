@@ -303,7 +303,7 @@ if (!isModuleVisible('yenerp', 'expensecategory')) return null;
         justifyContent="space-between"
         alignItems="center"
         sx={{ 
-          mb: 4,
+          mb: 4,ml:2,
           flexWrap: 'wrap',
           gap: 2
         }}
@@ -403,7 +403,7 @@ maxWidth: 300,
         </Box>
      </Box>
      
-
+<Box ml={2}>
       {/* Table Section */}
       <TableContainer 
         component={Paper} 
@@ -570,7 +570,7 @@ maxWidth: 300,
           </TableBody>
         </Table>
       </TableContainer>
-
+</Box>
       {/* Add/Edit Dialog */}
       <Dialog 
         open={dialogOpen !== "none"} 

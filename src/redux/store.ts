@@ -108,6 +108,8 @@ import { reportReducers } from '../redux/reportRegistry';
 import expenseCategoryReducer from '../features/yen-book/ExpenseCategorySlice';
 import expenseSubcategoryReducer from '../features/yen-book/ExpenseSubcategorySlice';
 import expenseNameReducer from '../features/yen-book/ExpenseNameSlice';
+import columnPreferenceReducer from '../../src/app/yen-book/OutgoingPaymentPage/Features/columnPreferencesSlice';
+import GRNSettingReducer from '../../src/app/yen-settings/Features/GRNSettingsSlice';
 const store = configureStore({
   reducer: {
     // locations: locationAreaReducer,
@@ -201,6 +203,8 @@ const store = configureStore({
         expenseCategory: expenseCategoryReducer,
     expenseName: expenseNameReducer,
     expenseSubcategory: expenseSubcategoryReducer,
+    outgoingColumnPreferences:columnPreferenceReducer,
+    grnPriceSettings:GRNSettingReducer,
     // addOns: addOnReducer,    
     // variants: variantReducer,
 

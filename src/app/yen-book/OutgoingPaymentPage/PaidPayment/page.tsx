@@ -30,11 +30,11 @@ import {
   fetchOutgoings,
   selectOutgoings,
   setSnackbarMessage,
-  setSnackbarOpen, 
-  clearSnackbarMessage, 
+  setSnackbarOpen,
+  clearSnackbarMessage,
   selectCurrentPage,
   selectPageSize,
-  selectTotalItems, 
+  selectTotalItems,
   setPagination,
   fetchVendorDetails
 } from "../../../../features/yen-purchase/Outgoing/outgoingPaymentSlice";
@@ -61,13 +61,15 @@ require('react-date-range/dist/theme/default.css');
 import moment from "moment";
 import { VendorDetail } from "@/Models/outgoingModel";
 import { AutocompleteChangeReason } from "@mui/material/Autocomplete";
+import PaymentHistoryDialog from "../Components/PaymentHistoryDialog";
 
 const PaidPaymentComponent = () => {
   const dispatch = useDispatch<AppDispatch>();
-   const { hasPermission, isModuleVisible } = usePermissions();
+  const { hasPermission, isModuleVisible } = usePermissions();
   const canReadpaymentdone = hasPermission("yenerp", "paymentdone", "read");
+const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
 
- 
+
   const { outgoings, loading, snackbarOpen, snackbarMessage, outgoingvendor } = useSelector(selectOutgoings);
   const { itemwise } = useSelector(selectGrn);
   const { businesses } = useSelector(selectBusinesses);
@@ -130,13 +132,13 @@ const PaidPaymentComponent = () => {
   // Calculate total paid amount from payment history
   const calculateTotalPaid = (payment: any) => {
     let totalPaid = 0;
-    
+
     if (payment.paymentHistory && payment.paymentHistory.length > 0) {
       payment.paymentHistory.forEach((history: any) => {
         totalPaid += history.amount || 0;
       });
     }
-    
+
     return totalPaid;
   };
 
@@ -152,12 +154,12 @@ const PaidPaymentComponent = () => {
     const appliedToDate = selectionRange?.endDate instanceof Date ? moment(selectionRange.endDate).endOf('day').toDate() : EndDate;
     dispatch(setPagination({ page: newPage, size: pageSize }));
     dispatch(fetchOutgoings({
-      page: newPage, 
-      size: pageSize, 
-      filterByStatus: true, 
-      filterBy: dateField, 
+      page: newPage,
+      size: pageSize,
+      filterByStatus: true,
+      filterBy: dateField,
       fromDate: appliedFromDate,
-      toDate: appliedToDate, 
+      toDate: appliedToDate,
       vendorName: selectedVendorName?.vendorName,
     }));
   };
@@ -235,10 +237,10 @@ const PaidPaymentComponent = () => {
     });
     setSelectedVendorName(null);
     dispatch(fetchOutgoings({
-      page: 1, 
-      size: pageSize, 
-      filterByStatus: true, 
-      filterBy: dateField, 
+      page: 1,
+      size: pageSize,
+      filterByStatus: true,
+      filterBy: dateField,
       fromDate: StartDate,
       toDate: EndDate
     }));
@@ -405,158 +407,158 @@ const PaidPaymentComponent = () => {
     document.body.removeChild(link);
     handleCloseDialog();
   };
-const handleDownload = async (outgoingId: string) => {
-  const outgoingdetail = paidOutgoings.find((outgoing) => outgoing.outgoingId === outgoingId);
-  if (!outgoingdetail) {
-    console.error('Outgoing not found!');
-    return;
-  }
-  const business = businesses.length > 0 ? businesses[0] : null;
-  const doc = new jsPDF();
-  let yOffset = 10;
-
-  // Header Section
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 0, 128);
-  doc.text('Payment Acknowledgement', 90, yOffset + 5);
-  const textWidth = doc.getTextWidth('Payment Acknowledgement');
-  doc.setDrawColor(0, 0, 128);
-  doc.line(90, yOffset + 7, 90 + textWidth, yOffset + 7);
-  yOffset += 10;
-
-  // Add Business Logo if available
-  if (business && business.imageUrl) {
-    try {
-      doc.addImage(business.imageUrl, 'JPEG', 20, 5, 20, 20);
-    } catch (e) {
-      console.error("Image failed to load:", e);
+  const handleDownload = async (outgoingId: string) => {
+    const outgoingdetail = paidOutgoings.find((outgoing) => outgoing.outgoingId === outgoingId);
+    if (!outgoingdetail) {
+      console.error('Outgoing not found!');
+      return;
     }
-  }
+    const business = businesses.length > 0 ? businesses[0] : null;
+    const doc = new jsPDF();
+    let yOffset = 10;
 
-  // FIXED: Use calculateTotalPaid for paid amount
-  const totalPaidAmount = calculateTotalPaid(outgoingdetail);
+    // Header Section
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 128);
+    doc.text('Payment Acknowledgement', 90, yOffset + 5);
+    const textWidth = doc.getTextWidth('Payment Acknowledgement');
+    doc.setDrawColor(0, 0, 128);
+    doc.line(90, yOffset + 7, 90 + textWidth, yOffset + 7);
+    yOffset += 10;
 
-  // Vendor and Business Details
-  const vendorDetailsRows = [
-    [
-      `Vendor Name: ${outgoingdetail.vendorName || ''}\n` +
-      `GSTIN: ${outgoingdetail.gstNumber || ''}\n` +
-      `Address: ${outgoingdetail.address || ''}\n` +
-      `City: ${outgoingdetail.city || ''}\n` +
-      `State: ${outgoingdetail.state || ''}\n` +
-      `Country: ${outgoingdetail.country || ''}\n` +
-      `Email: ${outgoingdetail.contactpersonEmail || ''}`,
-      `Business Name: ${business?.companyName || ''}\n` +
-      `GSTIN: ${business?.gstIn || ''}\n` +
-      `Address: ${business?.address1 || ''}\n` +
-      `Phone: ${business?.phoneNo || ''}\n` +
-      `Email: ${business?.emailId || ''}`,
-      `Outgoing No: ${outgoingdetail.randomId}\n` +
-      `Date: ${outgoingdetail.createdDate
-        ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy')
-        : 'Not Provided'}\n` +
-      `Total Paid: ${totalPaidAmount.toFixed(2)}`
-    ]
-  ];
+    // Add Business Logo if available
+    if (business && business.imageUrl) {
+      try {
+        doc.addImage(business.imageUrl, 'JPEG', 20, 5, 20, 20);
+      } catch (e) {
+        console.error("Image failed to load:", e);
+      }
+    }
 
-  doc.autoTable({
-    head: [['Vendor Details', 'Business Details', 'Outgoing Payment Details']],
-    body: vendorDetailsRows,
-    startY: yOffset,
-    theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 4, halign: 'left', valign: 'top', overflow: 'linebreak' },
-    columnStyles: { 0: { cellWidth: 60.6 }, 1: { cellWidth: 60.6 }, 2: { cellWidth: 60.6 } },
-    headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255], fontStyle: 'bold' },
-    bodyStyles: { lineWidth: 0.1, lineColor: [0, 0, 0], textColor: [0, 0, 0], minCellHeight: 15 },
-    tableLineColor: [0, 0, 0],
-    tableLineWidth: 0.1,
-  });
+    // FIXED: Use calculateTotalPaid for paid amount
+    const totalPaidAmount = calculateTotalPaid(outgoingdetail);
 
-  yOffset = doc.autoTable.previous.finalY;
+    // Vendor and Business Details
+    const vendorDetailsRows = [
+      [
+        `Vendor Name: ${outgoingdetail.vendorName || ''}\n` +
+        `GSTIN: ${outgoingdetail.gstNumber || ''}\n` +
+        `Address: ${outgoingdetail.address || ''}\n` +
+        `City: ${outgoingdetail.city || ''}\n` +
+        `State: ${outgoingdetail.state || ''}\n` +
+        `Country: ${outgoingdetail.country || ''}\n` +
+        `Email: ${outgoingdetail.contactpersonEmail || ''}`,
+        `Business Name: ${business?.companyName || ''}\n` +
+        `GSTIN: ${business?.gstIn || ''}\n` +
+        `Address: ${business?.address1 || ''}\n` +
+        `Phone: ${business?.phoneNo || ''}\n` +
+        `Email: ${business?.emailId || ''}`,
+        `Outgoing No: ${outgoingdetail.randomId}\n` +
+        `Date: ${outgoingdetail.createdDate
+          ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy')
+          : 'Not Provided'}\n` +
+        `Total Paid: ${totalPaidAmount.toFixed(2)}`
+      ]
+    ];
 
-  // Payment History Section
-  if (outgoingdetail.paymentHistory && outgoingdetail.paymentHistory.length > 0) {
-    const paymentHeaders = ['Date', 'Payment Method', 'Reference No', 'Type', 'Amount'];
-    const paymentRows = outgoingdetail.paymentHistory.map((payment: any) => [
-      payment.date ? format(new Date(payment.date), 'dd-MM-yyyy') : 'N/A',
-      payment.paymentMethod || 'N/A',
-      payment.neftNo || payment.rtgsNo || payment.chequeNo || 'N/A',
-      payment.paymentType || 'Regular',
-            (payment.amount || 0).toFixed(2),
-    ]);
-    // Add total row
-  
     doc.autoTable({
-      head: [paymentHeaders],
-      body: paymentRows,
+      head: [['Vendor Details', 'Business Details', 'Outgoing Payment Details']],
+      body: vendorDetailsRows,
       startY: yOffset,
       theme: 'grid',
-      styles: { fontSize: 8, halign: 'center', cellPadding: 2 },
-      headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255], lineWidth: 0.1, lineColor: [0, 0, 0] },
-      bodyStyles: { lineColor: [0, 0, 0], lineWidth: 0.1, textColor: [0, 0, 0] },
-      columnStyles: {
-        0: { halign: 'left' },
-        1: { halign: 'left' },
-        2: { halign: 'left' },
-        3: { halign: 'center' },
-         4: { halign: 'right' },
-      },
+      styles: { fontSize: 9, cellPadding: 4, halign: 'left', valign: 'top', overflow: 'linebreak' },
+      columnStyles: { 0: { cellWidth: 60.6 }, 1: { cellWidth: 60.6 }, 2: { cellWidth: 60.6 } },
+      headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255], fontStyle: 'bold' },
+      bodyStyles: { lineWidth: 0.1, lineColor: [0, 0, 0], textColor: [0, 0, 0], minCellHeight: 15 },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.1,
     });
+
     yOffset = doc.autoTable.previous.finalY;
-  }
 
-  // Summary Section
-  const discount = outgoingdetail.discountDetails || 0;
-  const totalPayableAmount = outgoingdetail.totalPayableAmount || 0;
-  const summaryTable = [
-    ['Discount', discount.toFixed(2)],
-    ['Total Paid Amount', totalPaidAmount.toFixed(2)],
-    ['Total Payable Amount', totalPayableAmount.toFixed(2)]
-  ];
-  doc.autoTable({
-    head: [['Description', 'Amount']],
-    body: summaryTable,
-    startY: yOffset,
-    theme: 'grid',
-    styles: { fontSize: 10, cellPadding: 3, overflow: 'linebreak', halign: 'right' },
-    columnStyles: {
-      0: { cellWidth: 90, halign: 'right' },
-      1: { cellWidth: 91.7, halign: 'right' }
-    },
-    headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 },
-    bodyStyles: { lineColor: [0, 0, 0], lineWidth: 0.1 },
-  });
+    // Payment History Section
+    if (outgoingdetail.paymentHistory && outgoingdetail.paymentHistory.length > 0) {
+      const paymentHeaders = ['Date', 'Payment Method', 'Reference No', 'Type', 'Amount'];
+      const paymentRows = outgoingdetail.paymentHistory.map((payment: any) => [
+        payment.date ? format(new Date(payment.date), 'dd-MM-yyyy') : 'N/A',
+        payment.paymentMethod || 'N/A',
+        payment.neftNo || payment.rtgsNo || payment.chequeNo || 'N/A',
+        payment.paymentType || 'Regular',
+        (payment.amount || 0).toFixed(2),
+      ]);
+      // Add total row
 
-  yOffset = doc.autoTable.previous.finalY + 10;
+      doc.autoTable({
+        head: [paymentHeaders],
+        body: paymentRows,
+        startY: yOffset,
+        theme: 'grid',
+        styles: { fontSize: 8, halign: 'center', cellPadding: 2 },
+        headStyles: { fillColor: [0, 0, 128], textColor: [255, 255, 255], lineWidth: 0.1, lineColor: [0, 0, 0] },
+        bodyStyles: { lineColor: [0, 0, 0], lineWidth: 0.1, textColor: [0, 0, 0] },
+        columnStyles: {
+          0: { halign: 'left' },
+          1: { halign: 'left' },
+          2: { halign: 'left' },
+          3: { halign: 'center' },
+          4: { halign: 'right' },
+        },
+      });
+      yOffset = doc.autoTable.previous.finalY;
+    }
 
-  // Add PAID logo below the table
-  const statusImage = '/images/paid.jpg';
-  if (statusImage) {
-    const img = new Image();
-    img.src = statusImage;
-    await new Promise<void>((resolve, reject) => {
-      img.onload = () => {
-        doc.addImage(img, 'JPG', 150, yOffset,30, 25);
-        resolve();
-      };
-      img.onerror = reject;
+    // Summary Section
+    const discount = outgoingdetail.discountDetails || 0;
+    const totalPayableAmount = outgoingdetail.totalPayableAmount || 0;
+    const summaryTable = [
+      ['Discount', discount.toFixed(2)],
+      ['Total Paid Amount', totalPaidAmount.toFixed(2)],
+      ['Total Payable Amount', totalPayableAmount.toFixed(2)]
+    ];
+    doc.autoTable({
+      head: [['Description', 'Amount']],
+      body: summaryTable,
+      startY: yOffset,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3, overflow: 'linebreak', halign: 'right' },
+      columnStyles: {
+        0: { cellWidth: 90, halign: 'right' },
+        1: { cellWidth: 91.7, halign: 'right' }
+      },
+      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.1 },
+      bodyStyles: { lineColor: [0, 0, 0], lineWidth: 0.1 },
     });
-  }
 
-  const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setTextColor(0);
-    const pageY = doc.internal.pageSize.height - 10;
-    const computerGeneratedY = pageY - 10;
-    doc.text("This is computer generated", doc.internal.pageSize.width / 2, computerGeneratedY, { align: 'center' });
-    doc.text(`Page ${i} of ${totalPages}`, doc.internal.pageSize.width / 2, pageY, { align: 'center' });
-  }
-  doc.save(`${outgoingdetail.vendorName} ${outgoingdetail.randomId}_PaymentDetails.pdf`);
-};
- const handleViewDetails = (index: number) => {
+    yOffset = doc.autoTable.previous.finalY + 10;
+
+    // Add PAID logo below the table
+    const statusImage = '/images/paid.jpg';
+    if (statusImage) {
+      const img = new Image();
+      img.src = statusImage;
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          doc.addImage(img, 'JPG', 150, yOffset, 30, 25);
+          resolve();
+        };
+        img.onerror = reject;
+      });
+    }
+
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(0);
+      const pageY = doc.internal.pageSize.height - 10;
+      const computerGeneratedY = pageY - 10;
+      doc.text("This is computer generated", doc.internal.pageSize.width / 2, computerGeneratedY, { align: 'center' });
+      doc.text(`Page ${i} of ${totalPages}`, doc.internal.pageSize.width / 2, pageY, { align: 'center' });
+    }
+    doc.save(`${outgoingdetail.vendorName} ${outgoingdetail.randomId}_PaymentDetails.pdf`);
+  };
+  const handleViewDetails = (index: number) => {
     setSelectedOutgoing(paidOutgoings[index]);
     setOpenDetailsDialog(true);
   };
@@ -564,7 +566,7 @@ const handleDownload = async (outgoingId: string) => {
   const handleCloseDetailsDialog = () => {
     setOpenDetailsDialog(false);
   };
- if (!canReadpaymentdone) {
+  if (!canReadpaymentdone) {
     return (
       <Box p={2}>
         <Typography color="error">
@@ -597,8 +599,8 @@ const handleDownload = async (outgoingId: string) => {
                 </Link>
               )}
             </Grid>
-           
-          {isModuleVisible("yenerp", "partialpayment") && (
+
+            {isModuleVisible("yenerp", "partialpayment") && (
               <Grid item>
                 <Link
                   href={"/yen-book/OutgoingPaymentPage/PendingPayment"
@@ -610,7 +612,7 @@ const handleDownload = async (outgoingId: string) => {
                 </Link>
               </Grid>
             )}
-           {isModuleVisible("yenerp", "paymentdone") && (
+            {isModuleVisible("yenerp", "paymentdone") && (
               <Grid item>
                 <Link href={"/yen-book/OutgoingPaymentPage/PaidPayment"}>
                   <Button
@@ -628,7 +630,8 @@ const handleDownload = async (outgoingId: string) => {
                 </Link>
               </Grid>
             )}
-             {isModuleVisible("yenerp", "ledger") && (
+        
+            {isModuleVisible("yenerp", "ledger") && (
               <Grid item>
                 <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
                   <Button variant="contained" color="primary">
@@ -721,10 +724,23 @@ const handleDownload = async (outgoingId: string) => {
                 </Typography>
               </Box>
             </Grid>
+  
 
             <Grid item xs sx={{ flexGrow: 1 }} />
-
+            {isModuleVisible("yenerp", "paymenthistory") && (
+  <Grid item>
+    <Button 
+      variant="contained" 
+      color="primary" 
+      sx={{ mr: 1 }}
+      onClick={() => setOpenPaymentHistoryDialog(true)}
+    >
+      Payment History
+    </Button>
+  </Grid>
+)}
             <Grid item xs="auto">
+              
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <IconButton
                   onClick={handleOpenDialog}
@@ -808,7 +824,7 @@ const handleDownload = async (outgoingId: string) => {
                             </IconButton>
                           </Tooltip>
                           <IconButton
-                            color="primary" 
+                            color="primary"
                             sx={{ ml: 0.2 }}
                             onClick={() => handleDownload(payment.outgoingId ?? '')}
                           >
@@ -821,7 +837,7 @@ const handleDownload = async (outgoingId: string) => {
                 </TableBody>
               </Table>
             </TableContainer>
-            
+
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', mt: 0.5 }}>
                 <IconButton
@@ -855,7 +871,7 @@ const handleDownload = async (outgoingId: string) => {
                 {/* Basic Information */}
                 <Table>
                   <TableBody>
-                     <TableRow>
+                    <TableRow>
                       <TableCell><strong>Outgoing Reference:</strong></TableCell>
                       <TableCell>{selectedOutgoing.randomId}</TableCell>
                     </TableRow>
@@ -973,6 +989,10 @@ const handleDownload = async (outgoingId: string) => {
             </Button>
           </DialogActions>
         </Dialog>
+<PaymentHistoryDialog 
+  open={openPaymentHistoryDialog} 
+  onClose={() => setOpenPaymentHistoryDialog(false)} 
+/>
 
         <Snackbar
           open={snackbarOpen}

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button, Dialog, DialogContent, DialogTitle, Box } from '@mui/material';
 import { addDays, startOfYear, endOfYear, startOfDay, endOfDay } from 'date-fns';
-import 'react-date-range/dist/styles.css'; // Main style file
-import 'react-date-range/dist/theme/default.css'; // Theme CSS file
+require('react-date-range/dist/styles.css');
+require('react-date-range/dist/theme/default.css');
 import { DateRangePicker, RangeKeyDict } from 'react-date-range';
 
 interface SelectionRange {

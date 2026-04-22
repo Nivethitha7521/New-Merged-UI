@@ -157,11 +157,11 @@ const LedgerPage = () => {
 
   const generateLedgerPDF = async () => {
     const doc = new jsPDF();
- 
+
     // Header - white background (drawn first to avoid overwriting the logo)
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 50, 'F');
- 
+
     // Load and add business logo - Added AFTER white background to ensure it's visible on top
     try {
       const business = businesses.length > 0 ? businesses[0] : null;
@@ -171,13 +171,13 @@ const LedgerPage = () => {
     } catch (error) {
       console.log('Logo not available, proceeding without logo');
     }
- 
+
     // Header text
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
     doc.text("LEDGER STATEMENT", 105, 35, { align: 'center' });
- 
+
     // Business info
     doc.setFontSize(9);
     const businessAddress = getBusinessAddress();
@@ -187,10 +187,10 @@ const LedgerPage = () => {
     });
     // Reset text color
     doc.setTextColor(0, 0, 0);
- 
+
     // Calculate vendor section height dynamically based on content
     let vendorSectionHeight = 25; // Minimum height
- 
+
     // Calculate additional height needed for vendor details
     if (selectedVendorName) {
       const vendor = outgoingVendor.find(v => v.vendorName === selectedVendorName);
@@ -199,46 +199,46 @@ const LedgerPage = () => {
         // vendorSectionHeight remains minimal; address/GST sections skipped below
       }
     }
- 
+
     // Vendor and period info section with consistent border
     const vendorSectionY = 55;
     const vendorSectionWidth = 180;
- 
+
     doc.setFillColor(255, 255, 255);
     doc.rect(15, vendorSectionY, vendorSectionWidth, vendorSectionHeight, 'F');
- 
+
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.2);
     doc.rect(15, vendorSectionY, vendorSectionWidth, vendorSectionHeight);
- 
+
     // Vendor details
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
- 
+
     let currentY = vendorSectionY + 10;
- 
+
     // Vendor information
     if (selectedVendorName) {
       doc.text(`Vendor: ${selectedVendorName}`, 20, currentY);
       currentY += 6;
-     
+
       const vendor = outgoingVendor.find(v => v.vendorName === selectedVendorName);
       if (vendor) {
         // GSTIN: Skipped as not available in VendorNameGet
         // Address: Skipped as not available in VendorNameGet
       }
     }
- 
+
     // Period information
     const startDate = moment(selectionRange.startDate).format('DD-MM-YYYY');
     const endDate = moment(selectionRange.endDate).format('DD-MM-YYYY');
     doc.text(`Period: ${startDate} to ${endDate}`, 20, currentY);
     currentY += 6;
- 
+
     // Table section with same border width as vendor section
     const tableSectionY = vendorSectionY + vendorSectionHeight + 10;
     const tableSectionWidth = vendorSectionWidth; // Same width as vendor section
- 
+
     // Prepare table data - SHOW NEGATIVE VALUES PROPERLY
     const columns = [
       { header: 'Date', dataKey: 'date' },
@@ -270,7 +270,7 @@ const LedgerPage = () => {
     // Calculate totals from actual transactions
     const totalDebit = transactions?.reduce((sum, t) => sum + t.debit_amount, 0) || 0;
     const totalCredit = transactions?.reduce((sum, t) => sum + t.credit_amount, 0) || 0;
- 
+
     // Use the final balance from the last transaction
     const periodFinalBalance = transactions?.[transactions.length - 1]?.balance || 0;
     // Format final balance with negative sign
@@ -338,38 +338,38 @@ const LedgerPage = () => {
       didDrawPage: (data: any) => {
         // Draw border around the entire table section
         const tableHeight = data.cursor?.y ? data.cursor.y - tableSectionY : 100;
-       
+
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(0.2);
         doc.rect(15, tableSectionY, tableSectionWidth, tableHeight);
-       
+
         // Footer
         const pageHeight = doc.internal.pageSize.height;
         doc.setFillColor(255, 255, 255);
         doc.rect(0, pageHeight - 20, 210, 20, 'F');
-       
+
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
-       
+
         const currentPage = data.pageNumber;
         const totalPages = (doc as any).internal.getNumberOfPages();
-       
+
         doc.text(`Page ${currentPage}`, 105, pageHeight - 12, { align: 'center' });
         doc.text(`Generated on ${moment().format('DD-MM-YYYY HH:mm')}`, 105, pageHeight - 6, { align: 'center' });
       }
     });
     // Alternative method to add footer and table borders to all pages
     const totalPages = (doc as any).internal.getNumberOfPages();
- 
+
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       const pageHeight = doc.internal.pageSize.height;
-     
+
       // White footer background
       doc.setFillColor(255, 255, 255);
       doc.rect(0, pageHeight - 20, 210, 20, 'F');
-     
+
       // Footer text
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(8);
@@ -385,7 +385,7 @@ const LedgerPage = () => {
 
   const generateLedgerCSV = () => {
     const columns = ['Date', 'Particulars', 'Status', 'Debit', 'Credit', 'Balance'];
-   
+
     // Use balance directly from API - SHOW NEGATIVE VALUES
     const rows = transactions?.map((transaction: Transaction) => {
       let balanceDisplay = '0.00';
@@ -454,15 +454,15 @@ const LedgerPage = () => {
   const hasInvoices = transactions?.some(t => t.type === 'invoice');
   console.log('Has invoice transactions:', hasInvoices);
   const canReadLedger = hasPermission("yenerp", "ledger", "read");
-if (!canReadLedger) {
-  return (
-    <Box p={2}>
-      <Typography color="error">
-        You do not have access to the Ledger module.
-      </Typography>
-    </Box>
-  );
-}
+  if (!canReadLedger) {
+    return (
+      <Box p={2}>
+        <Typography color="error">
+          You do not have access to the Ledger module.
+        </Typography>
+      </Box>
+    );
+  }
   if (loading) {
     return (
       <Container maxWidth="lg">
@@ -491,66 +491,66 @@ if (!canReadLedger) {
   return (
     <Box sx={{ p: 1, backgroundColor: 'white' }}>
       <YenBookPage />
-      
+
       {/* Navigation Buttons */}
       <Box>
         <Box sx={{ pl: 2, mb: 2, mt: 1 }}>
           <Grid container spacing={1} alignItems="center">
             {isModuleVisible("yenerp", "outgoingpayment") && (
-            <Grid item>
-              <Link href="/yen-book/OutgoingPaymentPage" passHref>
-                <Button variant="contained" size="small">
-                  Outgoing Payment
-                </Button>
-              </Link>
-            </Grid>
+              <Grid item>
+                <Link href="/yen-book/OutgoingPaymentPage" passHref>
+                  <Button variant="contained" size="small">
+                    Outgoing Payment
+                  </Button>
+                </Link>
+              </Grid>
             )}
             <Grid item>
               {isModuleVisible("yenerp", "advancepayment") && (
-              <Link href="/yen-book/OutgoingPaymentPage/PreOutgoing" passHref>
-                <Button variant="contained" size="small">
-                  Advance Payment
-                </Button>
-              </Link>
+                <Link href="/yen-book/OutgoingPaymentPage/PreOutgoing" passHref>
+                  <Button variant="contained" size="small">
+                    Advance Payment
+                  </Button>
+                </Link>
               )}
             </Grid>
             {isModuleVisible("yenerp", "partialpayment") && (
-            <Grid item>
-              <Link href="/yen-book/OutgoingPaymentPage/PendingPayment" passHref>
-                <Button variant="contained" size="small">
-                  Partial Payment
-                </Button>
-              </Link>
-              
-            </Grid>
+              <Grid item>
+                <Link href="/yen-book/OutgoingPaymentPage/PendingPayment" passHref>
+                  <Button variant="contained" size="small">
+                    Partial Payment
+                  </Button>
+                </Link>
+
+              </Grid>
             )}
             <Grid item>
-               {isModuleVisible("yenerp", "paymentdone") && (
-              <Link href="/yen-book/OutgoingPaymentPage/PaidPayment" passHref>
-                <Button variant="contained" size="small">
-                  Payment Done
+              {isModuleVisible("yenerp", "paymentdone") && (
+                <Link href="/yen-book/OutgoingPaymentPage/PaidPayment" passHref>
+                  <Button variant="contained" size="small">
+                    Payment Done
+                  </Button>
+                </Link>
+              )}
+            </Grid>
+            {isModuleVisible("yenerp", "ledger") && (
+              <Grid item>
+                <Button variant="contained" size="small" sx={{
+                  backgroundColor: 'white',
+                  color: 'black',
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.8)' },
+                }}>
+                  Ledger
                 </Button>
-              </Link>
-               )}
-            </Grid>
-             {isModuleVisible("yenerp", "ledger") && (
-            <Grid item>
-              <Button variant="contained" size="small" sx={{
-                backgroundColor: 'white',
-                color: 'black',
-                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.8)' },
-              }}>
-                Ledger
-              </Button>
-            </Grid>
-             )}
+              </Grid>
+            )}
             <Grid item>
               {isModuleVisible("yenerp", "purchasereturn") && (
-              <Link href="/yen-book/OutgoingPaymentPage/PurchaseReturn" passHref>
-                <Button variant="contained" size="small">
-                  Purchase Return
-                </Button>
-              </Link>
+                <Link href="/yen-book/OutgoingPaymentPage/PurchaseReturn" passHref>
+                  <Button variant="contained" size="small">
+                    Purchase Return
+                  </Button>
+                </Link>
               )}
             </Grid>
           </Grid>
@@ -628,7 +628,7 @@ if (!canReadLedger) {
                     onClick={toggleTableFullScreen}
                     size="medium"
                     disabled={!transactions || transactions.length === 0}
-                    sx={{ 
+                    sx={{
                       backgroundColor: isTableFullScreen ? 'rgba(25, 118, 210, 0.08)' : 'transparent'
                     }}
                   >
@@ -718,7 +718,7 @@ if (!canReadLedger) {
         )}
 
         {/* Ledger Table - Filtered */}
-        <Box sx={{ 
+        <Box sx={{
           position: 'relative',
           ...(isTableFullScreen && {
             position: 'fixed',
@@ -734,7 +734,7 @@ if (!canReadLedger) {
         }}>
           {/* Floating button ONLY in fullscreen mode */}
           {isTableFullScreen && (
-            <Box sx={{ 
+            <Box sx={{
               position: 'fixed',
               top: 16,
               right: 16,
@@ -742,8 +742,8 @@ if (!canReadLedger) {
               backgroundColor: 'rgba(255, 255, 255, 0.9)',
               borderRadius: '50%',
             }}>
-              <IconButton 
-                onClick={toggleTableFullScreen} 
+              <IconButton
+                onClick={toggleTableFullScreen}
                 color="primary"
                 size="small"
               >
@@ -752,8 +752,8 @@ if (!canReadLedger) {
             </Box>
           )}
 
-          <Paper sx={{ 
-            mb: 2, 
+          <Paper sx={{
+            mb: 2,
             mx: 1,
             ...(isTableFullScreen && {
               mx: 0,
@@ -779,38 +779,38 @@ if (!canReadLedger) {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
                       ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>S.No</TableCell>
-                    <TableCell sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
                       ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>Date</TableCell>
-                    <TableCell sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
                       ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>Particulars</TableCell>
-                    <TableCell sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
-                      ...(isTableFullScreen && {  padding: '20px 16px' })
+                      ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>Status</TableCell>
-                    <TableCell align="right" sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell align="right" sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
-                      ...(isTableFullScreen && {padding: '20px 16px' })
+                      ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>Debit (₹)</TableCell>
-                    <TableCell align="right" sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell align="right" sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
                       ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>Credit (₹)</TableCell>
-                    <TableCell align="right" sx={{ 
-                      fontWeight: 'bold', 
+                    <TableCell align="right" sx={{
+                      fontWeight: 'bold',
                       backgroundColor: '#f5f5f5',
                       ...(isTableFullScreen && { padding: '20px 16px' })
                     }}>Balance (₹)</TableCell>
@@ -824,8 +824,8 @@ if (!canReadLedger) {
                           key={`${transaction.reference_id}-${index}-${transaction.type}`}
                           hover
                           sx={{
-                            backgroundColor: transaction.type === 'opening_balance' ? '#e3f2fd' : 
-                                           transaction.type === 'invoice' ? '#f3e5f5' : 'inherit',
+                            backgroundColor: transaction.type === 'opening_balance' ? '#e3f2fd' :
+                              transaction.type === 'invoice' ? '#f3e5f5' : 'inherit',
                             ...(isTableFullScreen && {
                               '&:hover': {
                                 backgroundColor: 'rgba(0, 0, 0, 0.04) !important',
@@ -851,9 +851,9 @@ if (!canReadLedger) {
                               Type: {transaction.type}
                             </Typography>
                           </TableCell>
-                          <TableCell sx={{ 
+                          <TableCell sx={{
                             fontWeight: 'medium',
-                            ...(isTableFullScreen && {  padding: '16px' })
+                            ...(isTableFullScreen && { padding: '16px' })
                           }}>
                             {transaction.status || 'N/A'}
                           </TableCell>
@@ -863,9 +863,9 @@ if (!canReadLedger) {
                           <TableCell align="right" sx={isTableFullScreen ? { padding: '16px' } : {}}>
                             {transaction.credit_amount > 0 ? formatAmount(transaction.credit_amount) : '0.00'}
                           </TableCell>
-                          <TableCell 
-                            align="right" 
-                            sx={{ 
+                          <TableCell
+                            align="right"
+                            sx={{
                               fontWeight: 'medium',
                               color: transaction.balance < 0 ? '#d32f2f' : transaction.balance > 0 ? '#2e7d32' : 'inherit',
                               ...(isTableFullScreen && { padding: '16px' })
@@ -880,7 +880,7 @@ if (!canReadLedger) {
                           </TableCell>
                         </TableRow>
                       ))}
-                      <TableRow sx={{ 
+                      <TableRow sx={{
                         backgroundColor: '#f8f9fa',
                         ...(isTableFullScreen && {
                           '& .MuiTableCell-root': {
@@ -896,9 +896,9 @@ if (!canReadLedger) {
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>
                           {formatAmount(totalCredit)}
                         </TableCell>
-                        <TableCell 
-                          align="right" 
-                          sx={{ 
+                        <TableCell
+                          align="right"
+                          sx={{
                             fontWeight: 'bold',
                             color: finalBalance < 0 ? '#d32f2f' : finalBalance > 0 ? '#2e7d32' : 'inherit'
                           }}
@@ -914,16 +914,16 @@ if (!canReadLedger) {
                     </>
                   ) : (
                     <TableRow>
-                      <TableCell 
-                        colSpan={7} 
-                        align="center" 
-                        sx={{ 
+                      <TableCell
+                        colSpan={7}
+                        align="center"
+                        sx={{
                           py: 4,
-                          ...(isTableFullScreen && {  py: 10 })
+                          ...(isTableFullScreen && { py: 10 })
                         }}
                       >
-                        <Typography 
-                          variant={isTableFullScreen ? "h5" : "h5"} 
+                        <Typography
+                          variant={isTableFullScreen ? "h5" : "h5"}
                           color="textSecondary"
                         >
                           {selectedVendorName
@@ -973,8 +973,8 @@ if (!canReadLedger) {
             >
               Download CSV
             </Button>
-            <Button 
-              onClick={() => setOpenDialog(false)} 
+            <Button
+              onClick={() => setOpenDialog(false)}
               variant="text"
               sx={{ ml: 1 }}
             >

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Box,
   Button,
@@ -22,6 +22,7 @@ import {
   IconButton,
   MenuItem,
   CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -47,6 +48,7 @@ import Link from "next/link";
 import VendorDialog from "@/components/yen-purchase/vendorcomponent/vendorDialog";
 import { VendorNameGet, AdvancePayment } from "@/Models/advanceModel";
 import AddIcon from "@mui/icons-material/Add";
+import PaymentIcon from "@mui/icons-material/Payment";
 import { format } from "date-fns";
 import { fetchBank } from "@/features/yen-purchase/Outgoing/outgoingPaymentSlice";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -55,10 +57,12 @@ const AdvancePaymentPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, isModuleVisible } = usePermissions();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openVendorDialog, setOpenVendorDialog] = useState(false);
+  const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
+  const isFetchingRef = useRef(false);
 
   const canRead = hasPermission("yenerp", "advancepayment", "read");
   const canAdd = hasPermission("yenerp", "advancepayment", "add");
-  const isVisible = isModuleVisible("yenerp", "advancepayment");
 
   const { vendorName, loading: vendorLoading, dialogOpen } = useSelector(selectVendorItems);
   const { advances, loading: paymentLoading, snackbarMessage, snackbarOpen } = useSelector(selectAdvances);
@@ -75,70 +79,79 @@ const AdvancePaymentPage: React.FC = () => {
   );
 
   // Improved unique advances with better duplicate detection
-  const getUniqueAdvances = (advances: AdvancePayment[]) => {
+  const getUniqueAdvances = useCallback((advances: AdvancePayment[]) => {
     const seen = new Set();
     return advances.filter(payment => {
       const key = `${payment.advanceId}-${payment.vendorName}-${payment.createdDate}-${payment.amount}`;
       if (seen.has(key)) {
-        console.warn(`Duplicate advance payment detected: ${key}`);
         return false;
       }
       seen.add(key);
       return true;
     });
-  };
+  }, []);
 
   const displayAdvances = getUniqueAdvances(advances);
 
+  // Single useEffect for initial load - runs only once
   useEffect(() => {
-    dispatch(fetchVendorNames());
-  
-    dispatch(
-      fetchAdvances({
-        filterBy: "createdDate",
-      })
-    );
-  }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(fetchBank());
-  }, [dispatch]);
-
-  const handleVendorSelect = (vendor: VendorNameGet | null) => {
-    setSelectedVendor(vendor);
-    if (vendor) {
-      dispatch(
-        fetchAdvances({
-          filterBy: "createdDate",
-          vendorName: vendor.vendorName,
-        })
-      );
-    } else {
-      dispatch(
-        fetchAdvances({
-          filterBy: "createdDate",
-        })
-      );
+    if (!isInitialLoadDone && !isFetchingRef.current) {
+      const loadInitialData = async () => {
+        isFetchingRef.current = true;
+        try {
+          await Promise.all([
+            dispatch(fetchVendorNames()),
+            dispatch(fetchAdvances({ filterBy: "createdDate" })),
+            dispatch(fetchBank())
+          ]);
+          setIsInitialLoadDone(true);
+        } catch (error) {
+          console.error("Error loading initial data:", error);
+        } finally {
+          isFetchingRef.current = false;
+        }
+      };
+      loadInitialData();
     }
-  };
+  }, [dispatch, isInitialLoadDone]);
 
-  const handleOpenNewPaymentDialog = () => {
+  // Handle vendor selection without unnecessary fetches
+  const handleVendorSelect = useCallback((vendor: VendorNameGet | null) => {
+    if (selectedVendor?.vendorId === vendor?.vendorId) {
+      return; // Same vendor, no need to fetch
+    }
+    
+    setSelectedVendor(vendor);
+    
+    if (vendor) {
+      dispatch(fetchAdvances({
+        filterBy: "createdDate",
+        vendorName: vendor.vendorName,
+      }));
+    } else {
+      dispatch(fetchAdvances({
+        filterBy: "createdDate",
+      }));
+    }
+  }, [dispatch, selectedVendor]);
+
+  const handleOpenNewPaymentDialog = useCallback(() => {
     setOpenNewPaymentDialog(true);
-  };
-const handleCloseNewPaymentDialog = () => {
-  setOpenNewPaymentDialog(false);
-  setIsSubmitting(false); // Reset submitting state when dialog closes
-  setSelectedVendor(null); // Clear selected vendor
-  // Also refresh advances without vendor filter
-  dispatch(
-    fetchAdvances({
-      filterBy: "createdDate",
-    })
-  );
-};
-  const handleDialogOpen = () => {
+  }, []);
+  
+  const handleCloseNewPaymentDialog = useCallback(() => {
+    setOpenNewPaymentDialog(false);
+    setIsSubmitting(false);
+    // Only refresh if we had a vendor selected
+    if (selectedVendor) {
+      setSelectedVendor(null);
+      dispatch(fetchAdvances({ filterBy: "createdDate" }));
+    }
+  }, [dispatch, selectedVendor]);
+  
+  const handleDialogOpen = useCallback(() => {
     dispatch(setDialogOpen("edit"));
-  };
+  }, [dispatch]);
 
   const validationSchema = Yup.object({
     vendor: Yup.object().required("Vendor is required").nullable(),
@@ -184,9 +197,11 @@ const handleCloseNewPaymentDialog = () => {
     remarks: Yup.string().optional(),
   });
 
-  const handleNewPaymentSubmit = async (values: any, { resetForm }: any) => {
-    setIsSubmitting(true); // Disable submit button
+  const handleNewPaymentSubmit = useCallback(async (values: any, { resetForm }: any) => {
+    if (isSubmitting) return;
     
+    setIsSubmitting(true);
+
     const paymentData: Partial<AdvancePayment> = {
       vendorId: values.vendor.vendorId,
       vendorName: values.vendor.vendorName,
@@ -205,29 +220,21 @@ const handleCloseNewPaymentDialog = () => {
 
     try {
       await dispatch(createAdvancePayment(paymentData)).unwrap();
-      
-      // Close dialog and reset form
       setOpenNewPaymentDialog(false);
       resetForm();
-      
-      // Update the selected vendor and refresh data
       setSelectedVendor(null);
-      dispatch(
-        fetchAdvances({
-          filterBy: "createdDate",
-         
-        })
-      );
-      
+      // Refresh the advances list
+      await dispatch(fetchAdvances({ filterBy: "createdDate" }));
       dispatch(setSnackbarMessage("Advance payment created successfully"));
       dispatch(setSnackbarOpen(true));
     } catch (error: any) {
-      dispatch(setSnackbarMessage(`Failed to create advance payment: ${error}`));
+      console.error("Error creating advance payment:", error);
+      dispatch(setSnackbarMessage(`Failed to create advance payment: ${error.message || error}`));
       dispatch(setSnackbarOpen(true));
     } finally {
-      setIsSubmitting(false); // Re-enable submit button
+      setIsSubmitting(false);
     }
-  };
+  }, [dispatch, isSubmitting]);
 
   if (!canRead) {
     return (
@@ -240,22 +247,20 @@ const handleCloseNewPaymentDialog = () => {
   }
 
   return (
-    <Box sx={{ backgroundColor: "white" }}>
+    <Box sx={{ backgroundColor: "white", minHeight: "100vh" }}>
       <YenBookPage />
+      
+      {/* Navigation Buttons */}
       <Box display="flex" alignItems="center" justifyContent="space-between" marginTop={1}>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" flexWrap="wrap">
           {isModuleVisible("yenerp", "outgoingpayment") && (
             <Link href={"/yen-book/OutgoingPaymentPage"}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ mr: "5px", ml: "15px" }}
-              >
+              <Button variant="contained" color="primary" sx={{ mr: "5px", ml: "15px" }}>
                 Outgoing Payment
               </Button>
             </Link>
           )}
-        {isModuleVisible("yenerp", "advancepayment") && (
+          {isModuleVisible("yenerp", "advancepayment") && (
             <Link href={"/yen-book/OutgoingPaymentPage/PreOutgoing"}>
               <Button
                 variant="contained"
@@ -271,28 +276,28 @@ const handleCloseNewPaymentDialog = () => {
               </Button>
             </Link>
           )}
-         {isModuleVisible("yenerp", "partialpayment") && (
+          {isModuleVisible("yenerp", "partialpayment") && (
             <Link href={"/yen-book/OutgoingPaymentPage/PendingPayment"}>
               <Button variant="contained" sx={{ mr: "5px" }}>
                 Partial Payment
               </Button>
             </Link>
           )}
-         {isModuleVisible("yenerp", "paymentdone") && (
+          {isModuleVisible("yenerp", "paymentdone") && (
             <Link href={"/yen-book/OutgoingPaymentPage/PaidPayment"}>
               <Button variant="contained" color="primary" sx={{ mr: "5px" }}>
                 Payment Done
               </Button>
             </Link>
           )}
-           {isModuleVisible("yenerp", "ledger") && (
+          {isModuleVisible("yenerp", "ledger") && (
             <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
               <Button variant="contained" color="primary" sx={{ mr: "5px" }}>
                 Ledger
               </Button>
             </Link>
           )}
-        {isModuleVisible("yenerp", "purchasereturn") && (
+          {isModuleVisible("yenerp", "purchasereturn") && (
             <Link href={"/yen-book/OutgoingPaymentPage/PurchaseReturn"}>
               <Button variant="contained" color="primary" sx={{ mr: "5px" }}>
                 Purchase Return
@@ -302,7 +307,8 @@ const handleCloseNewPaymentDialog = () => {
         </Box>
       </Box>
 
-      <Box mt={2} ml={2} sx={{ maxWidth: 500 }} display="flex" justifyContent="space-between" alignItems="center">
+      {/* Single Row - Vendor Search, Add Vendor, Advance Payment */}
+      <Box mt={2} ml={2} sx={{ maxWidth: '100%', display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <Autocomplete
           key={`vendor-select-${uniqueVendorNames.length}`}
           options={uniqueVendorNames}
@@ -316,68 +322,87 @@ const handleCloseNewPaymentDialog = () => {
             <TextField {...params} label="Select Vendor" variant="outlined" size="small" sx={{ minWidth: 300 }} />
           )}
         />
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            size="small"
-            onClick={handleDialogOpen}
-            disabled={!canAdd}
-          >
-            Add Vendor
-          </Button>
-        </Box>
-      </Box>
-
-      <Box mt={2} ml={2} mr={2}>
+        
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
+          size="medium"
+          onClick={handleDialogOpen}
+          disabled={!canAdd}
+        >
+          Add Vendor
+        </Button>
+        
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<PaymentIcon />}
           onClick={handleOpenNewPaymentDialog}
-          sx={{ mb: 2 }}
+          disabled={!canAdd}
         >
           Advance Payment
         </Button>
-        <TableContainer 
-    component={Paper} 
-    sx={{ 
-      maxHeight: '400px',
-      overflow: 'auto'
-    }}
-  >
-          <Table>
+      </Box>
+
+      {/* Advance Payments Table */}
+      <Box mt={2} ml={2} mr={2}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            maxHeight: 'calc(100vh - 250px)',
+            overflowY: 'auto',
+            width: '100%',
+          }}
+        >
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>No</TableCell>
-                <TableCell>Advance ID</TableCell>
-                <TableCell>Vendor Name</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Pending Amount</TableCell>
-                <TableCell>Created Date</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>No</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Advance ID</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Vendor Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Amount</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Pending Amount</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Created Date</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayAdvances.length === 0 ? (
+              {paymentLoading && displayAdvances.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} style={{ textAlign: "center" }}>
-                    No advance payments found
+                    <CircularProgress size={30} />
+                    <Typography variant="body2" sx={{ mt: 1 }}>Loading advance payments...</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : displayAdvances.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} style={{ textAlign: "center" }}>
+                    <Typography variant="body1">No advance payments found</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 displayAdvances.map((payment: AdvancePayment, index: number) => (
-                  <TableRow key={`${payment.advanceId}-${index}-${payment.createdDate}`}>
+                  <TableRow key={`${payment.advanceId}-${payment.createdDate}-${index}`} hover>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{payment.randomId || "N/A"}</TableCell>
                     <TableCell>{payment.vendorName || "N/A"}</TableCell>
-                    <TableCell>{(payment.amount || 0).toFixed(2)}</TableCell>
-                    <TableCell>{(payment.pendingAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell>₹{(payment.amount || 0).toFixed(2)}</TableCell>
+                    <TableCell>₹{(payment.pendingAmount || 0).toFixed(2)}</TableCell>
                     <TableCell>
                       {payment.createdDate ? format(new Date(payment.createdDate), "dd-MM-yyyy") : "N/A"}
                     </TableCell>
-                    <TableCell>{payment.status || "N/A"}</TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: payment.status === "Completed" ? "green" : "orange",
+                          fontWeight: "medium"
+                        }}
+                      >
+                        {payment.status || "Pending"}
+                      </Typography>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -386,28 +411,43 @@ const handleCloseNewPaymentDialog = () => {
         </TableContainer>
       </Box>
 
-      <Dialog open={openNewPaymentDialog} onClose={handleCloseNewPaymentDialog} maxWidth="sm">
-        <DialogTitle>Create New Advance Payment</DialogTitle>
-        <DialogContent>
-          <Formik
-            initialValues={{
-              vendor: selectedVendor || null,
-              amount: "",
-              paymentMode: "",
-              paymentMethod: "",
-              bankName: "",
-              neftNo: "",
-              rtgsNo: "",
-              impsNo: "",
-              upi: "",
-              remarks: "",
-            }}
-            validationSchema={validationSchema}
-            onSubmit={handleNewPaymentSubmit}
-          >
-            {({ values, handleChange, handleBlur, handleSubmit, errors, touched, setFieldValue }) => (
-              <Form onSubmit={handleSubmit}>
-                <Grid container spacing={2} mt={1}>
+      {/* Advance Payment Dialog */}
+      <Dialog 
+        open={openNewPaymentDialog} 
+        onClose={handleCloseNewPaymentDialog} 
+        maxWidth="md" 
+      >
+        <DialogTitle sx={{ borderBottom: '1px solid #e0e0e0' }}>
+          <Typography variant="h6" component="span">
+            Create Advance Payment
+          </Typography>
+          {selectedVendor && (
+            <Typography variant="subtitle2" color="textSecondary">
+              for {selectedVendor.vendorName}
+            </Typography>
+          )}
+        </DialogTitle>
+        <Formik
+          initialValues={{
+            vendor: selectedVendor || null,
+            amount: "",
+            paymentMode: "",
+            paymentMethod: "",
+            bankName: "",
+            neftNo: "",
+            rtgsNo: "",
+            impsNo: "",
+            upi: "",
+            remarks: "",
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleNewPaymentSubmit}
+          enableReinitialize
+        >
+          {({ values, handleChange, handleBlur, handleSubmit, errors, touched, setFieldValue, isValid }) => (
+            <Form onSubmit={handleSubmit}>
+              <DialogContent>
+                <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <Autocomplete
                       options={uniqueVendorNames}
@@ -424,6 +464,7 @@ const handleCloseNewPaymentDialog = () => {
                           variant="outlined"
                           error={touched.vendor && !!errors.vendor}
                           helperText={touched.vendor && errors.vendor}
+                          required
                         />
                       )}
                     />
@@ -439,6 +480,10 @@ const handleCloseNewPaymentDialog = () => {
                       onBlur={handleBlur}
                       error={touched.amount && !!errors.amount}
                       helperText={touched.amount && errors.amount}
+                      required
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -451,16 +496,20 @@ const handleCloseNewPaymentDialog = () => {
                       onChange={(e) => {
                         handleChange(e);
                         const mode = e.target.value;
-                        setFieldValue("paymentMethod", mode === "Cash" ? "" : values.paymentMethod);
-                        setFieldValue("bankName", "");
-                        setFieldValue("neftNo", "");
-                        setFieldValue("rtgsNo", "");
-                        setFieldValue("impsNo", "");
-                        setFieldValue("upi", "");
+                        // Reset bank-related fields when switching modes
+                        if (mode === "Cash") {
+                          setFieldValue("paymentMethod", "");
+                          setFieldValue("bankName", "");
+                          setFieldValue("neftNo", "");
+                          setFieldValue("rtgsNo", "");
+                          setFieldValue("impsNo", "");
+                          setFieldValue("upi", "");
+                        }
                       }}
                       onBlur={handleBlur}
                       error={touched.paymentMode && !!errors.paymentMode}
                       helperText={touched.paymentMode && errors.paymentMode}
+                      required
                     >
                       <MenuItem value="Cash">Cash</MenuItem>
                       <MenuItem value="Bank">Bank</MenuItem>
@@ -479,6 +528,7 @@ const handleCloseNewPaymentDialog = () => {
                           onBlur={handleBlur}
                           error={touched.paymentMethod && !!errors.paymentMethod}
                           helperText={touched.paymentMethod && errors.paymentMethod}
+                          required
                         >
                           <MenuItem value="neft">NEFT</MenuItem>
                           <MenuItem value="rtgs">RTGS</MenuItem>
@@ -497,6 +547,7 @@ const handleCloseNewPaymentDialog = () => {
                           fullWidth
                           error={touched.bankName && !!errors.bankName}
                           helperText={touched.bankName && errors.bankName}
+                          required
                         >
                           {uniqueBanks.map((bank: any) => (
                             <MenuItem key={bank.bankMasterId} value={bank.bankName}>
@@ -508,7 +559,7 @@ const handleCloseNewPaymentDialog = () => {
                       {values.paymentMethod === "neft" && (
                         <Grid item xs={12}>
                           <TextField
-                          autoComplete="off"
+                            autoComplete="off"
                             label="NEFT Number"
                             fullWidth
                             name="neftNo"
@@ -517,13 +568,14 @@ const handleCloseNewPaymentDialog = () => {
                             onBlur={handleBlur}
                             error={touched.neftNo && !!errors.neftNo}
                             helperText={touched.neftNo && errors.neftNo}
+                            required
                           />
                         </Grid>
                       )}
                       {values.paymentMethod === "rtgs" && (
                         <Grid item xs={12}>
                           <TextField
-                          autoComplete="off"
+                            autoComplete="off"
                             label="RTGS Number"
                             fullWidth
                             name="rtgsNo"
@@ -532,13 +584,14 @@ const handleCloseNewPaymentDialog = () => {
                             onBlur={handleBlur}
                             error={touched.rtgsNo && !!errors.rtgsNo}
                             helperText={touched.rtgsNo && errors.rtgsNo}
+                            required
                           />
                         </Grid>
                       )}
                       {values.paymentMethod === "imps" && (
                         <Grid item xs={12}>
                           <TextField
-                          autoComplete="off"
+                            autoComplete="off"
                             label="IMPS Number"
                             fullWidth
                             name="impsNo"
@@ -547,13 +600,14 @@ const handleCloseNewPaymentDialog = () => {
                             onBlur={handleBlur}
                             error={touched.impsNo && !!errors.impsNo}
                             helperText={touched.impsNo && errors.impsNo}
+                            required
                           />
                         </Grid>
                       )}
                       {values.paymentMethod === "upi" && (
                         <Grid item xs={12}>
                           <TextField
-                          autoComplete="off"
+                            autoComplete="off"
                             label="UPI ID/Number"
                             fullWidth
                             name="upi"
@@ -562,6 +616,7 @@ const handleCloseNewPaymentDialog = () => {
                             onBlur={handleBlur}
                             error={touched.upi && !!errors.upi}
                             helperText={touched.upi && errors.upi}
+                            required
                           />
                         </Grid>
                       )}
@@ -569,9 +624,11 @@ const handleCloseNewPaymentDialog = () => {
                   )}
                   <Grid item xs={12}>
                     <TextField
-                    autoComplete="off"
-                      label="Remarks"
+                      autoComplete="off"
+                      label="Remarks (Optional)"
                       fullWidth
+                      multiline
+                      rows={3}
                       name="remarks"
                       value={values.remarks}
                       onChange={handleChange}
@@ -581,36 +638,43 @@ const handleCloseNewPaymentDialog = () => {
                     />
                   </Grid>
                 </Grid>
-                <DialogActions sx={{ mt: 2 }}>
-                  <Button 
-                    onClick={handleCloseNewPaymentDialog}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    variant="contained" 
-                    color="primary"
-                    disabled={isSubmitting}
-                    startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                  </Button>
-                </DialogActions>
-              </Form>
-            )}
-          </Formik>
-        </DialogContent>
+              </DialogContent>
+              <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
+                <Button
+                  onClick={handleCloseNewPaymentDialog}
+                  disabled={isSubmitting}
+                  variant="outlined"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={isSubmitting || !isValid}
+                  startIcon={isSubmitting ? <CircularProgress size={20} /> : <PaymentIcon />}
+                >
+                  {isSubmitting ? 'Processing...' : 'Submit Payment'}
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
       </Dialog>
+      
+      {/* Vendor Dialog */}
+      <VendorDialog 
+        loading={vendorLoading} 
+        setLoading={() => {}} 
+      />
 
-      <VendorDialog loading={vendorLoading} setLoading={() => { }} />
-
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => dispatch(clearSnackbarMessage())}
         message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       />
     </Box>
   );

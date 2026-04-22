@@ -21,7 +21,7 @@ import {
   resetPurchaseOrderState,
   fetchPurchaseOrderRandomIds,
   fetchAllImages,
-  setOrderImageUrls,setShowStockLogsDialog  
+  setOrderImageUrls, setShowStockLogsDialog
 } from '../../../features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import {
   Box, Button, Typography, Table, TableContainer, TableHead, TableRow, TableCell, TableBody,
@@ -336,13 +336,13 @@ const Polist: React.FC = () => {
     handleOpen(); // Perform itemwise action
     handleCloseAnchor(); // Close the dropdown after the action
   };
-const handleViewStockLogs = (order: any) => {
-  // Dispatch the Redux action to open the dialog with the selected PO
-  dispatch(setShowStockLogsDialog({ 
-    show: true, 
-    purchaseOrderId: order.purchaseOrderId 
-  }));
-};
+  const handleViewStockLogs = (order: any) => {
+    // Dispatch the Redux action to open the dialog with the selected PO
+    dispatch(setShowStockLogsDialog({
+      show: true,
+      purchaseOrderId: order.purchaseOrderId
+    }));
+  };
   const handleVendorChange = (vendor: VendorSearch | null) => {
     setSelectedVendor(vendor);
     setSelectedVendorName(vendor ? vendor.vendorName : '');
@@ -1660,11 +1660,11 @@ const handleViewStockLogs = (order: any) => {
                         <TableCell className="table-number-right">
                           <TextField
                             type="number"
-                            value={item.pendingTotalQuantity || 0}
+                            value={item.pendingTotalQuantity ? item.pendingTotalQuantity.toFixed(3) : '0'}
                             InputProps={{
                               readOnly: true,
                             }}
-                            inputProps={{ min: 0 }}
+                            inputProps={{ min: 0, step: 'any' }}
                             disabled
                             sx={{ width: '100px' }}
                           />
@@ -1911,7 +1911,7 @@ const handleViewStockLogs = (order: any) => {
                     <TableRow key={order.purchaseOrderId}>
                       <TableCell className="table-number-right">{index + 1}</TableCell>
                       <TableCell className="table-text-left">{order.randomId}</TableCell>
-                       <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
+                      <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
                       <TableCell className="table-text-left">{order.vendorName}</TableCell>
                       <TableCell>
                         <PhotoDisplay
@@ -2167,8 +2167,8 @@ const handleViewStockLogs = (order: any) => {
           </DialogActions>
         </Dialog>
         {/* Stock Update Logs Dialog */}
-      {/* Stock Update Logs Dialog - No props needed anymore */}
-<StockUpdateLogsDialog />
+        {/* Stock Update Logs Dialog - No props needed anymore */}
+        <StockUpdateLogsDialog />
         <Snackbar
           open={snackbarOpen}
           message={snackbarMessage}

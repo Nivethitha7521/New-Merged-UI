@@ -58,13 +58,13 @@ const initialState: CategoryState = {
 
 // Async thunk to fetch all categories
 export const fetchCategories = createAsyncThunk<Category[]>('category/fetchCategories', async () => {
-  const response = await axios.get('https://www.yenerp.com/masterapi/expensecategorys/');
+  const response = await axios.get('https://yenerp.com/yenerpliveapi/expensecategorys/');
   return response.data;
 });
 
 // Async thunk to add a new category
 export const addCategory = createAsyncThunk<Category, Category>('category/addCategory', async (category) => {
-  const response = await axios.post('https://www.yenerp.com/masterapi/expensecategorys/', category);
+  const response = await axios.post('https://yenerp.com/yenerpliveapi/expensecategorys/', category);
   return response.data;
 });
 
@@ -72,26 +72,26 @@ export const addCategory = createAsyncThunk<Category, Category>('category/addCat
 export const updateCategory = createAsyncThunk<Category, { expenseCategoryId: string, category: Category }>(
   'category/updateCategory',
   async ({ expenseCategoryId, category }) => {
-    const response = await axios.patch(`https://www.yenerp.com/masterapi/expensecategorys/${expenseCategoryId}`, category);
+    const response = await axios.patch(`https://yenerp.com/yenerpliveapi/expensecategorys/${expenseCategoryId}`, category);
     return response.data;
   }
 );
 
 // Async thunk to deactivate a category
 export const deactivateCategory = createAsyncThunk<Category, string>('category/deactivateCategory', async (expenseCategoryId) => {
-  const response = await axios.patch(`https://www.yenerp.com/masterapi/expensecategorys/${expenseCategoryId}`, { status: 'deactivated' });
+  const response = await axios.patch(`https://yenerp.com/yenerpliveapi/expensecategorys/${expenseCategoryId}`, { status: 'deactivated' });
   return response.data;
 });
 
 // Async thunk to activate a deactivated category
 export const activateCategory = createAsyncThunk<Category, string>('category/activateCategory', async (expenseCategoryId) => {
-  const response = await axios.patch(`https://www.yenerp.com/masterapi/expensecategorys/${expenseCategoryId}`, { status: 'active' });
+  const response = await axios.patch(`https://yenerp.com/yenerpliveapi/expensecategorys/${expenseCategoryId}`, { status: 'active' });
   return response.data;
 });
 
 // Async thunk to fetch all subcategories
 export const fetchSubcategories = createAsyncThunk<Subcategory[]>('subcategory/fetchSubcategories', async () => {
-  const response = await axios.get('https://www.yenerp.com/masterapi/expensesubcategorys/');
+  const response = await axios.get('https://yenerp.com/yenerpliveapi/expensesubcategorys/');
   return response.data;
 });
 

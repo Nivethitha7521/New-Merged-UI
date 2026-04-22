@@ -674,11 +674,7 @@ const PendingPaymentComponent = React.memo(() => {
                   </Link>
                 )}
               </Grid>
-              {/* <Grid item>
-                <Link href="/yen-book/OutgoingPaymentPage/AdvancePayment" passHref>
-                  <Button variant="contained" color="primary">Advance Payment</Button>
-                </Link>
-              </Grid> */}
+
               {isModuleVisible("yenerp", "partialpayment") && (
                 <Grid item>
                   <Link
@@ -712,6 +708,8 @@ const PendingPaymentComponent = React.memo(() => {
                   </Link>
                 )}
               </Grid>
+              {/* ✅ ADD THIS PAYMENT HISTORY BUTTON */}
+             
               {isModuleVisible("yenerp", "ledger") && (
                 <Grid item>
                   <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>

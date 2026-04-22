@@ -45,7 +45,7 @@ export const importCSV = createAsyncThunk(
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.post('https://yenerp.com/purchaseapi/itemgroups/import-csv', formData, {
+      const response = await axios.post('http:// 192.168.1.111:8000/purchasetestapi/itemgroups/import-csv', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

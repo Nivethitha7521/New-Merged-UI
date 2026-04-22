@@ -13,9 +13,9 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'http://192.168.1.109:8000/purchasetestapi';
 const customRoundOf = (value: number) => {
-  return Math.round(value * 100) / 100; // Round to two decimal placeshttp://192.168.29.117:8000
+  return Math.round(value * 100) / 100; 
 };
 
 // Updated thunk - Fix URL to /grn/ (singular) and handle response
@@ -980,10 +980,15 @@ export const grnSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchGrnById.fulfilled, (state, action) => {
-        state.selectedGrnId = action.payload; // Set the fetched GRN
-        state.loading = false;
-      })
+     .addCase(fetchGrnById.fulfilled, (state, action) => {
+  // If action.payload is the full GRN object, extract the ID
+  if (action.payload && typeof action.payload === 'object' && action.payload.grnId) {
+    state.selectedGrnId = action.payload.grnId;
+  } else if (typeof action.payload === 'string') {
+    state.selectedGrnId = action.payload;
+  }
+  state.loading = false;
+})
       .addCase(fetchGrnById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;

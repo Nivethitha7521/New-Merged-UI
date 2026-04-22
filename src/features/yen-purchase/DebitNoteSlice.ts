@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '@/redux/store';
 
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'http://192.168.1.109:8000/purchasetestapi';
 
 // ============================================
 // INTERFACES (Updated for comprehensive API)

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -46,6 +46,7 @@ interface EditedItem {
 interface GrnReturnDialogProps {
   dialogItems: ItemDetail[];
   selectedGrnId: string | null;
+  grnOriginalAmount: number; // ✅ New prop
   currentPage: number;
   pageSize: number;
   status?: string;
@@ -58,6 +59,7 @@ interface GrnReturnDialogProps {
 const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
   dialogItems,
   selectedGrnId,
+    grnOriginalAmount, // ✅ Use this
   currentPage,
   pageSize,
   status,
@@ -80,11 +82,11 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // 🔥 New state for amount limit validation
-  const [grnOriginalAmount, setGrnOriginalAmount] = useState<number>(0);
   const [totalExistingReturns, setTotalExistingReturns] = useState<number>(0);
   const [availableReturnAmount, setAvailableReturnAmount] = useState<number>(0);
   const [amountLimitError, setAmountLimitError] = useState<string | null>(null);
   const [backendErrorDetail, setBackendErrorDetail] = useState<any>(null);
+const hasFetchedRef = useRef(false);
 
   // Filter out "Other" option - only use dropdown reasons
   const dropdownReasons = returnReasons.filter(r => r.reason !== 'Other');
@@ -120,40 +122,14 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
     }
     return 0;
   };
-
-  // 🔥 Fetch GRN details to get original amount and existing returns
   useEffect(() => {
-    const fetchGrnDetails = async () => {
-      if (selectedGrnId) {
-        try {
-          const grnData = await dispatch(fetchGrnById(selectedGrnId)).unwrap();
-          
-          // Get original GRN amount
-          const originalAmount = grnData.grandTotal || grnData.totalReceivedAmount || 0;
-          setGrnOriginalAmount(originalAmount);
-          
-          // Calculate total existing returns from GRN
-          const existingReturns = grnData.itemDetails?.reduce((total: number, item: any) => {
-            return total + (item.returnedFinalPrice || 0);
-          }, 0) || 0;
-          setTotalExistingReturns(existingReturns);
-          
-          const available = originalAmount - existingReturns;
-          setAvailableReturnAmount(available > 0 ? available : 0);
-          
-          console.log('GRN Return Limits:', {
-            originalAmount,
-            existingReturns,
-            availableReturnAmount: available > 0 ? available : 0
-          });
-        } catch (error) {
-          console.error('Failed to fetch GRN details:', error);
-        }
-      }
-    };
-    
-    fetchGrnDetails();
-  }, [selectedGrnId, dispatch]);
+    const existingReturns = dialogItems.reduce((total, item) => {
+      return total + ((item.returnedQuantity || 0) * (item.unitPrice || 0));
+    }, 0);
+    setTotalExistingReturns(existingReturns);
+    const available = grnOriginalAmount - existingReturns;
+    setAvailableReturnAmount(available > 0 ? available : 0);
+  }, [dialogItems, grnOriginalAmount]); // ✅ No API call, no dispatch
 
   // 🔥 Check if current return would exceed available amount
   const checkAmountLimit = (): { isExceeded: boolean; message: string } => {

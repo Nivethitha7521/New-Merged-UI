@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '../../../redux/store';
 
-// Interfaces (updated to make paymentId optional)
+// Interfaces for grouped payments
 export interface PaymentHistoryEntry {
   amount: number;
   paymentType: string;
@@ -19,24 +19,25 @@ export interface PaymentHistoryEntry {
   debitAmount: number;
   advancePaymentsApplied: string[];
   advanceAmount: number;
-  paymentId?: string;  // Made optional to handle cases without paymentId
+  paymentId?: string;
 }
 
-export interface OutgoingDoc {
-  randomId: string;
-  vendorName: string;
-  status: string;
+export interface PaymentGroupResponse {
+  paymentId: string;
+  paymentDate: string | null;
   totalPayableAmount: number;
-  paidAmount: number;
-  relevantHistory: PaymentHistoryEntry[];
+  totalPaidAmount: number;
+  status: string;
+  vendorName: string;
+  outgoingRandomId: string;
+  paymentHistory: PaymentHistoryEntry[];
+  createdAt?: string;
 }
 
-export interface PaymentsByIdResponse {
-  paymentId: string | null;
-  totalPayments: number;
+export interface PaymentsGroupedResponse {
+  groups: PaymentGroupResponse[];
+  totalGroups: number;
   totalAmount: number;
-  payments: PaymentHistoryEntry[];
-  outgoings: OutgoingDoc[];
   page: number;
   limit: number;
   totalPages: number;
@@ -44,47 +45,77 @@ export interface PaymentsByIdResponse {
   hasPrev: boolean;
 }
 
+export interface PaymentDetailResponse extends PaymentGroupResponse {}
+
 interface PaymentsState {
-  data: PaymentsByIdResponse | null;
+  groupedData: PaymentsGroupedResponse | null;
+  selectedPayment: PaymentDetailResponse | null;
   loading: boolean;
   error: string | null;
   currentPaymentId: string | null;
   currentPage: number;
-  exportLoading: boolean; // Separate loading for exports
-  exportError: string | null; // Separate error for exports
+  exportLoading: boolean;
+  exportError: string | null;
+  individualExportId: string | null; // Track which payment is being exported
 }
 
 const initialState: PaymentsState = {
-  data: null,
+  groupedData: null,
+  selectedPayment: null,
   loading: false,
   error: null,
   currentPaymentId: null,
   currentPage: 1,
   exportLoading: false,
   exportError: null,
+  individualExportId: null,
 };
 
-export const fetchPaymentsById = createAsyncThunk(
-  'payments/fetchPaymentsById',
-  async ({ paymentId, page = 1, limit = 10, date }: { paymentId?: string; page?: number; limit?: number; date?: string }, { rejectWithValue }) => {
+// Fetch grouped payments (main view)
+export const fetchGroupedPayments = createAsyncThunk(
+  'payments/fetchGroupedPayments',
+  async ({ 
+    paymentId, 
+    page = 1, 
+    limit = 10, 
+    dateFrom, 
+    dateTo, 
+    vendorName 
+  }: { 
+    paymentId?: string; 
+    page?: number; 
+    limit?: number; 
+    dateFrom?: string;
+    dateTo?: string;
+    vendorName?: string;
+  }, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams();
-      if (paymentId) { // Only add if provided (for specific ID)
+      
+      if (paymentId) {
         params.append('payment_id', paymentId);
       }
-      if (date) {
-        params.append('date', date);
+      if (dateFrom) {
+        params.append('date_from', dateFrom);
       }
+      if (dateTo) {
+        params.append('date_to', dateTo);
+      }
+      if (vendorName) {
+        params.append('vendor_name', vendorName);
+      }
+      
       params.append('page', page.toString());
       params.append('limit', limit.toString());
-      const url = `https://yenerp.com/purchaseapi/outgoingpayments/payments/paymentwise?${params.toString()}`;
-      console.log('Fetching from URL:', url);
+      
+      console.log('Fetching grouped payments from URL:', `/outgoingpayments/payments/grouped?${params.toString()}`);
+      
       const response = await purchaseApi.get(
-  `/outgoingpayments/payments/paymentwise?${params.toString()}`
-);
-
-      console.log('API Response received:', response.data);
-      return response.data as PaymentsByIdResponse;
+        `/outgoingpayments/payments/grouped?${params.toString()}`
+      );
+      
+      console.log('Grouped payments response:', response.data);
+      return response.data as PaymentsGroupedResponse;
     } catch (error: any) {
       console.error('API Error details:', {
         status: error.response?.status,
@@ -92,33 +123,76 @@ export const fetchPaymentsById = createAsyncThunk(
         data: error.response?.data,
         message: error.message,
       });
+      
       const errorMsg = error.response?.status === 404 
         ? `No payments found${paymentId ? ` for ID "${paymentId}"` : ' in database'}`
         : error.response?.data?.detail || error.message || 'Failed to fetch payments data';
+      
       return rejectWithValue(errorMsg);
     }
   }
 );
 
-// New thunk for CSV export (fetches as blob)
-export const exportPaymentsCSV = createAsyncThunk(
-  'payments/exportPaymentsCSV',
-  async ({ paymentId, date }: { paymentId?: string; date?: string }, { rejectWithValue }) => {
+// Fetch single payment by ID (detailed view)
+export const fetchPaymentById = createAsyncThunk(
+  'payments/fetchPaymentById',
+  async (paymentId: string, { rejectWithValue }) => {
+    try {
+      console.log('Fetching payment details for:', paymentId);
+      
+      const response = await purchaseApi.get(
+        `/outgoingpayments/payments/by-payment-id/${paymentId}`
+      );
+      
+      console.log('Payment details response:', response.data);
+      return response.data as PaymentDetailResponse;
+    } catch (error: any) {
+      console.error('Error fetching payment details:', error);
+      
+      const errorMsg = error.response?.status === 404 
+      
+        ? `Payment ID "${paymentId}" not found`
+        : error.response?.data?.detail || error.message || 'Failed to fetch payment details';
+      
+      return rejectWithValue(errorMsg);
+    }
+  }
+);
+
+// Export grouped payments as CSV
+export const exportGroupedPaymentsCSV = createAsyncThunk(
+  'payments/exportGroupedPaymentsCSV',
+  async ({ paymentId, dateFrom, dateTo, vendorName }: { 
+    paymentId?: string; 
+    dateFrom?: string;
+    dateTo?: string;
+    vendorName?: string;
+  }, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams();
+      
       if (paymentId) {
         params.append('payment_id', paymentId);
       }
-      if (date) {
-        params.append('date', date);
+      if (dateFrom) {
+        params.append('date_from', dateFrom);
       }
+      if (dateTo) {
+        params.append('date_to', dateTo);
+      }
+      if (vendorName) {
+        params.append('vendor_name', vendorName);
+      }
+      
       params.append('format', 'csv');
-      const url = `https://yenerp.com/purchaseapi/outgoingpayments/payments/paymentwise?${params.toString()}`;
-      console.log('Exporting CSV from URL:', url);
-const response = await purchaseApi.get(
-  `/outgoingpayments/payments/paymentwise?${params.toString()}`,
-  { responseType: "blob" }
-);
+      
+      console.log('Exporting grouped payments CSV from URL:', `/outgoingpayments/payments/grouped?${params.toString()}`);
+      
+      const response = await purchaseApi.get(
+        `/outgoingpayments/payments/grouped?${params.toString()}`,
+        { responseType: "blob" }
+      );
+      
       return response.data; // Blob
     } catch (error: any) {
       console.error('CSV Export Error:', error);
@@ -128,25 +202,40 @@ const response = await purchaseApi.get(
   }
 );
 
-// New thunk for PDF export (fetches as blob)
-export const exportPaymentsPDF = createAsyncThunk(
-  'payments/exportPaymentsPDF',
-  async ({ paymentId, date }: { paymentId?: string; date?: string }, { rejectWithValue }) => {
+// Export grouped payments as PDF
+export const exportGroupedPaymentsPDF = createAsyncThunk(
+  'payments/exportGroupedPaymentsPDF',
+  async ({ paymentId, dateFrom, dateTo, vendorName }: { 
+    paymentId?: string; 
+    dateFrom?: string;
+    dateTo?: string;
+    vendorName?: string;
+  }, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams();
+      
       if (paymentId) {
         params.append('payment_id', paymentId);
       }
-      if (date) {
-        params.append('date', date);
+      if (dateFrom) {
+        params.append('date_from', dateFrom);
       }
+      if (dateTo) {
+        params.append('date_to', dateTo);
+      }
+      if (vendorName) {
+        params.append('vendor_name', vendorName);
+      }
+      
       params.append('format', 'pdf');
-      const url = `https://yenerp.com/purchaseapi/outgoingpayments/payments/paymentwise?${params.toString()}`;
-      console.log('Exporting PDF from URL:', url);
-const response = await purchaseApi.get(
-  `/outgoingpayments/payments/paymentwise?${params.toString()}`,
-  { responseType: "blob" }
-);
+      
+      console.log('Exporting grouped payments PDF from URL:', `/outgoingpayments/payments/grouped?${params.toString()}`);
+      
+      const response = await purchaseApi.get(
+        `/outgoingpayments/payments/grouped?${params.toString()}`,
+        { responseType: "blob" }
+      );
+      
       return response.data; // Blob
     } catch (error: any) {
       console.error('PDF Export Error:', error);
@@ -155,17 +244,45 @@ const response = await purchaseApi.get(
     }
   }
 );
-
-// Slice (updated with export handling)
+// exportIndividualPaymentPDF thunk-ஐ இப்படி மாற்றவும்
+export const exportIndividualPaymentPDF = createAsyncThunk(
+  'payments/exportIndividualPaymentPDF',
+  async (paymentId: string, { rejectWithValue }) => {
+    try {
+      console.log('Exporting individual payment PDF for:', paymentId);
+      
+      const response = await purchaseApi.get(
+        `/outgoingpayments/payments/individual-pdf/${paymentId}`,
+        { responseType: "blob" }
+      );
+      
+      console.log('PDF response received:', response);
+      
+      // Return ONLY the blob and paymentId (but we'll handle download in component)
+      // Don't create download link here - just return the data
+      return { 
+        blob: response.data, 
+        paymentId 
+      };
+    } catch (error: any) {
+      console.error('Individual PDF Export Error:', error);
+      const errorMsg = error.response?.data?.detail || error.message || 'Failed to export PDF';
+      return rejectWithValue(errorMsg);
+    }
+  }
+);
+// Slice with grouped payment handling
 const paymentsSlice = createSlice({
   name: 'payments',
   initialState,
   reducers: {
     resetPaymentsData: (state) => {
-      state.data = null;
+      state.groupedData = null;
+      state.selectedPayment = null;
       state.error = null;
       state.currentPaymentId = null;
       state.currentPage = 1;
+      state.individualExportId = null;
     },
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
@@ -173,53 +290,109 @@ const paymentsSlice = createSlice({
     resetExport: (state) => {
       state.exportLoading = false;
       state.exportError = null;
+      state.individualExportId = null;
+    },
+    clearSelectedPayment: (state) => {
+      state.selectedPayment = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Existing fetch cases
-      .addCase(fetchPaymentsById.pending, (state) => {
+      // Fetch grouped payments cases
+      .addCase(fetchGroupedPayments.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchPaymentsById.fulfilled, (state, action: PayloadAction<PaymentsByIdResponse>) => {
+      .addCase(fetchGroupedPayments.fulfilled, (state, action: PayloadAction<PaymentsGroupedResponse>) => {
         state.loading = false;
-        state.data = action.payload;
-        state.currentPaymentId = action.payload.paymentId || null;
+        state.groupedData = action.payload;
         state.currentPage = action.payload.page;
       })
-      .addCase(fetchPaymentsById.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(fetchGroupedPayments.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload || 'Unknown error occurred';
-        state.data = null;
+        state.groupedData = null;
       })
+      
+      // Fetch single payment details cases
+      .addCase(fetchPaymentById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPaymentById.fulfilled, (state, action: PayloadAction<PaymentDetailResponse>) => {
+        state.loading = false;
+        state.selectedPayment = action.payload;
+        state.currentPaymentId = action.payload.paymentId;
+      })
+      .addCase(fetchPaymentById.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload || 'Unknown error occurred';
+        state.selectedPayment = null;
+      })
+      
       // CSV export cases
-      .addCase(exportPaymentsCSV.pending, (state) => {
+      .addCase(exportGroupedPaymentsCSV.pending, (state) => {
         state.exportLoading = true;
         state.exportError = null;
       })
-      .addCase(exportPaymentsCSV.fulfilled, (state) => {
+      .addCase(exportGroupedPaymentsCSV.fulfilled, (state) => {
         state.exportLoading = false;
       })
-      .addCase(exportPaymentsCSV.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(exportGroupedPaymentsCSV.rejected, (state, action: PayloadAction<any>) => {
         state.exportLoading = false;
         state.exportError = action.payload || 'Unknown export error occurred';
       })
-      // PDF export cases
-      .addCase(exportPaymentsPDF.pending, (state) => {
+      
+      // Grouped PDF export cases
+      .addCase(exportGroupedPaymentsPDF.pending, (state) => {
         state.exportLoading = true;
         state.exportError = null;
       })
-      .addCase(exportPaymentsPDF.fulfilled, (state) => {
+      .addCase(exportGroupedPaymentsPDF.fulfilled, (state) => {
         state.exportLoading = false;
       })
-      .addCase(exportPaymentsPDF.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(exportGroupedPaymentsPDF.rejected, (state, action: PayloadAction<any>) => {
         state.exportLoading = false;
         state.exportError = action.payload || 'Unknown export error occurred';
+      })
+      
+      // Individual PDF export cases
+      .addCase(exportIndividualPaymentPDF.pending, (state, action) => {
+        state.exportLoading = true;
+        state.exportError = null;
+        state.individualExportId = action.meta.arg;
+      })
+      .addCase(exportIndividualPaymentPDF.fulfilled, (state) => {
+        state.exportLoading = false;
+        state.individualExportId = null;
+      })
+      .addCase(exportIndividualPaymentPDF.rejected, (state, action: PayloadAction<any>) => {
+        state.exportLoading = false;
+        state.exportError = action.payload || 'Unknown export error occurred';
+        state.individualExportId = null;
       });
   },
 });
 
-export const { resetPaymentsData, setCurrentPage, resetExport } = paymentsSlice.actions;
-export const selectPayments = (state: RootState) => state.payments as PaymentsState;
+// Export actions
+export const { 
+  resetPaymentsData, 
+  setCurrentPage, 
+  resetExport,
+  clearSelectedPayment 
+} = paymentsSlice.actions;
+
+// Selectors
+export const selectGroupedPayments = (state: RootState) => ({
+  groupedData: state.payments.groupedData,
+  selectedPayment: state.payments.selectedPayment,
+  loading: state.payments.loading,
+  error: state.payments.error,
+  currentPaymentId: state.payments.currentPaymentId,
+  currentPage: state.payments.currentPage,
+  exportLoading: state.payments.exportLoading,
+  exportError: state.payments.exportError,
+  individualExportId: state.payments.individualExportId,
+});
+
 export default paymentsSlice.reducer;
