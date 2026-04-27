@@ -61,6 +61,8 @@ import moment from 'moment';
 import SinglePaymentDialog from '@/components/yen-purchase/OutgoingComponent/SinglePayment';
 import { ClearIcon } from '@mui/x-date-pickers/icons';
 import { usePermissions } from "@/hooks/usePermissions";
+import { VendorSearch } from '@/Models/vendor';
+import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
 
 
 const PendingPaymentComponent = React.memo(() => {
@@ -77,7 +79,7 @@ const PendingPaymentComponent = React.memo(() => {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [openDownloadDialog, setOpenDownloadDialog] = useState(false);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [selectedVendorName, setSelectedVendorName] = useState<VendorDetail | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
   const [fetchedBusinessIds, setFetchedBusinessIds] = useState(new Set());
   const [selectionRange, setSelectionRange] = useState({
     startDate: new Date(),
@@ -125,13 +127,16 @@ const PendingPaymentComponent = React.memo(() => {
       }
     });
   }, [businesses, fetchedBusinessIds, dispatch]);
-
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
       return;
     }
-    const appliedFromDate = selectionRange?.startDate instanceof Date ? moment(selectionRange.startDate).startOf('day').toDate() : StartDate;
-    const appliedToDate = selectionRange?.endDate instanceof Date ? moment(selectionRange.endDate).endOf('day').toDate() : EndDate;
+    const appliedFromDate = selectionRange?.startDate instanceof Date
+      ? moment(selectionRange.startDate).startOf('day').toDate()
+      : StartDate;
+    const appliedToDate = selectionRange?.endDate instanceof Date
+      ? moment(selectionRange.endDate).endOf('day').toDate()
+      : EndDate;
     dispatch(setPagination({ page: newPage, size: pageSize }));
     dispatch(fetchOutgoings({
       page: newPage,
@@ -140,7 +145,7 @@ const PendingPaymentComponent = React.memo(() => {
       filterBy: dateField,
       fromDate: appliedFromDate,
       toDate: appliedToDate,
-      vendorName: selectedVendorName?.vendorName,
+      vendorCode: selectedVendor?.randomId || '',  // ← Send vendorCode
     }));
   };
 
@@ -188,50 +193,44 @@ const PendingPaymentComponent = React.memo(() => {
     )
   );
 
-  const handleVendorChange = (
-    event: React.SyntheticEvent,
-    newValue: VendorDetail | null,
-    reason: string
-  ) => {
-    setSelectedVendorName(newValue);
+  const handleVendorChange = (vendor: VendorSearch | null) => {
+    setSelectedVendor(vendor);
+
+    // Immediately fetch with new vendor filter
+    const appliedFromDate = selectionRange?.startDate instanceof Date
+      ? moment(selectionRange.startDate).startOf('day').toDate()
+      : StartDate;
+    const appliedToDate = selectionRange?.endDate instanceof Date
+      ? moment(selectionRange.endDate).endOf('day').toDate()
+      : EndDate;
+
+    dispatch(fetchOutgoings({
+      page: 1,
+      size: pageSize,
+      status: status,
+      filterBy: dateField,
+      fromDate: appliedFromDate,
+      toDate: appliedToDate,
+      vendorCode: vendor?.randomId || '',  // ← Send vendorCode
+    }));
   };
-
   const handleFilterClick = () => {
-    let filtered = outgoings;
-    const formattedStartDate = selectionRange?.startDate instanceof Date ? moment(selectionRange.startDate).startOf('day').toDate() : StartDate;
-    const formattedEndDate = selectionRange?.endDate instanceof Date ? moment(selectionRange.endDate).endOf('day').toDate() : EndDate;
+    const formattedStartDate = selectionRange?.startDate instanceof Date
+      ? moment(selectionRange.startDate).startOf('day').toDate()
+      : StartDate;
+    const formattedEndDate = selectionRange?.endDate instanceof Date
+      ? moment(selectionRange.endDate).endOf('day').toDate()
+      : EndDate;
 
-    if (selectedVendorName && selectedVendorName.vendorName) {
-      filtered = filtered.filter((outgoing) =>
-        outgoing.vendorName?.toLowerCase().includes(selectedVendorName.vendorName.toLowerCase())
-      );
-    }
-
-    if (formattedStartDate) {
-      filtered = filtered.filter((outgoing) => {
-        const paymentDateParsed = outgoing.paymentDate ? new Date(outgoing.paymentDate) : null;
-        return paymentDateParsed && paymentDateParsed >= formattedStartDate;
-      });
-    }
-
-    if (formattedEndDate) {
-      filtered = filtered.filter((outgoing) => {
-        const paymentDateParsed = outgoing.paymentDate ? new Date(outgoing.paymentDate) : null;
-        return paymentDateParsed && paymentDateParsed <= formattedEndDate;
-      });
-    }
-
-    dispatch(
-      fetchOutgoings({
-        page: currentPage,
-        size: pageSize,
-        fromDate: formattedStartDate instanceof Date ? formattedStartDate : undefined,
-        toDate: formattedEndDate instanceof Date ? formattedEndDate : undefined,
-        vendorName: selectedVendorName?.vendorName,
-        filterBy: 'paymentDate',
-        status: status,
-      })
-    )
+    dispatch(fetchOutgoings({
+      page: currentPage,
+      size: pageSize,
+      fromDate: formattedStartDate instanceof Date ? formattedStartDate : undefined,
+      toDate: formattedEndDate instanceof Date ? formattedEndDate : undefined,
+      vendorCode: selectedVendor?.randomId || '',  // ← Use vendorCode
+      filterBy: 'paymentDate',
+      status: status,
+    }))
       .then((response) => {
         let data: Outgoing[] = [];
         if (typeof response.payload === 'string') {
@@ -256,14 +255,13 @@ const PendingPaymentComponent = React.memo(() => {
         dispatch(setSnackbarOpen(true));
       });
   };
-
   const handleFilterClose = () => {
     setSelectionRange({
       startDate: new Date(),
       endDate: new Date(),
       key: 'selection',
     });
-    setSelectedVendorName(null);
+    setSelectedVendor(null);  // ← Clear selected vendor
     dispatch(fetchOutgoings({
       page: 1,
       size: pageSize,
@@ -271,9 +269,9 @@ const PendingPaymentComponent = React.memo(() => {
       filterBy: dateField,
       fromDate: StartDate,
       toDate: EndDate,
+      vendorCode: undefined,  // ← Clear vendorCode
     }));
   };
-
   const generateOutgoingInvoicePDF = () => {
     const doc = new jsPDF();
     let yOffset = 10;
@@ -709,7 +707,7 @@ const PendingPaymentComponent = React.memo(() => {
                 )}
               </Grid>
               {/* ✅ ADD THIS PAYMENT HISTORY BUTTON */}
-             
+
               {isModuleVisible("yenerp", "ledger") && (
                 <Grid item>
                   <Link href={"/yen-book/OutgoingPaymentPage/Ledger"}>
@@ -743,25 +741,13 @@ const PendingPaymentComponent = React.memo(() => {
                   />
                 </Box>
               </Grid>
+              {/* Replace the existing Autocomplete with VendorSearchAutocomplete */}
               <Grid item xs={6} sm={4} md={2}>
-                <FormControl fullWidth>
-                  <Autocomplete
-                    value={selectedVendorName}
-                    onChange={handleVendorChange}
-                    options={outgoingvendor}
-                    getOptionLabel={(option: VendorDetail) => option.vendorName || ''}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="All Vendors"
-                        variant="outlined"
-                        size="small"
-                        InputProps={{ ...params.InputProps, style: { fontSize: '12px' } }}
-                      />
-                    )}
-                    sx={{ fontSize: '12px' }}
-                  />
-                </FormControl>
+                <VendorSearchAutocomplete
+                  value={selectedVendor}
+                  onChange={handleVendorChange}
+                  label="All Vendors"
+                />
               </Grid>
               <Grid item xs="auto">
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

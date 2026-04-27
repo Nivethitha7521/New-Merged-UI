@@ -10,7 +10,7 @@ import purchaseApi from "@/utils/api";
 
 
 const LIMIT = 20;
-const API_BASE_URL = 'http://192.168.1.109:8000/purchasetestapi';
+const API_BASE_URL = 'https://yenerp.com/purchaseapi';
 
 export const fetchPurchaseOrderRandomIds = createAsyncThunk(
   "purchaseOrder/fetchRandomIds",
@@ -134,6 +134,7 @@ export const fetchPurchaseOrders = createAsyncThunk(
     status = '',
     fromDate,
     toDate,
+    vendorCode,  // ← ADD THIS
     vendorName,
     itemName,
     randomId,
@@ -144,64 +145,58 @@ export const fetchPurchaseOrders = createAsyncThunk(
     status?: string;
     fromDate?: string | Date;
     toDate?: string | Date;
+    vendorCode?: string;  // ← ADD THIS
     vendorName?: string;
     itemName?: string;
     randomId?: string;
     dateField?: 'orderDate' | 'approvedDate' | 'rejectedDate';
   }) => {
-
     try {
-
       const params: {
         skip?: number;
         limit?: number;
         status?: string;
         fromDate?: string;
         toDate?: string;
+        vendorCode?: string;  // ← ADD THIS
         vendorName?: string;
         itemName?: string;
         randomId?: string;
         filterBy?: string;
       } = {};
 
-      // Pagination
       params.skip = (page - 1) * size;
       params.limit = size;
 
       // Filters
       if (status) params.status = status;
+      if (vendorCode) params.vendorCode = vendorCode;  // ← ADD THIS
       if (vendorName) params.vendorName = vendorName;
       if (itemName) params.itemName = itemName;
       if (randomId) params.randomId = randomId;
 
       // Date filters
       if (fromDate) {
-        const fromDateObj =
-          typeof fromDate === 'string' ? new Date(fromDate) : fromDate;
+        const fromDateObj = typeof fromDate === 'string' ? new Date(fromDate) : fromDate;
         params.fromDate = fromDateObj.toISOString();
       }
 
       if (toDate) {
-        const toDateObj =
-          typeof toDate === 'string' ? new Date(toDate) : toDate;
+        const toDateObj = typeof toDate === 'string' ? new Date(toDate) : toDate;
         params.toDate = toDateObj.toISOString();
       }
 
-      // Filter field
       if (dateField) params.filterBy = dateField;
 
       const response = await purchaseApi.get("/purchaseorders/", { params });
       return response.data;
 
     } catch (error: any) {
-
       console.error('Error fetching purchase orders:', error);
       throw error;
-
     }
   }
 );
-
 export const fetchPendingPurchaseOrders = createAsyncThunk(
   'pendingPurchaseOrders/fetch',
   async ({
@@ -209,14 +204,16 @@ export const fetchPendingPurchaseOrders = createAsyncThunk(
     size,
     fromDate,
     toDate,
+    vendorCode,  // ← ADD THIS
     vendorName,
     itemName,
     randomId,
   }: {
     page: number;
     size: number;
-    fromDate?: string | Date;  // Allow both string and Date
-    toDate?: string | Date;    // Allow both string and Date
+    fromDate?: string | Date;
+    toDate?: string | Date;
+    vendorCode?: string;  // ← ADD THIS
     vendorName?: string;
     itemName?: string;
     randomId?: string;
@@ -226,21 +223,24 @@ export const fetchPendingPurchaseOrders = createAsyncThunk(
       limit?: number;
       fromDate?: string;
       toDate?: string;
+      vendorCode?: string;  // ← ADD THIS
       vendorName?: string;
       itemName?: string;
       randomId?: string;
     } = {};
 
-    // Pagination
     params.skip = (page - 1) * size;
     params.limit = size;
 
-    // Filters (no status or filterBy needed—backend handles pending and orderDate automatically)
+    // ← ADD vendorCode filter
+    if (vendorCode) {
+      params.vendorCode = vendorCode;
+    }
+    
     if (vendorName) params.vendorName = vendorName;
     if (itemName) params.itemName = itemName;
     if (randomId) params.randomId = randomId;
 
-    // Handle date conversion - convert string dates to Date objects if needed
     if (fromDate) {
       const fromDateObj = typeof fromDate === 'string' ? new Date(fromDate) : fromDate;
       params.fromDate = fromDateObj.toISOString();
@@ -256,19 +256,18 @@ export const fetchPendingPurchaseOrders = createAsyncThunk(
         params,
       });
 
-      if (response.data.purchaseOrders.length === 0) {  // Assuming response structure with purchaseOrders array
-        return [];  // Return empty array if no data
+      if (response.data.purchaseOrders.length === 0) {
+        return [];
       }
 
       console.log('Fetched pending purchase orders:', response.data);
-      return response.data.purchaseOrders;  // Return the array directly for consistency
+      return response.data.purchaseOrders;
     } catch (error: any) {
       console.error('Error fetching pending purchase orders:', error);
       return { errorMessage: 'Error fetching pending purchase orders. Please try again.' };
     }
   }
 );
-
 export const fetchStockUpdateLogs = createAsyncThunk(
   'purchaseOrders/fetchStockUpdateLogs',
   async (purchaseOrderId: string, { rejectWithValue }) => {

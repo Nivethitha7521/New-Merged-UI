@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = 'http:// 192.168.1.111:8000/purchasetestapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 
 interface DeviceFingerprint {
   userAgent: string;
@@ -86,7 +86,7 @@ export const logout = createAsyncThunk(
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
-              "x-browser-session-id": browserSessionId,
+             "x-browser-session-id": browserSessionId || "",
             },
             timeout: 5000,
           }
@@ -150,7 +150,7 @@ initializeAuth(state) {
   if (token && username) {
     state.isLoggedIn = true;
     state.username = username;
-  
+    state.token = token;
     state.tabId = tabId;
   }
 
@@ -171,9 +171,9 @@ initializeAuth(state) {
       state.error = null;
       state.browserSessionId = null;
       state.tabId = null;
-      
+      state.token = null;
       sessionStorage.clear();
-      localStorage.removeItem('browserSessionId');
+      //localStorage.removeItem('browserSessionId');
     },
     setTabSession(state, action) {
       state.isLoggedIn = true;

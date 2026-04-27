@@ -1145,6 +1145,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
         ...serviceData,
         vendorName: vendor.vendorName,
         vendorId: vendor.vendorId,
+        vendorCode: vendor.randomId,  // ← ADD THIS LINE - set vendorCode from randomId
         vendorContact: vendor.contactpersonPhone,
         contactpersonEmail: vendor.contactpersonEmail,
         address: vendor.address,
@@ -1161,6 +1162,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
         ...serviceData,
         vendorName: '',
         vendorId: '',
+        vendorCode: '',  // ← Clear this too
         vendorContact: '',
         creditLimit: 0,
         contactpersonEmail: '',
@@ -1180,6 +1182,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
     dispatch(setServiceData({
       serviceId: '',
       vendorName: '',
+      vendorCode: '',  // ← Add this
       vendorContact: '',
       workOrderDate: formatDate(currentDate),
       status: 'Pending',

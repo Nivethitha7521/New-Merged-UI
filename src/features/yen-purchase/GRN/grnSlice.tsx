@@ -13,7 +13,7 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'http://192.168.1.109:8000/purchasetestapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 const customRoundOf = (value: number) => {
   return Math.round(value * 100) / 100; 
 };
@@ -109,13 +109,24 @@ export const createAmountOnlyDebitNote = createAsyncThunk<
 
 export const fetchGrns = createAsyncThunk<FetchGrnsPayload, FetchGrnsArgs>(
   'grns/fetch',
-  async ({ page, size, status = '', fromDate, toDate, vendorName, dateFilterField = 'grnDate', daysFilterDate }) => {
+  async ({ 
+    page, 
+    size, 
+    status = '', 
+    fromDate, 
+    toDate, 
+    vendorCode,  // ← ADD THIS
+    vendorName, 
+    dateFilterField = 'grnDate', 
+    daysFilterDate 
+  }) => {
     const params: {
       skip?: number;
       limit?: number;
       status?: string;
       fromDate?: string;
       toDate?: string;
+      vendorCode?: string;  // ← ADD THIS
       vendorName?: string;
       dateFilterField?: string;
       daysFilterDate?: number;
@@ -125,6 +136,7 @@ export const fetchGrns = createAsyncThunk<FetchGrnsPayload, FetchGrnsArgs>(
     params.limit = size;
 
     if (status) params.status = status;
+    if (vendorCode) params.vendorCode = vendorCode;  // ← ADD THIS
     if (vendorName) params.vendorName = vendorName;
     if (fromDate) params.fromDate = fromDate.toISOString();
     if (toDate) params.toDate = toDate.toISOString();

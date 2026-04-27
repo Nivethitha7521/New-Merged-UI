@@ -11,7 +11,7 @@ export const fetchPurchaseSubcategories = createAsyncThunk<PurchaseSubcategory[]
   'purchaseSubcategory/fetch',
   async () => {
     try {
-      const response = await axios.get('http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/',
+      const response = await axios.get('https://yenerp.com/purchaseapi/purchasesubcategories/',
   { headers: authHeader() });
       return response.data;
     } catch (error: any) {
@@ -24,7 +24,7 @@ export const addPurchaseSubcategory = createAsyncThunk<PurchaseSubcategory, Purc
   'purchaseSubcategory/add',
   async (purchaseSubcategory) => {
     try {
-      const response = await axios.post('http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/', purchaseSubcategory,
+      const response = await axios.post('https://yenerp.com/purchaseapi/purchasesubcategories/', purchaseSubcategory,
   { headers: authHeader() });
       return response.data;
     } catch (error: any) {
@@ -41,7 +41,7 @@ export const updatePurchaseSubcategory = createAsyncThunk<
   async ({ purchasesubcategoryId, purchasesubcategory }) => {
     try {
       const response = await axios.patch(
-        `http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/${purchasesubcategoryId}`,
+        `https://yenerp.com/purchaseapi/purchasesubcategories/${purchasesubcategoryId}`,
         purchasesubcategory,
   { headers: authHeader() }
       );
@@ -57,7 +57,7 @@ export const deactivatePurchaseSubcategory = createAsyncThunk<PurchaseSubcategor
   async (purchasesubcategoryId) => {
     try {
       const response = await axios.patch(
-        `http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/${purchasesubcategoryId}/deactivate`,
+        `https://yenerp.com/purchaseapi/purchasesubcategories/${purchasesubcategoryId}/deactivate`,
        {},
   { headers: authHeader() }
       );
@@ -73,7 +73,7 @@ export const activatePurchaseSubcategory = createAsyncThunk<PurchaseSubcategory,
   async (purchasesubcategoryId) => {
     try {
       const response = await axios.patch(
-        `http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/${purchasesubcategoryId}/activate`,
+        `https://yenerp.com/purchaseapi/purchasesubcategories/${purchasesubcategoryId}/activate`,
        {},
   { headers: authHeader() }
       );
@@ -96,7 +96,7 @@ export const importPurchaseSubcategoriesCSV = createAsyncThunk<
       formData.append('file', file);
 
       const response = await axios.post(
-      'http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/import-csv',
+      'https://yenerp.com/purchaseapi/purchasesubcategories/import-csv',
         formData,
         {
           headers: { ...authHeader(),
@@ -132,7 +132,7 @@ export const exportPurchaseSubcategoriesCSV = createAsyncThunk<
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        'http://192.168.1.109:8000/purchasetestapi/purchasesubcategories/exportsubcategory/export-csv',
+        'https://yenerp.com/purchaseapi/purchasesubcategories/exportsubcategory/export-csv',
         {
           responseType: 'blob',
            headers: authHeader()

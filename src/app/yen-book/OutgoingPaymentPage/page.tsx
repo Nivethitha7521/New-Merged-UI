@@ -58,6 +58,7 @@ import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import DateRangeDialog from '@/components/dateRange';
 require('react-date-range/dist/styles.css');
 require('react-date-range/dist/theme/default.css');
+import { VendorSearch } from '@/Models/vendor';
 import { ClearIcon } from '@mui/x-date-pickers/icons';
 import moment from 'moment';
 import { fetchItemwiseAps, fetchRandomIDApInvoices, selectApinvoice, setApDialogOpen, setSelectedinvoiceId } from '@/features/yen-purchase/AP/apInvoiceSlice';
@@ -80,6 +81,7 @@ import {
   initializePreferences,
   selectVisibleColumns,
 } from '../OutgoingPaymentPage/Features/columnPreferencesSlice';
+import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
 
 const OutgoingPaymentComponent = React.memo(() => {
   const dispatch = useDispatch<AppDispatch>();
@@ -93,7 +95,7 @@ const OutgoingPaymentComponent = React.memo(() => {
 
   const [selectedOutgoing, setSelectedOutgoing] = useState<any>(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const [selectedVendorName, setSelectedVendorName] = useState<VendorDetail | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
   const [viewItemsDialogOpen, setViewItemsDialogOpen] = useState(false);
   const [selectedGrn, setSelectedGrn] = useState<GrnResponse | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -290,54 +292,36 @@ const OutgoingPaymentComponent = React.memo(() => {
     }
   };
 
-  const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoiceId?: string) => {
+const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoiceId?: string) => {
     dispatch(clearDebitCreditNotes());
     let documentIdToUse = '';
     let documentTypeToUse = '';
 
     if (grnId) {
-      documentIdToUse = grnId;
-      documentTypeToUse = 'grn';
-    } else if (apInvoiceId) {
-      documentIdToUse = apInvoiceId;
-      documentTypeToUse = 'ap_invoice';
+        documentIdToUse = grnId;
+        documentTypeToUse = 'grn';
     } else {
-      documentIdToUse = outgoingId;
-      documentTypeToUse = 'outgoing_payment';
+        documentIdToUse = outgoingId;  // This should be "69eef87c5cc5b9b4eedd522e"
+        documentTypeToUse = 'outgoing_payment';
     }
+
+    console.log('Opening Debit Credit Dialog with:', {
+        documentId: documentIdToUse,
+        documentType: documentTypeToUse
+    });
 
     dispatch(setDebitCreditDocumentId(documentIdToUse));
     dispatch(setDebitCreditDocumentType(documentTypeToUse));
     dispatch(setDebitCreditDialogOpen(true));
 
-    try {
-      await dispatch(fetchAllDebitNotesComprehensive({
+    // This will call: /debitnote/returnprocess/debitnotes/comprehensive/69eef87c5cc5b9b4eedd522e?document_type=outgoing_payment
+    await dispatch(fetchAllDebitNotesComprehensive({
         documentId: documentIdToUse,
         documentType: documentTypeToUse,
         includeCleared: true,
         includeActive: true,
-      })).unwrap();
-    } catch (error: any) {
-      try {
-        await dispatch(fetchAllDebitNotesForDocument({
-          documentId: documentIdToUse,
-          documentType: 'outgoing',
-          includeCleared: true,
-          includeActive: true,
-        })).unwrap();
-      } catch (fallbackError) {
-        let errorMessage = 'Failed to load debit notes';
-        if (error?.includes('422')) {
-          errorMessage = 'Document type is required for this request';
-        } else if (error?.includes('404')) {
-          errorMessage = 'No debit notes found for this document';
-        }
-        dispatch(setSnackbarMessage(errorMessage));
-        dispatch(setSnackbarOpen(true));
-      }
-    }
-  };
-
+    })).unwrap();
+};
   const outgoingCreditNoteStatus = useMemo(() => {
     const statusMap: { [key: string]: { isDisabled: boolean; tooltipTitle: string } } = {};
     outgoings.forEach((outgoingdebit) => {
@@ -387,7 +371,7 @@ const OutgoingPaymentComponent = React.memo(() => {
         fromDate: appliedFromDate,
         toDate: appliedToDate,
         filterByAmount: true,
-        vendorName: selectedVendorName?.vendorName,
+        vendorCode: selectedVendor?.randomId,  // ← Send vendorCode
         sortBy: backendSortField,
         sortOrder: backendSortOrder
       }));
@@ -404,7 +388,6 @@ const OutgoingPaymentComponent = React.memo(() => {
       }));
     }
   };
-
   const handleNextPage = () => {
     if (currentPage * pageSize) {
       handlePageChange(currentPage + 1);
@@ -468,7 +451,7 @@ const OutgoingPaymentComponent = React.memo(() => {
       fromDate: appliedFromDate,
       toDate: appliedToDate,
       filterByAmount: true,
-      vendorName: selectedVendorName?.vendorName,
+      vendorCode: selectedVendor?.randomId || '',  // ← CHANGE THIS: use selectedVendor?.randomId
       sortBy: backendSortField,
       sortOrder: backendSortOrder
     }));
@@ -514,8 +497,9 @@ const OutgoingPaymentComponent = React.memo(() => {
     if (formattedEndDate) {
       filterParams.toDate = new Date(formattedEndDate);
     }
-    if (selectedVendorName?.vendorName && selectedVendorName.vendorName.trim() !== '' && selectedVendorName.vendorName !== 'none') {
-      filterParams.vendorName = selectedVendorName.vendorName.trim();
+    // ← Use vendorCode from selected vendor
+    if (selectedVendor?.randomId) {
+      filterParams.vendorCode = selectedVendor.randomId;
     }
     if (dateField && dateField.trim() !== '') {
       filterParams.filterBy = dateField.trim();
@@ -526,7 +510,6 @@ const OutgoingPaymentComponent = React.memo(() => {
     if (!canRead) return;
     dispatch(fetchOutgoings(filterParams));
   };
-
   const handleFilterClose = () => {
     setIsFilterActive(false);
     setSelectionRange({
@@ -535,7 +518,7 @@ const OutgoingPaymentComponent = React.memo(() => {
       key: 'selection',
     });
     setStatus('');
-    setSelectedVendorName(null);
+    setSelectedVendor(null);  // ← Clear vendor selection
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -553,11 +536,11 @@ const OutgoingPaymentComponent = React.memo(() => {
       size: pageSize,
       filterBy: dateField,
       filterByAmount: true,
+      vendorCode: undefined,  // ← Clear vendorCode
       sortBy: backendSortField,
       sortOrder: sortOrder === 'asc' ? 'ascending' : 'descending'
     }));
   };
-
   const handleCloseViewItemsDialog = () => {
     setViewItemsDialogOpen(false);
     setSelectedGrn(null);
@@ -885,8 +868,34 @@ const OutgoingPaymentComponent = React.memo(() => {
     return filteredPayments.filter(payment => selectedRows.includes(payment.outgoingId || '')).length;
   }, [filteredPayments, selectedRows]);
 
-  const handleVendorChange = (event: React.SyntheticEvent, newValue: VendorDetail | null, reason: AutocompleteChangeReason) => {
-    setSelectedVendorName(newValue);
+  const handleVendorChange = (vendor: VendorSearch | null) => {
+    setSelectedVendor(vendor);
+
+    // Immediately fetch with new vendor filter
+    if (!canRead) return;
+
+    const sortFieldMap: { [key: string]: string } = {
+      dueDays: 'intimationDays',
+      paymentTerms: 'paymentTerms',
+      payableAmount: 'payableAmount',
+      totalPaid: 'totalPaid',
+      remainingAmount: 'totalPayableAmount',
+      totalPrice: 'totalPrice',
+      invoiceDate: 'invoiceDate',
+      vendorName: 'vendorName'
+    };
+    const backendSortField = sortColumn ? sortFieldMap[sortColumn] : 'createdDate';
+    const backendSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
+
+    dispatch(fetchOutgoings({
+      page: 1,
+      size: pageSize,
+      filterByAmount: true,
+      filterBy: dateField,
+      vendorCode: vendor?.randomId || '',  // ← Send vendorCode
+      sortBy: backendSortField,
+      sortOrder: backendSortOrder
+    }));
   };
 
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -936,15 +945,12 @@ const OutgoingPaymentComponent = React.memo(() => {
           <Grid item xs="auto">
             <DateRangeDialog selectionRange={selectionRange} setSelectionRange={setSelectionRange} onApply={handleFilterClick} />
           </Grid>
+          {/* Vendor Search - Use VendorSearchAutocomplete like GRN page */}
           <Grid item xs={6} sm={4} md={2}>
-            <Autocomplete
-              value={selectedVendorName}
+            <VendorSearchAutocomplete
+              value={selectedVendor}
               onChange={handleVendorChange}
-              options={outgoingvendor}
-              getOptionLabel={(option: VendorDetail) => option.vendorName || ''}
-              renderInput={(params) => <TextField {...params} label="All Vendors" variant="outlined" size="small" />}
-              size="small"
-              fullWidth
+              label="All Vendors"
             />
           </Grid>
           {/* <Grid item xs={6} sm={4} md={1}>

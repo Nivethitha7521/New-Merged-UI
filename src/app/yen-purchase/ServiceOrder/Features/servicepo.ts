@@ -121,6 +121,7 @@ const transformRawToNested = (raw: RawServiceData): ServiceData => {
   return {
     serviceId: raw.serviceId,
     vendorId: raw.vendorId || '',
+     vendorCode: raw.vendorCode || '',  // ← Add this
     vendorName: raw.vendorName || '',
     vendorContact: raw.vendorContact || '',
     workOrderDate: formattedWorkOrderDate || null,

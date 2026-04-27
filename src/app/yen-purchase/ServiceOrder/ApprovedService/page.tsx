@@ -166,7 +166,7 @@ console.log("Approved Service Permissions:", {
   const serviceOrder = useSelector(selectServiceState);
   const { services, loading, error, snackbarMessage, snackbarOpen } = serviceOrder;
   const { businesses } = useSelector(selectBusinesses);
-
+const [isSubmitting, setIsSubmitting] = useState(false);
   // Conversion state
   const conversionLoading = useSelector(selectConversionLoading);
   const conversionError = useSelector(selectConversionError);
@@ -428,8 +428,6 @@ const [apRoundOff, setApRoundOff] = useState('0.00'); // Start with default valu
       setOpenConvertToAPDialog(true);
     }
   };
-
-// Also update in handleDialogClose:
 const handleDialogClose = () => {
   setSelectedOrder(null);
   setSelectedDescriptions([]);
@@ -437,8 +435,9 @@ const handleDialogClose = () => {
   setOpenConvertConfirmation(false);
   setApInvoiceDate(format(new Date(), 'yyyy-MM-dd'));
   setApInvoiceNo('');
-  setApRoundOff('0.00'); // Reset to default
+  setApRoundOff('0.00');
   setApRoundOffError('');
+  setIsSubmitting(false);  // ← add this
   dispatch(clearConversionState());
 };
   const handleCloseSnackbar = () => {
@@ -469,25 +468,18 @@ const handleDialogClose = () => {
       }
     }
   };
-  const handleConfirmConvertToAP = () => {
-  if (!selectedOrder || !apInvoiceNo.trim()) return;
+ const handleConfirmConvertToAP = async () => {
+  if (!selectedOrder || !apInvoiceNo.trim() || isSubmitting) return;
 
-  // Ensure apRoundOff is properly formatted
+  setIsSubmitting(true);  // ← disable immediately on first click
+
   let roundOffValue = apRoundOff;
-  
-  // If apRoundOff is empty, set to "0.00"
-  if (!roundOffValue || roundOffValue === '') {
-    roundOffValue = '0.00';
-  }
-  
-  // Ensure it has exactly two decimal places
+  if (!roundOffValue || roundOffValue === '') roundOffValue = '0.00';
   if (!roundOffValue.includes('.')) {
     roundOffValue = parseFloat(roundOffValue).toFixed(2);
   } else {
     const parts = roundOffValue.split('.');
-    if (parts[1].length < 2) {
-      roundOffValue = parseFloat(roundOffValue).toFixed(2);
-    }
+    if (parts[1].length < 2) roundOffValue = parseFloat(roundOffValue).toFixed(2);
   }
 
   const request = {
@@ -497,17 +489,19 @@ const handleDialogClose = () => {
     invoiceDate: apInvoiceDate
   };
 
-  console.log('Sending conversion request:', request); // Debug log
-
-  dispatch(convertServiceToAPOutgoing(request)).then((result) => {
-    if (result.meta.requestStatus === 'fulfilled') {
-      setOpenConvertConfirmation(false);
-      handleDialogClose();
-      fetchApprovedServices();
-      dispatch(setSnackbarMessage('Service successfully converted to AP and Outgoing'));
-      dispatch(setSnackbarOpen(true));
-    }
-  });
+  try {
+    const result = await dispatch(convertServiceToAPOutgoing(request)).unwrap();
+    setOpenConvertConfirmation(false);
+    handleDialogClose();
+    fetchApprovedServices();
+    dispatch(setSnackbarMessage('Service successfully converted to AP and Outgoing'));
+    dispatch(setSnackbarOpen(true));
+  } catch (error: any) {
+    dispatch(setSnackbarMessage(error || 'Conversion failed'));
+    dispatch(setSnackbarOpen(true));
+  } finally {
+    setIsSubmitting(false);  // ← re-enable only if still mounted (error case)
+  }
 };
   // Generate PDF for vendorwise report
   const generatePDF = () => {
@@ -1395,15 +1389,15 @@ if (!canRead) {
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleConfirmConvertToAP}
-              variant="contained"
-              color="success"
-              disabled={conversionLoading}
-              startIcon={conversionLoading ? <CircularProgress size={20} /> : null}
-            >
-              {conversionLoading ? 'Converting...' : 'Yes, Convert to AP'}
-            </Button>
+          <Button
+  onClick={handleConfirmConvertToAP}
+  variant="contained"
+  color="success"
+  disabled={conversionLoading || isSubmitting}  // ← both checks
+  startIcon={(conversionLoading || isSubmitting) ? <CircularProgress size={20} /> : null}
+>
+  {(conversionLoading || isSubmitting) ? 'Converting...' : 'Yes, Convert to AP'}
+</Button>
           </DialogActions>
         </Dialog>
         {/* Final Confirmation Dialog

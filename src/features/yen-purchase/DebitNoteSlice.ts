@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '@/redux/store';
 
-const BASE_URL = 'http://192.168.1.109:8000/purchasetestapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 
 // ============================================
 // INTERFACES (Updated for comprehensive API)
@@ -203,67 +203,53 @@ export const fetchAllDebitNotesForDocument = createAsyncThunk(
     }
   }
 );
-// In DebitNoteSlice.ts - Fix the thunk
 export const fetchAllDebitNotesComprehensive = createAsyncThunk(
   'debitCreditNote/fetchAllDebitNotesComprehensive',
   async (
     { 
       documentId, 
-      documentType,  // This is now required
+      documentType,
       includeCleared = true, 
       includeActive = true 
     }: { 
       documentId: string; 
-      documentType: string;  // Required
+      documentType: string;
       includeCleared?: boolean; 
       includeActive?: boolean;
     },
     { rejectWithValue }
   ) => {
     try {
-      console.log('📋 Making API request:', {
-        documentId,
-        documentType,
-        includeCleared,
-        includeActive
+      console.log('📋 Making API request to:', `/debitnote/returnprocess/debitnotes/comprehensive/${documentId}`);
+      console.log('Params:', {
+        document_type: documentType,
+        include_cleared: includeCleared,
+        include_active: includeActive
       });
       
       const response = await purchaseApi.get<ComprehensiveDebitNotesResponse>(
         `/debitnote/returnprocess/debitnotes/comprehensive/${documentId}`,
         {
           params: {
-            document_type: documentType,  // Make sure this matches backend
+            document_type: documentType,
             include_cleared: includeCleared,
             include_active: includeActive,
           },
         }
       );
       
-      console.log('✅ API response received:', response.status);
+      console.log('✅ API response received:', response.status, response.data);
       return response.data;
       
     } catch (error: any) {
       console.error('❌ API request failed:', error);
+      console.error('Response:', error.response?.data);
       
-      // Get detailed error info
-      let errorDetails = 'Unknown error';
-      if (error.response) {
-        console.log('Response data:', error.response.data);
-        console.log('Response status:', error.response.status);
-        console.log('Response headers:', error.response.headers);
-        
-        errorDetails = error.response.data?.detail || 
-                      error.response.data?.message || 
-                      `Server error: ${error.response.status}`;
-      } else if (error.request) {
-        console.log('No response received:', error.request);
-        errorDetails = 'No response from server';
-      } else {
-        console.log('Error setting up request:', error.message);
-        errorDetails = error.message;
-      }
-      
-      return rejectWithValue(errorDetails);
+      return rejectWithValue(
+        error.response?.data?.detail || 
+        error.response?.data?.message || 
+        'Failed to fetch debit notes'
+      );
     }
   }
 );

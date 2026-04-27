@@ -38,9 +38,10 @@ export const fetchAdvances = createAsyncThunk<
         ...(vendorName && { vendorName }),
       });
 
-  const response = await purchaseApi.get(
+      const response = await purchaseApi.get(
         `/advancevendor/vendorwise/advance?${params}`,
-      );      return {
+      );
+      return {
         data: response.data.data || [],
         totalItems: response.data.totalItems || 0,
       };
@@ -50,6 +51,7 @@ export const fetchAdvances = createAsyncThunk<
     }
   }
 );
+
 export const fetchVendorDetails = createAsyncThunk<
   VendorDetail[],
   { status?: string },
@@ -85,6 +87,7 @@ export const createAdvancePayment = createAsyncThunk<
     );
   }
 });
+
 export const fetchActiveAdvancesVendor = createAsyncThunk(
   "outgoings/fetchActiveAdvancesVendor",
   async (vendorId: string, { rejectWithValue }) => {
@@ -100,6 +103,7 @@ export const fetchActiveAdvancesVendor = createAsyncThunk(
     }
   },
 );
+
 export const fetchActiveAdvancesVendorByName = createAsyncThunk(
   "outgoings/fetchActiveAdvancesVendorByName",
   async (vendorName: string, { rejectWithValue }) => {
@@ -120,6 +124,7 @@ export const fetchActiveAdvancesVendorByName = createAsyncThunk(
     }
   },
 );
+
 // Add these new async thunks for fetching advances
 export const fetchActiveAdvancesMultipleVendor = createAsyncThunk<
   AdvancePayment[],
@@ -151,6 +156,7 @@ export const fetchActiveAdvancesMultipleVendor = createAsyncThunk<
     }
   },
 );
+
 const advancePaymentSlice = createSlice({
   name: 'advances',
   initialState,

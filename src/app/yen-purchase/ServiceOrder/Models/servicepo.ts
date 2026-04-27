@@ -17,6 +17,7 @@ export interface Freight {
 export interface ServiceData {
   serviceId: string;
   vendorId: string;
+  vendorCode?:string;
   vendorName: string;
   vendorContact: string;
   workOrderDate: string | null;
@@ -207,6 +208,7 @@ export interface RawServiceData {
   _id?: string;
   serviceId: string;
   vendorId?: string;
+  vendorCode?:string;
   vendorName: string;
   vendorContact: string;
   workOrderDate: string | null;

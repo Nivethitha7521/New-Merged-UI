@@ -149,6 +149,22 @@ const TableRowMemo = React.memo(
   }) => {
     // Get validation error for this item
     const validationError = priceValidationError[item.itemId];
+    const [localGrnValue, setLocalGrnValue] = useState<string>(
+      item.grnPrice !== undefined && item.grnPrice !== null
+        ? String(item.grnPrice)
+        : poPrice !== undefined && poPrice !== null
+          ? String(poPrice)
+          : ''
+    );
+    useEffect(() => {
+      setLocalGrnValue(
+        item.grnPrice !== undefined && item.grnPrice !== null
+          ? String(item.grnPrice)
+          : poPrice !== undefined && poPrice !== null
+            ? String(poPrice)
+            : ''
+      );
+    }, [item.itemId]); // Only reset when item changes, not on every render
 
     return (
       <TableRow>
@@ -191,51 +207,63 @@ const TableRowMemo = React.memo(
 
         {/* NEW: PO Price Column - Non-editable */}
         <TableCell className='table-number-right'>
-         {poPrice}
+          {poPrice}
         </TableCell>
-{/* GRN Price Column - Editable with validation */}
-<TableCell className='table-number-right'>
-  <TextField
-    type="text"  // ← CHANGE from "number" to "text"
-    autoComplete="off"
-    value={item.grnPrice !== undefined && item.grnPrice !== null ? item.grnPrice : ''}
-    onChange={(e) => {
-      const newPrice = e.target.value;
-      // Allow empty string or valid numbers with decimal
-      if (newPrice === '' || /^\d*\.?\d*$/.test(newPrice)) {
-        handlePriceChange(item.itemId, newPrice);
-        
-        // Clear validation error when user starts typing
-        if (validationError) {
-          setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
-        }
-      }
-    }}
-    onBlur={async (e) => {
-      const value = e.target.value;
-      if (value === '') {
-        // Clear any validation error when field is empty
-        setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
-        return;
-      }
-      const grnPrice = Number(value);
-      if (!isNaN(grnPrice) && grnPrice > 0 && poPrice > 0) {
-        const isValid = await validateGrnPrice(item.itemId, grnPrice, poPrice);
-        if (!isValid && grnPrice > poPrice) {
-          // Keep the error
-        }
-      } else if (grnPrice === 0 && value !== '') {
-        setPriceValidationError(prev => ({ ...prev, [item.itemId]: 'Price cannot be zero' }));
-      }
-    }}
-    inputProps={{ step: "0.01" }}
-    sx={{ width: "100px" }}
-    error={!!validationError || (touched[index]?.grnPrice && !!errors[index]?.grnPrice)}
-    helperText={validationError || (touched[index]?.grnPrice && errors[index]?.grnPrice)}
-    placeholder="Enter price"
-  />
-</TableCell>
+        {/* GRN Price Column - Editable with validation */}
+        <TableCell className='table-number-right'>
+          <TextField
+            type="number"
+            autoComplete="off"
+            value={localGrnValue}                          // ← use local state
+            onChange={(e) => {
+              const newPrice = e.target.value;
+              setLocalGrnValue(newPrice);                  // ← always update local display
 
+              if (newPrice === '') {
+                handlePriceChange(item.itemId, '');
+                setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
+                return;
+              }
+              if (/^\d*\.?\d*$/.test(newPrice)) {
+                handlePriceChange(item.itemId, newPrice);
+                if (validationError) {
+                  setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
+                }
+              }
+            }}
+            onBlur={async (e) => {
+              const value = localGrnValue;
+
+              if (value === '' || value === undefined) {
+                setPriceValidationError(prev => ({
+                  ...prev,
+                  [item.itemId]: 'required'
+                }));
+                return;
+              }
+
+              const grnPrice = Number(value);
+              if (grnPrice === 0) {
+                setPriceValidationError(prev => ({
+                  ...prev,
+                  [item.itemId]: 'Price cannot be zero'
+                }));
+                return;
+              }
+
+              if (!isNaN(grnPrice) && grnPrice > 0 && poPrice > 0) {
+                await validateGrnPrice(item.itemId, grnPrice, poPrice);
+              } else {
+                setPriceValidationError(prev => ({ ...prev, [item.itemId]: '' }));
+              }
+            }}
+            inputProps={{ step: "0.01" }}
+            sx={{ width: "100px" }}
+            error={!!validationError || (touched[index]?.grnPrice && !!errors[index]?.grnPrice)}
+            helperText={validationError || (touched[index]?.grnPrice && errors[index]?.grnPrice)}
+            placeholder="Enter price"
+          />
+        </TableCell>
         <TableCell className='table-number-right'>{(item.perUnit || 0).toFixed(2)}</TableCell>
         <TableCell className='table-number-right'>
           <TextField
@@ -400,15 +428,15 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   const [priceValidationErrors, setPriceValidationErrors] = useState<Record<string, string>>({});
   const dispatch = useDispatch<AppDispatch>();
   const [isValidatingPrice, setIsValidatingPrice] = useState(false);
-const { settings: grnSettings, validationResult, loading: settingsLoading } = useSelector(
-  (state: any) => state.grnPriceSettings
-);
-// Load settings when dialog opens
-useEffect(() => {
-  if (open) {
-    dispatch(fetchGRNPriceSettings());
-  }
-}, [open, dispatch]);
+  const { settings: grnSettings, validationResult, loading: settingsLoading } = useSelector(
+    (state: any) => state.grnPriceSettings
+  );
+  // Load settings when dialog opens
+  useEffect(() => {
+    if (open) {
+      dispatch(fetchGRNPriceSettings());
+    }
+  }, [open, dispatch]);
 
 
   const toggleFullScreen = () => {
@@ -483,78 +511,78 @@ useEffect(() => {
     [updatedItems, selectedOrder, setErrors]
   );
 
-// Add this function - checks if there are any active price validation errors
-const hasPriceValidationErrors = useCallback((): boolean => {
-  return Object.values(priceValidationErrors).some(error => error !== '');
-}, [priceValidationErrors]);
+  // Add this function - checks if there are any active price validation errors
+  const hasPriceValidationErrors = useCallback((): boolean => {
+    return Object.values(priceValidationErrors).some(error => error !== '');
+  }, [priceValidationErrors]);
   // Validate GRN price function
-// Validate price function using Redux
-const validateGrnPrice = useCallback(async (
-  itemId: string,
-  grnPrice: number,
-  poPrice: number
-): Promise<boolean> => {
-  if (!grnSettings?.isActive) {
-    setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
-    return true;
-  }
-
-  // If price is below or equal to PO price, always allow
-  if (grnPrice <= poPrice) {
-    setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
-    return true;
-  }
-
-  setIsValidatingPrice(true);
-
-  try {
-    const item = updatedItems.find(i => i.itemId === itemId);
-    const itemName = item?.itemName || 'Item';
-
-    const result = await dispatch(validateGRNPrice({
-      poPrice,
-      grnPrice,
-      itemName
-    })).unwrap();
-
-    if (!result.valid) {
-      setPriceValidationErrors(prev => ({
-        ...prev,
-        [itemId]: result.message
-      }));
-      return false;
-    } else {
+  // Validate price function using Redux
+  const validateGrnPrice = useCallback(async (
+    itemId: string,
+    grnPrice: number,
+    poPrice: number
+  ): Promise<boolean> => {
+    if (!grnSettings?.isActive) {
       setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
       return true;
     }
-  } catch (error) {
-    console.error('Validation error:', error);
-    return true; // Allow on error
-  } finally {
-    setIsValidatingPrice(false);
-  }
-}, [grnSettings, updatedItems, dispatch]);
-// Then in the save button logic, add this check:
-const handleOpenConfirmDialog = () => {
-  // Check for price validation errors
-  if (hasPriceValidationErrors()) {
-    // You need access to snackbar state - add this to props
-    if (onPriceValidationError) {
-      onPriceValidationError("Please fix price validation errors before converting to GRN.");
+
+    // If price is below or equal to PO price, always allow
+    if (grnPrice <= poPrice) {
+      setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
+      return true;
     }
-    return;
-  }
-  
-  const finalTotal = totalOrderAmount + roundOffAmount;
-  if (finalTotal < 0) {
-    setErrors((prev) => ({
-      ...prev,
-      roundOff: "Round off amount cannot make total negative"
-    }));
-    return;
-  }
-  setOpenConfirmDialog(true);
-};
+
+    setIsValidatingPrice(true);
+
+    try {
+      const item = updatedItems.find(i => i.itemId === itemId);
+      const itemName = item?.itemName || 'Item';
+
+      const result = await dispatch(validateGRNPrice({
+        poPrice,
+        grnPrice,
+        itemName
+      })).unwrap();
+
+      if (!result.valid) {
+        setPriceValidationErrors(prev => ({
+          ...prev,
+          [itemId]: result.message
+        }));
+        return false;
+      } else {
+        setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
+        return true;
+      }
+    } catch (error) {
+      console.error('Validation error:', error);
+      return true; // Allow on error
+    } finally {
+      setIsValidatingPrice(false);
+    }
+  }, [grnSettings, updatedItems, dispatch]);
+  // Then in the save button logic, add this check:
+  const handleOpenConfirmDialog = () => {
+    // Check for price validation errors
+    if (hasPriceValidationErrors()) {
+      // You need access to snackbar state - add this to props
+      if (onPriceValidationError) {
+        onPriceValidationError("Please fix price validation errors before converting to GRN.");
+      }
+      return;
+    }
+
+    const finalTotal = totalOrderAmount + roundOffAmount;
+    if (finalTotal < 0) {
+      setErrors((prev) => ({
+        ...prev,
+        roundOff: "Round off amount cannot make total negative"
+      }));
+      return;
+    }
+    setOpenConfirmDialog(true);
+  };
   const handleCloseConfirmDialog = () => {
     setOpenConfirmDialog(false);
   };
@@ -1568,49 +1596,50 @@ const ApprovedPurchase: React.FC = () => {
     },
     [updatedItems, selectedOrder, setExcessDialogMessage, setExcessDialogOpen]
   );
-const handlePriceChange = useCallback(
-  (itemId: string, value: string) => {
-    const index = updatedItems.findIndex((item) => item.itemId === itemId);
-    setTouched((prev) => ({
-      ...prev,
-      [index]: { ...prev[index], grnPrice: true },
-    }));
-    
-    // Allow empty string to clear the field
-    if (value === "") {
-      setUpdatedItems((prevItems) =>
-        prevItems.map((item) =>
-          item.itemId === itemId ? { ...item, grnPrice: undefined } : item
-        )
-      );
-      setErrors((prev) => ({
+  const handlePriceChange = useCallback(
+    (itemId: string, value: string) => {
+      const index = updatedItems.findIndex((item) => item.itemId === itemId);
+      setTouched((prev) => ({
         ...prev,
-        [index]: { ...prev[index], grnPrice: "" },
+        [index]: { ...prev[index], grnPrice: true },
       }));
-      return;
-    }
-    
-    // Validate number format
-    if (/^\d*\.?\d*$/.test(value)) {
-      const priceValue = Number(value);
-      setUpdatedItems((prevItems) =>
-        prevItems.map((item) =>
-          item.itemId === itemId ? { ...item, grnPrice: priceValue } : item
-        )
-      );
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], grnPrice: "" },
-      }));
-    } else {
-      setErrors((prev) => ({
-        ...prev,
-        [index]: { ...prev[index], grnPrice: "Invalid number" },
-      }));
-    }
-  },
-  [updatedItems]
-);
+
+      // Allow empty string while typing (don't clear the field yet)
+      if (value === "") {
+        setUpdatedItems((prevItems) =>
+          prevItems.map((item) =>
+            item.itemId === itemId ? { ...item, grnPrice: undefined } : item
+          )
+        );
+        // Don't set error immediately, wait for onBlur
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], grnPrice: "" },
+        }));
+        return;
+      }
+
+      // Validate number format
+      if (/^\d*\.?\d*$/.test(value)) {
+        const priceValue = Number(value);
+        setUpdatedItems((prevItems) =>
+          prevItems.map((item) =>
+            item.itemId === itemId ? { ...item, grnPrice: priceValue } : item
+          )
+        );
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], grnPrice: "" },
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          [index]: { ...prev[index], grnPrice: "Invalid number" },
+        }));
+      }
+    },
+    [updatedItems]
+  );
   const handleDiscountChange = useCallback(
     (itemId: string, field: "befTaxDiscount" | "afTaxDiscount", value: string) => {
       const index = updatedItems.findIndex((item) => item.itemId === itemId);
@@ -2549,12 +2578,13 @@ const handlePriceChange = useCallback(
       page: 1,
       size: pageSize,
       dateField: "approvedDate",
-      vendorName: vendor ? vendor.vendorName : "",
+      vendorCode: vendor ? vendor.randomId : "",  // ← CHANGE: send vendorCode
       status: "Approved,PartiallyReceived",
       itemName: searchQueryItem,
       randomId: selectedRandomId,
     }));
   }, [dispatch, pageSize, selectionRange, searchQueryItem, selectedRandomId]);
+
   const handleRandomIdChange = useCallback((randomId: string) => {
     setSelectedRandomId(randomId);
     dispatch(fetchPurchaseOrders({
@@ -2585,32 +2615,34 @@ const handlePriceChange = useCallback(
       randomId: selectedRandomId,
     }));
   }, [dispatch, pageSize, selectionRange, selectedVendor, selectedRandomId]);
+  // Update handleFilterClick
   const handleFilterClick = useCallback(() => {
     dispatch(setPagination({ page: 1, size: pageSize }));
-    // UPDATED: Pass status as comma-separated string
     dispatch(fetchPurchaseOrders({
       page: 1,
       size: pageSize,
       dateField: "approvedDate",
       fromDate: moment(selectionRange.startDate).startOf("day").toDate(),
       toDate: moment(selectionRange.endDate).endOf("day").toDate(),
-      vendorName: selectedVendor ? selectedVendor.vendorName : "",
-      status: "Approved,PartiallyReceived", // Pass as comma-separated string
+      vendorCode: selectedVendor ? selectedVendor.randomId : "",  // ← CHANGE: send vendorCode
+      status: "Approved,PartiallyReceived",
       itemName: newItem ? newItem.itemName : "",
       randomId: selectedRandomId,
     }));
   }, [dispatch, pageSize, selectionRange, selectedVendor, newItem, selectedRandomId]);
+
+  // Update handleFilterClose
   const handleFilterClose = useCallback(() => {
     setSelectionRange({ startDate: new Date(), endDate: new Date(), key: "selection" });
     setSelectedVendor(null);
     setNewItem(null);
     setSelectedRandomId("");
-    // UPDATED: Pass status as comma-separated string
     dispatch(fetchPurchaseOrders({
       page: 1,
       size: pageSize,
       dateField: "approvedDate",
-      status: "Approved,PartiallyReceived", // Pass as comma-separated string
+      status: "Approved,PartiallyReceived",
+      vendorCode: undefined,  // ← Clear vendorCode
     }));
   }, [dispatch, pageSize]);
   const isReceivedQuantityValid = useCallback(() => {
@@ -3004,10 +3036,10 @@ const handlePriceChange = useCallback(
           receivingLocation={receivingLocation}  // Add this
           setReceivingLocation={setReceivingLocation}  // Add this
           poLocationId={selectedOrder?.locationId}  // Add this to pass PO's location ID
-            onPriceValidationError={(message) => {
-    setSnackbarInvoiceMessage(message);
-    setSnackbarInvoiceOpen(true);
-  }}
+          onPriceValidationError={(message) => {
+            setSnackbarInvoiceMessage(message);
+            setSnackbarInvoiceOpen(true);
+          }}
         />
         <Dialog open={openEditDialog} onClose={handleCloseDialogs}>
           <DialogTitle>Confirm Submission</DialogTitle>

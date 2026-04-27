@@ -62,6 +62,8 @@ import moment from "moment";
 import { VendorDetail } from "@/Models/outgoingModel";
 import { AutocompleteChangeReason } from "@mui/material/Autocomplete";
 import PaymentHistoryDialog from "../Components/PaymentHistoryDialog";
+import { VendorSearch } from "@/Models/vendor";
+import VendorSearchAutocomplete from "@/components/vendorsearchautocomplete";
 
 const PaidPaymentComponent = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -77,7 +79,7 @@ const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
   const [loadingState, setLoadingState] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedOutgoing, setSelectedOutgoing] = useState<any>(null);
-  const [selectedVendorName, setSelectedVendorName] = useState<VendorDetail | null>(null);
+const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
   const [filteredOutgoing, setFilteredOutgoing] = useState<Outgoing[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const currentPage = useSelector(selectCurrentPage);
@@ -145,25 +147,27 @@ const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
   const paidOutgoings = outgoings.filter(payment => {
     return payment.status === 'Fully Paid' || payment.status === 'Partially Paid';
   });
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
-      return;
-    }
-    const appliedFromDate = selectionRange?.startDate instanceof Date ? moment(selectionRange.startDate).startOf('day').toDate() : StartDate;
-    const appliedToDate = selectionRange?.endDate instanceof Date ? moment(selectionRange.endDate).endOf('day').toDate() : EndDate;
-    dispatch(setPagination({ page: newPage, size: pageSize }));
-    dispatch(fetchOutgoings({
-      page: newPage,
-      size: pageSize,
-      filterByStatus: true,
-      filterBy: dateField,
-      fromDate: appliedFromDate,
-      toDate: appliedToDate,
-      vendorName: selectedVendorName?.vendorName,
-    }));
-  };
-
+const handlePageChange = (newPage: number) => {
+  if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
+    return;
+  }
+  const appliedFromDate = selectionRange?.startDate instanceof Date 
+    ? moment(selectionRange.startDate).startOf('day').toDate() 
+    : StartDate;
+  const appliedToDate = selectionRange?.endDate instanceof Date 
+    ? moment(selectionRange.endDate).endOf('day').toDate() 
+    : EndDate;
+  dispatch(setPagination({ page: newPage, size: pageSize }));
+  dispatch(fetchOutgoings({
+    page: newPage,
+    size: pageSize,
+    filterByStatus: true,
+    filterBy: dateField,
+    fromDate: appliedFromDate,
+    toDate: appliedToDate,
+    vendorCode: selectedVendor?.randomId || '',  // ← Send vendorCode
+  }));
+};
   const handleNextPage = () => {
     if (currentPage * pageSize < totalItems) {
       handlePageChange(currentPage + 1);
@@ -175,76 +179,76 @@ const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
       handlePageChange(currentPage - 1);
     }
   };
+const handleFilterClick = () => {
+  const formattedStartDate = selectionRange?.startDate instanceof Date
+    ? moment(selectionRange.startDate).startOf('day').toDate()
+    : StartDate;
+  const formattedEndDate = selectionRange?.endDate instanceof Date
+    ? moment(selectionRange.endDate).endOf('day').toDate()
+    : EndDate;
 
-  const handleFilterClick = () => {
-    const formattedStartDate = selectionRange?.startDate instanceof Date
-      ? moment(selectionRange.startDate).startOf('day').toDate()
-      : StartDate;
-    const formattedEndDate = selectionRange?.endDate instanceof Date
-      ? moment(selectionRange.endDate).endOf('day').toDate()
-      : EndDate;
+  const filterParams: any = {
+    page: newPage,
+    size: pageSize,
+    filterByStatus: true,
+    filterBy: dateField,
+  };
 
-    const filterParams: any = {
-      page: newPage,
-      size: pageSize,
-      filterByStatus: true,
-      filterBy: dateField,
-    };
+  if (formattedStartDate) {
+    filterParams.fromDate = formattedStartDate;
+  }
+  if (formattedEndDate) {
+    filterParams.toDate = formattedEndDate;
+  }
+  // ← Use vendorCode instead of vendorName
+  if (selectedVendor?.randomId && selectedVendor.randomId.trim() !== '') {
+    filterParams.vendorCode = selectedVendor.randomId;
+  }
 
-    if (formattedStartDate) {
-      filterParams.fromDate = formattedStartDate;
-    }
-    if (formattedEndDate) {
-      filterParams.toDate = formattedEndDate;
-    }
-    if (selectedVendorName?.vendorName && selectedVendorName.vendorName.trim() !== '') {
-      filterParams.vendorName = selectedVendorName.vendorName.trim();
-    }
+  console.log('Applying filters:', filterParams);
 
-    console.log('Applying filters:', filterParams);
+  dispatch(fetchOutgoings(filterParams))
+    .then((response) => {
+      const data = response.payload as { outgoings: Outgoing[]; totalItems: number } | string;
 
-    dispatch(fetchOutgoings(filterParams))
-      .then((response) => {
-        const data = response.payload as { outgoings: Outgoing[]; totalItems: number } | string;
+      console.log('Filtered outgoings:', data);
 
-        console.log('Filtered outgoings:', data);
-
-        if (typeof data === 'string') {
-          dispatch(setSnackbarMessage(data));
-          dispatch(setSnackbarOpen(true));
-          setFilteredOutgoing([]);
-        } else if (data.outgoings.length === 0) {
-          dispatch(setSnackbarMessage('No matching Outgoing Payment found.'));
-          dispatch(setSnackbarOpen(true));
-          setFilteredOutgoing([]);
-        } else {
-          setFilteredOutgoing(data.outgoings);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching outgoing:', error);
-        dispatch(setSnackbarMessage(error.message || 'Error fetching outgoing'));
+      if (typeof data === 'string') {
+        dispatch(setSnackbarMessage(data));
         dispatch(setSnackbarOpen(true));
         setFilteredOutgoing([]);
-      });
-  };
-
-  const handleFilterClose = () => {
-    setSelectionRange({
-      startDate: new Date(),
-      endDate: new Date(),
-      key: 'selection',
+      } else if (data.outgoings.length === 0) {
+        dispatch(setSnackbarMessage('No matching Outgoing Payment found.'));
+        dispatch(setSnackbarOpen(true));
+        setFilteredOutgoing([]);
+      } else {
+        setFilteredOutgoing(data.outgoings);
+      }
+    })
+    .catch((error) => {
+      console.error('Error fetching outgoing:', error);
+      dispatch(setSnackbarMessage(error.message || 'Error fetching outgoing'));
+      dispatch(setSnackbarOpen(true));
+      setFilteredOutgoing([]);
     });
-    setSelectedVendorName(null);
-    dispatch(fetchOutgoings({
-      page: 1,
-      size: pageSize,
-      filterByStatus: true,
-      filterBy: dateField,
-      fromDate: StartDate,
-      toDate: EndDate
-    }));
-  };
+};
+const handleFilterClose = () => {
+  setSelectionRange({
+    startDate: new Date(),
+    endDate: new Date(),
+    key: 'selection',
+  });
+  setSelectedVendor(null);  // ← Clear selected vendor
+  dispatch(fetchOutgoings({
+    page: 1,
+    size: pageSize,
+    filterByStatus: true,
+    filterBy: dateField,
+    fromDate: StartDate,
+    toDate: EndDate,
+    vendorCode: undefined,  // ← Clear vendorCode
+  }));
+};
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -259,14 +263,27 @@ const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
     }
   };
 
-  const handleVendorChange = (
-    event: React.SyntheticEvent,
-    newValue: VendorDetail | null,
-    reason: AutocompleteChangeReason
-  ) => {
-    setSelectedVendorName(newValue);
-  };
-
+const handleVendorChange = (vendor: VendorSearch | null) => {
+  setSelectedVendor(vendor);
+  
+  // Immediately fetch with new vendor filter
+  const appliedFromDate = selectionRange?.startDate instanceof Date 
+    ? moment(selectionRange.startDate).startOf('day').toDate() 
+    : StartDate;
+  const appliedToDate = selectionRange?.endDate instanceof Date 
+    ? moment(selectionRange.endDate).endOf('day').toDate() 
+    : EndDate;
+    
+  dispatch(fetchOutgoings({
+    page: 1,
+    size: pageSize,
+    filterByStatus: true,
+    filterBy: dateField,
+    fromDate: appliedFromDate,
+    toDate: appliedToDate,
+    vendorCode: vendor?.randomId || '',  // ← Send vendorCode
+  }));
+};
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
@@ -665,32 +682,14 @@ const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
               </Box>
             </Grid>
 
-            <Grid item xs={6} sm={4} md={2}>
-              <FormControl fullWidth>
-                <Autocomplete
-                  value={selectedVendorName}
-                  onChange={handleVendorChange}
-                  options={outgoingvendor}
-                  getOptionLabel={(option: VendorDetail) => option.vendorName || ''}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="All Vendors"
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        ...params.InputProps,
-                        style: { fontSize: '12px' },
-                      }}
-                    />
-                  )}
-                  sx={{
-                    fontSize: '12px',
-                  }}
-                />
-              </FormControl>
-            </Grid>
-
+           {/* Replace the existing Autocomplete with VendorSearchAutocomplete */}
+<Grid item xs={6} sm={4} md={2}>
+  <VendorSearchAutocomplete
+    value={selectedVendor}
+    onChange={handleVendorChange}
+    label="All Vendors"
+  />
+</Grid>
             <Grid item xs="auto">
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <IconButton

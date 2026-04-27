@@ -120,9 +120,9 @@ const AdvancePaymentPage: React.FC = () => {
     if (selectedVendor?.vendorId === vendor?.vendorId) {
       return; // Same vendor, no need to fetch
     }
-    
+
     setSelectedVendor(vendor);
-    
+
     if (vendor) {
       dispatch(fetchAdvances({
         filterBy: "createdDate",
@@ -138,7 +138,7 @@ const AdvancePaymentPage: React.FC = () => {
   const handleOpenNewPaymentDialog = useCallback(() => {
     setOpenNewPaymentDialog(true);
   }, []);
-  
+
   const handleCloseNewPaymentDialog = useCallback(() => {
     setOpenNewPaymentDialog(false);
     setIsSubmitting(false);
@@ -148,7 +148,7 @@ const AdvancePaymentPage: React.FC = () => {
       dispatch(fetchAdvances({ filterBy: "createdDate" }));
     }
   }, [dispatch, selectedVendor]);
-  
+
   const handleDialogOpen = useCallback(() => {
     dispatch(setDialogOpen("edit"));
   }, [dispatch]);
@@ -158,6 +158,9 @@ const AdvancePaymentPage: React.FC = () => {
     amount: Yup.number()
       .required("Amount is required")
       .min(0.01, "Amount must be greater than 0"),
+    paymentDate: Yup.date()
+      .required("Payment date is required")
+      .max(new Date(), "Payment date cannot be in the future"),
     paymentMode: Yup.string()
       .required("Payment Mode is required")
       .oneOf(["Cash", "Bank"], "Payment Mode must be Cash or Bank"),
@@ -199,7 +202,7 @@ const AdvancePaymentPage: React.FC = () => {
 
   const handleNewPaymentSubmit = useCallback(async (values: any, { resetForm }: any) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
 
     const paymentData: Partial<AdvancePayment> = {
@@ -207,6 +210,7 @@ const AdvancePaymentPage: React.FC = () => {
       vendorName: values.vendor.vendorName,
       amount: parseFloat(values.amount),
       paymentType: "advance",
+      paymentDate: values.paymentDate, // Send the selected payment date
       paymentMode: values.paymentMode,
       paymentMethod: values.paymentMode === "Cash" ? undefined : values.paymentMethod,
       bankName: values.paymentMode === "Bank" ? values.bankName : undefined,
@@ -249,7 +253,7 @@ const AdvancePaymentPage: React.FC = () => {
   return (
     <Box sx={{ backgroundColor: "white", minHeight: "100vh" }}>
       <YenBookPage />
-      
+
       {/* Navigation Buttons */}
       <Box display="flex" alignItems="center" justifyContent="space-between" marginTop={1}>
         <Box display="flex" alignItems="center" flexWrap="wrap">
@@ -322,7 +326,7 @@ const AdvancePaymentPage: React.FC = () => {
             <TextField {...params} label="Select Vendor" variant="outlined" size="small" sx={{ minWidth: 300 }} />
           )}
         />
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -333,7 +337,7 @@ const AdvancePaymentPage: React.FC = () => {
         >
           Add Vendor
         </Button>
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -361,8 +365,10 @@ const AdvancePaymentPage: React.FC = () => {
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>No</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Advance ID</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Vendor Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Vendor Code</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Amount</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Pending Amount</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Payment Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Created Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Status</TableCell>
               </TableRow>
@@ -370,14 +376,14 @@ const AdvancePaymentPage: React.FC = () => {
             <TableBody>
               {paymentLoading && displayAdvances.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} style={{ textAlign: "center" }}>
+                  <TableCell colSpan={9} style={{ textAlign: "center" }}>
                     <CircularProgress size={30} />
                     <Typography variant="body2" sx={{ mt: 1 }}>Loading advance payments...</Typography>
                   </TableCell>
                 </TableRow>
               ) : displayAdvances.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} style={{ textAlign: "center" }}>
+                  <TableCell colSpan={9} style={{ textAlign: "center" }}>
                     <Typography variant="body1">No advance payments found</Typography>
                   </TableCell>
                 </TableRow>
@@ -387,8 +393,12 @@ const AdvancePaymentPage: React.FC = () => {
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{payment.randomId || "N/A"}</TableCell>
                     <TableCell>{payment.vendorName || "N/A"}</TableCell>
+                    <TableCell>{payment.vendorCode || "N/A"}</TableCell>
                     <TableCell>₹{(payment.amount || 0).toFixed(2)}</TableCell>
                     <TableCell>₹{(payment.pendingAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell>
+                      {payment.paymentDate ? format(new Date(payment.paymentDate), "dd-MM-yyyy") : "N/A"}
+                    </TableCell>
                     <TableCell>
                       {payment.createdDate ? format(new Date(payment.createdDate), "dd-MM-yyyy") : "N/A"}
                     </TableCell>
@@ -412,10 +422,16 @@ const AdvancePaymentPage: React.FC = () => {
       </Box>
 
       {/* Advance Payment Dialog */}
-      <Dialog 
-        open={openNewPaymentDialog} 
-        onClose={handleCloseNewPaymentDialog} 
-        maxWidth="md" 
+      <Dialog
+        open={openNewPaymentDialog}
+        onClose={handleCloseNewPaymentDialog}
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: '100%',
+            maxWidth: '600px',
+          }
+        }}
       >
         <DialogTitle sx={{ borderBottom: '1px solid #e0e0e0' }}>
           <Typography variant="h6" component="span">
@@ -431,6 +447,7 @@ const AdvancePaymentPage: React.FC = () => {
           initialValues={{
             vendor: selectedVendor || null,
             amount: "",
+            paymentDate: new Date(), // Default to current date
             paymentMode: "",
             paymentMethod: "",
             bankName: "",
@@ -469,6 +486,32 @@ const AdvancePaymentPage: React.FC = () => {
                       )}
                     />
                   </Grid>
+
+                  {/* Payment Date Field */}
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Payment Date"
+                      type="date"
+                      fullWidth
+                      name="paymentDate"
+                      value={values.paymentDate ? format(values.paymentDate, "yyyy-MM-dd") : ""}
+                      onChange={(e) => {
+                        const selectedDate = e.target.value ? new Date(e.target.value) : null;
+                        setFieldValue("paymentDate", selectedDate);
+                      }}
+                      onBlur={handleBlur}
+                      error={touched.paymentDate && !!errors.paymentDate}
+                      helperText={touched.paymentDate && errors.paymentDate ? String(errors.paymentDate) : ""}
+                      required
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      inputProps={{
+                        max: format(new Date(), "yyyy-MM-dd") // Disable future dates
+                      }}
+                    />
+                  </Grid>
+
                   <Grid item xs={12}>
                     <TextField
                       label="Advance Amount"
@@ -661,11 +704,11 @@ const AdvancePaymentPage: React.FC = () => {
           )}
         </Formik>
       </Dialog>
-      
+
       {/* Vendor Dialog */}
-      <VendorDialog 
-        loading={vendorLoading} 
-        setLoading={() => {}} 
+      <VendorDialog
+        loading={vendorLoading}
+        setLoading={() => { }}
       />
 
       {/* Snackbar for notifications */}

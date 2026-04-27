@@ -41,6 +41,8 @@ export interface ItemDetail {
   returnedSgst?: number;
   returnedCgst?: number;
   returnHistory?: ReturnHistory[];
+  poPrice: number;
+  priceVariance: number;
 }
 
 export interface GrnData {
@@ -445,6 +447,7 @@ export interface FetchGrnsArgs {
   fromDate?: Date;
   toDate?: Date;
   vendorName?: string;
+  vendorCode?:string; 
   dateFilterField?: 'grnDate' | 'grnVerifiedDate' | 'grnReturnedDate';
   daysFilterDate?: number;
 }
@@ -567,7 +570,9 @@ export const initialState: GrnState = {
     returnedFinalPrice: 0,
     returnedSgst: 0,
     returnedCgst: 0,
-    grnPrice: 0
+    grnPrice: 0,
+    poPrice: 0,
+    priceVariance: 0
   },
   vendors: [],
   purchaseitems: [],

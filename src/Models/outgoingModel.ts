@@ -198,6 +198,7 @@ export interface PaymentDone {
 export interface VendorDetail {
   vendorName: string;
   count: number;
+  randomId:string;
   totalAmount: number;
   statuses: string[];
 }
@@ -338,6 +339,7 @@ export interface FetchOutgoingsArgs {
   fromDate?: Date;
   toDate?: Date;
   vendorName?: string;
+  vendorCode?:string;
   filterBy?: string;
   status?: string;
   filterByAmount?: boolean;

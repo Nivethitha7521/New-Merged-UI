@@ -75,7 +75,7 @@ if (!browserSessionId) {
 }
   try {
     // ✅ CORRECT URL - Call your FastAPI backend on port 8000
- const response = await fetch('https://yenerp.com/purchasetestapi/login', {
+ const response = await fetch('https://yenerp.com/purchaseapi/login', {
   method: 'POST',
   headers: {
     'Authorization': `Basic ${btoa(`${trimmedUsername}:${trimmedPassword}`)}`,
@@ -118,7 +118,8 @@ localStorage.setItem("userRole", result.role_name);
 dispatch(jwtLoginSuccess({
   username: result.username,
   permissions: result.permissions,
-  role: result.role_name
+  role: result.role_name,
+  token: result.access_token,
 }));
 
 toast.success(

@@ -5,7 +5,6 @@ import purchaseApi from "@/utils/api";
 import { RootState } from '../../../redux/store';
 import { Bank, BulkPaymentRequest, BulkPaymentResponse, DebitNote, FetchOutgoingsArgs, GRN, initialState, Outgoing, PaymentDetails, PaymentDone, PaymentHistory, ProcessPaymentRequest, TaxDetail, VendorDetail, VendorPayment } from '@/Models/outgoingModel';
 
-// In outgoingPaymentSlice.ts - fetchOutgoings
 export const fetchOutgoings = createAsyncThunk<
   { outgoings: Outgoing[]; totalItems: number; totalPayableAmount: number },
   FetchOutgoingsArgs,
@@ -14,7 +13,7 @@ export const fetchOutgoings = createAsyncThunk<
   'outgoings/fetchOutgoings',
   async (args, { rejectWithValue }) => {
     try {
-      const url = 'http://192.168.1.109:8000/purchasetestapi/outgoingpayments/';
+      const url = 'https://yenerp.com/purchaseapi/outgoingpayments/';
       const params: any = {
         skip: (args.page - 1) * args.size,
         limit: args.size,
@@ -27,10 +26,10 @@ export const fetchOutgoings = createAsyncThunk<
 
       if (args.fromDate) params.fromDate = args.fromDate.toISOString();
       if (args.toDate) params.toDate = args.toDate.toISOString();
+      if (args.vendorCode) params.vendorCode = args.vendorCode;  // ← ADD THIS
       if (args.vendorName) params.vendorName = args.vendorName;
       if (args.filterBy) params.filterBy = args.filterBy;
-      if (args.status) params.status = args.status;  // ✅ Make sure this line exists
-      if (args.status && args.status !== '') params.status = args.status;  // Only add if not empty
+      if (args.status) params.status = args.status;
 
       console.log('🔍 API Call Params:', params);
 
@@ -43,6 +42,7 @@ export const fetchOutgoings = createAsyncThunk<
     }
   }
 );
+
 // In your API service
 export const fetchOutgoingStatuses = async (): Promise<string[]> => {
     const response = await purchaseApi.get("/outgoingpayments/getStatusfilter/statuses");

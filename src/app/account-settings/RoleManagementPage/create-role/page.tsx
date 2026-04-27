@@ -1077,7 +1077,7 @@ return;
 
     console.log("📤 Sending role payload:", rolePayload);
 
-    const roleResponse = await fetch("http:// 192.168.1.111:8000/purchasetestapi/roles", {
+    const roleResponse = await fetch("https://yenerp.com/purchaseapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1127,7 +1127,7 @@ return;
 
     console.log("📤 Sending permissions payload:", permissionPayload);
 
-    const permResponse = await fetch("http:// 192.168.1.111:8000/purchasetestapi/permissions", {
+    const permResponse = await fetch("https://yenerp.com/purchaseapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)
@@ -1229,9 +1229,10 @@ const handleConfirmCreate = () => {
         <div className="px-6 py-3 flex-shrink-0">
           <div className="flex gap-3">
             {/* Predefined Roles Dropdown */}
-            <div className="w-1/2">
-              <label className="block text-sm font-bold text-black mb-2">Select Predefined Roles</label>
-              <select
+           <div className="w-1/2">
+  <label className="block text-sm font-bold text-black mb-0.5">Select Predefined Roles</label>
+  <p className="text-xs text-gray-500 mb-2">Choose a ready-made role template</p>
+  <select
                 value={selectedPredefinedRole}
                 onChange={(e) => setSelectedPredefinedRole(e.target.value)}
                 className="border border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:outline-none transition-all duration-200 w-full text-sm"
@@ -1247,8 +1248,9 @@ const handleConfirmCreate = () => {
 
             {/* Custom Role Input */}
             <div className="w-1/2">
-              <label className="block text-sm font-bold text-black mb-2">Create a New Custom Role</label>
-              <input
+  <label className="block text-sm font-bold text-black mb-0.5">Create a New Custom Role</label>
+  <p className="text-xs text-gray-500 mb-2">Type a unique name for your role</p>
+  <input
                 value={customRoleName}
                 onChange={(e) => setCustomRoleName(e.target.value)}
                 className="w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:outline-none transition-all duration-200 text-sm"
@@ -1445,9 +1447,8 @@ onClick={() => setConfirmOpen(true)}
 >
   <DialogTitle>Confirm Role Creation</DialogTitle>
 
-<DialogContent>
-  Are you sure you want to create role &quot;{formRoleName}&quot;?
-</DialogContent>
+  <DialogContent>
+Are you sure you want to create role &quot;{formRoleName}&quot;?  </DialogContent>
 
   <DialogActions>
     <Button

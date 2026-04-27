@@ -181,7 +181,7 @@ export const initialState: PurchaseOrderState = {
 let purchaseItemsCache: Map<string, { data: PurchaseItemSearchAdd[], timestamp: number }> = new Map();
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-const BASE_URL = 'http://192.168.1.109:8000/purchasetestapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 
 // Async thunks for freight and PO calculations
 export const calculateFreightTotals = createAsyncThunk(

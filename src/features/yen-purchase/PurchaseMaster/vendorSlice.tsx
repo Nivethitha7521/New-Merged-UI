@@ -143,10 +143,6 @@ export const searchVendorsByExactName = createAsyncThunk<
     return response.data;
   }
 );
-
-// ----------------------------------------------
-// SEARCH (LIKE) VENDORS
-// ----------------------------------------------
 export const searchVendors = createAsyncThunk<
   VendorSummary[],
   { searchQuery: string; skip: number; limit: number; forceRefresh?: boolean }
@@ -166,19 +162,26 @@ export const searchVendors = createAsyncThunk<
       localStorage.removeItem(cacheKey);
     }
 
-    const response = await purchaseApi.get<VendorSummary[]>(`/vendors/vendor-names/`, {
-      params: { vendor_name: searchQuery, skip, limit },
-    }); // ✅ cleaned headers
+    try {
+      const response = await purchaseApi.get<VendorSummary[]>(`/vendors/vendor-names/`, {
+        params: { vendor_name: searchQuery, skip, limit },
+      });
 
-    localStorage.setItem(
-      cacheKey,
-      JSON.stringify({ data: response.data, timestamp: now })
-    );
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({ data: response.data, timestamp: now })
+      );
 
-    return response.data;
+      return response.data;
+    } catch (error: any) {
+      // 404 just means no results — return empty array, don't throw
+      if (error?.response?.status === 404) {
+        return [];
+      }
+      throw error;
+    }
   }
 );
-
 
 // ----------------------------------------------
 // UPDATE VENDOR

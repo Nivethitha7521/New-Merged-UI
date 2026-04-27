@@ -23,7 +23,7 @@ const PROTECTED_ROUTES = [
   '/yen-inventory',
   '/master-admin',
   '/account-settings',
-  '/QlikReport', // ✅ NEW
+  '/QlikReport',
 ];
 
 const LoadingSpinner = () => (
@@ -56,10 +56,10 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
   const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
 
-const isProtectedRoute = useMemo(() =>
-  PROTECTED_ROUTES.some(route => pathname?.startsWith(route)),
-  [pathname]
-);
+  const isProtectedRoute = useMemo(() =>
+    PROTECTED_ROUTES.some(route => pathname?.startsWith(route)),
+    [pathname]
+  );
 
   const isDirectAccess = useMemo(() => {
     if (typeof window === "undefined") return false;
@@ -73,93 +73,141 @@ const isProtectedRoute = useMemo(() =>
   const role = useSelector((state: RootState) => state.auth.role);
   const permissionObject = useSelector((state: RootState) => state.auth.permissions);
 
-const hasPurchaseAccess = useMemo(() => {
-  if (!permissionObject?.yenerp) return false;
-  const yenerp = permissionObject.yenerp as Record<string, { read?: boolean }>;
-  const excludeKeys = [
-    'purchaseorderreport', 'posreport',
-    // inventory keys
-    'physicalstockmodification', 'physicalstockvariancemodification', 'stockledger',
-    'warehousephysicalstockmodification', 'warehousephysicalstockvariancemodification', 'warehousestockledger',
-    // book keys
-    'outgoingpayment', 'advancepayment', 'partialpayment', 'paymentdone',
-    'paymenthistory', 'ledger', 'purchasereturn', 'expensecategory',
-    'expensesubcategory', 'expensename',
-  ];
-  return Object.keys(yenerp)
-    .filter((key) => !excludeKeys.includes(key))
-    .some((key) => yenerp[key]?.read === true);
-}, [permissionObject]);
+  const hasPurchaseAccess = useMemo(() => {
+    if (!permissionObject?.yenerp) return false;
+    const yenerp = permissionObject.yenerp as Record<string, { read?: boolean }>;
+    const excludeKeys = [
+      'purchaseorderreport', 'posreport',
+      'physicalstockmodification', 'physicalstockvariancemodification', 'stockledger',
+      'warehousephysicalstockmodification', 'warehousephysicalstockvariancemodification', 'warehousestockledger',
+      'outgoingpayment', 'advancepayment', 'partialpayment', 'paymentdone',
+      'paymenthistory', 'ledger', 'purchasereturn', 'expensecategory',
+      'expensesubcategory', 'expensename',
+    ];
+    return Object.keys(yenerp)
+      .filter((key) => !excludeKeys.includes(key))
+      .some((key) => yenerp[key]?.read === true);
+  }, [permissionObject]);
 
+  const hasInventoryAccess = useMemo(() => {
+    if (!permissionObject?.yenerp) return false;
+    const yenerp = permissionObject.yenerp;
+    const INVENTORY_KEYS = [
+      "physicalstockmodification",
+      "physicalstockvariancemodification",
+      "stockledger",
+      "warehousephysicalstockmodification",
+      "warehousephysicalstockvariancemodification",
+      "warehousestockledger",
+    ];
+    return INVENTORY_KEYS.some((key) => yenerp[key]?.read === true);
+  }, [permissionObject]);
 
+  const hasBookAccess = useMemo(() => {
+    if (!permissionObject?.yenerp) return false;
+    const yenerp = permissionObject.yenerp as Record<string, { read?: boolean }>;
+    const BOOK_KEYS = [
+      'outgoingpayment', 'advancepayment', 'partialpayment',
+      'paymentdone', 'paymenthistory', 'ledger',
+      'purchasereturn', 'expensecategory', 'expensesubcategory', 'expensename',
+    ];
+    return BOOK_KEYS.some((key) => yenerp[key]?.read === true);
+  }, [permissionObject]);
 
- const hasInventoryAccess = useMemo(() => {
-  if (!permissionObject?.yenerp) return false;
-  const yenerp = permissionObject.yenerp;
-  const INVENTORY_KEYS = [
-    "physicalstockmodification",
-    "physicalstockvariancemodification",
-    "stockledger",
-    "warehousephysicalstockmodification",
-    "warehousephysicalstockvariancemodification",
-    "warehousestockledger",
-  ];
-  return INVENTORY_KEYS.some((key) => yenerp[key]?.read === true);
-}, [permissionObject]);
+  const hasPurchaseReportAccess = useMemo(() => {
+    if (!permissionObject?.yenerp) return false;
+    return permissionObject.yenerp?.purchaseorderreport?.read === true;
+  }, [permissionObject]);
 
+  const hasPosReportAccess = useMemo(() => {
+    if (!permissionObject?.yenerp) return false;
+    return permissionObject.yenerp?.posreport?.read === true;
+  }, [permissionObject]);
 
-
-const hasBookAccess = useMemo(() => {
-  if (!permissionObject?.yenerp) return false;
-  const yenerp = permissionObject.yenerp as Record<string, { read?: boolean }>;
-  const BOOK_KEYS = [
-    'outgoingpayment', 'advancepayment', 'partialpayment',
-    'paymentdone', 'paymenthistory', 'ledger',
-    'purchasereturn', 'expensecategory', 'expensesubcategory', 'expensename',
-  ];
-  return BOOK_KEYS.some((key) => yenerp[key]?.read === true);
-}, [permissionObject]);
-
-  // ✅ NEW - Reports access
- const hasPurchaseReportAccess = useMemo(() => {
-  if (!permissionObject?.yenerp) return false;
-  return permissionObject.yenerp?.purchaseorderreport?.read === true;
-}, [permissionObject]);
-
-const hasPosReportAccess = useMemo(() => {
-  if (!permissionObject?.yenerp) return false;
-  return permissionObject.yenerp?.posreport?.read === true;
-}, [permissionObject]);
-
-const hasReportsAccess = hasPurchaseReportAccess || hasPosReportAccess;
+  const hasReportsAccess = hasPurchaseReportAccess || hasPosReportAccess;
 
   useEffect(() => { setupAxios(); }, []);
 
+  // ✅ PING EFFECT — duplicate இல்ல, clean-ஆ இருக்கு
   useEffect(() => {
     if (!isLoggedIn || !token) return;
+
     let throttleTimer: ReturnType<typeof setTimeout> | null = null;
-    const sendPing = async () => {
+
+    // isUserActive = true  → user mouse/click பண்ணான் → TTL refresh பண்ணு
+    // isUserActive = false → fallback check மட்டும் → TTL refresh வேண்டாம்
+    const sendPing = async (isUserActive: boolean = false) => {
       try {
-        await fetch("http:// 192.168.1.111:8000/purchasetestapi/ping", {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://yenerp.com";
+        const browserSessionId = localStorage.getItem("browserSessionId") || "";
+
+        const res = await fetch(`${API_BASE}/purchaseapi/ping`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "x-browser-session-id": browserSessionId,
+            "x-user-active": isUserActive ? "true" : "false",
+          },
         });
-      } catch (e) { console.log("ping error", e); }
-    };
-    const events = ["mousemove", "keydown", "click", "scroll"];
-    const handler = () => {
-      if (!throttleTimer) {
-        throttleTimer = setTimeout(() => { sendPing(); throttleTimer = null; }, 10000);
+
+        if (res.status === 401) {
+          dispatch(forceLogout());
+          router.replace("/");
+        }
+      } catch (e) {
+        console.log("ping error", e);
       }
     };
+
+    // Activity trigger → TTL refresh பண்ணணும்
+    const handler = () => {
+      if (!throttleTimer) {
+        throttleTimer = setTimeout(() => {
+          sendPing(true); // user active
+          throttleTimer = null;
+        }, 10000);
+      }
+    };
+
+    // Fallback → just validate, TTL refresh வேண்டாம்
+    const fallbackInterval = setInterval(() => {
+      sendPing(false);
+    }, 5 * 60 * 1000);
+
+    const events = ["mousemove", "keydown", "click", "scroll"];
     events.forEach((e) => window.addEventListener(e, handler));
-    const fallbackInterval = setInterval(sendPing, 5 * 60 * 1000);
+
     return () => {
       events.forEach((e) => window.removeEventListener(e, handler));
       clearInterval(fallbackInterval);
       if (throttleTimer) clearTimeout(throttleTimer);
     };
   }, [isLoggedIn, token]);
+
+  // Idle auto-logout
+  useEffect(() => {
+    if (!isLoggedIn || !token) return;
+
+    const IDLE_TIMEOUT_MS = 60 * 60 * 1000;
+    let idleTimer: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(async () => {
+        dispatch(forceLogout());
+        router.replace("/");
+      }, IDLE_TIMEOUT_MS);
+    };
+
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    events.forEach((e) => window.addEventListener(e, resetTimer));
+    resetTimer();
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
+      clearTimeout(idleTimer);
+    };
+  }, [isLoggedIn, token, dispatch, router]);
 
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
@@ -181,15 +229,14 @@ const hasReportsAccess = hasPurchaseReportAccess || hasPosReportAccess;
 
   useEffect(() => {
     dispatch(initializeAuth());
-    dispatch(validateToken());
     dispatch(fetchBusinesses());
   }, [dispatch]);
 
   useEffect(() => {
-    if (isInitialized && permissionReady) {
+    if (isInitialized) {
       setIsCheckingSession(false);
     }
-  }, [isInitialized, permissionReady]);
+  }, [isInitialized]);
 
   useEffect(() => {
     if (!isInitialized || isCheckingSession) return;
@@ -247,7 +294,7 @@ const hasReportsAccess = hasPurchaseReportAccess || hasPosReportAccess;
               showPurchaseMenu={hasPurchaseAccess}
               showBookMenu={hasBookAccess}
               showInventoryMenu={hasInventoryAccess}
-              showReportsMenu={hasReportsAccess} // ✅ NEW
+              showReportsMenu={hasReportsAccess}
             />
           )}
           <div className={`flex flex-col flex-1 overflow-hidden ${isMenuOpen ? 'pl-12' : 'pl-0'}`}>

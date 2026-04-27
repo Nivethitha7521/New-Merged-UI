@@ -548,7 +548,7 @@ const handleReturnProcess = useCallback(async (outgoing: any) => {
 const ReturnActionButton = useCallback(({ payment, onClick, canEdit }: any) => {
     // Only disable if no GRN ID (can't return without GRN)
     // REMOVED the remaining amount check
-    const isDisabled = !payment.grnId || !canEdit;
+    // const isDisabled = !payment.grnId || !canEdit;
 
     let tooltipTitle = "Process Return";
     if (!payment.grnId) {
@@ -561,7 +561,7 @@ const ReturnActionButton = useCallback(({ payment, onClick, canEdit }: any) => {
         <IconButton
             color="primary"
             onClick={() => onClick(payment)}
-            disabled={isDisabled}
+            // disabled={isDisabled}
         >
             <ReturnIcon />
         </IconButton>

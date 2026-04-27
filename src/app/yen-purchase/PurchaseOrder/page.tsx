@@ -358,24 +358,28 @@ const Polist: React.FC = () => {
       order.items.some((item) => item.pendingTotalQuantity > 0),
   );
   // Removed client-side filteredOrders since backend hardcodes pending
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
-      return;
-    }
-    // Use either the selected range if available or default date range
-    const appliedFromDate = selectionRange?.startDate instanceof Date ? moment(selectionRange.startDate).startOf('day').toDate() : fromDate;
-    const appliedToDate = selectionRange?.endDate instanceof Date ? moment(selectionRange.endDate).endOf('day').toDate() : toDate;
-    // Dispatch pagination with the current filters or default date range
-    dispatch(setPagination({ page: newPage, size: pageSize }));
-    // Fetch the purchase orders with correct date range and filters (no status or filterBy)
-    dispatch(fetchPendingPurchaseOrders({
-      page: newPage,
-      size: pageSize,
-      vendorName: selectedVendorName || '',
-      itemName: searchQueryItem || '',
-      randomId: randomIdFilter // This will now work correctly
-    }));
-  };
+const handlePageChange = (newPage: number) => {
+  if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
+    return;
+  }
+  
+  const appliedFromDate = selectionRange?.startDate instanceof Date 
+    ? moment(selectionRange.startDate).startOf('day').toDate() 
+    : fromDate;
+  const appliedToDate = selectionRange?.endDate instanceof Date 
+    ? moment(selectionRange.endDate).endOf('day').toDate() 
+    : toDate;
+  
+  dispatch(setPagination({ page: newPage, size: pageSize }));
+  
+  dispatch(fetchPendingPurchaseOrders({
+    page: newPage,
+    size: pageSize,
+    vendorCode: selectedVendor?.randomId || '',  // ← ADD THIS
+    itemName: searchQueryItem || '',
+    randomId: randomIdFilter
+  }));
+};
   const handleNextPage = () => {
     if (currentPage * pageSize) {
       handlePageChange(currentPage + 1);
@@ -1075,42 +1079,41 @@ const Polist: React.FC = () => {
     setConfirmDialogOpen(false);
     setDialogOpen(false);
   };
-  const handleFilterClick = () => {
-    // Prepare API parameters
-    const apiParams: any = {
-      page: 1,
-      size: pageSize,
-      vendorName: selectedVendorName || '',
-      itemName: searchQueryItem || '',
-      randomId: selectedRandomId || '',
-    };
-    // Send dates as ISO string (date portion only)
-    if (selectionRange?.startDate) {
-      const startDate = new Date(selectionRange.startDate);
-      apiParams.fromDate = startDate.toISOString().split('T')[0]; // "2025-11-12"
-    }
-    if (selectionRange?.endDate) {
-      const endDate = new Date(selectionRange.endDate);
-      apiParams.toDate = endDate.toISOString().split('T')[0]; // "2025-11-15"
-    }
-    console.log('API Filter Parameters:', apiParams);
-    // Make single API call with all filters
-    dispatch(fetchPendingPurchaseOrders(apiParams))
-      .then(response => {
-        const data = response.payload || [];
-        if (data.length === 0) {
-          console.log('No matching orders found.');
-          setSnackbarMessage('No matching orders found.');
-          setSnackbarOpen(true);
-        }
-        // Handle the filtered data from API
-      })
-      .catch(error => {
-        console.error('Error fetching purchase orders:', error);
-        setSnackbarMessage(error.message || 'Error fetching purchase orders');
-        setSnackbarOpen(true);
-      });
+const handleFilterClick = () => {
+  const apiParams: any = {
+    page: 1,
+    size: pageSize,
+    vendorCode: selectedVendor?.randomId || '',  // ← CHANGE: send vendorCode
+    itemName: searchQueryItem || '',
+    randomId: selectedRandomId || '',
   };
+  
+  if (selectionRange?.startDate) {
+    const startDate = new Date(selectionRange.startDate);
+    apiParams.fromDate = startDate.toISOString().split('T')[0];
+  }
+  if (selectionRange?.endDate) {
+    const endDate = new Date(selectionRange.endDate);
+    apiParams.toDate = endDate.toISOString().split('T')[0];
+  }
+  
+  console.log('API Filter Parameters:', apiParams);
+  
+  dispatch(fetchPendingPurchaseOrders(apiParams))
+    .then(response => {
+      const data = response.payload || [];
+      if (data.length === 0) {
+        console.log('No matching orders found.');
+        setSnackbarMessage('No matching orders found.');
+        setSnackbarOpen(true);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching purchase orders:', error);
+      setSnackbarMessage(error.message || 'Error fetching purchase orders');
+      setSnackbarOpen(true);
+    });
+};
   const handleFilterClose = () => {
     // Reset filter states (except for the date)
     setSelectionRange({

@@ -84,13 +84,13 @@ const customRound = (amount: number) => {
 };
 const allHeaders = [
   'itemName', 'nos', 'eachQuantity', 'receivedQuantity',
-  'returnedQuantity', 'totalQuantity', 'uom', 'unitPrice', 'purchasetaxName', 'befTaxDiscount', 'afTaxDiscount',
+  'returnedQuantity', 'totalQuantity', 'uom', 'unitPrice', 'priceVariance', 'purchasetaxName', 'befTaxDiscount', 'afTaxDiscount',
   'expiryDate', 'totalPrice', 'finalPrice'
 ];
 // Define preferred header order for table rendering
 const preferredHeaderOrder = [
   'itemName', 'nos', 'eachQuantity', 'receivedQuantity',
-  'returnedQuantity', 'totalQuantity', 'uom', 'unitPrice', 'purchasetaxName', 'befTaxDiscount', 'afTaxDiscount',
+  'returnedQuantity', 'totalQuantity', 'uom', 'unitPrice', 'priceVariance', 'purchasetaxName', 'befTaxDiscount', 'afTaxDiscount',
   'expiryDate', 'totalPrice', 'finalPrice'
 ];
 // Map header keys to user-friendly display names
@@ -106,6 +106,7 @@ const headerDisplayNames: { [key: string]: string } = {
   returnedQuantity: 'Returned Quantity',
   totalQuantity: 'Total Quantity',
   unitPrice: 'Unit Price',
+  priceVariance: 'Variance',
   expiryDate: 'Expiry Date',
   totalPrice: 'Total Price',
   finalPrice: 'Final Price',
@@ -128,7 +129,7 @@ const GrnPage = () => {
     }
   }>({});
   const { selectedPo, poDialogOpen } = useSelector(selectPurchaseListState);
-const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
+  const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogSaveOpen, setDialogSaveOpen] = useState(false);
   const [apInvoiceDate, setApInvoiceDate] = useState<Date | null>(new Date());
@@ -472,13 +473,31 @@ const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
     }
   };
   const handleReturnClick = (grnId: string) => {
-    const grn = grns.find((g) => g.grnId === grnId);
-    if (grn && grn.itemDetails) {
-      setSelectedGrnItems(grn.itemDetails); // Set items for the dialog
-      setReturnDialogOpen(true); // Open the dialog
-      dispatch(setSelectedGrnId(grnId)); // Set the selected GRN ID
+  const grn = grns.find((g) => g.grnId === grnId);
+  if (grn && grn.itemDetails) {
+    // Calculate total amount from items
+    let calculatedTotal = 0;
+    
+    // First try to use grnAmount if available
+    if (grn.grnAmount && grn.grnAmount > 0) {
+      calculatedTotal = grn.grnAmount;
+    } else {
+      // Otherwise calculate from item details
+      calculatedTotal = grn.itemDetails.reduce((sum, item) => {
+        const quantity = item.receivedQuantity || item.quantity || 0;
+        const price = item.unitPrice || 0;
+        return sum + (quantity * price);
+      }, 0);
     }
-  };
+    
+    console.log(`📦 GRN ${grn.randomId} - Original Amount: ₹${calculatedTotal}`);
+    
+    setSelectedGrnItems(grn.itemDetails);
+    setSelectedGrnAmount(calculatedTotal); // ← THIS WAS MISSING
+    setReturnDialogOpen(true);
+    dispatch(setSelectedGrnId(grnId));
+  }
+};
   const handleReturnComplete = () => {
     setReturnDialogOpen(false);
     setSelectedGrnItems([]);
@@ -594,10 +613,17 @@ const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
     handleOpen(); // Perform itemwise action
     handleCloseAnchor(); // Close the dropdown after the action
   };
-  const handleVendorChange = (vendor: VendorSearch | null) => {
-    setSelectedVendor(vendor);
-    setSelectedVendorName(vendor ? vendor.vendorName : '');
-  };
+const handleVendorChange = (vendor: VendorSearch | null) => {
+  setSelectedVendor(vendor);
+  setSelectedVendorName(vendor ? vendor.vendorName : '');
+  
+  // Immediately fetch with new vendor filter
+  dispatch(fetchGrns({
+    page: 1,
+    size: pageSize,
+    vendorCode: vendor?.randomId || '',  // ← Send vendorCode
+  }));
+};
   const handleDownload = async (grnId: string) => {
     const grncheck = grns.find((grn) => grn.grnId === grnId);
     if (!grncheck) {
@@ -1590,75 +1616,53 @@ const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
       </Box>
     );
   }
-  const handleFilterClick = () => {
-    let filtered: GrnData[] = grns;
-    const formattedStartDate = selectionRange?.startDate instanceof Date
-      ? moment(selectionRange.startDate).startOf('day').toDate()
-      : fromDate;
-    const formattedEndDate = selectionRange?.endDate instanceof Date
-      ? moment(selectionRange.endDate).endOf('day').toDate()
-      : toDate;
-    // Filter based on selected vendor name
-    if (selectedVendorName) {
-      filtered = filtered.filter(grn =>
-        grn.vendorName?.toLowerCase().includes(selectedVendorName.toLowerCase())
-      );
-    }
-    // Filter based on start date
-    if (formattedStartDate) {
-      filtered = filtered.filter(grn => {
-        const grnDateParsed = grn.grnDate ? new Date(grn.grnDate) : null;
-        return grnDateParsed && grnDateParsed >= formattedStartDate;
-      });
-    }
-    // Filter based on end date
-    if (formattedEndDate) {
-      filtered = filtered.filter(grn => {
-        const grnDateParsed = grn.grnDate ? new Date(grn.grnDate) : null;
-        return grnDateParsed && grnDateParsed <= formattedEndDate;
-      });
-    }
-    // Filter based on status
-    if (status) {
-      filtered = filtered.filter(grn => grn.status === status);
-    }
-    console.log('Filtered GRN (Frontend):', filtered);
-    // Send filters to the backend
-    dispatch(fetchGrns({
-      page: newPage,
-      size: pageSize,
-      fromDate: formattedStartDate instanceof Date ? formattedStartDate : undefined,
-      toDate: formattedEndDate instanceof Date ? formattedEndDate : undefined,
-      vendorName: selectedVendorName || '',
-      status: status || '',
-    }))
-      .unwrap() // Unwrap the thunk result
-      .then((payload: FetchGrnsPayload) => {
-        const data = payload.grns || [];
-        if (data.length === 0) {
-          console.log('No matching GRN found.');
-          setSnackbarMessageGRN('No matching GRN found.');
-          setSnackbarOpenGRN(true);
-        } else {
-          setFilteredGrn(data);
-        }
-      })
-      .catch((error: { message?: string }) => {
-        console.error('Error fetching GRN:', error);
-        setSnackbarMessageGRN(error.message || 'Error fetching GRN');
+const handleFilterClick = () => {
+  // Send filters to the backend
+  dispatch(fetchGrns({
+    page: newPage,
+    size: pageSize,
+    fromDate: selectionRange?.startDate instanceof Date 
+      ? moment(selectionRange.startDate).startOf('day').toDate() 
+      : undefined,
+    toDate: selectionRange?.endDate instanceof Date 
+      ? moment(selectionRange.endDate).endOf('day').toDate() 
+      : undefined,
+    vendorCode: selectedVendor?.randomId || '',  // ← ADD THIS (send vendorCode)
+    vendorName: selectedVendorName || '',
+    status: status || '',
+  }))
+    .unwrap()
+    .then((payload: FetchGrnsPayload) => {
+      const data = payload.grns || [];
+      if (data.length === 0) {
+        console.log('No matching GRN found.');
+        setSnackbarMessageGRN('No matching GRN found.');
         setSnackbarOpenGRN(true);
-      });
-  };
-  const handleFilterClose = () => {
-    // Reset filter states (except for the date)
-    setSelectionRange({
-      startDate: new Date(), // Set to current date
-      endDate: new Date(), // Set to current date
-      key: 'selection', // Retain the key
+      } else {
+        setFilteredGrn(data);
+      }
+    })
+    .catch((error: { message?: string }) => {
+      console.error('Error fetching GRN:', error);
+      setSnackbarMessageGRN(error.message || 'Error fetching GRN');
+      setSnackbarOpenGRN(true);
     });
-    setSelectedVendor(null); // Clear vendor selection
-    dispatch(fetchGrns({ page: 1, size: pageSize, status }));
-  }
+};
+const handleFilterClose = () => {
+  setSelectionRange({
+    startDate: new Date(),
+    endDate: new Date(),
+    key: 'selection',
+  });
+  setSelectedVendor(null);
+  
+  dispatch(fetchGrns({ 
+    page: 1, 
+    size: pageSize, 
+    status,
+    vendorCode: undefined,  // ← Clear vendorCode
+  }));
+}
   if (error) {
     return <Typography>Error: {error}</Typography>;
   }
@@ -2181,6 +2185,18 @@ const [selectedGrnAmount, setSelectedGrnAmount] = useState<number>(0);
                                 )}
                                 {header === 'uom' && (item.uom || '')}
                                 {header === 'unitPrice' && (item.unitPrice || 0).toFixed(2)}
+                                {/* NEW: Price Variance column with color coding */}
+                                {/* Price Variance column with color coding */}
+                                {header === 'priceVariance' && (
+                                  <span style={{
+                                    color: item.priceVariance && item.priceVariance !== 0 ? '#d32f2f' : 'inherit',
+                                    fontWeight: item.priceVariance && item.priceVariance !== 0 ? 'bold' : 'normal'
+                                  }}>
+                                    {item.priceVariance !== null && item.priceVariance !== undefined && item.priceVariance !== 0
+                                      ? `${item.priceVariance > 0 ? '+' : ''}${item.priceVariance.toFixed(2)}`
+                                      : '0.00'}
+                                  </span>
+                                )}
                                 {header === 'purchasetaxName' && (item.purchasetaxName || 0)}
                                 {header === 'befTaxDiscount' && (
                                   <TextField
