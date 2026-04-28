@@ -74,7 +74,7 @@ const resetPassword = async () => {
   setLoading(true);
   try {
     const res = await fetch(
-  `https://yenerp.com/purchaseapi/users/reset-password?username=${encodeURIComponent(username!)}&new_password=${encodeURIComponent(password)}`,
+  `http://192.168.1.131:8000/purchaseapi/users/reset-password?username=${encodeURIComponent(username!)}&new_password=${encodeURIComponent(password)}`,
   { method: "POST" }
 );
 

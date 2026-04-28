@@ -138,7 +138,7 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     // isUserActive = false → fallback check மட்டும் → TTL refresh வேண்டாம்
     const sendPing = async (isUserActive: boolean = false) => {
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://yenerp.com";
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://192.168.1.131:8000";
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
         const res = await fetch(`${API_BASE}/purchaseapi/ping`, {
