@@ -14,16 +14,16 @@ import {
   SearchResponse,
   StorageLocationItem,
   UOM,
-  Vendor
+  Vendor,
+  Tax  // Add Tax import
 } from '@/Models/purchaseitem';
 import { PurchaseItemType } from '@/Models/itemType';
 
 // ✅ IMPORTANT: use the existing category thunk from PurchaseCategorySlice
-import { fetchCategories } from './PurchaseCategorySlice';
+import { fetchCategoriesItem } from './PurchaseCategorySlice';
+import { random } from 'lodash';
 
-
-
-const EXPORT_CSV_URL = 'http://192.168.1.131:8000/purchaseapi/rawMaterials/export_csv';
+const EXPORT_CSV_URL = 'http://192.168.1.100:8000/purchaseapi/rawMaterials/export_csv';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // ---------- EXPORT (OLD) ----------
@@ -37,7 +37,6 @@ export const exportPurchaseItemsToCSV = createAsyncThunk(
 
       const response = await axios.get(EXPORT_CSV_URL, {
         responseType: 'blob',
-         
       });
 
       if (response.status !== 200) {
@@ -65,7 +64,7 @@ export const fetchPurchaseItems = createAsyncThunk(
   async ({
     page,
     size,
-    showDeactivated = false, // Add this parameter
+    showDeactivated = false,
     ...filters
   }: {
     page: number;
@@ -78,8 +77,12 @@ export const fetchPurchaseItems = createAsyncThunk(
     const params: Record<string, any> = {
       skip: (page - 1) * size,
       limit: size,
-      status: showDeactivated ? 'deactivated' : 'active', // Add status filter
     };
+
+    // Only add status filter if not fetching all
+    if (showDeactivated !== undefined) {
+      params.status = showDeactivated ? 'deactivated' : 'active';
+    }
 
     Object.entries(filters).forEach(([key, value]) => {
       if (value) params[key] = value;
@@ -88,15 +91,13 @@ export const fetchPurchaseItems = createAsyncThunk(
     try {
       console.log('📡 Fetching purchase items with params:', params);
       
-      const response = await purchaseApi.get('http://192.168.1.131:8000/purchaseapi/rawMaterials/', { 
+      const response = await purchaseApi.get('http://192.168.1.100:8000/purchaseapi/rawMaterials/', { 
         params,
-        
-
       });
       
       console.log('📦 Raw API response:', response.data);
       
-      let items = [];
+      let items: PurchaseItem[] = [];
       let totalItems = 0;
       
       if (Array.isArray(response.data)) {
@@ -116,7 +117,7 @@ export const fetchPurchaseItems = createAsyncThunk(
       return {
         items: items,
         totalItems: totalItems,
-        showDeactivated, // Return this to handle in reducer
+        showDeactivated,
       };
     } catch (error: any) {
       console.error('❌ Error fetching purchase items:', error);
@@ -126,143 +127,152 @@ export const fetchPurchaseItems = createAsyncThunk(
   }
 );
 
-// ---------- UOM ----------
+// ---------- UOM (from Master Admin API) ----------
 export const fetchUom = createAsyncThunk('uom/fetch', async () => {
   try {
-    const username = localStorage.getItem('username') || 'default_user';
-    
-    const response = await purchaseApi.get<UOM[]>('http://192.168.1.131:8000/purchaseapi/purchaseuoms/', {
-    
-
+    const response = await axios.get('https://yenerp.com/masteradminapi/uoms/', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
     });
     
-    console.log('UOM API Response:', response.data);
+    console.log('Master Admin UOM API Response:', response.data);
     
-    const uoms = response.data.map((item) => ({ uom: item.uom }));
+    const activeUoms = response.data.filter((uom: any) => uom.status === 'active');
+    
+    const uoms: UOM[] = activeUoms.map((item: any) => ({ 
+      uomId: item.uomId || item.id,
+      uom: item.uom,
+      status: item.status
+    }));
+    
     return uoms;
   } catch (error: any) {
-    console.error('Error fetching UOMs:', error);
-    console.error('Error response:', error.response?.data);
+    console.error('Error fetching UOMs from master admin:', error);
     throw new Error(error.response?.data?.detail || 'Failed to fetch UOMs');
   }
 });
 
+// ---------- TAX (from Master Admin API) ----------
+export const fetchTax = createAsyncThunk('tax/fetch', async () => {
+  try {
+    const response = await axios.get('https://yenerp.com/masteradminapi/taxes', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    
+    console.log('Master Admin Tax API Response:', response.data);
+    
+    const activeTaxes = response.data.filter((tax: any) => tax.status === 'active');
+    
+    const taxes: Tax[] = activeTaxes.map((item: any) => ({ 
+      taxId: item.taxId || item.id,
+      taxPercentage: item.taxPercentage,
+      taxName: item.taxName,
+      status: item.status
+    }));
+    
+    return taxes;
+  } catch (error: any) {
+    console.error('Error fetching Taxes from master admin:', error);
+    throw new Error(error.response?.data?.detail || 'Failed to fetch Taxes');
+  }
+});
 
 // ---------- ITEM TYPE ----------
 export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async () => {
   try {
-    // Get the username from your auth state or localStorage
-    const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
+    const response = await purchaseApi.get<PurchaseItemType[]>('http://192.168.1.100:8000/purchaseapi/itemtypes/', {});
     
-    const response = await purchaseApi.get<PurchaseItemType[]>('http://192.168.1.131:8000/purchaseapi/itemtypes/', {
-    
-
-    });
-
     console.log('Item Types API Response:', response.data);
     
     const itemtypes = response.data.map(item => ({
       itemtypeId: item.itemtypeId,
       itemtypeName: item.itemtypeName,
-      randomId: item.randomId, // This is crucial for storing in itemTypeId
+      randomId: item.randomId,
     }));
 
     return itemtypes;
   } catch (error: any) {
     console.error('Error fetching item types:', error);
-    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch item types');
   }
 });
 
-
-// ---------- TAX ----------
-export const fetchPurchaseTaxes = createAsyncThunk('purchaseTaxes/fetch', async () => {
-  try {
-    const username = localStorage.getItem('username') || 'default_user';
-    
-    const response = await purchaseApi.get('http://192.168.1.131:8000/purchaseapi/purchasetaxes/', {
-     
-
-    });
-    
-    console.log('Tax API Response:', response.data);
-    
-    const tax = (response.data as any[]).map((item) => ({
-      purchasetaxPercentage: item.purchasetaxPercentage,
-    }));
-    return tax;
-  } catch (error: any) {
-    console.error('Error fetching taxes:', error);
-    console.error('Error response:', error.response?.data);
-    throw new Error(error.response?.data?.detail || 'Failed to fetch taxes');
-  }
-});
-
-
 // ---------- STORAGE LOCATION ----------
 export const fetchStorageLocationItems = createAsyncThunk('storageLocations/fetch', async () => {
   try {
-    const username = localStorage.getItem('username') || 'default_user';
-    
-    const response = await purchaseApi.get<StorageLocationItem[]>('http://192.168.1.131:8000/purchaseapi/storagelocations/', {
-      
-
-    });
+    const response = await purchaseApi.get<StorageLocationItem[]>('http://192.168.1.100:8000/purchaseapi/storagelocations/', {});
     
     console.log('Location API Response:', response.data);
     
-    const location = response.data.map((item) => ({ locationName: item.locationName }));
-    return location;
+    const locations = response.data.map((item) => ({ 
+      locationId: item.locationId,
+      locationName: item.locationName,
+      randomId:item.randomId,
+      status: item.status
+    }));
+    
+    return locations;
   } catch (error: any) {
     console.error('Error fetching locations:', error);
-    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch locations');
   }
 });
 
+// ---------- GROUP ITEMS ----------
 export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', async () => {
   try {
-    const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
+    const response = await purchaseApi.get('http://192.168.1.100:8000/purchaseapi/itemgroups/', {});
     
-    const response = await purchaseApi.get('http://192.168.1.131:8000/purchaseapi/itemgroups/', {
-     
-
-    });
-
     console.log('Group Items API Response:', response.data);
 
-    const groupitem = response.data.map((item: any) => ({
+    const groupitems = response.data.map((item: any) => ({
       itemgroupId: item.itemgroupId,
-      itemgroupName: item.itemgroupName
+      itemgroupName: item.itemgroupName,
+      randomId:item.randomId,
+      status: item.status
     }));
 
-    return groupitem;
+    return groupitems;
   } catch (error: any) {
     console.error('Error fetching group items:', error);
-    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch group items');
   }
 });
 
-
 // ---------- VENDORS ----------
 export const fetchAllVendors = createAsyncThunk('vendors/fetch', async () => {
-  const response = await purchaseApi.get<Vendor[]>('http://192.168.1.131:8000/purchaseapi/vendors/',);
+  const response = await purchaseApi.get<Vendor[]>('http://192.168.1.100:8000/purchaseapi/vendors/');
   const vendorData = response.data.map((item) => ({
     vendorId: item.vendorId,
     vendorName: item.vendorName,
   }));
   return vendorData;
 });
+// Add to purchaseItemSlice.ts
 
+export const fetchSubcategoriesByCategory = createAsyncThunk(
+  'purchaseItems/fetchSubcategoriesByCategory',
+  async (categoryId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get(
+        `http://192.168.1.100:8000/purchaseapi/purchasecategory/${categoryId}/subcategories`
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch subcategories');
+    }
+  }
+);
 // ---------- ADD ITEM ----------
 export const addPurchaseItem = createAsyncThunk(
   'purchaseItems/add',
   async (purchase: Omit<PurchaseItem, 'purchaseitemId'>, { dispatch, rejectWithValue }) => {
     try {
-      const username = localStorage.getItem('username') || 'default_user';
-      
       const purchaseToAdd = {
         ...purchase,
       };
@@ -270,9 +280,8 @@ export const addPurchaseItem = createAsyncThunk(
       console.log('Sending purchase item data:', purchaseToAdd);
 
       const response = await purchaseApi.post<PurchaseItem>(
-        'http://192.168.1.131:8000/purchaseapi/rawMaterials/',
+        'http://192.168.1.100:8000/purchaseapi/rawMaterials/',
         purchaseToAdd,
-       
       );
 
       console.log('Add purchase item response:', response.data);
@@ -282,11 +291,6 @@ export const addPurchaseItem = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       console.error('Failed to add purchase item:', error);
-      console.error('Error response:', error.response?.data);
-       console.error('❌ FULL Backend Response:', error.response);
-       console.error('❌ Backend Data:', error.response?.data);
-  console.error('❌ Backend Detail:', error.response?.data?.detail);
-      // Return detailed error information
       return rejectWithValue({
         message: error.response?.data?.detail || error.response?.data?.message || 'Failed to add purchase item',
         validationErrors: error.response?.data?.detail || null,
@@ -307,25 +311,22 @@ export const POsearchPurchaseItems = createAsyncThunk<
 
   if (cachedData) {
     const { data, timestamp } = JSON.parse(cachedData);
-
     if (now - timestamp < CACHE_DURATION) {
       console.log('Using cached purchase items data');
       return data;
     } else {
-      console.log('Cache expired, fetching fresh data');
       localStorage.removeItem(cacheKey);
     }
   }
 
   const response = await purchaseApi.get<PurchaseItemSearch[]>(
-    `http://192.168.1.131:8000/purchaseapi/rawMaterials/exact-name/`,
+    `http://192.168.1.100:8000/purchaseapi/rawMaterials/exact-name/`,
     {
       params: {
         item_name: searchQuery,
         skip,
         limit,
       },
-      
     }
   );
 
@@ -340,7 +341,6 @@ export const POsearchPurchaseItems = createAsyncThunk<
   return response.data;
 });
 
-
 export const invalidatePOCache = createAsyncThunk('purchaseItems/invalidateCache', async () => {
   Object.keys(localStorage).forEach((key) => {
     if (key.startsWith('purchaseItems_')) {
@@ -350,9 +350,9 @@ export const invalidatePOCache = createAsyncThunk('purchaseItems/invalidateCache
   console.log('Purchase items cache invalidated');
 });
 
-// In purchaseItemSlice.ts, ensure the thunk is properly typed
+// ---------- SEARCH WITH STOCK ----------
 export const searchPurchaseItems = createAsyncThunk<
-  PurchaseItemSearchAdd[],  // Return type
+  PurchaseItemSearchAdd[],
   { 
     searchQuery: string; 
     skip: number; 
@@ -375,35 +375,27 @@ export const searchPurchaseItems = createAsyncThunk<
       locationId 
     });
     
-    // Build params object
     const params: Record<string, any> = { 
       itemName: searchQuery, 
       skip, 
       limit
     };
     
-    // Add locationId to params if provided
     if (locationId) {
       params.locationId = locationId;
     }
     
-    // Add cache-busting only if forceRefresh is true
     if (forceRefresh) {
       params._t = Date.now();
     }
     
     const response = await purchaseApi.get<SearchResponse>(
-      `http://192.168.1.131:8000/purchaseapi/rawMaterials/search-with-stock`,
+      `http://192.168.1.100:8000/purchaseapi/rawMaterials/search-with-stock`,
       { params }
     );
     
     const items = response.data?.items || [];
-    console.log(`✅ searchPurchaseItems: Received ${items.length} items with stock for location ${locationId || 'all'}`);
-    
-    // Log stock details for debugging
-    items.forEach(item => {
-      console.log(`  📦 ${item.itemName}: stock=${item.availableStock}, location=${item.locationId}`);
-    });
+    console.log(`✅ searchPurchaseItems: Received ${items.length} items`);
     
     return items;
   } catch (error) {
@@ -411,6 +403,7 @@ export const searchPurchaseItems = createAsyncThunk<
     return [];
   }
 });
+
 export const invalidatePurchaseItemsCache = createAsyncThunk(
   'purchaseItems/invalidateCache',
   async () => {
@@ -428,18 +421,16 @@ export const updatePurchaseItem = createAsyncThunk(
   'purchaseItems/update',
   async (purchase: PurchaseItem, { dispatch, rejectWithValue }) => {
     try {
-      
       const purchaseToUpdate = {
         ...purchase,
       };
       
       console.log('✏️ Updating purchase item:', purchaseToUpdate);
-      console.log('🆔 Update URL:', `http://192.168.1.131:8000/purchaseapi/rawMaterials/${purchase.purchaseitemId}`);
+      console.log('🆔 Update URL:', `http://192.168.1.100:8000/purchaseapi/rawMaterials/${purchase.purchaseitemId}`);
 
       const response = await purchaseApi.patch<PurchaseItem>(
-        `http://192.168.1.131:8000/purchaseapi/rawMaterials/${purchase.purchaseitemId}`,
+        `http://192.168.1.100:8000/purchaseapi/rawMaterials/${purchase.purchaseitemId}`,
         purchaseToUpdate,
-       
       );
 
       console.log('✅ Update response:', response.data);
@@ -449,8 +440,6 @@ export const updatePurchaseItem = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       console.error('❌ Update error:', error);
-      console.error('❌ Error response:', error.response?.data);
-      
       return rejectWithValue({
         message: error.response?.data?.detail || 'Failed to update purchase item',
         validationErrors: error.response?.data?.detail,
@@ -463,33 +452,27 @@ export const updatePurchaseItem = createAsyncThunk(
 // ---------- DEACTIVATE ----------
 export const deactivatePurchaseItem = createAsyncThunk('purchaseItems/deactivate', async (id: string, { rejectWithValue }) => {
   try {
-    const username = localStorage.getItem('username') || 'default_user';
-    
     console.log('🔴 Deactivating item with ID:', id);
     
     const response = await purchaseApi.patch<PurchaseItem>(
-      `http://192.168.1.131:8000/purchaseapi/rawMaterials/${id}/deactivate`,
+      `http://192.168.1.100:8000/purchaseapi/rawMaterials/${id}/deactivate`,
       { status: 'deactivated' },
-      
     );
 
     console.log('✅ Deactivation API response:', response.data);
     return id;
   } catch (error: any) {
     console.error('❌ Deactivate error:', error);
-    console.error('❌ Error response:', error.response?.data);
     return rejectWithValue(error.response?.data?.detail || 'Failed to deactivate purchase item');
   }
 });
+
 // ---------- ACTIVATE ----------
 export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', async (id: string, { rejectWithValue }) => {
   try {
-    const username = localStorage.getItem('username') || 'default_user';
-    
     await purchaseApi.patch<PurchaseItem>(
-      `http://192.168.1.131:8000/purchaseapi/rawMaterials/${id}/activate`,
+      `http://192.168.1.100:8000/purchaseapi/rawMaterials/${id}/activate`,
       { status: 'active' },
-      
     );
     return id;
   } catch (error: any) {
@@ -497,6 +480,7 @@ export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', a
     return rejectWithValue(error.response?.data?.detail || 'Failed to activate purchase item');
   }
 });
+
 // ---------- IMPORT ----------
 export const importPurchaseItems = createAsyncThunk(
   'purchaseItems/import',
@@ -507,9 +491,8 @@ export const importPurchaseItems = createAsyncThunk(
       formData.append('mode', mode);
 
       const response = await purchaseApi.post(
-        'http://192.168.1.131:8000/purchaseapi/rawMaterials/import_csv',
+        'http://192.168.1.100:8000/purchaseapi/rawMaterials/import_csv',
         formData,
-      
       );
 
       return response.data as ImportResponse;
@@ -561,15 +544,14 @@ export const importPurchaseItems = createAsyncThunk(
   }
 );
 
-// ---------- EXPORT (NEW) ----------
+// ---------- EXPORT ----------
 export const exportPurchaseItems = createAsyncThunk(
   'purchaseItems/export',
   async (_, { rejectWithValue }) => {
     try {
       const response = await purchaseApi.get(
-        'http://192.168.1.131:8000/purchaseapi/rawMaterials/purchaseitemexport/export_csv',
+        'http://192.168.1.100:8000/purchaseapi/rawMaterials/purchaseitemexport/export_csv',
         {
-
           responseType: 'blob',
         }
       );
@@ -675,43 +657,34 @@ const purchaseItemSlice = createSlice({
       .addCase(fetchPurchaseItems.pending, (state) => {
         state.loading = true;
       })
-     // In your extraReducers, update the fetchPurchaseItems.fulfilled case:
-.addCase(fetchPurchaseItems.fulfilled, (state, action) => {
-  state.loading = false;
-  
-  const { items, totalItems, showDeactivated } = action.payload;
-  
-  if (showDeactivated) {
-    // When fetching deactivated items
-    state.deactivatedItems = items.filter((item: PurchaseItem) => item.status === 'deactivated');
-    state.totalItems = totalItems;
-  } else {
-    // When fetching active items
-    state.items = items.filter((item: PurchaseItem) => item.status === 'active');
-    state.totalItems = totalItems;
-    
-    // Also fetch deactivated items count separately if needed
-    const deactivatedCount = items.filter((item: PurchaseItem) => item.status === 'deactivated').length;
-    console.log('🔵 Deactivated items count:', deactivatedCount);
-  }
-  
-  state.error = null;
-})
+      .addCase(fetchPurchaseItems.fulfilled, (state, action) => {
+        state.loading = false;
+        const { items, totalItems, showDeactivated } = action.payload;
+        
+        if (showDeactivated) {
+          state.deactivatedItems = items;
+          state.totalItems = totalItems;
+        } else {
+          state.items = items;
+          state.totalItems = totalItems;
+        }
+        state.error = null;
+      })
       .addCase(fetchPurchaseItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch purchase items';
       })
 
-      // ✅ USE fetchCategories THUNK (from PurchaseCategorySlice)
-      .addCase(fetchCategories.pending, (state) => {
+      // CATEGORIES
+      .addCase(fetchCategoriesItem.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchCategories.fulfilled, (state, action) => {
+      .addCase(fetchCategoriesItem.fulfilled, (state, action) => {
         state.loading = false;
         state.categories = action.payload;
         state.error = null;
       })
-      .addCase(fetchCategories.rejected, (state, action) => {
+      .addCase(fetchCategoriesItem.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch categories';
       })
@@ -730,21 +703,21 @@ const purchaseItemSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch UOMs';
       })
 
-      // TAX
-      .addCase(fetchPurchaseTaxes.pending, (state) => {
+      // TAX (Master Admin)
+      .addCase(fetchTax.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchPurchaseTaxes.fulfilled, (state, action) => {
+      .addCase(fetchTax.fulfilled, (state, action) => {
         state.loading = false;
         state.taxes = action.payload;
         state.error = null;
       })
-      .addCase(fetchPurchaseTaxes.rejected, (state, action) => {
+      .addCase(fetchTax.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch taxes';
       })
 
-      // LOCATION
+      // LOCATIONS
       .addCase(fetchStorageLocationItems.pending, (state) => {
         state.loading = true;
       })
@@ -758,7 +731,7 @@ const purchaseItemSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch locations';
       })
 
-      // GROUP ITEM
+      // GROUP ITEMS
       .addCase(fetchPurchaseGroupItems.pending, (state) => {
         state.loading = true;
       })
@@ -772,7 +745,7 @@ const purchaseItemSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch group items';
       })
 
-      // ITEM TYPE
+      // ITEM TYPES
       .addCase(fetchPurchaseItemtype.pending, (state) => {
         state.loading = true;
       })
@@ -821,10 +794,10 @@ const purchaseItemSlice = createSlice({
       })
       .addCase(updatePurchaseItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = state.items.map((item) =>
-          item.purchaseitemId === action.payload.purchaseitemId ? { ...item, ...action.payload } : item
-        );
-        state.items = state.items.filter((item) => containsSearchQuery(item, state.searchQuery));
+        const index = state.items.findIndex(item => item.purchaseitemId === action.payload.purchaseitemId);
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
         state.successMessage = 'Purchase item updated successfully.';
         state.error = null;
       })
@@ -834,55 +807,29 @@ const purchaseItemSlice = createSlice({
       })
 
       // DEACTIVATE
-      // In your purchaseItemSlice, update the deactivate extraReducer
-.addCase(deactivatePurchaseItem.fulfilled, (state, action) => {
-  state.loading = false;
-  
-  console.log('🔄 Redux: Processing deactivation for ID:', action.payload);
-  console.log('🔄 Redux: Items before deactivation:', state.items.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
-  
-  // Find the item being deactivated
-  const itemToDeactivate = state.items.find(item => item.purchaseitemId === action.payload);
-  console.log('🔄 Redux: Item to deactivate found:', itemToDeactivate);
-  
-  if (itemToDeactivate) {
-    // Update the item status to deactivated in items array
-    state.items = state.items.map((item) =>
-      item.purchaseitemId === action.payload ? { ...item, status: 'deactivated' } : item
-    );
-    
-    // Add to deactivatedItems array
-    state.deactivatedItems.push({ ...itemToDeactivate, status: 'deactivated' });
-    
-    // Remove from active items array
-    state.items = state.items.filter((item) => item.status !== 'deactivated');
-  }
-  
-  console.log('🔄 Redux: Items after deactivation:', state.items.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
-  console.log('🔄 Redux: Deactivated items after:', state.deactivatedItems.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
-  
-  state.successMessage = 'Purchase item deactivated successfully.';
-  state.error = null;
-})
-
-      // ACTIVATE
-      .addCase(activatePurchaseItem.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(activatePurchaseItem.fulfilled, (state, action) => {
+      .addCase(deactivatePurchaseItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.deactivatedItems = state.deactivatedItems.filter(
-          (item) => item.purchaseitemId !== action.payload
-        );
-        state.items = state.items.map((item) =>
-          item.purchaseitemId === action.payload ? { ...item, status: 'active' } : item
-        );
-        state.successMessage = 'Purchase item activated successfully.';
+        const itemToDeactivate = state.items.find(item => item.purchaseitemId === action.payload);
+        if (itemToDeactivate) {
+          const deactivatedItem = { ...itemToDeactivate, status: 'deactivated' };
+          state.items = state.items.filter(item => item.purchaseitemId !== action.payload);
+          state.deactivatedItems.push(deactivatedItem);
+        }
+        state.successMessage = 'Purchase item deactivated successfully.';
         state.error = null;
       })
-      .addCase(activatePurchaseItem.rejected, (state, action) => {
+
+      // ACTIVATE
+      .addCase(activatePurchaseItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to activate purchase item';
+        const itemToActivate = state.deactivatedItems.find(item => item.purchaseitemId === action.payload);
+        if (itemToActivate) {
+          const activatedItem = { ...itemToActivate, status: 'active' };
+          state.deactivatedItems = state.deactivatedItems.filter(item => item.purchaseitemId !== action.payload);
+          state.items.push(activatedItem);
+        }
+        state.successMessage = 'Purchase item activated successfully.';
+        state.error = null;
       })
 
       // IMPORT
@@ -953,8 +900,8 @@ export const {
 
 export const selectCurrentPage = (state: RootState) => state.purchaseItems.currentPage;
 export const selectPageSize = (state: RootState) => state.purchaseItems.pageSize;
-export const selectTotalItems = (state: RootState) => state.purchaseItems.totalItems;
+export const 
+selectTotalItems = (state: RootState) => state.purchaseItems.totalItems;
 export const selectPurchaseItems = (state: RootState) => state.purchaseItems;
 
 export default purchaseItemSlice.reducer;
-

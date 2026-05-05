@@ -10,7 +10,7 @@ import purchaseApi from "@/utils/api";
 
 
 const LIMIT = 20;
-const API_BASE_URL = 'http://192.168.1.131:8000/purchaseapi';
+const API_BASE_URL = 'http://192.168.1.100:8000/purchaseapi';
 
 export const fetchPurchaseOrderRandomIds = createAsyncThunk(
   "purchaseOrder/fetchRandomIds",

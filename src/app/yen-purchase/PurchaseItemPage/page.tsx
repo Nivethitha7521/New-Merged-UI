@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { setLoading } from '@/features/yen-purchase/GRN/grnSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -24,9 +23,9 @@ import {
   selectPurchaseItems,
   fetchPurchaseGroupItems,
   fetchAllVendors,
-  fetchPurchaseTaxes,
   fetchStorageLocationItems,
   fetchUom,
+  fetchTax,
   fetchPurchaseItemtype,
   setActivateDialogOpen,
   setDeactivateDialogOpen,
@@ -48,10 +47,7 @@ import {
   importPurchaseItems,
   exportPurchaseItems,
 } from '../../../features/yen-purchase/PurchaseMaster/purchaseItemSlice';
-
-// ✅ NEW: import fetchCategories from PurchaseCategorySlice
-import { fetchCategories } from '../../../features/yen-purchase/PurchaseMaster/PurchaseCategorySlice';
-
+import { fetchCategoriesItem } from '../../../features/yen-purchase/PurchaseMaster/PurchaseCategorySlice';
 import * as yup from 'yup';
 import YenPurchasePage from '../page';
 import PurchasePagination from '../../../components/yen-purchase/purchaseitem/purchaseItempagination';
@@ -60,7 +56,7 @@ import PurchaseItemForm from '../../../components/yen-purchase/purchaseitem/purc
 import { exportCsv } from '@/utilities/csvUtils';
 import ImportErrorDialog from '../../../components/yen-purchase/purchaseitem/importErrorDialog';
 import PurchaseControls from '@/components/yen-purchase/purchaseitem/purchaseitemControlers';
-import { ImportResponse } from '@/Models/purchaseitem';
+import { ImportResponse, PurchaseItem } from '@/Models/purchaseitem';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const validationSchema = yup.object({
@@ -73,41 +69,54 @@ const validationSchema = yup.object({
     .required('Purchase price is required')
     .moreThan(0, 'Purchase price must be greater than 0'),
   uom: yup.string().required('UOM is required'),
-  purchasetaxName: yup.number().required('Tax required'),
+  taxPercentage: yup.number().typeError('Tax is required').required('Tax is required'),
   purchasesubcategoryName: yup.string().required('Subcategory is required'),
+  sellingPrice: yup.number().when('saleType', {
+    is: true,
+    then: (schema) => schema.required('Selling price is required when Sale Type is true').min(0, 'Selling price must be greater than or equal to 0'),
+    otherwise: (schema) => schema.notRequired().nullable()
+  }),
 });
-
-const initialPurchaseState = {
+const initialPurchaseState: PurchaseItem = {
   purchaseitemId: '',
   itemName: '',
   randomId: '',
+  purchasecategoryId: '',
+  purchasesubcategoryId: '',
+  itemgroupId: '',
+  uomId: '',
+  taxId: '',
+  itemTypeId: '',
+  locationId: '',
+  stockQuantity: 0,
+  supplier: '',
+  purchasePrice: 0,
+  sellingPrice: 0,
+  saleType: false,
+  reorderLevel: 0,
+  hsnCode: '',
+  shelfLife: '',
+  vendorTag: [],
+  barcode: 0,
+  description: '',
+  status: '',
+  createdDate: null,
+  lastUpdatedDate: null,
   purchasecategoryName: '',
   purchasesubcategoryName: '',
   itemgroupName: '',
   uom: '',
-  stockQuantity: 0,
-  supplier: '',
-  purchasePrice: 0,
-  purchasetaxName: '',
-  reorderLevel: 0,
+  taxPercentage: 0,
+  taxName: '',
   itemType: '',
-  hsnCode: '',
-  shelfLife: '',
-  vendorTag: [],
   locationName: '',
-  barcode: '',
-  description: '',
-  status: '',
-  createdDate: null as any,
-  lastUpdatedDate: null as any,
 };
 
 const PurchasePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, isModuleVisible } = usePermissions();
-const [permissionLoading, setPermissionLoading] = useState(true);
-
-  // ✅ FIX: Store permissions in state to prevent re-renders
+  const [permissionLoading, setPermissionLoading] = useState(true);
+  const [subcategoriesList, setSubcategoriesList] = useState<any[]>([]);
   const [permissionState, setPermissionState] = useState({
     canAdd: false,
     canEdit: false,
@@ -115,7 +124,6 @@ const [permissionLoading, setPermissionLoading] = useState(true);
     moduleVisible: false
   });
 
-  // ✅ FIX: Check permissions once on mount
   useEffect(() => {
     const moduleVisible = isModuleVisible('yenerp', 'purchaseitem');
     const canAdd = hasPermission('yenerp', 'purchaseitem', 'add');
@@ -130,17 +138,17 @@ const [permissionLoading, setPermissionLoading] = useState(true);
       canEdit,
       canDelete,
       moduleVisible
-    }); setPermissionLoading(false);
-  }, []); // ✅ Empty dependency array - runs only once
+    });
+    setPermissionLoading(false);
+  }, []);
 
   const { canAdd, canEdit, canDelete, moduleVisible } = permissionState;
 
-  
+  const purchaseItemsState = useSelector(selectPurchaseItems);
 
   const {
     items,
     deactivatedItems,
-    
     showDeactivated,
     snackbarMessage,
     snackbarOpen,
@@ -152,21 +160,19 @@ const [permissionLoading, setPermissionLoading] = useState(true);
     locations,
     vendors,
     itemtypes,
-    
     itemToActivate,
     itemToDeactivate,
     dialogOpen,
     deactivateDialogOpen,
     activateDialogOpen,
     editIndex,
-    
     filters,
-  } = useSelector(selectPurchaseItems);
+  } = purchaseItemsState;
 
   const currentPage = useSelector(selectCurrentPage);
   const pageSize = useSelector(selectPageSize);
   const totalItems = useSelector(selectTotalItems);
-  const newPage = useSelector(selectCurrentPage); 
+  const newPage = useSelector(selectCurrentPage);
 
   const [importResults, setImportResults] = useState<{
     successful: Array<{ row: number; data: Record<string, string> }>;
@@ -183,40 +189,70 @@ const [permissionLoading, setPermissionLoading] = useState(true);
   const [subcategory, setSubcategory] = useState('');
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [exportStatus, setExportStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
- 
-  // 🔄 MASTER DATA – now using fetchCategories (NOT fetchPurchaseCategories)
-    // ✅ FIX: Master Data - Run only when module becomes visible
+
+  useEffect(() => {
+    const allSubcategories: any[] = [];
+
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      categories.forEach((category: any) => {
+        const subcategories = category.subcategories;
+
+        if (subcategories && Array.isArray(subcategories) && subcategories.length > 0) {
+          subcategories.forEach((sub: any) => {
+            allSubcategories.push({
+              id: sub.randomId,
+              name: sub.purchasesubcategoryName,
+              randomId: sub.randomId,
+              purchasesubcategoryId: sub.randomId,
+              purchasesubcategoryName: sub.purchasesubcategoryName,
+              categoryId: category.purchasecategoryId,
+              categoryName: category.purchasecategoryName
+            });
+          });
+        }
+      });
+    }
+
+    setSubcategoriesList(allSubcategories);
+    console.log('✅ Subcategories with IDs:', allSubcategories);
+  }, [categories]);
+
   useEffect(() => {
     if (!moduleVisible) return;
-    
+
     dispatch(fetchPurchaseGroupItems());
-    dispatch(fetchPurchaseTaxes());
     dispatch(fetchStorageLocationItems());
     dispatch(fetchUom());
-    dispatch(fetchCategories());
+    dispatch(fetchTax());
+    dispatch(fetchCategoriesItem());
     dispatch(fetchPurchaseItemtype());
     dispatch(fetchAllVendors());
   }, [dispatch, moduleVisible]);
 
-  // ITEMS
- // ITEMS
-// purchaseitem/page.tsx - ITEMS useEffect-// ✅ FIX: ITEMS useEffect - Remove hasPermission/isModuleVisible from dependencies
-useEffect(() => {
-  if (!moduleVisible) return;
-  
-  dispatch(
-    fetchPurchaseItems({
-      page: currentPage,
-      size: pageSize,
-      showDeactivated: showDeactivated,
-      ...filters,
-    })
-  );
-}, [dispatch, currentPage, pageSize, showDeactivated, moduleVisible]); 
-// ✅ Removed: hasPermission, isModuleVisible, filters // Add showDeactivated to dependencies
-  // ✅ FIX: Sync local state with Redux filters (ONE WAY)
   useEffect(() => {
-    // Prevent infinite loop by checking if values are different
+    if (!moduleVisible) return;
+
+    dispatch(
+      fetchPurchaseItems({
+        page: currentPage,
+        size: pageSize,
+        showDeactivated: showDeactivated,
+        ...filters,
+      })
+    );
+  }, [dispatch, currentPage, pageSize, showDeactivated, moduleVisible]);
+
+  useEffect(() => {
+    console.log('🔍 Categories loaded:', categories);
+    categories.forEach(cat => {
+      console.log(`📂 Category: ${cat.purchasecategoryName}`);
+      console.log(`   Subcategories:`, cat.subcategories);
+    });
+    
+    console.log('🔍 Subcategories List built:', subcategoriesList);
+  }, [categories, subcategoriesList]);
+
+  useEffect(() => {
     if (filters.itemName !== itemName) {
       setItemName(filters.itemName || '');
     }
@@ -245,7 +281,7 @@ useEffect(() => {
     );
   };
 
-    const handleClearFilters = () => {
+  const handleClearFilters = () => {
     setItemName('');
     setCategory('');
     setSubcategory('');
@@ -255,7 +291,7 @@ useEffect(() => {
       fetchPurchaseItems({
         page: 1,
         size: pageSize,
-        showDeactivated: showDeactivated, // Add this
+        showDeactivated: showDeactivated,
       })
     );
   };
@@ -283,62 +319,90 @@ useEffect(() => {
   const handleDialogOpen = () => dispatch(setDialogOpen('edit'));
   const handleDialogClose = () => {
     dispatch(setDialogOpen('none'));
-    dispatch(setItemData(initialPurchaseState as any));
+    dispatch(setItemData(initialPurchaseState));
     dispatch(setEditIndex(null));
   };
 
   const handleEdit = (index: number) => {
     if (canEdit) {
       dispatch(setEditIndex(index));
-      const itemToEdit = { ...items[index] };
-      dispatch(setItemData(itemToEdit));
+      const itemToEdit = items[index] as PurchaseItem;
+
+      const uomDisplay = uoms.find((u: any) => u.uomId === itemToEdit.uomId);
+      const taxDisplay = taxes.find((t: any) => t.taxId === itemToEdit.taxId);
+      const itemTypeDisplay = itemtypes.find((t: any) => t.randomId === itemToEdit.itemTypeId || t.itemtypeId === itemToEdit.itemTypeId);
+      const categoryDisplay = categories.find((c: any) => c.purchasecategoryId === itemToEdit.purchasecategoryId || c.randomId === itemToEdit.purchasecategoryId);
+      const itemGroupDisplay = groupitems.find((g: any) => g.itemgroupId === itemToEdit.itemgroupId);
+      const locationDisplay = locations.find((l: any) => l.locationId === itemToEdit.locationId);
+      
+      let subcategoryDisplay = '';
+      let subcategoryId = itemToEdit.purchasesubcategoryId || '';
+      
+      for (const category of categories) {
+        const subcategories = category.subcategories || [];
+        const foundSub = subcategories.find((sub: any) => 
+          sub.randomId === subcategoryId || 
+          sub.purchasesubcategoryId === subcategoryId ||
+          sub.id === subcategoryId
+        );
+        if (foundSub) {
+          subcategoryDisplay = foundSub.purchasesubcategoryName;
+          break;
+        }
+      }
+
+      const editValues = {
+        ...itemToEdit,
+        uom: uomDisplay?.uom || '',
+        taxPercentage: taxDisplay?.taxPercentage || '',
+        itemType: itemTypeDisplay?.itemtypeName || '',
+        purchasecategoryName: categoryDisplay?.purchasecategoryName || '',
+        itemgroupName: itemGroupDisplay?.itemgroupName || '',
+        locationName: locationDisplay?.locationName || '',
+        purchasesubcategoryName: subcategoryDisplay,
+        purchasesubcategoryId: subcategoryId,
+        saleType: itemToEdit.saleType || false,
+        sellingPrice: itemToEdit.sellingPrice || 0,
+      };
+
+      dispatch(setItemData(editValues as PurchaseItem));
       handleDialogOpen();
     }
   };
 
-  const handleDeactivateClick = (item: any) => {
+  const handleDeactivateClick = (item: PurchaseItem) => {
     if (canDelete) {
       dispatch(setItemToDeactivate(item));
       dispatch(setDeactivateDialogOpen(true));
     }
   };
 
-  const handleActivateClick = (item: any) => {
+  const handleActivateClick = (item: PurchaseItem) => {
     if (canDelete) {
       dispatch(setItemToActivate(item));
       dispatch(setActivateDialogOpen(true));
     }
   };
 
-  // Update your handleConfirmDeactivate function with detailed logging
-const handleConfirmDeactivate = async () => {
-  try {
-    if (itemToDeactivate) {
-      console.log('🔴 Starting deactivation process...');
-      console.log('📋 Item to deactivate:', itemToDeactivate);
-      console.log('🔄 Current active items before:', items);
-      console.log('🔄 Current deactivated items before:', deactivatedItems);
+  const handleConfirmDeactivate = async () => {
+    try {
+      if (itemToDeactivate) {
+        console.log('🔴 Starting deactivation process...');
+        await dispatch(deactivatePurchaseItem(itemToDeactivate.purchaseitemId)).unwrap();
 
-      await dispatch(deactivatePurchaseItem(itemToDeactivate.purchaseitemId)).unwrap();
-      
-      console.log('✅ Deactivation API call completed');
-      console.log('🔄 Current active items after:', items);
-      console.log('🔄 Current deactivated items after:', deactivatedItems);
+        dispatch(setSnackbarMessage('Purchase item deactivated successfully'));
+        dispatch(setSnackbarOpen(true));
+        dispatch(setDeactivateDialogOpen(false));
 
-      dispatch(setSnackbarMessage('Purchase item deactivated successfully'));
+        dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize }));
+      }
+    } catch (error: any) {
+      console.error('❌ Deactivation error:', error);
+      dispatch(setSnackbarMessage(`Failed to deactivate purchase item: ${error.message}`));
       dispatch(setSnackbarOpen(true));
-      dispatch(setDeactivateDialogOpen(false));
-
-      // Force refresh the data
-      console.log('🔄 Refreshing data after deactivation...');
-      dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize }));
     }
-  } catch (error: any) {
-    console.error('❌ Deactivation error:', error);
-    dispatch(setSnackbarMessage(`Failed to deactivate purchase item: ${error.message}`));
-    dispatch(setSnackbarOpen(true));
-  }
-};
+  };
+
   const handleConfirmActivate = async () => {
     try {
       if (itemToActivate) {
@@ -355,7 +419,6 @@ const handleConfirmDeactivate = async () => {
 
   const handleImportCSV = async (file: File, mode: 'merge' | 'replace' | 'rollback') => {
     try {
-      setLoading(true);
       const resultAction = await dispatch(importPurchaseItems({ file, mode }));
 
       if (importPurchaseItems.fulfilled.match(resultAction)) {
@@ -404,7 +467,6 @@ const handleConfirmDeactivate = async () => {
         setSnackbarMessage(`Import error: ${error.message || 'Unknown error occurred'}`)
       );
     } finally {
-      setLoading(false);
       dispatch(setSnackbarOpen(true));
     }
   };
@@ -425,229 +487,362 @@ const handleConfirmDeactivate = async () => {
       });
   };
 
-  const handleDownloadSampleCSV = () => {
-    const headers = [
-      { label: 'Item Code (Required)', key: 'itemCode' },
-      { label: 'Item Name (Required)', key: 'itemName' },
-      { label: 'Category (Required)', key: 'purchasecategoryName' },
-      { label: 'Subcategory (Required)', key: 'purchasesubcategoryName' },
-      { label: 'Item Group (Required)', key: 'itemgroupName' },
-      { label: 'UOM (Required)', key: 'uom' },
-      { label: 'Stock Quantity (Required)', key: 'stockQuantity' },
-      { label: 'Supplier (Required)', key: 'supplier' },
-      { label: 'Purchase Price (Required)', key: 'purchasePrice' },
-      { label: 'Tax Percentage (Required)', key: 'purchasetaxName' },
-      { label: 'Reorder Level (Required)', key: 'reorderLevel' },
-      { label: 'Item Type (Required)', key: 'itemType' },
-      { label: 'HSN Code (Required)', key: 'hsnCode' },
-      { label: 'Shelf Life (Required)', key: 'shelfLife' },
-      { label: 'Vendor Tag (Required)', key: 'vendorTag' },
-      { label: 'Storage Location (Required)', key: 'locationName' },
-      { label: 'Barcode (Required)', key: 'barcode' },
-      { label: 'Description (Required)', key: 'description' },
-    ];
+const handleDownloadSampleCSV = () => {
+  // Match backend HEADER_MAPPING as closely as possible
+  const sampleHeaders = [
+    "Item Name",           // Required
+    "Item Code",
+    "Category",            // purchasecategoryName
+    "Subcategory",         // purchasesubcategoryName
+    "Item Group",          // itemgroupName - Required
+    "UOM",                 // Required
+    "Stock Quantity",
+    "Supplier",
+    "Purchase Price",      // Required
+    "Selling Price",
+    "Sale Type",           // Yes/No or true/false
+    "Tax Rate",            // Most reliable column name (backend supports many variants)
+    "Reorder Level",
+    "Item Type",
+    "HSN Code",
+    "Shelf Life",
+    "Vendor Tags",
+    "Location",            // locationName
+    "Barcode",
+    "Description"
+  ];
 
-    const sampleData = [
-      {
-        itemCode: '678',
-        itemName: 'Sample Item',
-        purchasecategoryName: 'Sample Category',
-        purchasesubcategoryName: 'Sample Subcategory',
-        itemgroupName: 'Sample Group',
-        uom: 'pcs',
-        stockQuantity: '100.00',
-        supplier: 'Sample Supplier',
-        purchasePrice: 100,
-        purchasetaxName: '18',
-        reorderLevel: 10,
-        itemType: 'Sample Type',
-        hsnCode: '123456',
-        shelfLife: '1 year',
-        vendorTag: 'Vendor1,Vendor2',
-        locationName: 'Sample Location',
-        barcode: '1234567890123',
-        description: 'Sample Description',
-      },
-    ];
+  const sampleData = [
+    {
+      "Item Name": "Sample Raw Material",
+      "Item Code": "RM001",
+      "Category": "Raw Materials",
+      "Subcategory": "Chemicals",
+      "Item Group": "Raw Materials",
+      "UOM": "KG",
+      "Stock Quantity": "100.00",
+      "Supplier": "ABC Suppliers",
+      "Purchase Price": "125.50",
+      "Selling Price": "",
+      "Sale Type": "No",
+      "Tax Rate": "18",
+      "Reorder Level": "20",
+      "Item Type": "Raw Material",
+      "HSN Code": "29151200",
+      "Shelf Life": "24 months",
+      "Vendor Tags": "SupplierA,SupplierB",
+      "Location": "Main Warehouse",
+      "Description": "High quality raw material sample"
+    },
+    {
+      "Item Name": "Sample Finished Good",
+      "Item Code": "FG001",
+      "Category": "Finished Goods",
+      "Subcategory": "Packaged",
+      "Item Group": "Finished Goods",
+      "UOM": "PCS",
+      "Stock Quantity": "50",
+      "Supplier": "XYZ Manufacturers",
+      "Purchase Price": "450.00",
+      "Selling Price": "599.00",
+      "Sale Type": "Yes",
+      "Tax Rate": "12",
+      "Reorder Level": "10",
+      "Item Type": "Finished Good",
+      "HSN Code": "21069099",
+      "Shelf Life": "12 months",
+      "Vendor Tags": "VendorX",
+      "Location": "FG Store",
+      "Description": "Premium finished product"
+    }
+  ];
 
-    exportCsv(sampleData, headers, 'sample_purchase_items.csv');
-  };
+  // Create CSV content
+  let csvContent = sampleHeaders.join(',') + '\n';
 
-  function getChangedFields(initialValues: any, currentValues: any) {
-    const changes: Record<string, any> = {};
-
-    Object.keys(currentValues).forEach((key) => {
-      if (Array.isArray(currentValues[key])) {
-        if (JSON.stringify(initialValues[key]) !== JSON.stringify(currentValues[key])) {
-          changes[key] = currentValues[key];
-        }
-      } else if (typeof currentValues[key] === 'number') {
-        if (initialValues[key] !== currentValues[key]) {
-          changes[key] = currentValues[key];
-        }
-      } else if (initialValues[key] !== currentValues[key]) {
-        changes[key] = currentValues[key];
-      }
+  sampleData.forEach(row => {
+    const values = sampleHeaders.map(header => {
+      const value = row[header as keyof typeof row] ?? '';
+      // Escape commas and quotes
+      const escaped = String(value).replace(/"/g, '""');
+      return `"${escaped}"`;
     });
+    csvContent += values.join(',') + '\n';
+  });
 
-    return changes;
-  }
-// In your PurchasePage.tsx, update the handleSubmit function
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'sample_purchase_items.csv';
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 const handleSubmit = async (values: any) => {
   try {
     console.log('🔄 Submitting form data:', values);
+    console.log('📋 Available subcategories with IDs:', subcategoriesList);
     
-    // Check if editIndex is valid for edit mode
-    if (editIndex !== null && (editIndex < 0 || editIndex >= items.length)) {
-      console.error('❌ Invalid edit index:', editIndex);
-      dispatch(setSnackbarMessage('Invalid item selection for editing'));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-
-    // Validate itemType is selected
-    if (!values.itemType) {
-      dispatch(setSnackbarMessage('Item Type is required'));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-
-    // Find the selected item type to get both randomId and name
-    const selectedItemType = itemtypes.find(
-      (type: any) => type.itemtypeName === values.itemType
-    );
-
-    // Check if selected item type exists
-    if (!selectedItemType) {
-      console.error('❌ Selected item type not found:', values.itemType);
-      dispatch(setSnackbarMessage('Selected item type not found in master data'));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-
-    const normalizedItemName = values.itemName.trim().toLowerCase();
-    const isDuplicate = items.some(
-      (item) =>
-        item.purchaseitemId !== values.purchaseitemId &&
-        item.itemName.trim().toLowerCase() === normalizedItemName
-    );
-
-    if (isDuplicate) {
-      dispatch(setSnackbarMessage('Item name already exists.'));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-
-    let dataToSend;
-
-    if (editIndex !== null) {
-      // EDIT MODE
-      const itemToEdit = items[editIndex];
-      if (!itemToEdit) {
-        console.error('❌ No item found at edit index:', editIndex);
-        dispatch(setSnackbarMessage('Item not found for editing'));
+    const getRandomId = (item: any) => {
+      if (!item) return '';
+      return item.randomId || item.uomId || item.taxId || item.itemgroupId || item.locationId;
+    };
+    
+    // Create lookup maps
+    const itemTypeMap = new Map();
+    itemtypes.forEach((t: any) => {
+      itemTypeMap.set(t.itemtypeName, t);
+    });
+    
+    const uomMap = new Map();
+    uoms.forEach((u: any) => {
+      uomMap.set(u.uom, u);
+    });
+    
+    const taxMap = new Map();
+    taxes.forEach((t: any) => {
+      taxMap.set(t.taxPercentage, t);
+      taxMap.set(String(t.taxPercentage), t);
+    });
+    
+    const categoryMap = new Map();
+    categories.forEach((c: any) => {
+      categoryMap.set(c.purchasecategoryName, c);
+    });
+    
+    const itemGroupMap = new Map();
+    groupitems.forEach((g: any) => {
+      itemGroupMap.set(g.itemgroupName, g);
+    });
+    
+    const locationMap = new Map();
+    locations.forEach((l: any) => {
+      locationMap.set(l.locationName, l);
+    });
+    
+    // Get subcategory ID
+    const selectedSubcategoryName = values.purchasesubcategoryName;
+    let selectedSubcategoryId = '';
+    
+    if (selectedSubcategoryName) {
+      const foundSubcategory = subcategoriesList.find(
+        (sub: any) => sub.name === selectedSubcategoryName || sub.purchasesubcategoryName === selectedSubcategoryName
+      );
+      
+      if (foundSubcategory) {
+        selectedSubcategoryId = foundSubcategory.id || foundSubcategory.randomId;
+        console.log('✅ Found subcategory ID:', selectedSubcategoryId, 'for name:', selectedSubcategoryName);
+      } else {
+        console.error('❌ Subcategory not found in list:', selectedSubcategoryName);
+        console.log('Available subcategories:', subcategoriesList);
+        dispatch(setSnackbarMessage(`Subcategory "${selectedSubcategoryName}" not found`));
         dispatch(setSnackbarOpen(true));
         return;
       }
-
+    }
+    
+    // Get selected objects from maps
+    const selectedTax = taxMap.get(values.taxPercentage);
+    const selectedItemType = itemTypeMap.get(values.itemType);
+    const selectedUOM = uomMap.get(values.uom);
+    const selectedCategory = categoryMap.get(values.purchasecategoryName);
+    const selectedItemGroup = itemGroupMap.get(values.itemgroupName);
+    const selectedLocation = locationMap.get(values.locationName);
+    
+    // Validate all required selections
+    if (!selectedTax) {
+      dispatch(setSnackbarMessage(`Tax rate "${values.taxPercentage}%" not found`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    if (!selectedItemType) {
+      dispatch(setSnackbarMessage(`Item Type "${values.itemType}" not found`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    if (!selectedUOM) {
+      dispatch(setSnackbarMessage(`UOM "${values.uom}" not found`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    if (!selectedCategory) {
+      dispatch(setSnackbarMessage(`Category "${values.purchasecategoryName}" not found`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    if (!selectedItemGroup) {
+      dispatch(setSnackbarMessage(`Item Group "${values.itemgroupName}" not found`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    if (!selectedLocation) {
+      dispatch(setSnackbarMessage(`Location "${values.locationName}" not found`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    // Validate subcategory belongs to selected category
+    const categorySubcategories = selectedCategory.subcategories || [];
+    const isSubcategoryValid = categorySubcategories.some(
+      (sub: any) => (sub.randomId === selectedSubcategoryId) || (sub.purchasesubcategoryName === selectedSubcategoryName)
+    );
+    
+    if (!isSubcategoryValid && selectedSubcategoryId) {
+      console.warn('⚠️ Subcategory does not belong to selected category!');
+      dispatch(setSnackbarMessage(`"${selectedSubcategoryName}" does not belong to category "${values.purchasecategoryName}"`));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    // Check if selling price is required when saleType is true
+    const isSaleTypeValue = values.saleType || false;
+    if (isSaleTypeValue && (!values.sellingPrice || values.sellingPrice <= 0)) {
+      dispatch(setSnackbarMessage('Selling price is required and must be greater than 0 when Sale Type is enabled'));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
+    
+    let dataToSend: any;
+    
+    if (editIndex !== null) {
+      // UPDATE existing item
+      const itemToEdit = items[editIndex];
       dataToSend = {
-        ...getChangedFields(initialPurchaseState, values),
         purchaseitemId: itemToEdit.purchaseitemId,
         itemName: values.itemName.trim(),
-        // Ensure both itemTypeId and itemType are included
-        itemTypeId: selectedItemType.randomId, // Now TypeScript knows this exists
-        itemType: values.itemType || itemToEdit.itemType,
-      };
-
-      console.log('📤 Edit data being sent:', dataToSend);
-      console.log('📤 Item Type randomId being sent:', selectedItemType.randomId);
-
-    } else {
-      // ADD MODE
-      dataToSend = { 
-        ...values, 
-        itemName: values.itemName.trim(),
-        status: 'active',
-        // Use the selected item type's randomId for new items
-        itemTypeId: selectedItemType.randomId, // Now TypeScript knows this exists
-        itemType: values.itemType,
+        itemCode: values.itemCode || '',
+        itemTypeId: getRandomId(selectedItemType),
+        uomId: selectedUOM.uomId,
+        taxId: selectedTax.taxId,
+        purchasecategoryId: getRandomId(selectedCategory),
+        itemgroupId: getRandomId(selectedItemGroup),
+        locationId: getRandomId(selectedLocation),
+        purchasesubcategoryId: selectedSubcategoryId,
+        taxPercentage: Number(values.taxPercentage),
+        stockQuantity: isSaleTypeValue ? 0 : Number(values.stockQuantity) || 0,
+        saleType: isSaleTypeValue,
+        purchasePrice: Number(values.purchasePrice) || 0,
+        sellingPrice: isSaleTypeValue ? Number(values.sellingPrice) : null,
+        reorderLevel: isSaleTypeValue ? 0 : Number(values.reorderLevel) || 0,
+        supplier: values.supplier || '',
+        hsnCode: values.hsnCode || '',
+        shelfLife: values.shelfLife || '',
+        barcode: Number(values.barcode) || 0,  // 🔥 Convert to number
+        description: values.description || '',
+        vendorTag: values.vendorTag || [],
       };
       
-      console.log('📤 Add data being sent:', dataToSend);
-      console.log('📤 Item Type randomId being sent:', selectedItemType.randomId);
-    }
-
-    if (editIndex !== null) {
-      const result = await dispatch(updatePurchaseItem(dataToSend)).unwrap();
+      console.log('📤 FINAL Edit data:', dataToSend);
+      await dispatch(updatePurchaseItem(dataToSend)).unwrap();
       dispatch(setSnackbarMessage('Item updated successfully'));
-      
-      // Refresh the data after update
-      dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize }));
     } else {
-      const result = await dispatch(addPurchaseItem(dataToSend)).unwrap();
+      // ADD new item
+      dataToSend = {
+        itemName: values.itemName.trim(),
+        itemCode: values.itemCode || '',
+        itemTypeId: getRandomId(selectedItemType),
+        uomId: selectedUOM.uomId,
+        taxId: selectedTax.taxId,
+        purchasecategoryId: getRandomId(selectedCategory),
+        itemgroupId: getRandomId(selectedItemGroup),
+        locationId: getRandomId(selectedLocation),
+        purchasesubcategoryId: selectedSubcategoryId,
+        taxPercentage: Number(values.taxPercentage),
+        stockQuantity: isSaleTypeValue ? 0 : Number(values.stockQuantity) || 0,
+        saleType: isSaleTypeValue,
+        purchasePrice: Number(values.purchasePrice) || 0,
+        sellingPrice: isSaleTypeValue ? Number(values.sellingPrice) : null,
+        reorderLevel: isSaleTypeValue ? 0 : Number(values.reorderLevel) || 0,
+        supplier: values.supplier || '',
+        hsnCode: values.hsnCode || '',
+        shelfLife: values.shelfLife || '',
+        barcode: Number(values.barcode) || 0,  // 🔥 Convert to number
+        description: values.description || '',
+        vendorTag: values.vendorTag || [],
+        status: 'active',
+      };
+      
+      console.log('📤 FINAL Add data:', dataToSend);
+      await dispatch(addPurchaseItem(dataToSend)).unwrap();
       dispatch(setSnackbarMessage('Item added successfully'));
-      dispatch(fetchPurchaseItems({ page: newPage, size: pageSize }));
     }
-
+    
     dispatch(setSnackbarOpen(true));
     handleDialogClose();
+    
+    // Refresh the items list
+    dispatch(fetchPurchaseItems({
+      page: currentPage,
+      size: pageSize,
+      showDeactivated: showDeactivated,
+      ...filters
+    }));
+    
   } catch (error: any) {
     console.error('❌ Submission error:', error);
-    
     let errorMessage = `Failed to ${editIndex !== null ? 'update' : 'add'} item`;
     
-    if (error.payload) {
-      errorMessage = error.payload.message || errorMessage;
+    if (error.response?.data?.detail) {
+      errorMessage = error.response.data.detail;
+    } else if (error.payload?.message) {
+      errorMessage = error.payload.message;
     } else if (error.message) {
       errorMessage = error.message;
     }
-
+    
     dispatch(setSnackbarMessage(errorMessage));
     dispatch(setSnackbarOpen(true));
   }
 };
-// ✅ ADD handleRefresh FUNCTION HERE - after handleSubmit and before paginatedItems
-const handleRefresh = () => {
-  console.log('🔄 Manual refresh triggered');
-  
-  const currentFilters = {
-    ...(filters.itemName && { itemName: filters.itemName }),
-    ...(filters.purchasecategoryName && { purchasecategoryName: filters.purchasecategoryName }),
-    ...(filters.purchasesubcategoryName && { purchasesubcategoryName: filters.purchasesubcategoryName }),
+
+  const handleRefresh = () => {
+    console.log('🔄 Manual refresh triggered');
+
+    const currentFilters = {
+      ...(filters.itemName && { itemName: filters.itemName }),
+      ...(filters.purchasecategoryName && { purchasecategoryName: filters.purchasecategoryName }),
+      ...(filters.purchasesubcategoryName && { purchasesubcategoryName: filters.purchasesubcategoryName }),
+    };
+
+    dispatch(
+      fetchPurchaseItems({
+        page: currentPage,
+        size: pageSize,
+        ...currentFilters,
+      })
+    );
+
+    dispatch(setSnackbarMessage('Data refreshed successfully'));
+    dispatch(setSnackbarOpen(true));
   };
 
-  // Force refresh both active and deactivated data
-  dispatch(
-    fetchPurchaseItems({
-      page: currentPage,
-      size: pageSize,
-      ...currentFilters,
-    })
-  );
-  
-  dispatch(setSnackbarMessage('Data refreshed successfully'));
-  dispatch(setSnackbarOpen(true));
-};
-const paginatedItems = showDeactivated ? deactivatedItems : items;
+  const paginatedItems = showDeactivated ? deactivatedItems : items;
 
-// ✅ FIX: Use local state for module visibility check
-if (permissionLoading) {
-  return (
-    <Box p={3}>
-      <Typography>Loading permissions...</Typography>
-    </Box>
-  );
-}
+  if (permissionLoading) {
+    return (
+      <Box p={3}>
+        <Typography>Loading permissions...</Typography>
+      </Box>
+    );
+  }
 
-if (!moduleVisible) {
-  return (
-    <Box p={3}>
-      <Alert severity="error">
-        You do not have access to the Purchase Item module.
-      </Alert>
-    </Box>
-  );
-}
+  if (!moduleVisible) {
+    return (
+      <Box p={3}>
+        <Alert severity="error">
+          You do not have access to the Purchase Item module.
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -671,8 +866,7 @@ if (!moduleVisible) {
           loading={loading}
           exportStatus={exportStatus}
           canAdd={canAdd}
-            handleRefresh={handleRefresh} // Add this line
-
+          handleRefresh={handleRefresh}
         />
 
         <PurchaseTable

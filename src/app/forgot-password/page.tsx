@@ -32,7 +32,7 @@ if (username.trim()) {
 
 
 const res = await fetch(
-  `http://192.168.1.131:8000/purchaseapi/users/forgot-password?${query.toString()}`,
+  `http://192.168.1.100:8000/purchaseapi/users/forgot-password?${query.toString()}`,
   { method: "POST" }
 );
 
@@ -62,7 +62,7 @@ sessionStorage.setItem("fp_username", username);
  setIsAutoFetching(true);
   try {
     const res = await fetch(
-     `http://192.168.1.131:8000/purchaseapi/users/email/${encodeURIComponent(mail)}/username`
+     `http://192.168.1.100:8000/purchaseapi/users/email/${encodeURIComponent(mail)}/username`
 
     );
 
@@ -88,7 +88,7 @@ const fetchEmailByUsername = async (uname: string) => {
  ;
   try {
     const res = await fetch(
-    `http://192.168.1.131:8000/purchaseapi/users/username/${encodeURIComponent(uname)}/email`
+    `http://192.168.1.100:8000/purchaseapi/users/username/${encodeURIComponent(uname)}/email`
 
     );
 

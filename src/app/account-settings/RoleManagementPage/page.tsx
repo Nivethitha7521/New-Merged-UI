@@ -370,7 +370,7 @@ const handleDeleteRole = async (roleName: string) => {
   if (!roleToDelete) return;
 
   await fetch(
-    `http://192.168.1.131:8000/purchaseapi/roles/${roleToDelete.id}/deactivate`,
+    `http://192.168.1.100:8000/purchaseapi/roles/${roleToDelete.id}/deactivate`,
     { method: "PUT" }
   );
 
@@ -389,7 +389,7 @@ const handleRestoreRole = async (roleName: string) => {
   if (!roleToRestore) return;
 
   await fetch(
-    `http://192.168.1.131:8000/purchaseapi/roles/${roleToRestore.id}/restore`,
+    `http://192.168.1.100:8000/purchaseapi/roles/${roleToRestore.id}/restore`,
     { method: "PUT" }
   );
 

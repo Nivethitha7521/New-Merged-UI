@@ -3,9 +3,8 @@ import purchaseApi from '@/utils/api'; // ✅ USE purchaseApi
 import { RootState } from '../../../redux/store';
 import { initialState, UOMItem } from '@/Models/uom';
 
-// ✅ REMOVE getAuthHeaders COMPLETELY - purchaseApi handles headers
 
-// ✅ UPDATE ALL API CALLS TO USE purchaseApi
+// ✅ UPDATE ALL API CALLS TO USE purchaseApiwhats
 export const fetchUOMItems = createAsyncThunk<UOMItem[]>('uom/fetchUOMItems', async () => {
   const response = await purchaseApi.get('/purchaseuoms/'); // ✅ USE purchaseApi
   return response.data;

@@ -1077,7 +1077,7 @@ return;
 
     console.log("📤 Sending role payload:", rolePayload);
 
-    const roleResponse = await fetch("http://192.168.1.131:8000/purchaseapi/roles", {
+    const roleResponse = await fetch("http://192.168.1.100:8000/purchaseapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1127,7 +1127,7 @@ return;
 
     console.log("📤 Sending permissions payload:", permissionPayload);
 
-    const permResponse = await fetch("http://192.168.1.131:8000/purchaseapi/permissions", {
+    const permResponse = await fetch("http://192.168.1.100:8000/purchaseapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)

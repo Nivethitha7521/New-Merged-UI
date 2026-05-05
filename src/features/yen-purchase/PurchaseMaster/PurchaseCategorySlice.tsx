@@ -8,6 +8,41 @@ export const fetchCategories = createAsyncThunk<Category[]>('category/fetchCateg
   return response.data;
 });
 
+export const fetchCategoriesItem = createAsyncThunk(
+  'purchaseCategory/fetchCategories',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get('/purchasecategories/itemget/rawMaterials/');
+      
+      // Transform categories and ensure subcategories have IDs
+      const categories = response.data.map((category: any) => {
+        // If subcategories are strings, we need to fetch their IDs separately
+        const hasStringSubs = category.subcategories.some((sub: any) => typeof sub === 'string');
+        
+        if (hasStringSubs) {
+          // This indicates the backend didn't populate the IDs
+          console.warn('⚠️ Categories returned with string-only subcategories:', category.purchasecategoryName);
+        }
+        
+        return {
+          ...category,
+          subcategories: category.subcategories.map((sub: any) => {
+            if (typeof sub === 'string') {
+              // Keep as string but log warning
+              return sub;
+            }
+            return sub;
+          })
+        };
+      });
+      
+      return categories;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch categories');
+    }
+  }
+);
+
 export const addCategory = createAsyncThunk<Category, Category>('category/addCategory', async (category) => {
   const response = await purchaseApi.post('/purchasecategories', category);
   return response.data;

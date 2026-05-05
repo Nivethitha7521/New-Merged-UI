@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.131:8000/purchaseapi';
+const BASE_URL = 'http://192.168.1.100:8000/purchaseapi';
 
 interface DeviceFingerprint {
   userAgent: string;

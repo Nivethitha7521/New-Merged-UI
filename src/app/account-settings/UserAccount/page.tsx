@@ -137,7 +137,7 @@ const [passwordTouched, setPasswordTouched] = useState(false);
   const fetchRolesFromBackend = async () => {
     try {
       console.log("Fetching roles from backend...");
-      const response = await fetch('http://192.168.1.131:8000/purchaseapi/roles');
+      const response = await fetch('http://192.168.1.100:8000/purchaseapi/roles');
       
       if (response.ok) {
         const rolesFromBackend = await response.json();
@@ -181,7 +181,7 @@ const [passwordTouched, setPasswordTouched] = useState(false);
 const fetchRoleAppsFromPermissions = async () => {
   try {
     console.log("Fetching permissions to map role -> apps...");
-    const res = await fetch("http://192.168.1.131:8000/purchaseapi/permissions");
+    const res = await fetch("http://192.168.1.100:8000/purchaseapi/permissions");
 
     if (!res.ok) return;
 
@@ -383,7 +383,7 @@ if (
         updateData.password = formUser.password;
       }
       
-      const response = await fetch(`http://192.168.1.131:8000/purchaseapi/users/${editingUserId}`, {
+      const response = await fetch(`http://192.168.1.100:8000/purchaseapi/users/${editingUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -441,7 +441,7 @@ setSnackbar({
       // ✅ CREATE NEW USER (your existing code)
       console.log("🔄 Creating user in role management system...");
 
-      const response = await fetch('http://192.168.1.131:8000/purchaseapi/users', {
+      const response = await fetch('http://192.168.1.100:8000/purchaseapi/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -534,7 +534,7 @@ setSnackbar({
  const handleDeactivateUser = async (userId: string) => {
   try {
     // 🔥 1. Update backend
-    await fetch(`http://192.168.1.131:8000/purchaseapi/users/${userId}/deactivate`, {
+    await fetch(`http://192.168.1.100:8000/purchaseapi/users/${userId}/deactivate`, {
       method: "PATCH",
     });
 
@@ -559,7 +559,7 @@ setSnackbar({
 
  const handleRestoreUser = async (userId: string) => {
   try {
-    await fetch(`http://192.168.1.131:8000/purchaseapi/users/${userId}/activate`, {
+    await fetch(`http://192.168.1.100:8000/purchaseapi/users/${userId}/activate`, {
       method: "PATCH",
     });
 
@@ -597,7 +597,7 @@ setSnackbar({
 const fetchUsersFromBackend = async () => {
   try {
     console.log("Fetching users from backend...");
-    const response = await fetch('http://192.168.1.131:8000/purchaseapi/users');
+    const response = await fetch('http://192.168.1.100:8000/purchaseapi/users');
     
     if (response.ok) {
       const usersFromBackend = await response.json();
