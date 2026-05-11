@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://192.168.1.100:8000/purchaseapi',
+  baseURL: 'http://192.168.1.102:8000/purchaseapi',
 });
 
 axiosInstance.interceptors.response.use(

@@ -764,7 +764,7 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
             <TableContainer
               component={Paper}
               sx={{
-                maxHeight: 'calc(100vh - 230px)',
+                maxHeight: 'calc(100vh - 250px)',
                 overflowY: 'auto',
                 width: '100%',
               }}

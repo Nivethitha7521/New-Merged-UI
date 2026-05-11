@@ -4,7 +4,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
   Grid, TextField, FormControl, InputLabel, Select, MenuItem,
   FormHelperText, Box, IconButton, Typography, Divider,
-  Checkbox, FormControlLabel
+  Checkbox, FormControlLabel, RadioGroup, Radio, FormLabel, Alert
 } from '@mui/material';
 import { Formik, Form, FormikHelpers, useFormikContext, FormikProps } from 'formik';
 import * as yup from 'yup';
@@ -33,6 +33,7 @@ interface PurchaseItemFormProps {
   locations: any[];
   itemtypes: any[];
   existingItems: any[];
+  brands: any[];
 }
 
 interface SubcategoryItem {
@@ -80,7 +81,8 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
   taxes,
   locations,
   itemtypes,
-  existingItems
+  existingItems,
+  brands,  // ✅ ADD THIS
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { items: purchaseSubcategories } = useSelector(selectPurchaseSubcategoryItems);
@@ -92,14 +94,23 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [subcategoryDialogOpen, setSubcategoryDialogOpen] = useState(false);
   const [isSaleType, setIsSaleType] = useState(initialValues.saleType || false);
+  const [taxType, setTaxType] = useState<'include' | 'exclude'>(
+    initialValues.includeTax ? 'include' : 'exclude'
+  );
   const existingSubcategories = purchaseSubcategories.map(item => item.purchasesubcategoryName);
   const inputRef = useRef<HTMLInputElement>(null);
   const [localCategories, setLocalCategories] = useState(propCategories);
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false); // ✅ ADD THIS
 
-  // Update saleType when initialValues change
+  // Update when initialValues change
   useEffect(() => {
     setIsSaleType(initialValues.saleType || false);
-  }, [initialValues.saleType]);
+    if (initialValues.includeTax) {
+      setTaxType('include');
+    } else {
+      setTaxType('exclude');
+    }
+  }, [initialValues.saleType, initialValues.includeTax]);
 
   const allSubcategories = (localCategories as CategoryWithSubcategories[]).flatMap(category => {
     const subcategories = category.subcategories || [];
@@ -236,6 +247,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
     }
   };
 
+  // MAIN SUBMIT FUNCTION WITH TAX CALCULATION
   const handleFormSubmit = async (values: any, actions: FormikHelpers<any>) => {
     try {
       setLoading(true);
@@ -257,6 +269,45 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
       const selectedItemGroup = groupitems.find((group: any) => group.itemgroupName === values.itemgroupName);
       const selectedLocation = locations.find((loc: any) => loc.locationName === values.locationName);
 
+      const taxPercentage = selectedTax?.taxPercentage || values.taxPercentage || 0;
+      const enteredPrice = Number(values.purchasePrice);
+
+      let purchasePriceToStore = enteredPrice;
+      let finalPriceToStore: number | null = null;
+      let includeTaxValue = false;
+      let excludeTaxValue = false;
+      let sellingPriceToStore = values.sellingPrice ? Number(values.sellingPrice) : null;
+
+      // TAX CALCULATION LOGIC
+      if (taxType === 'include') {
+        // User entered price INCLUDING tax
+        includeTaxValue = true;
+        excludeTaxValue = false;
+
+        if (taxPercentage > 0) {
+          purchasePriceToStore = enteredPrice / (1 + taxPercentage / 100);
+          finalPriceToStore = enteredPrice;
+        } else {
+          purchasePriceToStore = enteredPrice;
+          finalPriceToStore = enteredPrice;
+        }
+
+        if (isSaleType && sellingPriceToStore && sellingPriceToStore > 0 && taxPercentage > 0) {
+          sellingPriceToStore = sellingPriceToStore / (1 + taxPercentage / 100);
+        }
+      } else {
+        // User entered price EXCLUDING tax
+        includeTaxValue = false;
+        excludeTaxValue = true;
+        purchasePriceToStore = enteredPrice;
+
+        if (taxPercentage > 0) {
+          finalPriceToStore = enteredPrice * (1 + taxPercentage / 100);
+        } else {
+          finalPriceToStore = enteredPrice;
+        }
+      }
+
       const normalizedValues: any = {
         itemName: values.itemName.trim(),
         purchasesubcategoryId: selectedSubcategoryId,
@@ -266,14 +317,14 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
         taxId: selectedTax?.taxId || '',
         itemTypeId: selectedItemType?.randomId || selectedItemType?.itemtypeId || '',
         locationId: selectedLocation?.randomId || selectedLocation?.locationId || '',
-        purchasePrice: Number(values.purchasePrice),
-        sellingPrice: isSaleType ? Number(values.sellingPrice) : 0,
+        purchasePrice: purchasePriceToStore,
+        sellingPrice: sellingPriceToStore,
         saleType: isSaleType,
         stockQuantity: isSaleType ? 0 : Number(values.stockQuantity),
         reorderLevel: isSaleType ? 0 : Number(values.reorderLevel),
         supplier: values.supplier || '',
-        hsnCode: values.hsnCode || '',
-        shelfLife: values.shelfLife || '',
+        hsnCode: values.hsnCode || 0,
+        shelfLife: values.shelfLife || 0,
         barcode: values.barcode || '',
         description: values.description || '',
         vendorTag: values.vendorTag || [],
@@ -281,9 +332,15 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
         purchasecategoryName: values.purchasecategoryName,
         itemgroupName: values.itemgroupName,
         uom: values.uom,
-        taxPercentage: values.taxPercentage,
+        taxPercentage: taxPercentage,
         itemType: values.itemType,
         locationName: values.locationName,
+        includeTax: includeTaxValue,
+        excludeTax: excludeTaxValue,
+        finalPrice: finalPriceToStore,
+        aliasName: values.aliasName,
+        brandId: values.brandId,
+        brandName: values.brandName
       };
 
       if (editIndex !== null) {
@@ -299,6 +356,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
       actions.setSubmitting(false);
     }
   };
+
 
   return (
     <Dialog
@@ -339,9 +397,8 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
               }}
             >
               {/* SECTION 1: Basic Information */}
-              <Box sx={{ display: 'flex',mb: 1, mt: 1 }}>
+              <Box sx={{ display: 'flex', mb: 1, mt: 1 }}>
                 <SectionHeader title="Basic Information" />
-                {/* Sale Type Checkbox - Next to Basic Information header */}
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -360,13 +417,11 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                       size="small"
                     />
                   }
-                  label="Sale Type"
-                  sx={{ ml: 1,mb:2 }}
+                  label="Direct Sales Item(FG)"
+                  sx={{ ml: 1, mb: 2 }}
                 />
               </Box>
               <Grid container spacing={1.5} sx={{ mb: 2 }}>
-
-                {/* Item Name */}
                 <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     inputRef={inputRef}
@@ -396,8 +451,65 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                     required
                   />
                 </Grid>
+                {/* Alias Name - Optional */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    autoComplete="off"
+                    label="Alias Name"
+                    name="aliasName"
+                    size="small"
+                    value={values.aliasName || ''}
+                    onChange={(e) => { handleChange(e); }}
+                    placeholder="Optional"
+                  />
+                </Grid>{/* ✅ BRAND SELECT - Like Category/Subcategory */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box sx={{
+                    display: 'inline-flex',
+                    width: '100%',
+                    border: '1px solid rgba(0,0,0,0.23)',
+                    borderRadius: 1,
+                    backgroundColor: 'white',
+                    '&:hover': { borderColor: 'black' },
+                    '&:focus-within': { borderColor: '#1976d2', borderWidth: 2 }
+                  }}>
+                    <FormControl
+                      fullWidth
+                      size="small"
+                      sx={{
+                        '& .MuiOutlinedInput-root': { border: 'none', '& fieldset': { border: 'none' } },
+                      }}
+                    >
+                      <InputLabel>Brand</InputLabel>
+                      <Select
+                        label="Brand"
+                        name="brandName"
+                        value={values.brandName || ''}
+                        onChange={(event) => {
+                          const selectedBrandName = event.target.value as string;
+                          const selectedBrand = brands.find((b: any) => b.brandName === selectedBrandName);
 
-                {/* Purchase Subcategory */}
+                          setFieldValue('brandName', selectedBrandName);
+                          setFieldValue('brandId', selectedBrand?.brandId || selectedBrand?.randomId || '');
+                        }}
+                      >
+                        {brands && brands.map((brand: any) => (
+                          <MenuItem key={brand.brandId || brand.randomId} value={brand.brandName}>
+                            {brand.brandName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <IconButton
+                      onClick={() => setBrandDialogOpen(true)}
+                      size="small"
+                      sx={{ height: 'auto', width: 40, borderRadius: 0, borderLeft: '1px solid rgba(0,0,0,0.23)', flexShrink: 0 }}
+                    >
+                      <AddIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <Box sx={{
                     display: 'inline-flex',
@@ -467,7 +579,6 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormHelperText>
                 </Grid>
 
-                {/* Purchase Category */}
                 <Grid item xs={12} sm={6} md={3}>
                   <Box sx={{
                     display: 'inline-flex',
@@ -533,11 +644,10 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormHelperText>
                 </Grid>
 
-                {/* Item Group */}
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small" error={touched.itemgroupName && Boolean(errors.itemgroupName)}>
                     <InputLabel>Item Group*</InputLabel>
-                    <Select label="Item Group*" name="itemgroupName" value={values.itemgroupName} onChange={handleChange} required>
+                    <Select label="Item Group" name="itemgroupName" value={values.itemgroupName} onChange={handleChange} required>
                       {groupitems.length > 0 ? (
                         groupitems.map((groupitem, index) => (
                           <MenuItem key={groupitem.itemgroupId || `group-${index}`} value={groupitem.itemgroupName}>
@@ -552,7 +662,6 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormControl>
                 </Grid>
 
-                {/* Item Type */}
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small" error={touched.itemType && Boolean(errors.itemType)}>
                     <InputLabel>Item Type*</InputLabel>
@@ -580,24 +689,20 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormControl>
                 </Grid>
 
-                {/* Supplier */}
                 <Grid item xs={12} sm={6} md={3}>
                   <TextField
-                    fullWidth size="small" label="Supplier*" name="supplier" autoComplete='off'
+                    fullWidth size="small" label="Supplier" name="supplier" autoComplete='off'
                     value={values.supplier} onChange={handleChange}
                     error={touched.supplier && Boolean(errors.supplier)}
                     helperText={touched.supplier && errors.supplier ? String(errors.supplier) : ''}
                     required
                   />
                 </Grid>
-
               </Grid>
 
-              {/* SECTION 2: Pricing & Inventory */}
+              {/* SECTION 2: Pricing & Inventory - MODIFIED SECTION */}
               <SectionHeader title="Pricing & Inventory" />
               <Grid container spacing={1.5} sx={{ mb: 2 }}>
-
-                {/* UOM */}
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small" error={touched.uom && Boolean(errors.uom)}>
                     <InputLabel>UOM*</InputLabel>
@@ -614,38 +719,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormControl>
                 </Grid>
 
-                {/* Purchase Price */}
-                <Grid item xs={12} sm={6} md={isSaleType ? 2 : 2}>
-                  <TextField
-                    fullWidth size="small" label="Purchase Price*" name="purchasePrice"
-                    value={values.purchasePrice} onChange={handleChange}
-                    error={touched.purchasePrice && Boolean(errors.purchasePrice)}
-                    helperText={touched.purchasePrice && errors.purchasePrice ? String(errors.purchasePrice) : ''}
-                    type="number" InputProps={{ inputProps: { step: '1' } }} required
-                  />
-                </Grid>
-
-                {/* Selling Price - shown only when Sale Type is true */}
-                {isSaleType && (
-                  <Grid item xs={12} sm={6} md={2}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Selling Price*"
-                      name="sellingPrice"
-                      value={values.sellingPrice ?? ''}
-                      onChange={handleChange}
-                      error={touched.sellingPrice && Boolean(errors.sellingPrice)}
-                      helperText={touched.sellingPrice && errors.sellingPrice ? String(errors.sellingPrice) : ''}
-                      type="number"
-                      InputProps={{ inputProps: { step: '0.01', min: 0 } }}
-                      required
-                    />
-                  </Grid>
-                )}
-
-                {/* Tax Percentage */}
-                <Grid item xs={12} sm={6} md={isSaleType ? 2 : 2}>
+                <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small" error={touched.taxPercentage && Boolean(errors.taxPercentage)}>
                     <InputLabel>Tax Percentage*</InputLabel>
                     <Select
@@ -674,10 +748,71 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormControl>
                 </Grid>
 
-                {/* Reorder Level */}
+                {/* NEW: Tax Type Selection */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <FormControl component="fieldset" size="small">
+                    <FormLabel component="legend" sx={{ fontSize: '0.75rem' }}></FormLabel>
+                    <RadioGroup
+                      row
+                      value={taxType}
+                      onChange={(e) => setTaxType(e.target.value as 'include' | 'exclude')}
+                    >
+                      <FormControlLabel
+                        value="exclude"
+                        control={<Radio size="small" />}
+                        label="Exclude Tax"
+                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem' } }}
+                      />
+                      <FormControlLabel
+                        value="include"
+                        control={<Radio size="small" />}
+                        label="Include Tax"
+                        sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.75rem' } }}
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </Grid>
+
                 <Grid item xs={12} sm={6} md={2}>
                   <TextField
-                    fullWidth size="small" label="Reorder Level*" name="reorderLevel"
+                    fullWidth
+                    size="small"
+                    label={taxType === 'include' ? "Price*" : "Base Price*"}
+                    name="purchasePrice"
+                    value={values.purchasePrice}
+                    onChange={handleChange}
+                    error={touched.purchasePrice && Boolean(errors.purchasePrice)}
+                    helperText={touched.purchasePrice && errors.purchasePrice ? String(errors.purchasePrice) : ''}
+                    type="number"
+                    InputProps={{ inputProps: { step: '0.01', min: 0 } }}
+                    required
+                  />
+                </Grid>
+
+                {/* Price calculation display
+                {getPriceDisplay(values, values.taxPercentage)} */}
+
+                {isSaleType && (
+                  <Grid item xs={12} sm={6} md={2}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label={taxType === 'include' ? "Selling Price (Including Tax)*" : "Selling Price (Excluding Tax)*"}
+                      name="sellingPrice"
+                      value={values.sellingPrice ?? ''}
+                      onChange={handleChange}
+                      error={touched.sellingPrice && Boolean(errors.sellingPrice)}
+                      helperText={touched.sellingPrice && errors.sellingPrice ? String(errors.sellingPrice) : ''}
+                      type="number"
+                      InputProps={{ inputProps: { step: '0.01', min: 0 } }}
+                      required
+                    />
+                  </Grid>
+                )}
+
+                <Grid item xs={12} sm={6} md={2}>
+                  <TextField
+                    fullWidth size="small" label="Reorder Level" name="reorderLevel"
                     value={values.reorderLevel} onChange={handleChange}
                     error={touched.reorderLevel && Boolean(errors.reorderLevel)}
                     helperText={touched.reorderLevel && errors.reorderLevel ? String(errors.reorderLevel) : ''}
@@ -686,22 +821,29 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                 </Grid>
               </Grid>
 
-              {/* SECTION 3: Additional Details */}
+              {/* SECTION 3: Additional Details - Keep as is */}
               <SectionHeader title="Additional Details" />
               <Grid container spacing={1.5}>
-
-                {/* HSN Code */}
-                <Grid item xs={12} sm={6} md={2}>
-                  <TextField
-                    fullWidth size="small" label="HSN Code*" name="hsnCode"
-                    value={values.hsnCode} onChange={handleChange}
-                    error={touched.hsnCode && Boolean(errors.hsnCode)}
-                    helperText={touched.hsnCode && errors.hsnCode ? String(errors.hsnCode) : ''}
-                    required
-                  />
-                </Grid>
-
-                {/* Storage Location */}
+             <Grid item xs={12} sm={6} md={2}>
+  <TextField
+    fullWidth
+    size="small"
+    label="HSN Code"
+    name="hsnCode"
+    value={values.hsnCode === 0 ? '' : values.hsnCode}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (value === '') {
+        setFieldValue('hsnCode', 0);
+      } else if (/^\d*$/.test(value)) {
+        setFieldValue('hsnCode', Number(value));
+      }
+    }}
+    type="text"
+    inputMode="numeric"
+    placeholder="Optional (defaults to 0)"
+  />
+</Grid>
                 <Grid item xs={12} sm={6} md={3}>
                   <FormControl fullWidth size="small" error={touched.locationName && Boolean(errors.locationName)}>
                     <InputLabel>Storage Location*</InputLabel>
@@ -718,24 +860,32 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   </FormControl>
                 </Grid>
 
-                {/* Shelf Life */}
-                <Grid item xs={12} sm={6} md={2}>
-                  <TextField
-                    fullWidth size="small" label="Shelf Life*" name="shelfLife" autoComplete='off'
-                    value={values.shelfLife} onChange={handleChange}
-                    error={touched.shelfLife && Boolean(errors.shelfLife)}
-                    helperText={touched.shelfLife && errors.shelfLife ? String(errors.shelfLife) : ''}
-                    required
-                  />
-                </Grid>
-
-                {/* Barcode */}
+<Grid item xs={12} sm={6} md={2}>
+  <TextField
+    fullWidth
+    size="small"
+    label="Shelf Life"
+    name="shelfLife"
+    value={values.shelfLife === 0 ? '' : values.shelfLife}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (value === '') {
+        setFieldValue('shelfLife', 0);
+      } else if (/^\d*$/.test(value)) {
+        setFieldValue('shelfLife', Number(value));
+      }
+    }}
+    type="text"
+    inputMode="numeric"
+    placeholder="Optional (defaults to 0)"
+  />
+</Grid>
                 <Grid item xs={12} sm={6} md={2}>
                   <TextField
                     disabled
                     fullWidth
                     size="small"
-                    label="Barcode*"
+                    label="Barcode"
                     name="barcode"
                     autoComplete='off'
                     value={values.barcode}
@@ -747,10 +897,9 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                   />
                 </Grid>
 
-                {/* Description */}
                 <Grid item xs={12}>
                   <TextField
-                    fullWidth size="small" label="Description*" name="description" autoComplete='off'
+                    fullWidth size="small" label="Description" name="description" autoComplete='off'
                     value={values.description} onChange={handleChange}
                     error={touched.description && Boolean(errors.description)}
                     helperText={touched.description && errors.description ? String(errors.description) : ''}

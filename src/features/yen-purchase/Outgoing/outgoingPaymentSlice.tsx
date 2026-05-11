@@ -13,7 +13,7 @@ export const fetchOutgoings = createAsyncThunk<
   'outgoings/fetchOutgoings',
   async (args, { rejectWithValue }) => {
     try {
-      const url = 'http://192.168.1.100:8000/purchaseapi/outgoingpayments/';
+      const url = 'http://192.168.1.102:8000/purchaseapi/outgoingpayments/';
       const params: any = {
         skip: (args.page - 1) * args.size,
         limit: args.size,

@@ -15,15 +15,13 @@ import {
   StorageLocationItem,
   UOM,
   Vendor,
-  Tax  // Add Tax import
+  Tax
 } from '@/Models/purchaseitem';
 import { PurchaseItemType } from '@/Models/itemType';
 
 // ✅ IMPORTANT: use the existing category thunk from PurchaseCategorySlice
 import { fetchCategoriesItem } from './PurchaseCategorySlice';
-import { random } from 'lodash';
 
-const EXPORT_CSV_URL = 'http://192.168.1.100:8000/purchaseapi/rawMaterials/export_csv';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // ---------- EXPORT (OLD) ----------
@@ -31,11 +29,7 @@ export const exportPurchaseItemsToCSV = createAsyncThunk(
   'export/exportPurchaseItemsToCSV',
   async (_, { rejectWithValue }) => {
     try {
-      if (!EXPORT_CSV_URL) {
-        throw new Error('Export URL is not defined');
-      }
-
-      const response = await axios.get(EXPORT_CSV_URL, {
+      const response = await axios.get('http://192.168.1.102:8000/purchaseapi/rawMaterials/purchaseitemexport/export_csv', {
         responseType: 'blob',
       });
 
@@ -79,9 +73,8 @@ export const fetchPurchaseItems = createAsyncThunk(
       limit: size,
     };
 
-    // Only add status filter if not fetching all
     if (showDeactivated !== undefined) {
-      params.status = showDeactivated ? 'deactivated' : 'active';
+      params.showDeactivated = showDeactivated;
     }
 
     Object.entries(filters).forEach(([key, value]) => {
@@ -90,16 +83,14 @@ export const fetchPurchaseItems = createAsyncThunk(
 
     try {
       console.log('📡 Fetching purchase items with params:', params);
-      
-      const response = await purchaseApi.get('http://192.168.1.100:8000/purchaseapi/rawMaterials/', { 
+
+      const response = await purchaseApi.get('/rawMaterials/', {
         params,
       });
-      
-      console.log('📦 Raw API response:', response.data);
-      
+
       let items: PurchaseItem[] = [];
       let totalItems = 0;
-      
+
       if (Array.isArray(response.data)) {
         items = response.data;
         totalItems = response.data.length;
@@ -110,10 +101,7 @@ export const fetchPurchaseItems = createAsyncThunk(
         items = response.data || [];
         totalItems = items.length;
       }
-      
-      console.log('✅ Processed items:', items);
-      console.log('✅ Total items:', totalItems);
-      
+
       return {
         items: items,
         totalItems: totalItems,
@@ -121,7 +109,6 @@ export const fetchPurchaseItems = createAsyncThunk(
       };
     } catch (error: any) {
       console.error('❌ Error fetching purchase items:', error);
-      console.error('❌ Error response:', error.response?.data);
       throw new Error(error.response?.data?.detail || 'Error fetching purchase items');
     }
   }
@@ -136,20 +123,18 @@ export const fetchUom = createAsyncThunk('uom/fetch', async () => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     });
-    
-    console.log('Master Admin UOM API Response:', response.data);
-    
+
     const activeUoms = response.data.filter((uom: any) => uom.status === 'active');
-    
-    const uoms: UOM[] = activeUoms.map((item: any) => ({ 
+
+    const uoms: UOM[] = activeUoms.map((item: any) => ({
       uomId: item.uomId || item.id,
       uom: item.uom,
       status: item.status
     }));
-    
+
     return uoms;
   } catch (error: any) {
-    console.error('Error fetching UOMs from master admin:', error);
+    console.error('Error fetching UOMs:', error);
     throw new Error(error.response?.data?.detail || 'Failed to fetch UOMs');
   }
 });
@@ -163,21 +148,19 @@ export const fetchTax = createAsyncThunk('tax/fetch', async () => {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
     });
-    
-    console.log('Master Admin Tax API Response:', response.data);
-    
+
     const activeTaxes = response.data.filter((tax: any) => tax.status === 'active');
-    
-    const taxes: Tax[] = activeTaxes.map((item: any) => ({ 
+
+    const taxes: Tax[] = activeTaxes.map((item: any) => ({
       taxId: item.taxId || item.id,
       taxPercentage: item.taxPercentage,
       taxName: item.taxName,
       status: item.status
     }));
-    
+
     return taxes;
   } catch (error: any) {
-    console.error('Error fetching Taxes from master admin:', error);
+    console.error('Error fetching Taxes:', error);
     throw new Error(error.response?.data?.detail || 'Failed to fetch Taxes');
   }
 });
@@ -185,10 +168,8 @@ export const fetchTax = createAsyncThunk('tax/fetch', async () => {
 // ---------- ITEM TYPE ----------
 export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async () => {
   try {
-    const response = await purchaseApi.get<PurchaseItemType[]>('http://192.168.1.100:8000/purchaseapi/itemtypes/', {});
-    
-    console.log('Item Types API Response:', response.data);
-    
+    const response = await purchaseApi.get<PurchaseItemType[]>('/itemtypes/', {});
+
     const itemtypes = response.data.map(item => ({
       itemtypeId: item.itemtypeId,
       itemtypeName: item.itemtypeName,
@@ -205,17 +186,15 @@ export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async ()
 // ---------- STORAGE LOCATION ----------
 export const fetchStorageLocationItems = createAsyncThunk('storageLocations/fetch', async () => {
   try {
-    const response = await purchaseApi.get<StorageLocationItem[]>('http://192.168.1.100:8000/purchaseapi/storagelocations/', {});
-    
-    console.log('Location API Response:', response.data);
-    
-    const locations = response.data.map((item) => ({ 
+    const response = await purchaseApi.get<StorageLocationItem[]>('/storagelocations/', {});
+
+    const locations = response.data.map((item) => ({
       locationId: item.locationId,
       locationName: item.locationName,
-      randomId:item.randomId,
+      randomId: item.randomId,
       status: item.status
     }));
-    
+
     return locations;
   } catch (error: any) {
     console.error('Error fetching locations:', error);
@@ -226,14 +205,12 @@ export const fetchStorageLocationItems = createAsyncThunk('storageLocations/fetc
 // ---------- GROUP ITEMS ----------
 export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', async () => {
   try {
-    const response = await purchaseApi.get('http://192.168.1.100:8000/purchaseapi/itemgroups/', {});
-    
-    console.log('Group Items API Response:', response.data);
+    const response = await purchaseApi.get('/itemgroups/', {});
 
     const groupitems = response.data.map((item: any) => ({
       itemgroupId: item.itemgroupId,
       itemgroupName: item.itemgroupName,
-      randomId:item.randomId,
+      randomId: item.randomId,
       status: item.status
     }));
 
@@ -246,21 +223,20 @@ export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', asyn
 
 // ---------- VENDORS ----------
 export const fetchAllVendors = createAsyncThunk('vendors/fetch', async () => {
-  const response = await purchaseApi.get<Vendor[]>('http://192.168.1.100:8000/purchaseapi/vendors/');
+  const response = await purchaseApi.get<Vendor[]>('/vendors/');
   const vendorData = response.data.map((item) => ({
     vendorId: item.vendorId,
     vendorName: item.vendorName,
   }));
   return vendorData;
 });
-// Add to purchaseItemSlice.ts
 
 export const fetchSubcategoriesByCategory = createAsyncThunk(
   'purchaseItems/fetchSubcategoriesByCategory',
   async (categoryId: string, { rejectWithValue }) => {
     try {
       const response = await purchaseApi.get(
-        `http://192.168.1.100:8000/purchaseapi/purchasecategory/${categoryId}/subcategories`
+        `/purchasecategory/${categoryId}/subcategories`
       );
       return response.data;
     } catch (error: any) {
@@ -268,23 +244,18 @@ export const fetchSubcategoriesByCategory = createAsyncThunk(
     }
   }
 );
+
 // ---------- ADD ITEM ----------
 export const addPurchaseItem = createAsyncThunk(
   'purchaseItems/add',
   async (purchase: Omit<PurchaseItem, 'purchaseitemId'>, { dispatch, rejectWithValue }) => {
     try {
-      const purchaseToAdd = {
-        ...purchase,
-      };
-
-      console.log('Sending purchase item data:', purchaseToAdd);
+      const purchaseToAdd = { ...purchase };
 
       const response = await purchaseApi.post<PurchaseItem>(
-        'http://192.168.1.100:8000/purchaseapi/rawMaterials/',
+        '/rawMaterials/',
         purchaseToAdd,
       );
-
-      console.log('Add purchase item response:', response.data);
 
       dispatch(invalidatePurchaseItemsCache());
       dispatch(invalidatePOCache());
@@ -312,7 +283,6 @@ export const POsearchPurchaseItems = createAsyncThunk<
   if (cachedData) {
     const { data, timestamp } = JSON.parse(cachedData);
     if (now - timestamp < CACHE_DURATION) {
-      console.log('Using cached purchase items data');
       return data;
     } else {
       localStorage.removeItem(cacheKey);
@@ -320,7 +290,7 @@ export const POsearchPurchaseItems = createAsyncThunk<
   }
 
   const response = await purchaseApi.get<PurchaseItemSearch[]>(
-    `http://192.168.1.100:8000/purchaseapi/rawMaterials/exact-name/`,
+    `/rawMaterials/exact-name/`,
     {
       params: {
         item_name: searchQuery,
@@ -353,53 +323,43 @@ export const invalidatePOCache = createAsyncThunk('purchaseItems/invalidateCache
 // ---------- SEARCH WITH STOCK ----------
 export const searchPurchaseItems = createAsyncThunk<
   PurchaseItemSearchAdd[],
-  { 
-    searchQuery: string; 
-    skip: number; 
-    limit: number; 
+  {
+    searchQuery: string;
+    skip: number;
+    limit: number;
     forceRefresh?: boolean;
     locationId?: string | null;
   }
->('purchaseOrder/searchPurchaseItems', async ({ 
-  searchQuery, 
-  skip, 
-  limit, 
+>('purchaseOrder/searchPurchaseItems', async ({
+  searchQuery,
+  skip,
+  limit,
   forceRefresh = false,
   locationId = null
 }) => {
   try {
-    console.log('🔍 searchPurchaseItems: Fetching fresh data with stock from API', { 
-      searchQuery, 
-      skip, 
-      limit, 
-      locationId 
-    });
-    
-    const params: Record<string, any> = { 
-      itemName: searchQuery, 
-      skip, 
+    const params: Record<string, any> = {
+      itemName: searchQuery,
+      skip,
       limit
     };
-    
+
     if (locationId) {
       params.locationId = locationId;
     }
-    
+
     if (forceRefresh) {
       params._t = Date.now();
     }
-    
+
     const response = await purchaseApi.get<SearchResponse>(
-      `http://192.168.1.100:8000/purchaseapi/rawMaterials/search-with-stock`,
+      `/rawMaterials/search-with-stock`,
       { params }
     );
-    
-    const items = response.data?.items || [];
-    console.log(`✅ searchPurchaseItems: Received ${items.length} items`);
-    
-    return items;
+
+    return response.data?.items || [];
   } catch (error) {
-    console.error('❌ Error fetching purchase items:', error);
+    console.error('Error fetching purchase items:', error);
     return [];
   }
 });
@@ -421,25 +381,18 @@ export const updatePurchaseItem = createAsyncThunk(
   'purchaseItems/update',
   async (purchase: PurchaseItem, { dispatch, rejectWithValue }) => {
     try {
-      const purchaseToUpdate = {
-        ...purchase,
-      };
-      
-      console.log('✏️ Updating purchase item:', purchaseToUpdate);
-      console.log('🆔 Update URL:', `http://192.168.1.100:8000/purchaseapi/rawMaterials/${purchase.purchaseitemId}`);
+      const purchaseToUpdate = { ...purchase };
 
       const response = await purchaseApi.patch<PurchaseItem>(
-        `http://192.168.1.100:8000/purchaseapi/rawMaterials/${purchase.purchaseitemId}`,
+        `/rawMaterials/${purchase.purchaseitemId}`,
         purchaseToUpdate,
       );
-
-      console.log('✅ Update response:', response.data);
 
       dispatch(invalidatePurchaseItemsCache());
       dispatch(invalidatePOCache());
       return response.data;
     } catch (error: any) {
-      console.error('❌ Update error:', error);
+      console.error('Update error:', error);
       return rejectWithValue({
         message: error.response?.data?.detail || 'Failed to update purchase item',
         validationErrors: error.response?.data?.detail,
@@ -452,17 +405,13 @@ export const updatePurchaseItem = createAsyncThunk(
 // ---------- DEACTIVATE ----------
 export const deactivatePurchaseItem = createAsyncThunk('purchaseItems/deactivate', async (id: string, { rejectWithValue }) => {
   try {
-    console.log('🔴 Deactivating item with ID:', id);
-    
-    const response = await purchaseApi.patch<PurchaseItem>(
-      `http://192.168.1.100:8000/purchaseapi/rawMaterials/${id}/deactivate`,
+    await purchaseApi.patch<PurchaseItem>(
+      `/rawMaterials/${id}/deactivate`,
       { status: 'deactivated' },
     );
-
-    console.log('✅ Deactivation API response:', response.data);
     return id;
   } catch (error: any) {
-    console.error('❌ Deactivate error:', error);
+    console.error('Deactivate error:', error);
     return rejectWithValue(error.response?.data?.detail || 'Failed to deactivate purchase item');
   }
 });
@@ -471,7 +420,7 @@ export const deactivatePurchaseItem = createAsyncThunk('purchaseItems/deactivate
 export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', async (id: string, { rejectWithValue }) => {
   try {
     await purchaseApi.patch<PurchaseItem>(
-      `http://192.168.1.100:8000/purchaseapi/rawMaterials/${id}/activate`,
+      `/rawMaterials/${id}/activate`,
       { status: 'active' },
     );
     return id;
@@ -481,64 +430,95 @@ export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', a
   }
 });
 
+// ============================================================
+// BACKUP AND ROLLBACK ACTIONS
+// ============================================================
+
+// Get available backups
+export const fetchBackups = createAsyncThunk(
+  'purchaseItems/fetchBackups',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get('/rawMaterials/backups');
+      return response.data.backups || [];
+    } catch (error: any) {
+      console.error('Error fetching backups:', error);
+      return rejectWithValue(error.response?.data?.detail || error.message || 'Failed to fetch backups');
+    }
+  }
+);
+
+// Rollback to a specific backup
+export const rollbackToBackup = createAsyncThunk(
+  'purchaseItems/rollbackToBackup',
+  async (backupId: string, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.post(`/rawMaterials/rollback?backup_id=${backupId}`);
+
+      // Invalidate caches after rollback
+      dispatch(invalidatePurchaseItemsCache());
+      dispatch(invalidatePOCache());
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Rollback error:', error);
+      return rejectWithValue({
+        message: error.response?.data?.detail || error.message || 'Failed to rollback',
+        status: error.response?.status
+      });
+    }
+  }
+);
+
 // ---------- IMPORT ----------
 export const importPurchaseItems = createAsyncThunk(
   'purchaseItems/import',
-  async ({ file, mode }: ImportPayload, { rejectWithValue }) => {
+  async ({ file, mode }: ImportPayload, { dispatch, rejectWithValue }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('mode', mode);
 
       const response = await purchaseApi.post(
-        'http://192.168.1.100:8000/purchaseapi/rawMaterials/import_csv',
+        '/rawMaterials/import_csv',
         formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
       );
+
+      // Invalidate cache after import
+      dispatch(invalidatePurchaseItemsCache());
+      dispatch(invalidatePOCache());
 
       return response.data as ImportResponse;
     } catch (error: any) {
+      console.error('Import error:', error);
+
       if (error.response) {
-        if (error.response.status === 422) {
-          const detail = error.response.data.detail || {};
-          if (detail.missing?.length > 0) {
-            return rejectWithValue({
-              message: detail.message || 'Validation failed',
-              successful: [],
-              updated: [],
-              failed: [
-                {
-                  row: 0,
-                  data: {},
-                  error: 'Missing required columns in CSV file',
-                  missingFields: detail.missing || [],
-                },
-              ],
-              errorCount: detail.error_count || 0,
-            });
-          } else {
-            return rejectWithValue({
-              message: detail.message || 'Validation failed',
-              successful: detail.successful || [],
-              updated: detail.updated || [],
-              failed: detail.sample_errors || [],
-              errorCount: detail.error_count || 0,
-            });
-          }
-        }
+        const data = error.response.data;
         return rejectWithValue({
-          message: error.response.data.detail?.message || error.response.data.message || 'Import failed',
-          successful: [],
-          updated: [],
-          failed: [],
-          errorCount: 0,
+          message: data.detail?.message || data.message || 'Import failed',
+          inserted_count: data.inserted_count || 0,
+          updated_count: data.updated_count || 0,
+          failed_count: data.failed_count || 0,
+          successful: data.successful || [],
+          updated: data.updated || [],
+          failed: data.failed || [],
+          backup_id: data.backup_id,
+          rollback_available: data.rollback_available,
         });
       }
       return rejectWithValue({
         message: error.message || 'Failed to import purchase items',
+        inserted_count: 0,
+        updated_count: 0,
+        failed_count: 0,
         successful: [],
         updated: [],
         failed: [],
-        errorCount: 0,
       });
     }
   }
@@ -550,7 +530,7 @@ export const exportPurchaseItems = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await purchaseApi.get(
-        'http://192.168.1.100:8000/purchaseapi/rawMaterials/purchaseitemexport/export_csv',
+        '/rawMaterials/purchaseitemexport/export_csv',
         {
           responseType: 'blob',
         }
@@ -559,10 +539,11 @@ export const exportPurchaseItems = createAsyncThunk(
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'purchase_items.csv');
+      link.setAttribute('download', `purchase_items_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       return true;
     } catch (error: any) {
@@ -645,10 +626,22 @@ const purchaseItemSlice = createSlice({
       state.importStatus = 'idle';
       state.importError = null;
       state.importMessage = null;
+      state.importResults = {
+        successful: [],
+        updated: [],
+        failed: []
+      };
     },
     resetExportStatus(state) {
       state.exportStatus = 'idle';
       state.exportError = null;
+    },
+    resetRollbackStatus(state) {
+      state.rollbackStatus = 'idle';
+      state.rollbackError = null;
+    },
+    clearBackups(state) {
+      state.backups = [];
     },
   },
   extraReducers: (builder) => {
@@ -660,14 +653,13 @@ const purchaseItemSlice = createSlice({
       .addCase(fetchPurchaseItems.fulfilled, (state, action) => {
         state.loading = false;
         const { items, totalItems, showDeactivated } = action.payload;
-        
+
         if (showDeactivated) {
           state.deactivatedItems = items;
-          state.totalItems = totalItems;
         } else {
           state.items = items;
-          state.totalItems = totalItems;
         }
+        state.totalItems = totalItems;
         state.error = null;
       })
       .addCase(fetchPurchaseItems.rejected, (state, action) => {
@@ -703,7 +695,7 @@ const purchaseItemSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch UOMs';
       })
 
-      // TAX (Master Admin)
+      // TAX
       .addCase(fetchTax.pending, (state) => {
         state.loading = true;
       })
@@ -779,13 +771,13 @@ const purchaseItemSlice = createSlice({
       })
       .addCase(addPurchaseItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.items.push(action.payload);
+        state.items.unshift(action.payload);
         state.successMessage = 'Purchase item created successfully.';
         state.error = null;
       })
       .addCase(addPurchaseItem.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to add purchase item';
+        state.error = (action.payload as any)?.message || 'Failed to add purchase item';
       })
 
       // UPDATE
@@ -803,55 +795,115 @@ const purchaseItemSlice = createSlice({
       })
       .addCase(updatePurchaseItem.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to update purchase item';
+        state.error = (action.payload as any)?.message || 'Failed to update purchase item';
       })
 
       // DEACTIVATE
       .addCase(deactivatePurchaseItem.fulfilled, (state, action) => {
-        state.loading = false;
         const itemToDeactivate = state.items.find(item => item.purchaseitemId === action.payload);
         if (itemToDeactivate) {
           const deactivatedItem = { ...itemToDeactivate, status: 'deactivated' };
           state.items = state.items.filter(item => item.purchaseitemId !== action.payload);
-          state.deactivatedItems.push(deactivatedItem);
+          state.deactivatedItems.unshift(deactivatedItem);
         }
         state.successMessage = 'Purchase item deactivated successfully.';
-        state.error = null;
+      })
+      .addCase(deactivatePurchaseItem.rejected, (state, action) => {
+        state.error = (action.payload as string) || 'Failed to deactivate purchase item';
       })
 
       // ACTIVATE
       .addCase(activatePurchaseItem.fulfilled, (state, action) => {
-        state.loading = false;
         const itemToActivate = state.deactivatedItems.find(item => item.purchaseitemId === action.payload);
         if (itemToActivate) {
           const activatedItem = { ...itemToActivate, status: 'active' };
           state.deactivatedItems = state.deactivatedItems.filter(item => item.purchaseitemId !== action.payload);
-          state.items.push(activatedItem);
+          state.items.unshift(activatedItem);
         }
         state.successMessage = 'Purchase item activated successfully.';
-        state.error = null;
       })
+      .addCase(activatePurchaseItem.rejected, (state, action) => {
+        state.error = (action.payload as string) || 'Failed to activate purchase item';
+      })
+.addCase(importPurchaseItems.fulfilled, (state, action: PayloadAction<ImportResponse>) => {
+  state.importStatus = 'succeeded';
+  state.importMessage = action.payload.message;
+  state.importError = null;
 
-      // IMPORT
-      .addCase(importPurchaseItems.pending, (state) => {
-        state.importStatus = 'loading';
-        state.importError = null;
-        state.importMessage = null;
-      })
-      .addCase(importPurchaseItems.fulfilled, (state, action: PayloadAction<ImportResponse>) => {
-        state.importStatus = 'succeeded';
-        state.importMessage = action.payload.message;
-        state.importResults = {
-          successful: action.payload.successful || [],
-          updated: action.payload.updated || [],
-          failed: action.payload.failed || [],
-        };
-      })
-      .addCase(importPurchaseItems.rejected, (state, action) => {
-        state.importStatus = 'failed';
-        state.importError = action.error.message || 'Failed to import purchase items';
-      })
+  // The API returns successful with proper fields
+  const transformedSuccessful = (action.payload.successful || []).map((item: any) => ({
+    row: item.row,
+    data: {
+      itemName: item.itemName || '',
+      randomId: item.randomId || '',
+      barcode: item.barcode || 0,
+      ...(item.brandName && { brandName: item.brandName }),
+      ...(item.aliasName && { aliasName: item.aliasName }),
+      ...(item.shelfLife && { shelfLife: String(item.shelfLife) })
+    }
+  }));
 
+  const transformedUpdated = (action.payload.updated || []).map((item: any) => ({
+    row: item.row,
+    data: { itemName: item.itemName || '' },
+    error: item.error
+  }));
+
+  const transformedFailed = (action.payload.failed || []).map((item: any) => ({
+    row: item.row,
+    data: item.data || {},
+    error: item.error,
+    missingFields: item.missingFields || []
+  }));
+
+  state.importResults = {
+    successful: transformedSuccessful,
+    updated: transformedUpdated,
+    failed: transformedFailed
+  };
+
+  // DON'T set snackbar message here - we'll use dialog only
+  // state.snackbarMessage = `Imported ${action.payload.inserted_count || 0} items, updated ${action.payload.updated_count || 0}`;
+  // state.snackbarOpen = true;
+})
+
+.addCase(importPurchaseItems.rejected, (state, action) => {
+  state.importStatus = 'failed';
+  const payload = action.payload as any;
+  state.importError = payload?.message || 'Failed to import purchase items';
+  
+  // Store the import results even on failure
+  if (payload?.successful) {
+    state.importResults.successful = payload.successful.map((item: any) => ({
+      row: item.row,
+      data: {
+        itemName: item.itemName || '',
+        randomId: item.randomId || '',
+        barcode: item.barcode || 0,
+        ...(item.brandName && { brandName: item.brandName }),
+        ...(item.aliasName && { aliasName: item.aliasName }),
+        ...(item.shelfLife && { shelfLife: String(item.shelfLife) })
+      }
+    }));
+  }
+  
+  if (payload?.updated) {
+    state.importResults.updated = payload.updated.map((item: any) => ({
+      row: item.row,
+      data: { itemName: item.itemName || '' },
+      error: item.error
+    }));
+  }
+  
+  if (payload?.failed) {
+    state.importResults.failed = payload.failed.map((item: any) => ({
+      row: item.row,
+      data: item.data || {},
+      error: item.error,
+      missingFields: item.missingFields || []
+    }));
+  }
+})
       // EXPORT
       .addCase(exportPurchaseItems.pending, (state) => {
         state.exportStatus = 'loading';
@@ -863,16 +915,46 @@ const purchaseItemSlice = createSlice({
       .addCase(exportPurchaseItems.rejected, (state, action) => {
         state.exportStatus = 'failed';
         state.exportError = action.error.message || 'Failed to export purchase items';
-      });
+      })
+
+      // FETCH BACKUPS
+      .addCase(fetchBackups.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchBackups.fulfilled, (state, action) => {
+        state.loading = false;
+        state.backups = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchBackups.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch backups';
+      })
+
+      // ROLLBACK
+      .addCase(rollbackToBackup.pending, (state) => {
+        state.rollbackStatus = 'loading';
+        state.rollbackError = null;
+      })
+    // Update rollback.fulfilled case
+.addCase(rollbackToBackup.fulfilled, (state, action) => {
+  state.rollbackStatus = 'succeeded';
+  state.rollbackError = null;
+  // DON'T set snackbar message - dialog will show success
+  // state.snackbarMessage = action.payload.message || 'Rollback completed successfully';
+  // state.snackbarOpen = true;
+  state.loading = false;
+})
+
+.addCase(rollbackToBackup.rejected, (state, action) => {
+  state.rollbackStatus = 'failed';
+  state.rollbackError = (action.payload as any)?.message || 'Failed to rollback';
+  // DON'T set snackbar message - dialog will show error
+  // state.snackbarMessage = (action.payload as any)?.message || 'Rollback failed';
+  // state.snackbarOpen = true;
+});
   },
 });
-
-// ---------- HELPERS ----------
-const containsSearchQuery = (item: PurchaseItem, searchQuery: string) => {
-  const query = searchQuery.toLowerCase().trim();
-  const itemName = item.itemName ? item.itemName.toLowerCase() : '';
-  return itemName.includes(query);
-};
 
 // ---------- EXPORTS ----------
 export const {
@@ -896,12 +978,15 @@ export const {
   clearFilters,
   resetExportStatus,
   resetImportStatus,
+  resetRollbackStatus,
+  clearBackups,
 } = purchaseItemSlice.actions;
 
 export const selectCurrentPage = (state: RootState) => state.purchaseItems.currentPage;
 export const selectPageSize = (state: RootState) => state.purchaseItems.pageSize;
-export const 
-selectTotalItems = (state: RootState) => state.purchaseItems.totalItems;
+export const selectTotalItems = (state: RootState) => state.purchaseItems.totalItems;
 export const selectPurchaseItems = (state: RootState) => state.purchaseItems;
+export const selectBackups = (state: RootState) => state.purchaseItems.backups;
+export const selectRollbackStatus = (state: RootState) => state.purchaseItems.rollbackStatus;
 
 export default purchaseItemSlice.reducer;

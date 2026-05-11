@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '@/redux/store';
 
-const BASE_URL = 'http://192.168.1.100:8000/purchaseapi'; // Adjust as needed for local testing
+const BASE_URL = 'http://192.168.1.102:8000/purchaseapi'; // Adjust as needed for local testing
 
 // ============================================
 // INTERFACES

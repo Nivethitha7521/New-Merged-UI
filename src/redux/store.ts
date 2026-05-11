@@ -41,6 +41,7 @@ import purchaseMasterItemReducer from '../features/yen-purchase/purchaseMasterSl
 import PurchaseCategoryReducer  from '../features/yen-purchase/PurchaseMaster/PurchaseCategorySlice';
 import purchaseSubcategoryReducer from '../features/yen-purchase/PurchaseMaster/PurchaseSubcategorySlice'; // Adjust import path
 import groupMasterReducer from '../features/yen-purchase/PurchaseMaster/GroupMasterSlice';
+import brandReducer from '../app/yen-purchase/PurchaseMaster/Brands/Features/BrandSlice';
 import VendorTypeReducer from '../features/yen-purchase/PurchaseMaster/VendorTypeSlice';
 import PurchaseUomReducer from '../features/yen-purchase/PurchaseMaster/PurchaseUomSlice'
 import purchaseTaxReducer from '../features/yen-purchase/PurchaseMaster/purchaseTaxSlice';
@@ -163,6 +164,7 @@ const store = configureStore({
     purchaseSubcategory: purchaseSubcategoryReducer,
     purchaseCategory:PurchaseCategoryReducer,
     groupItems: groupMasterReducer,
+    brand:brandReducer,
     vendorType:VendorTypeReducer,
     purchaseUom:PurchaseUomReducer,
     purchaseTax:purchaseTaxReducer,

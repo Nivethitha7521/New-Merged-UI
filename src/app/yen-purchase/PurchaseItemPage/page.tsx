@@ -43,43 +43,58 @@ import {
   setPagination,
   setFilters,
   clearFilters,
-  exportPurchaseItemsToCSV,
-  importPurchaseItems,
   exportPurchaseItems,
+  importPurchaseItems,
+  rollbackToBackup,
+  fetchBackups,
+  selectRollbackStatus,
 } from '../../../features/yen-purchase/PurchaseMaster/purchaseItemSlice';
 import { fetchCategoriesItem } from '../../../features/yen-purchase/PurchaseMaster/PurchaseCategorySlice';
+import { fetchBrands, selectBrands } from '../../yen-purchase/PurchaseMaster/Brands/Features/BrandSlice';
 import * as yup from 'yup';
 import YenPurchasePage from '../page';
 import PurchasePagination from '../../../components/yen-purchase/purchaseitem/purchaseItempagination';
 import PurchaseTable from '../../../components/yen-purchase/purchaseitem/purchaseitemTable';
 import PurchaseItemForm from '../../../components/yen-purchase/purchaseitem/purchaseitemForm';
-import { exportCsv } from '@/utilities/csvUtils';
 import ImportErrorDialog from '../../../components/yen-purchase/purchaseitem/importErrorDialog';
 import PurchaseControls from '@/components/yen-purchase/purchaseitem/purchaseitemControlers';
 import { ImportResponse, PurchaseItem } from '@/Models/purchaseitem';
 import { usePermissions } from '@/hooks/usePermissions';
 
 const validationSchema = yup.object({
-  itemName: yup.string().required('Item Name is required'),
+  itemName: yup.string()
+    .required('Item Name is required')
+    .max(100, 'Item name cannot exceed 100 characters'),
+  aliasName: yup.string().optional().max(50, 'Alias name cannot exceed 50 characters'),
+  brandName: yup.string().optional(),
   purchasecategoryName: yup.string().required('Category is required'),
-  itemgroupName: yup.string().required('Item Group is required'),
+  purchasesubcategoryName: yup.string()
+    .required('Subcategory is required')
+    .test('no-duplicate-sub', 'Subcategory already exists in this category', function (value) {
+      return true;
+    }),
+  itemgroupName: yup.string().optional(),
   purchasePrice: yup
     .number()
     .typeError('Purchase price must be a number')
     .required('Purchase price is required')
     .moreThan(0, 'Purchase price must be greater than 0'),
   uom: yup.string().required('UOM is required'),
+  itemType: yup.string().required('Item type required'),
   taxPercentage: yup.number().typeError('Tax is required').required('Tax is required'),
-  purchasesubcategoryName: yup.string().required('Subcategory is required'),
   sellingPrice: yup.number().when('saleType', {
     is: true,
     then: (schema) => schema.required('Selling price is required when Sale Type is true').min(0, 'Selling price must be greater than or equal to 0'),
     otherwise: (schema) => schema.notRequired().nullable()
   }),
 });
+
 const initialPurchaseState: PurchaseItem = {
   purchaseitemId: '',
   itemName: '',
+  aliasName: '',
+  brandId: '',
+  brandName: '',
   randomId: '',
   purchasecategoryId: '',
   purchasesubcategoryId: '',
@@ -94,8 +109,8 @@ const initialPurchaseState: PurchaseItem = {
   sellingPrice: 0,
   saleType: false,
   reorderLevel: 0,
-  hsnCode: '',
-  shelfLife: '',
+  hsnCode: 0,
+  shelfLife: 0,
   vendorTag: [],
   barcode: 0,
   description: '',
@@ -110,6 +125,9 @@ const initialPurchaseState: PurchaseItem = {
   taxName: '',
   itemType: '',
   locationName: '',
+  includeTax: false,
+  excludeTax: true,
+  finalPrice: 0,
 };
 
 const PurchasePage: React.FC = () => {
@@ -145,6 +163,11 @@ const PurchasePage: React.FC = () => {
   const { canAdd, canEdit, canDelete, moduleVisible } = permissionState;
 
   const purchaseItemsState = useSelector(selectPurchaseItems);
+  const { items: brands } = useSelector(selectBrands);
+  const rollbackStatus = useSelector(selectRollbackStatus);
+  // ADD THIS LINE - Import loading state
+  const [importLoading, setImportLoading] = useState(false);
+
 
   const {
     items,
@@ -172,8 +195,6 @@ const PurchasePage: React.FC = () => {
   const currentPage = useSelector(selectCurrentPage);
   const pageSize = useSelector(selectPageSize);
   const totalItems = useSelector(selectTotalItems);
-  const newPage = useSelector(selectCurrentPage);
-
   const [importResults, setImportResults] = useState<{
     successful: Array<{ row: number; data: Record<string, string> }>;
     updated: Array<{ row: number; data: Record<string, string>; error?: string }>;
@@ -183,13 +204,14 @@ const PurchasePage: React.FC = () => {
     updated: [],
     failed: [],
   });
-
+  const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
   const [itemName, setItemName] = useState('');
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [exportStatus, setExportStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
 
+  // Build subcategories list
   useEffect(() => {
     const allSubcategories: any[] = [];
 
@@ -217,6 +239,7 @@ const PurchasePage: React.FC = () => {
     console.log('✅ Subcategories with IDs:', allSubcategories);
   }, [categories]);
 
+  // Fetch initial data
   useEffect(() => {
     if (!moduleVisible) return;
 
@@ -227,8 +250,10 @@ const PurchasePage: React.FC = () => {
     dispatch(fetchCategoriesItem());
     dispatch(fetchPurchaseItemtype());
     dispatch(fetchAllVendors());
+    dispatch(fetchBrands(false));
   }, [dispatch, moduleVisible]);
 
+  // Fetch purchase items
   useEffect(() => {
     if (!moduleVisible) return;
 
@@ -240,18 +265,9 @@ const PurchasePage: React.FC = () => {
         ...filters,
       })
     );
-  }, [dispatch, currentPage, pageSize, showDeactivated, moduleVisible]);
+  }, [dispatch, currentPage, pageSize, showDeactivated, moduleVisible, filters]);
 
-  useEffect(() => {
-    console.log('🔍 Categories loaded:', categories);
-    categories.forEach(cat => {
-      console.log(`📂 Category: ${cat.purchasecategoryName}`);
-      console.log(`   Subcategories:`, cat.subcategories);
-    });
-    
-    console.log('🔍 Subcategories List built:', subcategoriesList);
-  }, [categories, subcategoriesList]);
-
+  // Filter handlers
   useEffect(() => {
     if (filters.itemName !== itemName) {
       setItemName(filters.itemName || '');
@@ -334,14 +350,18 @@ const PurchasePage: React.FC = () => {
       const categoryDisplay = categories.find((c: any) => c.purchasecategoryId === itemToEdit.purchasecategoryId || c.randomId === itemToEdit.purchasecategoryId);
       const itemGroupDisplay = groupitems.find((g: any) => g.itemgroupId === itemToEdit.itemgroupId);
       const locationDisplay = locations.find((l: any) => l.locationId === itemToEdit.locationId);
-      
+
+      const brand = brands.find((b: any) =>
+        b.brandId === itemToEdit.brandId || b.randomId === itemToEdit.brandId
+      );
+
       let subcategoryDisplay = '';
       let subcategoryId = itemToEdit.purchasesubcategoryId || '';
-      
+
       for (const category of categories) {
         const subcategories = category.subcategories || [];
-        const foundSub = subcategories.find((sub: any) => 
-          sub.randomId === subcategoryId || 
+        const foundSub = subcategories.find((sub: any) =>
+          sub.randomId === subcategoryId ||
           sub.purchasesubcategoryId === subcategoryId ||
           sub.id === subcategoryId
         );
@@ -363,6 +383,10 @@ const PurchasePage: React.FC = () => {
         purchasesubcategoryId: subcategoryId,
         saleType: itemToEdit.saleType || false,
         sellingPrice: itemToEdit.sellingPrice || 0,
+        brandName: brand?.brandName || '',
+        brandId: itemToEdit.brandId || '',
+        hsnCode: itemToEdit.hsnCode ?? 0,  // Use nullish coalescing
+        shelfLife: itemToEdit.shelfLife ?? 0,  // Use nullish coalescing
       };
 
       dispatch(setItemData(editValues as PurchaseItem));
@@ -387,14 +411,11 @@ const PurchasePage: React.FC = () => {
   const handleConfirmDeactivate = async () => {
     try {
       if (itemToDeactivate) {
-        console.log('🔴 Starting deactivation process...');
         await dispatch(deactivatePurchaseItem(itemToDeactivate.purchaseitemId)).unwrap();
-
         dispatch(setSnackbarMessage('Purchase item deactivated successfully'));
         dispatch(setSnackbarOpen(true));
         dispatch(setDeactivateDialogOpen(false));
-
-        dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize }));
+        dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize, showDeactivated: showDeactivated, ...filters }));
       }
     } catch (error: any) {
       console.error('❌ Deactivation error:', error);
@@ -410,64 +431,139 @@ const PurchasePage: React.FC = () => {
         dispatch(setSnackbarMessage('Purchase item activated successfully'));
         dispatch(setSnackbarOpen(true));
         dispatch(setActivateDialogOpen(false));
+        dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize, showDeactivated: showDeactivated, ...filters }));
       }
     } catch (error: any) {
       dispatch(setSnackbarMessage(`Failed to activate purchase item: ${error.message}`));
       dispatch(setSnackbarOpen(true));
     }
   };
+const handleImportCSV = async (file: File, mode: 'merge' | 'replace') => {
+  setImportLoading(true);
+  setImportMode(mode);
 
-  const handleImportCSV = async (file: File, mode: 'merge' | 'replace' | 'rollback') => {
-    try {
-      const resultAction = await dispatch(importPurchaseItems({ file, mode }));
+  try {
+    const resultAction = await dispatch(importPurchaseItems({ file, mode }));
 
-      if (importPurchaseItems.fulfilled.match(resultAction)) {
-        const result = resultAction.payload as ImportResponse;
-        setImportResults({
-          successful: result.successful || [],
-          updated: result.updated || [],
-          failed: result.failed || [],
-        });
-        setErrorDialogOpen(true);
-        dispatch(
-          setSnackbarMessage(
-            `Imported ${result.inserted_count || 0} items, updated ${result.updated_count || 0}`
-          )
-        );
-        dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize }));
-      } else if (importPurchaseItems.rejected.match(resultAction)) {
-        const errorPayload = resultAction.payload as any;
-        const importResults = {
-          successful: errorPayload?.successful || [],
-          updated: errorPayload?.updated || [],
-          failed: errorPayload?.failed || [],
-        };
+    if (importPurchaseItems.fulfilled.match(resultAction)) {
+      const result = resultAction.payload;
 
-        if (errorPayload?.detail?.missing?.length > 0) {
-          importResults.failed = [
-            {
-              row: 0,
-              data: {},
-              error: 'Missing required columns in CSV file',
-              missingFields: errorPayload.detail.missing,
-            },
-          ];
+      // Transform the results to match ImportErrorDialog format
+      const transformedSuccessful = (result.successful || []).map((item: any) => ({
+        row: item.row,
+        data: {
+          itemName: item.itemName || '',
+          randomId: item.randomId || '',
+          barcode: item.barcode || 0,
+          ...(item.brandName && { brandName: item.brandName }),
+          ...(item.aliasName && { aliasName: item.aliasName }),
         }
+      }));
 
-        setImportResults(importResults);
-        setErrorDialogOpen(true);
-        dispatch(
-          setSnackbarMessage(
-            errorPayload?.message || 'Import failed. Please check your file and try again.'
-          )
-        );
-      }
-    } catch (error: any) {
-      dispatch(
-        setSnackbarMessage(`Import error: ${error.message || 'Unknown error occurred'}`)
-      );
-    } finally {
+      const transformedUpdated = (result.updated || []).map((item: any) => ({
+        row: item.row,
+        data: {
+          itemName: item.itemName || '',
+          randomId: item.randomId || ''
+        },
+        error: item.error
+      }));
+
+      const transformedFailed = (result.failed || []).map((item: any) => ({
+        row: item.row,
+        data: item.data || {},
+        error: item.error,
+        missingFields: item.missingFields || []
+      }));
+
+      setImportResults({
+        successful: transformedSuccessful,
+        updated: transformedUpdated,
+        failed: transformedFailed
+      });
+
+      // Refresh the list after successful import
+      await dispatch(fetchPurchaseItems({
+        page: currentPage,
+        size: pageSize,
+        showDeactivated: showDeactivated,
+        ...filters
+      }));
+
+    } else if (importPurchaseItems.rejected.match(resultAction)) {
+      const errorPayload = resultAction.payload as any;
+
+      const transformedFailed = (errorPayload?.failed || []).map((item: any) => ({
+        row: item.row,
+        data: item.data || {},
+        error: item.error,
+        missingFields: item.missingFields || []
+      }));
+
+      setImportResults({
+        successful: errorPayload?.successful || [],
+        updated: errorPayload?.updated || [],
+        failed: transformedFailed.length > 0 ? transformedFailed : [{
+          row: 0,
+          data: {},
+          error: errorPayload?.message || 'Import failed',
+          missingFields: []
+        }]
+      });
+    }
+  } catch (error: any) {
+    console.error('Import error:', error);
+    setImportResults({
+      successful: [],
+      updated: [],
+      failed: [{
+        row: 0,
+        data: {},
+        error: error.message || 'Import failed',
+        missingFields: []
+      }]
+    });
+  } finally {
+    setImportLoading(false);
+    setErrorDialogOpen(true); // Open the dialog to show results
+  }
+};
+
+  // Add this function to refresh data after import/rollback
+  const refreshData = () => {
+    dispatch(fetchPurchaseItems({
+      page: currentPage,
+      size: pageSize,
+      showDeactivated: showDeactivated,
+      ...filters
+    }));
+  };
+
+  const handleRollback = async (backupId: string) => {
+    try {
+      await dispatch(rollbackToBackup(backupId)).unwrap();
+      dispatch(setSnackbarMessage('Rollback completed successfully'));
       dispatch(setSnackbarOpen(true));
+      dispatch(fetchPurchaseItems({
+        page: currentPage,
+        size: pageSize,
+        showDeactivated: showDeactivated,
+        ...filters
+      }));
+    } catch (error: any) {
+      console.error('Rollback error:', error);
+      dispatch(setSnackbarMessage(error.message || 'Rollback failed'));
+      dispatch(setSnackbarOpen(true));
+    }
+  };
+
+  const handleFetchBackups = async () => {
+    try {
+      const result = await dispatch(fetchBackups()).unwrap();
+      return result;
+    } catch (error) {
+      console.error('Error fetching backups:', error);
+      return [];
     }
   };
 
@@ -487,331 +583,302 @@ const PurchasePage: React.FC = () => {
       });
   };
 
-const handleDownloadSampleCSV = () => {
-  // Match backend HEADER_MAPPING as closely as possible
-  const sampleHeaders = [
-    "Item Name",           // Required
-    "Item Code",
-    "Category",            // purchasecategoryName
-    "Subcategory",         // purchasesubcategoryName
-    "Item Group",          // itemgroupName - Required
-    "UOM",                 // Required
-    "Stock Quantity",
-    "Supplier",
-    "Purchase Price",      // Required
-    "Selling Price",
-    "Sale Type",           // Yes/No or true/false
-    "Tax Rate",            // Most reliable column name (backend supports many variants)
-    "Reorder Level",
-    "Item Type",
-    "HSN Code",
-    "Shelf Life",
-    "Vendor Tags",
-    "Location",            // locationName
-    "Barcode",
-    "Description"
-  ];
+  const handleDownloadSampleCSV = () => {
+    const sampleHeaders = [
+      "Item Name",
+      "Alias Name",
+      "Brand Name",
+      "Item Code",
+      "Category",
+      "Subcategory",
+      "Item Group",
+      "UOM",
+      "Stock Quantity",
+      "Supplier",
+      "Purchase Price",
+      "Selling Price",
+      "Sale Type",
+      "Tax Rate",
+      "Reorder Level",
+      "Item Type",
+      "HSN Code",
+      "Shelf Life",
+      "Vendor Tags",
+      "Location",
+      "Barcode",
+      "Description"
+    ];
 
-  const sampleData = [
-    {
-      "Item Name": "Sample Raw Material",
-      "Item Code": "RM001",
-      "Category": "Raw Materials",
-      "Subcategory": "Chemicals",
-      "Item Group": "Raw Materials",
-      "UOM": "KG",
-      "Stock Quantity": "100.00",
-      "Supplier": "ABC Suppliers",
-      "Purchase Price": "125.50",
-      "Selling Price": "",
-      "Sale Type": "No",
-      "Tax Rate": "18",
-      "Reorder Level": "20",
-      "Item Type": "Raw Material",
-      "HSN Code": "29151200",
-      "Shelf Life": "24 months",
-      "Vendor Tags": "SupplierA,SupplierB",
-      "Location": "Main Warehouse",
-      "Description": "High quality raw material sample"
-    },
-    {
-      "Item Name": "Sample Finished Good",
-      "Item Code": "FG001",
-      "Category": "Finished Goods",
-      "Subcategory": "Packaged",
-      "Item Group": "Finished Goods",
-      "UOM": "PCS",
-      "Stock Quantity": "50",
-      "Supplier": "XYZ Manufacturers",
-      "Purchase Price": "450.00",
-      "Selling Price": "599.00",
-      "Sale Type": "Yes",
-      "Tax Rate": "12",
-      "Reorder Level": "10",
-      "Item Type": "Finished Good",
-      "HSN Code": "21069099",
-      "Shelf Life": "12 months",
-      "Vendor Tags": "VendorX",
-      "Location": "FG Store",
-      "Description": "Premium finished product"
-    }
-  ];
+    const sampleData = [
+      {
+        "Item Name": "Sample Raw Material",
+        "Alias Name": "RM-ALT-001",
+        "Brand Name": "KILI",
+        "Item Code": "RM001",
+        "Category": "Raw Materials",
+        "Subcategory": "Chemicals",
+        "Item Group": "",
+        "UOM": "KG",
+        "Stock Quantity": "100.00",
+        "Supplier": "ABC Suppliers",
+        "Purchase Price": "125.50",
+        "Selling Price": "",
+        "Sale Type": "No",
+        "Tax Rate": "18",
+        "Reorder Level": "20",
+        "Item Type": "Raw Material",
+        "HSN Code": "29151200",
+        "Shelf Life": "24 months",
+        "Vendor Tags": "SupplierA,SupplierB",
+        "Location": "Main Warehouse",
+        "Barcode": "",
+        "Description": "High quality raw material sample"
+      }
+    ];
 
-  // Create CSV content
-  let csvContent = sampleHeaders.join(',') + '\n';
+    let csvContent = sampleHeaders.join(',') + '\n';
 
-  sampleData.forEach(row => {
-    const values = sampleHeaders.map(header => {
-      const value = row[header as keyof typeof row] ?? '';
-      // Escape commas and quotes
-      const escaped = String(value).replace(/"/g, '""');
-      return `"${escaped}"`;
+    sampleData.forEach(row => {
+      const values = sampleHeaders.map(header => {
+        const value = row[header as keyof typeof row] ?? '';
+        const escaped = String(value).replace(/"/g, '""');
+        return `"${escaped}"`;
+      });
+      csvContent += values.join(',') + '\n';
     });
-    csvContent += values.join(',') + '\n';
-  });
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'sample_purchase_items.csv';
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-const handleSubmit = async (values: any) => {
-  try {
-    console.log('🔄 Submitting form data:', values);
-    console.log('📋 Available subcategories with IDs:', subcategoriesList);
-    
-    const getRandomId = (item: any) => {
-      if (!item) return '';
-      return item.randomId || item.uomId || item.taxId || item.itemgroupId || item.locationId;
-    };
-    
-    // Create lookup maps
-    const itemTypeMap = new Map();
-    itemtypes.forEach((t: any) => {
-      itemTypeMap.set(t.itemtypeName, t);
-    });
-    
-    const uomMap = new Map();
-    uoms.forEach((u: any) => {
-      uomMap.set(u.uom, u);
-    });
-    
-    const taxMap = new Map();
-    taxes.forEach((t: any) => {
-      taxMap.set(t.taxPercentage, t);
-      taxMap.set(String(t.taxPercentage), t);
-    });
-    
-    const categoryMap = new Map();
-    categories.forEach((c: any) => {
-      categoryMap.set(c.purchasecategoryName, c);
-    });
-    
-    const itemGroupMap = new Map();
-    groupitems.forEach((g: any) => {
-      itemGroupMap.set(g.itemgroupName, g);
-    });
-    
-    const locationMap = new Map();
-    locations.forEach((l: any) => {
-      locationMap.set(l.locationName, l);
-    });
-    
-    // Get subcategory ID
-    const selectedSubcategoryName = values.purchasesubcategoryName;
-    let selectedSubcategoryId = '';
-    
-    if (selectedSubcategoryName) {
-      const foundSubcategory = subcategoriesList.find(
-        (sub: any) => sub.name === selectedSubcategoryName || sub.purchasesubcategoryName === selectedSubcategoryName
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'sample_purchase_items.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSubmit = async (values: any) => {
+    try {
+      console.log('🔄 Submitting form data:', values);
+      console.log('📋 Available subcategories with IDs:', subcategoriesList);
+
+      const getRandomId = (item: any) => {
+        if (!item) return '';
+        return item.randomId || item.uomId || item.taxId || item.itemgroupId || item.locationId;
+      };
+
+      const itemTypeMap = new Map();
+      itemtypes.forEach((t: any) => {
+        itemTypeMap.set(t.itemtypeName, t);
+      });
+
+      const uomMap = new Map();
+      uoms.forEach((u: any) => {
+        uomMap.set(u.uom, u);
+      });
+
+      const taxMap = new Map();
+      taxes.forEach((t: any) => {
+        taxMap.set(t.taxPercentage, t);
+        taxMap.set(String(t.taxPercentage), t);
+      });
+
+      const categoryMap = new Map();
+      categories.forEach((c: any) => {
+        categoryMap.set(c.purchasecategoryName, c);
+      });
+
+      const itemGroupMap = new Map();
+      groupitems.forEach((g: any) => {
+        itemGroupMap.set(g.itemgroupName, g);
+      });
+
+      const locationMap = new Map();
+      locations.forEach((l: any) => {
+        locationMap.set(l.locationName, l);
+      });
+
+      const selectedBrand = brands.find((b: any) =>
+        b.brandName === values.brandName ||
+        (b.name === values.brandName)
       );
-      
-      if (foundSubcategory) {
-        selectedSubcategoryId = foundSubcategory.id || foundSubcategory.randomId;
-        console.log('✅ Found subcategory ID:', selectedSubcategoryId, 'for name:', selectedSubcategoryName);
-      } else {
-        console.error('❌ Subcategory not found in list:', selectedSubcategoryName);
-        console.log('Available subcategories:', subcategoriesList);
-        dispatch(setSnackbarMessage(`Subcategory "${selectedSubcategoryName}" not found`));
+      const brandId = selectedBrand?.brandId;
+
+      const selectedSubcategoryName = values.purchasesubcategoryName;
+      let selectedSubcategoryId = '';
+
+      if (selectedSubcategoryName) {
+        const foundSubcategory = subcategoriesList.find(
+          (sub: any) => sub.name === selectedSubcategoryName || sub.purchasesubcategoryName === selectedSubcategoryName
+        );
+
+        if (foundSubcategory) {
+          selectedSubcategoryId = foundSubcategory.id || foundSubcategory.randomId;
+          console.log('✅ Found subcategory ID:', selectedSubcategoryId, 'for name:', selectedSubcategoryName);
+        } else {
+          console.error('❌ Subcategory not found in list:', selectedSubcategoryName);
+          dispatch(setSnackbarMessage(`Subcategory "${selectedSubcategoryName}" not found`));
+          dispatch(setSnackbarOpen(true));
+          return;
+        }
+      }
+
+      const selectedTax = taxMap.get(values.taxPercentage);
+      const selectedItemType = itemTypeMap.get(values.itemType);
+      const selectedUOM = uomMap.get(values.uom);
+      const selectedCategory = categoryMap.get(values.purchasecategoryName);
+      const selectedItemGroup = itemGroupMap.get(values.itemgroupName);
+      const selectedLocation = locationMap.get(values.locationName);
+
+      if (!selectedTax) {
+        dispatch(setSnackbarMessage(`Tax rate "${values.taxPercentage}%" not found`));
         dispatch(setSnackbarOpen(true));
         return;
       }
-    }
-    
-    // Get selected objects from maps
-    const selectedTax = taxMap.get(values.taxPercentage);
-    const selectedItemType = itemTypeMap.get(values.itemType);
-    const selectedUOM = uomMap.get(values.uom);
-    const selectedCategory = categoryMap.get(values.purchasecategoryName);
-    const selectedItemGroup = itemGroupMap.get(values.itemgroupName);
-    const selectedLocation = locationMap.get(values.locationName);
-    
-    // Validate all required selections
-    if (!selectedTax) {
-      dispatch(setSnackbarMessage(`Tax rate "${values.taxPercentage}%" not found`));
+
+      if (!selectedItemType) {
+        dispatch(setSnackbarMessage(`Item Type "${values.itemType}" not found`));
+        dispatch(setSnackbarOpen(true));
+        return;
+      }
+
+      if (!selectedUOM) {
+        dispatch(setSnackbarMessage(`UOM "${values.uom}" not found`));
+        dispatch(setSnackbarOpen(true));
+        return;
+      }
+
+      if (!selectedCategory) {
+        dispatch(setSnackbarMessage(`Category "${values.purchasecategoryName}" not found`));
+        dispatch(setSnackbarOpen(true));
+        return;
+      }
+
+      if (!selectedLocation) {
+        dispatch(setSnackbarMessage(`Location "${values.locationName}" not found`));
+        dispatch(setSnackbarOpen(true));
+        return;
+      }
+
+      const categorySubcategories = selectedCategory.subcategories || [];
+      const isSubcategoryValid = categorySubcategories.some(
+        (sub: any) => (sub.randomId === selectedSubcategoryId) || (sub.purchasesubcategoryName === selectedSubcategoryName)
+      );
+
+      if (!isSubcategoryValid && selectedSubcategoryId) {
+        console.warn('⚠️ Subcategory does not belong to selected category!');
+        dispatch(setSnackbarMessage(`"${selectedSubcategoryName}" does not belong to category "${values.purchasecategoryName}"`));
+        dispatch(setSnackbarOpen(true));
+        return;
+      }
+
+      const isSaleTypeValue = values.saleType || false;
+      if (isSaleTypeValue && (!values.sellingPrice || values.sellingPrice <= 0)) {
+        dispatch(setSnackbarMessage('Selling price is required and must be greater than 0 when Sale Type is enabled'));
+        dispatch(setSnackbarOpen(true));
+        return;
+      }
+
+      let dataToSend: any;
+
+      if (editIndex !== null) {
+        const itemToEdit = items[editIndex];
+        dataToSend = {
+          purchaseitemId: itemToEdit.purchaseitemId,
+          itemName: values.itemName.trim(),
+          aliasName: values.aliasName?.trim() || '',
+          brandId: brandId,
+          itemCode: values.itemCode || '',
+          itemTypeId: getRandomId(selectedItemType),
+          uomId: selectedUOM.uomId,
+          taxId: selectedTax.taxId,
+          purchasecategoryId: getRandomId(selectedCategory),
+          itemgroupId: getRandomId(selectedItemGroup),
+          locationId: getRandomId(selectedLocation),
+          purchasesubcategoryId: selectedSubcategoryId,
+          taxPercentage: Number(values.taxPercentage),
+          stockQuantity: isSaleTypeValue ? 0 : Number(values.stockQuantity) || 0,
+          saleType: isSaleTypeValue,
+          purchasePrice: Number(values.purchasePrice) || 0,
+          sellingPrice: isSaleTypeValue ? Number(values.sellingPrice) : null,
+          reorderLevel: isSaleTypeValue ? 0 : Number(values.reorderLevel) || 0,
+          supplier: values.supplier || '',
+          hsnCode: values.hsnCode || 0,
+          shelfLife: values.shelfLife || 0,
+          barcode: Number(values.barcode) || 0,
+          description: values.description || '',
+          vendorTag: values.vendorTag || [],
+        };
+
+        console.log('📤 FINAL Edit data:', dataToSend);
+        await dispatch(updatePurchaseItem(dataToSend)).unwrap();
+        dispatch(setSnackbarMessage('Item updated successfully'));
+      } else {
+        dataToSend = {
+          itemName: values.itemName.trim(),
+          aliasName: values.aliasName?.trim() || '',
+          brandId: brandId,
+          itemCode: values.itemCode || '',
+          itemTypeId: getRandomId(selectedItemType),
+          uomId: selectedUOM.uomId,
+          taxId: selectedTax.taxId,
+          purchasecategoryId: getRandomId(selectedCategory),
+          itemgroupId: getRandomId(selectedItemGroup),
+          locationId: getRandomId(selectedLocation),
+          purchasesubcategoryId: selectedSubcategoryId,
+          taxPercentage: Number(values.taxPercentage),
+          stockQuantity: isSaleTypeValue ? 0 : Number(values.stockQuantity) || 0,
+          saleType: isSaleTypeValue,
+          purchasePrice: Number(values.purchasePrice) || 0,
+          sellingPrice: isSaleTypeValue ? Number(values.sellingPrice) : null,
+          reorderLevel: isSaleTypeValue ? 0 : Number(values.reorderLevel) || 0,
+          supplier: values.supplier || '',
+          hsnCode: values.hsnCode || 0,
+          shelfLife: values.shelfLife || 0,
+          barcode: Number(values.barcode) || 0,
+          description: values.description || '',
+          vendorTag: values.vendorTag || [],
+          status: 'active',
+        };
+
+        console.log('📤 FINAL Add data:', dataToSend);
+        await dispatch(addPurchaseItem(dataToSend)).unwrap();
+        dispatch(setSnackbarMessage('Item added successfully'));
+      }
+
       dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    if (!selectedItemType) {
-      dispatch(setSnackbarMessage(`Item Type "${values.itemType}" not found`));
+      handleDialogClose();
+
+      dispatch(fetchPurchaseItems({
+        page: currentPage,
+        size: pageSize,
+        showDeactivated: showDeactivated,
+        ...filters
+      }));
+
+    } catch (error: any) {
+      console.error('❌ Submission error:', error);
+      let errorMessage = `Failed to ${editIndex !== null ? 'update' : 'add'} item`;
+
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.payload?.message) {
+        errorMessage = error.payload.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      dispatch(setSnackbarMessage(errorMessage));
       dispatch(setSnackbarOpen(true));
-      return;
     }
-    
-    if (!selectedUOM) {
-      dispatch(setSnackbarMessage(`UOM "${values.uom}" not found`));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    if (!selectedCategory) {
-      dispatch(setSnackbarMessage(`Category "${values.purchasecategoryName}" not found`));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    if (!selectedItemGroup) {
-      dispatch(setSnackbarMessage(`Item Group "${values.itemgroupName}" not found`));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    if (!selectedLocation) {
-      dispatch(setSnackbarMessage(`Location "${values.locationName}" not found`));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    // Validate subcategory belongs to selected category
-    const categorySubcategories = selectedCategory.subcategories || [];
-    const isSubcategoryValid = categorySubcategories.some(
-      (sub: any) => (sub.randomId === selectedSubcategoryId) || (sub.purchasesubcategoryName === selectedSubcategoryName)
-    );
-    
-    if (!isSubcategoryValid && selectedSubcategoryId) {
-      console.warn('⚠️ Subcategory does not belong to selected category!');
-      dispatch(setSnackbarMessage(`"${selectedSubcategoryName}" does not belong to category "${values.purchasecategoryName}"`));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    // Check if selling price is required when saleType is true
-    const isSaleTypeValue = values.saleType || false;
-    if (isSaleTypeValue && (!values.sellingPrice || values.sellingPrice <= 0)) {
-      dispatch(setSnackbarMessage('Selling price is required and must be greater than 0 when Sale Type is enabled'));
-      dispatch(setSnackbarOpen(true));
-      return;
-    }
-    
-    let dataToSend: any;
-    
-    if (editIndex !== null) {
-      // UPDATE existing item
-      const itemToEdit = items[editIndex];
-      dataToSend = {
-        purchaseitemId: itemToEdit.purchaseitemId,
-        itemName: values.itemName.trim(),
-        itemCode: values.itemCode || '',
-        itemTypeId: getRandomId(selectedItemType),
-        uomId: selectedUOM.uomId,
-        taxId: selectedTax.taxId,
-        purchasecategoryId: getRandomId(selectedCategory),
-        itemgroupId: getRandomId(selectedItemGroup),
-        locationId: getRandomId(selectedLocation),
-        purchasesubcategoryId: selectedSubcategoryId,
-        taxPercentage: Number(values.taxPercentage),
-        stockQuantity: isSaleTypeValue ? 0 : Number(values.stockQuantity) || 0,
-        saleType: isSaleTypeValue,
-        purchasePrice: Number(values.purchasePrice) || 0,
-        sellingPrice: isSaleTypeValue ? Number(values.sellingPrice) : null,
-        reorderLevel: isSaleTypeValue ? 0 : Number(values.reorderLevel) || 0,
-        supplier: values.supplier || '',
-        hsnCode: values.hsnCode || '',
-        shelfLife: values.shelfLife || '',
-        barcode: Number(values.barcode) || 0,  // 🔥 Convert to number
-        description: values.description || '',
-        vendorTag: values.vendorTag || [],
-      };
-      
-      console.log('📤 FINAL Edit data:', dataToSend);
-      await dispatch(updatePurchaseItem(dataToSend)).unwrap();
-      dispatch(setSnackbarMessage('Item updated successfully'));
-    } else {
-      // ADD new item
-      dataToSend = {
-        itemName: values.itemName.trim(),
-        itemCode: values.itemCode || '',
-        itemTypeId: getRandomId(selectedItemType),
-        uomId: selectedUOM.uomId,
-        taxId: selectedTax.taxId,
-        purchasecategoryId: getRandomId(selectedCategory),
-        itemgroupId: getRandomId(selectedItemGroup),
-        locationId: getRandomId(selectedLocation),
-        purchasesubcategoryId: selectedSubcategoryId,
-        taxPercentage: Number(values.taxPercentage),
-        stockQuantity: isSaleTypeValue ? 0 : Number(values.stockQuantity) || 0,
-        saleType: isSaleTypeValue,
-        purchasePrice: Number(values.purchasePrice) || 0,
-        sellingPrice: isSaleTypeValue ? Number(values.sellingPrice) : null,
-        reorderLevel: isSaleTypeValue ? 0 : Number(values.reorderLevel) || 0,
-        supplier: values.supplier || '',
-        hsnCode: values.hsnCode || '',
-        shelfLife: values.shelfLife || '',
-        barcode: Number(values.barcode) || 0,  // 🔥 Convert to number
-        description: values.description || '',
-        vendorTag: values.vendorTag || [],
-        status: 'active',
-      };
-      
-      console.log('📤 FINAL Add data:', dataToSend);
-      await dispatch(addPurchaseItem(dataToSend)).unwrap();
-      dispatch(setSnackbarMessage('Item added successfully'));
-    }
-    
-    dispatch(setSnackbarOpen(true));
-    handleDialogClose();
-    
-    // Refresh the items list
-    dispatch(fetchPurchaseItems({
-      page: currentPage,
-      size: pageSize,
-      showDeactivated: showDeactivated,
-      ...filters
-    }));
-    
-  } catch (error: any) {
-    console.error('❌ Submission error:', error);
-    let errorMessage = `Failed to ${editIndex !== null ? 'update' : 'add'} item`;
-    
-    if (error.response?.data?.detail) {
-      errorMessage = error.response.data.detail;
-    } else if (error.payload?.message) {
-      errorMessage = error.payload.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
-    dispatch(setSnackbarMessage(errorMessage));
-    dispatch(setSnackbarOpen(true));
-  }
-};
+  };
 
   const handleRefresh = () => {
     console.log('🔄 Manual refresh triggered');
-
     const currentFilters = {
       ...(filters.itemName && { itemName: filters.itemName }),
       ...(filters.purchasecategoryName && { purchasecategoryName: filters.purchasecategoryName }),
       ...(filters.purchasesubcategoryName && { purchasesubcategoryName: filters.purchasesubcategoryName }),
     };
-
     dispatch(
       fetchPurchaseItems({
         page: currentPage,
@@ -819,7 +886,6 @@ const handleSubmit = async (values: any) => {
         ...currentFilters,
       })
     );
-
     dispatch(setSnackbarMessage('Data refreshed successfully'));
     dispatch(setSnackbarOpen(true));
   };
@@ -850,6 +916,17 @@ const handleSubmit = async (values: any) => {
       <Box sx={{ pt: 1, pl: 2, pr: 1 }}>
         <PurchaseControls
           handleDialogOpen={canAdd ? handleDialogOpen : undefined}
+          handleDownloadSampleCSV={handleDownloadSampleCSV}
+          handleImportCSV={handleImportCSV}
+          handleExportCSV={handleExportCSV}
+          handleRollback={handleRollback}
+          fetchBackups={handleFetchBackups}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value) => dispatch(setShowDeactivated(value))}
+          loading={loading || rollbackStatus === 'loading' || importLoading}  // Add importLoading here
+          exportStatus={exportStatus}
+          canAdd={canAdd}
+          handleRefresh={handleRefresh}
           itemName={itemName}
           category={category}
           subcategory={subcategory}
@@ -858,17 +935,7 @@ const handleSubmit = async (values: any) => {
           setSubcategory={setSubcategory}
           handleFilter={handleFilter}
           handleClearFilters={handleClearFilters}
-          handleDownloadSampleCSV={handleDownloadSampleCSV}
-          handleImportCSV={handleImportCSV}
-          handleExportCSV={handleExportCSV}
-          showDeactivated={showDeactivated}
-          setShowDeactivated={(value) => dispatch(setShowDeactivated(value))}
-          loading={loading}
-          exportStatus={exportStatus}
-          canAdd={canAdd}
-          handleRefresh={handleRefresh}
         />
-
         <PurchaseTable
           items={paginatedItems}
           loading={loading}
@@ -901,6 +968,7 @@ const handleSubmit = async (values: any) => {
           locations={locations}
           itemtypes={itemtypes}
           existingItems={items}
+          brands={brands}
         />
 
         <Dialog
@@ -949,11 +1017,12 @@ const handleSubmit = async (values: any) => {
           onClose={() => dispatch(setSnackbarOpen(false))}
           message={snackbarMessage}
         />
-
         <ImportErrorDialog
           open={errorDialogOpen}
           onClose={() => setErrorDialogOpen(false)}
           importResults={importResults}
+          mode={importMode}
+          onRefresh={refreshData}
         />
       </Box>
     </Box>
