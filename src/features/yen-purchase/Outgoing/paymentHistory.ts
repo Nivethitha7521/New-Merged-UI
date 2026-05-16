@@ -159,7 +159,6 @@ export const fetchPaymentById = createAsyncThunk(
   }
 );
 
-// Export grouped payments as CSV
 export const exportGroupedPaymentsCSV = createAsyncThunk(
   'payments/exportGroupedPaymentsCSV',
   async ({ paymentId, dateFrom, dateTo, vendorName }: { 
@@ -170,39 +169,42 @@ export const exportGroupedPaymentsCSV = createAsyncThunk(
   }, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams();
-      
-      if (paymentId) {
-        params.append('payment_id', paymentId);
-      }
-      if (dateFrom) {
-        params.append('date_from', dateFrom);
-      }
-      if (dateTo) {
-        params.append('date_to', dateTo);
-      }
-      if (vendorName) {
-        params.append('vendor_name', vendorName);
-      }
-      
+      if (paymentId) params.append('payment_id', paymentId);
+      if (dateFrom) params.append('date_from', dateFrom);
+      if (dateTo) params.append('date_to', dateTo);
+      if (vendorName) params.append('vendor_name', vendorName);
       params.append('format', 'csv');
-      
-      console.log('Exporting grouped payments CSV from URL:', `/outgoingpayments/payments/grouped?${params.toString()}`);
-      
+
       const response = await purchaseApi.get(
         `/outgoingpayments/payments/grouped?${params.toString()}`,
         { responseType: "blob" }
       );
-      
-      return response.data; // Blob
+
+      // ✅ Handle download inside thunk
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = paymentId
+        ? `${paymentId}_payment_report.csv`
+        : 'all_payments_report.csv';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      // ✅ Only return serializable value
+      return { success: true };
+
     } catch (error: any) {
-      console.error('CSV Export Error:', error);
       const errorMsg = error.response?.data?.detail || error.message || 'Failed to export CSV';
       return rejectWithValue(errorMsg);
     }
   }
 );
 
-// Export grouped payments as PDF
 export const exportGroupedPaymentsPDF = createAsyncThunk(
   'payments/exportGroupedPaymentsPDF',
   async ({ paymentId, dateFrom, dateTo, vendorName }: { 
@@ -213,59 +215,67 @@ export const exportGroupedPaymentsPDF = createAsyncThunk(
   }, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams();
-      
-      if (paymentId) {
-        params.append('payment_id', paymentId);
-      }
-      if (dateFrom) {
-        params.append('date_from', dateFrom);
-      }
-      if (dateTo) {
-        params.append('date_to', dateTo);
-      }
-      if (vendorName) {
-        params.append('vendor_name', vendorName);
-      }
-      
+      if (paymentId) params.append('payment_id', paymentId);
+      if (dateFrom) params.append('date_from', dateFrom);
+      if (dateTo) params.append('date_to', dateTo);
+      if (vendorName) params.append('vendor_name', vendorName);
       params.append('format', 'pdf');
-      
-      console.log('Exporting grouped payments PDF from URL:', `/outgoingpayments/payments/grouped?${params.toString()}`);
-      
+
       const response = await purchaseApi.get(
         `/outgoingpayments/payments/grouped?${params.toString()}`,
         { responseType: "blob" }
       );
-      
-      return response.data; // Blob
+
+      // ✅ Handle download inside thunk
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = paymentId
+        ? `${paymentId}_payment_report.pdf`
+        : 'all_payments_report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+
+      // ✅ Only return serializable value
+      return { success: true };
+
     } catch (error: any) {
-      console.error('PDF Export Error:', error);
       const errorMsg = error.response?.data?.detail || error.message || 'Failed to export PDF';
       return rejectWithValue(errorMsg);
     }
   }
 );
-// exportIndividualPaymentPDF thunk-ஐ இப்படி மாற்றவும்
 export const exportIndividualPaymentPDF = createAsyncThunk(
   'payments/exportIndividualPaymentPDF',
   async (paymentId: string, { rejectWithValue }) => {
     try {
-      console.log('Exporting individual payment PDF for:', paymentId);
-      
       const response = await purchaseApi.get(
         `/outgoingpayments/payments/individual-pdf/${paymentId}`,
         { responseType: "blob" }
       );
-      
-      console.log('PDF response received:', response);
-      
-      // Return ONLY the blob and paymentId (but we'll handle download in component)
-      // Don't create download link here - just return the data
-      return { 
-        blob: response.data, 
-        paymentId 
-      };
+
+      // ✅ Handle download HERE inside the thunk — don't store blob in Redux
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payment_voucher_${paymentId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+
+      // ✅ Only return serializable data to Redux
+      return { paymentId };
+
     } catch (error: any) {
-      console.error('Individual PDF Export Error:', error);
       const errorMsg = error.response?.data?.detail || error.message || 'Failed to export PDF';
       return rejectWithValue(errorMsg);
     }

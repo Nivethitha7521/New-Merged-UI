@@ -70,9 +70,27 @@ const PaymentHistoryDialogContent = ({ onRequestClose }: PaymentHistoryDialogCon
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  const paymentIdFilter = searchParams?.get('payment_id') || '';
-  const currentPageParam = searchParams?.get('page') || '1';
-  const currentPage = parseInt(currentPageParam, 10) || 1;
+  // Get initial values from URL
+  const initialPaymentId = searchParams?.get('payment_id') || '';
+  const initialPage = parseInt(searchParams?.get('page') || '1', 10);
+  const initialDateFrom = searchParams?.get('date_from') || '';
+  const initialDateTo = searchParams?.get('date_to') || '';
+  const initialVendorName = searchParams?.get('vendor_name') || '';
+
+  // State initialized from URL directly
+  const [localFilter, setLocalFilter] = useState(initialPaymentId);
+  const [dateFrom, setDateFrom] = useState<string>(initialDateFrom);
+  const [dateTo, setDateTo] = useState<string>(initialDateTo);
+  const [vendorName, setVendorName] = useState<string>(initialVendorName);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  
+  const limit = 10;
+  const isInitialMount = useRef(true);
+  const isUpdatingFromFilter = useRef(false);
 
   const {
     groupedData,
@@ -83,62 +101,129 @@ const PaymentHistoryDialogContent = ({ onRequestClose }: PaymentHistoryDialogCon
     individualExportId,
   } = useSelector(selectGroupedPayments);
 
-  const [openDialog, setOpenDialog] = useState(false);
-  const [localFilter, setLocalFilter] = useState(paymentIdFilter);
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [dateFrom, setDateFrom] = useState<string>('');
-  const [dateTo, setDateTo] = useState<string>('');
-  const [vendorName, setVendorName] = useState<string>('');
+  // Fetch data function
+  const fetchData = (page: number, filters: {
+    paymentId?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    vendorName?: string;
+  }) => {
+    if (!canRead) return;
+    
+    dispatch(fetchGroupedPayments({
+      paymentId: filters.paymentId || undefined,
+      page,
+      limit,
+      dateFrom: filters.dateFrom || undefined,
+      dateTo: filters.dateTo || undefined,
+      vendorName: filters.vendorName || undefined,
+    }));
+  };
 
-  const limit = 10;
-  const hasInitialLoadRun = useRef(false);
-  const isUpdatingFromURL = useRef(false);
-
-  // Sync URL params to state
+  // Initial load - only once
   useEffect(() => {
+    if (isInitialMount.current && canRead) {
+      isInitialMount.current = false;
+      
+      // Initial fetch with URL params
+      fetchData(initialPage, {
+        paymentId: initialPaymentId,
+        dateFrom: initialDateFrom,
+        dateTo: initialDateTo,
+        vendorName: initialVendorName,
+      });
+    }
+  }, [canRead]); // Empty dependency array - only runs once on mount
+
+  // Handle filter application
+  const handleFilterApply = () => {
+    // Update URL
+    const newParams = new URLSearchParams();
+    if (localFilter) newParams.set('payment_id', localFilter);
+    if (dateFrom) newParams.set('date_from', dateFrom);
+    if (dateTo) newParams.set('date_to', dateTo);
+    if (vendorName) newParams.set('vendor_name', vendorName);
+    newParams.set('page', '1');
+    
+    // Reset page to 1 when applying filters
+    setCurrentPage(1);
+    router.push(`?${newParams.toString()}`);
+    
+    // Fetch with new filters
+    fetchData(1, {
+      paymentId: localFilter,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      vendorName: vendorName,
+    });
+  };
+
+  // Handle clear filters
+  const handleClearFilter = () => {
+    setLocalFilter('');
+    setDateFrom('');
+    setDateTo('');
+    setVendorName('');
+    setCurrentPage(1);
+    
+    const newParams = new URLSearchParams();
+    newParams.set('page', '1');
+    router.push(`?${newParams.toString()}`);
+    
+    // Fetch all data
+    fetchData(1, {});
+  };
+
+  // Handle page change
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setCurrentPage(value);
+    
+    const newParams = new URLSearchParams(searchParams?.toString() || '');
+    newParams.set('page', value.toString());
+    router.push(`?${newParams.toString()}`);
+    
+    // Fetch data for new page with current filters
+    fetchData(value, {
+      paymentId: localFilter || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      vendorName: vendorName || undefined,
+    });
+  };
+
+  // Sync URL changes to state (when user clicks browser back/forward)
+  useEffect(() => {
+    const urlPaymentId = searchParams?.get('payment_id') || '';
     const urlDateFrom = searchParams?.get('date_from') || '';
     const urlDateTo = searchParams?.get('date_to') || '';
     const urlVendorName = searchParams?.get('vendor_name') || '';
-    const urlPaymentId = searchParams?.get('payment_id') || '';
+    const urlPage = parseInt(searchParams?.get('page') || '1', 10);
 
-    // Only update if values are different
-    if (
-      localFilter !== urlPaymentId ||
-      dateFrom !== urlDateFrom ||
-      dateTo !== urlDateTo ||
-      vendorName !== urlVendorName
-    ) {
-      isUpdatingFromURL.current = true;
+    // Check if URL has changed from current state
+    const hasChanged = 
+      urlPaymentId !== localFilter ||
+      urlDateFrom !== dateFrom ||
+      urlDateTo !== dateTo ||
+      urlVendorName !== vendorName ||
+      urlPage !== currentPage;
+
+    if (hasChanged && !isInitialMount.current) {
+      // Update state from URL
       setLocalFilter(urlPaymentId);
       setDateFrom(urlDateFrom);
       setDateTo(urlDateTo);
       setVendorName(urlVendorName);
-      isUpdatingFromURL.current = false;
+      setCurrentPage(urlPage);
+      
+      // Fetch data with new URL params
+      fetchData(urlPage, {
+        paymentId: urlPaymentId || undefined,
+        dateFrom: urlDateFrom || undefined,
+        dateTo: urlDateTo || undefined,
+        vendorName: urlVendorName || undefined,
+      });
     }
-  }, [searchParams]);
-
-  // Fetch data when filters change
-  useEffect(() => {
-    if (!canRead) return;
-    
-    // Skip if we're updating from URL (to avoid double fetch)
-    if (isUpdatingFromURL.current) return;
-
-    // For initial load, use the URL params directly
-    const fetchParams = {
-      paymentId: paymentIdFilter || '',
-      page: currentPage,
-      limit,
-      dateFrom: dateFrom || undefined,
-      dateTo: dateTo || undefined,
-      vendorName: vendorName || undefined,
-    };
-
-    dispatch(fetchGroupedPayments(fetchParams));
-  }, [dispatch, paymentIdFilter, currentPage, canRead, dateFrom, dateTo, vendorName]);
-
-  // Remove the separate initial load useEffect - it's causing double fetch
+  }, [searchParams]); // Only runs when URL changes (browser navigation)
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -157,99 +242,39 @@ const PaymentHistoryDialogContent = ({ onRequestClose }: PaymentHistoryDialogCon
 
 const handleIndividualPDFDownload = async (paymentId: string) => {
   try {
-    const result = await dispatch(exportIndividualPaymentPDF(paymentId)).unwrap();
-    
-    // Directly create download from the blob
-    const url = window.URL.createObjectURL(result.blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `payment_voucher_${paymentId}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    await dispatch(exportIndividualPaymentPDF(paymentId)).unwrap();
+    // Download is already triggered inside the thunk
   } catch (err) {
     console.error('Failed to download PDF:', err);
   }
 };
+const handleCSVExport = async () => {
+  try {
+    await dispatch(exportGroupedPaymentsCSV({
+      paymentId: localFilter || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      vendorName: vendorName || undefined,
+    })).unwrap();
+    handleCloseDialog();
+  } catch (err) {
+    console.error('CSV export failed:', err);
+  }
+};
 
-const handleCSVExport = () => {
-    dispatch(
-      exportGroupedPaymentsCSV({
-        paymentId: paymentIdFilter || '',
-        dateFrom: dateFrom || undefined,
-        dateTo: dateTo || undefined,
-        vendorName: vendorName || undefined,
-      })
-    ).then((action) => {
-      if (exportGroupedPaymentsCSV.fulfilled.match(action)) {
-        const blob = action.payload as Blob;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = paymentIdFilter
-          ? `${paymentIdFilter}_payment_report.csv`
-          : 'all_payments_report.csv';
-        link.click();
-        URL.revokeObjectURL(url);
-        handleCloseDialog();
-      }
-    });
-  };
-
-  const handlePDFExport = () => {
-    dispatch(
-      exportGroupedPaymentsPDF({
-        paymentId: paymentIdFilter || '',
-        dateFrom: dateFrom || undefined,
-        dateTo: dateTo || undefined,
-        vendorName: vendorName || undefined,
-      })
-    ).then((action) => {
-      if (exportGroupedPaymentsPDF.fulfilled.match(action)) {
-        const blob = action.payload as Blob;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = paymentIdFilter
-          ? `${paymentIdFilter}_payment_report.pdf`
-          : 'all_payments_report.pdf';
-        link.click();
-        URL.revokeObjectURL(url);
-        handleCloseDialog();
-      }
-    });
-  };
-
-  const handleFilterApply = () => {
-    const newParams = new URLSearchParams();
-
-    if (localFilter) newParams.set('payment_id', localFilter);
-    if (dateFrom) newParams.set('date_from', dateFrom);
-    if (dateTo) newParams.set('date_to', dateTo);
-    if (vendorName) newParams.set('vendor_name', vendorName);
-
-    newParams.set('page', '1');
-    router.push(`?${newParams.toString()}`);
-  };
-
-  const handleClearFilter = () => {
-    setLocalFilter('');
-    setDateFrom('');
-    setDateTo('');
-    setVendorName('');
-
-    const newParams = new URLSearchParams();
-    newParams.set('page', '1');
-    router.push(`?${newParams.toString()}`);
-  };
-
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
-    const newParams = new URLSearchParams(searchParams?.toString() || '');
-    newParams.set('page', value.toString());
-    router.push(`?${newParams.toString()}`);
-  };
-
+const handlePDFExport = async () => {
+  try {
+    await dispatch(exportGroupedPaymentsPDF({
+      paymentId: localFilter || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      vendorName: vendorName || undefined,
+    })).unwrap();
+    handleCloseDialog();
+  } catch (err) {
+    console.error('PDF export failed:', err);
+  }
+};
   const formatDate = (dateString: string): string => {
     return moment(dateString).format('DD-MM-YYYY');
   };
@@ -302,8 +327,8 @@ const handleCSVExport = () => {
     );
   }
 
-  const title = paymentIdFilter
-    ? `Payment Details - ${paymentIdFilter}`
+  const title = localFilter
+    ? `Payment Details - ${localFilter}`
     : 'All Payment History';
 
   const getAccordionSummaryGrid = () => {
@@ -339,7 +364,7 @@ const handleCSVExport = () => {
           handleClearFilter={handleClearFilter}
           openExportDialog={() => setOpenDialog(true)}
           exportLoading={exportLoading}
-          disableClear={!paymentIdFilter && !dateFrom && !dateTo && !vendorName}
+          disableClear={!localFilter && !dateFrom && !dateTo && !vendorName}
           disableExport={!groupedData || groupedData.groups.length === 0 || exportLoading}
         />
 
@@ -367,7 +392,7 @@ const handleCSVExport = () => {
           <Alert severity="info">No payment records found for the selected filters.</Alert>
         ) : (
           groupedData?.groups.map((group: any) => (
-            <Accordion key={group.paymentId} defaultExpanded={!!paymentIdFilter}>
+            <Accordion key={group.paymentId} defaultExpanded={!!localFilter}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Grid container alignItems="center" spacing={isMobile ? 1 : 2}>
                   <Grid item {...getAccordionSummaryGrid()}>
@@ -510,7 +535,7 @@ const handleCSVExport = () => {
         <MuiDialogTitle>Download Payment Report</MuiDialogTitle>
         <MuiDialogContent>
           <Typography>
-            Choose format for {paymentIdFilter ? `filtered (${paymentIdFilter})` : 'all'} payments
+            Choose format for {localFilter ? `filtered (${localFilter})` : 'all'} payments
           </Typography>
           {(dateFrom || dateTo) && (
             <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>

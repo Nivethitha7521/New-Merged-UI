@@ -1,194 +1,105 @@
 import { format } from "date-fns";
 import { PurchaseItemSearchAdd } from "./purchaseModel";
-import { Brand } from "@/app/yen-purchase/PurchaseMaster/Brands/Models/BrandModel";
 
-export interface ImportPayload {
-  file: File;
-  mode: 'merge' | 'replace';
+export interface ImportPayload{
+  file:File;
+  mode:'merge' | 'replace' | 'rollback';
 }
-
-export interface BackupInfo {
-  backup_id: string;
-  created_at: string;
-  purchase_count: number;
-  master_count: number;
-}
-
-export interface RollbackResponse {
-  message: string;
-  purchase_items_restored: number;
-  master_items_restored: number;
-  backup_id: string;
-}
-
 export interface PurchaseItem {
-  purchaseitemId: string;
-  itemName: string;
-  itemCode?: string;
-  randomId: string;
-  aliasName?: string;
-  brandId?: string;
-  brandName?: string;
-  purchasecategoryId: string;
-  purchasesubcategoryId: string;
-  itemgroupId: string;
-  uomId: string;
-  taxId: string;
-  itemTypeId: string;
-  locationId: string;
-  stockQuantity: number;
-  supplier: string;
-  purchasePrice: number;
-  sellingPrice?: number;
-  saleType: boolean;
-  reorderLevel: number;
-  hsnCode: number | null;
-  shelfLife: number | null;
-  vendorTag: string[];
-  barcode: number;
-  description: string;
-  status: string;
-  createdDate: Date | null;
-  lastUpdatedDate: Date | null;
-  purchasecategoryName?: string;
-  purchasesubcategoryName?: string;
-  itemgroupName?: string;
-  uom?: string;
-  taxPercentage?: number;
-  taxName?: string;
-  itemType?: string;
-  locationName?: string;
-  includeTax?: boolean;
-  excludeTax?: boolean;
-  finalPrice?: number;
-}
-
-export interface PurchaseItemPost {
-  itemName: string;
-  itemCode?: string;
-  purchasecategoryId: string;
-  purchasesubcategoryId: string;
-  itemgroupId: string;
-  uomId: string;
-  taxId: string;
-  itemTypeId: string;
-  locationId: string;
-  stockQuantity: number;
-  supplier: string;
-  purchasePrice: number;
-  sellingPrice?: number;
-  saleType: boolean;
-  reorderLevel: number;
-  hsnCode: number | null;
-  shelfLife: number | null;
-  vendorTag: string[];
-  barcode: number;
-  description: string;
-  status?: string;
-  aliasName?: string;
-  brandId?: string;
-  includeTax?: boolean;
-  excludeTax?: boolean;
-  finalPrice?: number;
-}
-
+    purchaseitemId: string;
+    itemName: string;
+    purchasecategoryName: string;
+    purchasesubcategoryName: any;
+    itemgroupName: string;
+    uom: string;
+    stockQuantity: number;
+    supplier: string;
+    purchasePrice: number;
+    randomId: string;
+    purchasetaxName: string;
+    reorderLevel: number;
+    itemType: string;
+    itemTypeId:string;
+    hsnCode: string;
+    shelfLife: string;
+    vendorTag: string[];
+    locationName: string;
+    barcode: string;
+    description: string;
+    status: string;
+    createdDate: Date | null;
+    lastUpdatedDate: Date | null;
+  }
+  
 export interface ImportResponse {
   message: string;
-  mode: string;
   inserted_count?: number;
   updated_count?: number;
-  failed_count?: number;
-  backup_id?: string;
-  backup_created?: boolean;
-  rollback_available?: boolean;
-  rollback_performed?: boolean;
-  successful?: Array<{ row: number; itemName: string; randomId: string; barcode: number; brandName?: string; aliasName?: string; shelfLife?: number }>;
-  updated?: Array<{ row: number; itemName: string; action: string }>;
-  failed?: Array<{ row: number; data: Record<string, string>; error: string; missingFields?: string[] }>;
-  master_synced_count?: number;
-  master_sync_results?: Array<any>;
-  final_counters?: {
-    pi_counter: number;
-    ex_counter: number;
-  };
-  barcode_stats?: {
-    "rawmaterial (PI)": {
-      range: string;
-      total_count: number;
-      next_barcode: number;
-    };
-    "finished_goods (EX)": {
-      range: string;
-      total_count: number;
-      next_barcode: number;
-    };
-  };
-  restored?: {
-    success: boolean;
-    purchase_restored?: number;
-    master_restored?: number;
-    message?: string;
-  };
+  backup_count?: number;
+  mode: string;
+  successful?: Array<{ row: number; data: Record<string, string> }>;
+  updated?: Array<{ row: number; data: Record<string, string>; error?: string }>;
+  failed?: Array<{ row: number; data: Record<string, string>; error: string; missingFields: string[] }>;
+  errorCount?: number;
 }
 
 export interface PurchaseItemSearch {
-  purchaseitemId: string;
-  itemName: string;
-}
+    purchaseitemId: string;
+    itemName: string;
+  }
+  
+    // interface SearchState {
+    //   purchaseItems: PurchaseItemSearch[];
+    //   searchQuery: string;
+    //   status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    //   error: string | null;
+    // }
+    // interface SearchParams {
+    //   itemName?: string;
+    //   skip?: number;
+    //   limit?: number;
+    // }
+    
+  export interface SearchResponse {
+    total: number;
+    items: PurchaseItemSearchAdd[];
+  }
 
-export interface SearchResponse {
-  total: number;
-  items: PurchaseItemSearchAdd[];
-}
-
+// Example function to format a date
 export const formatDateTime = (date: Date): string => {
-  return format(date, "dd:MM:yyyy hh:mm a");
+  // Format the date using date-fns format function
+  return format(date, "dd:MM:yyyy hh:mm a"); // Example format string "dd:MM:yyyy hh:mm a"
 };
 
-export interface UOM {
-  uomId: string;
-  uom: string;
-  status: string;
-}
+// Usage example
+const currentDate = new Date(); // Replace with your actual date
+const formattedDate = formatDateTime(currentDate);
+console.log(formattedDate); // Example output: "09:07:2024 03:30 PM"
+// Define the Vendor interface
 
-export interface Tax {
-  taxId: string;
-  taxPercentage: number;
-  taxName: string;
-  status: string;
+export interface UOM {
+  uom: string;
+
+}
+export interface PurchaseTax {
+  purchasetaxPercentage: string;
 }
 
 export interface StorageLocationItem {
-  locationId: string;
   locationName: string;
-  status?: string;
-  randomId?: string;
 }
 
 export interface PurchaseGroupItem {
-  itemgroupId: string;
   itemgroupName: string;
-  status?: string;
-  randomId?: string;
 }
-
 export interface PurchaseItemType {
-  itemtypeId: string;
   itemtypeName: string;
-  randomId: string;
-  variance_Defaultprice?: number;
+  randomId:string;
 }
-
 export interface PurchaseCategory {
-  purchasecategoryId: string;
+  purchasecategoryId: string; // Optional as it will be generated by the server
   purchasecategoryName: string;
-  randomId?: string;
-  subcategories: Array<{
-    purchasesubcategoryId: string;
-    purchasesubcategoryName: string;
-    randomId: string;
-  }>;
-  status?: string;
+  subcategories: string[]; // Assuming subcategories are sent as an array of strings (ids)
 }
 
 export interface Vendor {
@@ -205,12 +116,11 @@ export interface PurchaseItemState {
   searchQuery: string;
   categories: PurchaseCategory[];
   uoms: UOM[];
-  taxes: Tax[];
+  taxes: PurchaseTax[];
   locations: StorageLocationItem[];
   groupitems: PurchaseGroupItem[];
   itemtypes: PurchaseItemType[];
   vendors: Vendor[];
-  brands: Brand[];
   snackbarOpen: boolean;
   snackbarMessage: string;
   editIndex: number | null;
@@ -222,9 +132,9 @@ export interface PurchaseItemState {
   activateDialogOpen: boolean;
   itemToDeactivate: PurchaseItem | null;
   tags: string[];
-  currentPage: number;
-  pageSize: number;
-  totalItems: number;
+  currentPage: number; // New
+  pageSize: number; // New
+  totalItems: number; // New
   importStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   exportStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   exportError: string | null;
@@ -234,15 +144,12 @@ export interface PurchaseItemState {
     purchasesubcategoryName: string;
   };
   importError: string | null;
-  importMessage: string | null;
+  importMessage: string | null,
   importResults: {
-    successful: Array<{ row: number; data: Record<string, string> }>;
-    updated: Array<{ row: number; data: Record<string, string>; error?: string }>;
-    failed: Array<{ row: number; data: Record<string, string>; error: string; missingFields: string[] }>;
-  };
-  rollbackStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
-  rollbackError: string | null;
-  backups: BackupInfo[];
+  successful: Array<{ row: number; data: Record<string, string> }>;
+  updated: Array<{ row: number; data: Record<string, string>; error?: string }>;
+  failed: Array<{ row: number; data: Record<string, string>; error: string; missingFields: string[] }>;
+}
 }
 
 export const initialState: PurchaseItemState = {
@@ -259,7 +166,6 @@ export const initialState: PurchaseItemState = {
   groupitems: [],
   itemtypes: [],
   vendors: [],
-  brands: [],
   snackbarOpen: false,
   snackbarMessage: '',
   editIndex: null,
@@ -276,42 +182,27 @@ export const initialState: PurchaseItemState = {
   itemData: {
     purchaseitemId: '',
     itemName: '',
-    aliasName: '',
-    brandId: '',
-    brandName: '',
-    purchasecategoryId: '',
-    purchasesubcategoryId: '',
-    itemgroupId: '',
-    uomId: '',
-    taxId: '',
-    itemTypeId: '',
-    locationId: '',
+    purchasecategoryName: '',
+    purchasesubcategoryName: '',
     randomId: '',
+    itemgroupName: '',
+    uom: '',
     stockQuantity: 0,
     supplier: '',
     purchasePrice: 0,
-    sellingPrice: 0,
-    saleType: false,
+    purchasetaxName: '',
     reorderLevel: 0,
-    hsnCode: null,
-    shelfLife: null,
+    itemType: '',
+    hsnCode: '',
+    shelfLife: '',
     vendorTag: [],
-    barcode: 0,
+    locationName: '',
+    barcode: '',
     description: '',
     status: '',
     createdDate: null,
     lastUpdatedDate: null,
-    purchasecategoryName: '',
-    purchasesubcategoryName: '',
-    itemgroupName: '',
-    uom: '',
-    taxPercentage: 0,
-    taxName: '',
-    itemType: '',
-    locationName: '',
-    includeTax: false,
-    excludeTax: true,
-    finalPrice: 0,
+    itemTypeId: ""
   },
   exportStatus: 'idle',
   exportError: null,
@@ -324,11 +215,8 @@ export const initialState: PurchaseItemState = {
   importMessage: null,
   importStatus: 'idle',
   importResults: {
-    successful: [],
-    updated: [],
-    failed: []
-  },
-  rollbackStatus: 'idle',
-  rollbackError: null,
-  backups: []
+  successful: [],
+  updated: [],
+  failed: []
+}
 };

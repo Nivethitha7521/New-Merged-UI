@@ -5,6 +5,73 @@ import purchaseApi from "@/utils/api";
 import { RootState } from '../../../redux/store';
 import { Bank, BulkPaymentRequest, BulkPaymentResponse, DebitNote, FetchOutgoingsArgs, GRN, initialState, Outgoing, PaymentDetails, PaymentDone, PaymentHistory, ProcessPaymentRequest, TaxDetail, VendorDetail, VendorPayment } from '@/Models/outgoingModel';
 
+// Add this interface for column visibility
+interface ColumnVisibility {
+  id: string;
+  visible: boolean;
+}
+
+// Default column preferences
+const defaultColumnPreferences: ColumnVisibility[] = [
+  { id: 'serialNo', visible: true },
+  { id: 'select', visible: true },
+  { id: 'poNo', visible: true },
+  { id: 'grnNo', visible: true },
+  { id: 'apNo', visible: true },
+  { id: 'outgoingNo', visible: true },
+  { id: 'vendorName', visible: true },
+  { id: 'type', visible: true },
+  { id: 'invoiceNo', visible: true },
+  { id: 'invoiceDate', visible: true },
+  { id: 'invoiceAmount', visible: true },
+  { id: 'taxDetails', visible: true },
+  { id: 'discountAmount', visible: true },
+  { id: 'total', visible: true },
+  { id: 'paidAmount', visible: true },
+  { id: 'remainingAmount', visible: true },
+  { id: 'dueDays', visible: true },
+  { id: 'paymentTerms', visible: true },
+  { id: 'verifiedBy', visible: true },
+  { id: 'verifiedDate', visible: true },
+  { id: 'action', visible: true },
+];
+
+export const initializePreferences = () => (dispatch: any) => {
+  try {
+    const savedPreferences = localStorage.getItem('outgoingPaymentColumnPreferences');
+    if (savedPreferences) {
+      const preferences = JSON.parse(savedPreferences);
+      dispatch(setColumnPreferences(preferences));
+    } else {
+      // Set default preferences if none exist
+      dispatch(setColumnPreferences(defaultColumnPreferences));
+    }
+  } catch (error) {
+    console.error('Failed to load column preferences:', error);
+    dispatch(setColumnPreferences(defaultColumnPreferences));
+  }
+};
+
+// Toggle column visibility and save to localStorage
+export const toggleColumnVisibility = (payload: { columnId: string }) => (dispatch: any, getState: any) => {
+  const { columnId } = payload;
+  const currentState = getState();
+  const currentPreferences = currentState.outgoingPayment.columnPreferences || defaultColumnPreferences;
+  
+  const updatedPreferences = currentPreferences.map((col: ColumnVisibility) =>
+    col.id === columnId ? { ...col, visible: !col.visible } : col
+  );
+  
+  dispatch(setColumnPreferences(updatedPreferences));
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem('outgoingPaymentColumnPreferences', JSON.stringify(updatedPreferences));
+  } catch (error) {
+    console.error('Failed to save column preferences:', error);
+  }
+};
+
 export const fetchOutgoings = createAsyncThunk<
   { outgoings: Outgoing[]; totalItems: number; totalPayableAmount: number },
   FetchOutgoingsArgs,
@@ -13,7 +80,7 @@ export const fetchOutgoings = createAsyncThunk<
   'outgoings/fetchOutgoings',
   async (args, { rejectWithValue }) => {
     try {
-      const url = 'http://192.168.1.102:8000/purchaseapi/outgoingpayments/';
+      const url = 'https://yenerp.com/purchaseapi/outgoingpayments/';
       const params: any = {
         skip: (args.page - 1) * args.size,
         limit: args.size,
@@ -26,7 +93,7 @@ export const fetchOutgoings = createAsyncThunk<
 
       if (args.fromDate) params.fromDate = args.fromDate.toISOString();
       if (args.toDate) params.toDate = args.toDate.toISOString();
-      if (args.vendorCode) params.vendorCode = args.vendorCode;  // ← ADD THIS
+      if (args.vendorCode) params.vendorCode = args.vendorCode;
       if (args.vendorName) params.vendorName = args.vendorName;
       if (args.filterBy) params.filterBy = args.filterBy;
       if (args.status) params.status = args.status;
@@ -48,13 +115,14 @@ export const fetchOutgoingStatuses = async (): Promise<string[]> => {
     const response = await purchaseApi.get("/outgoingpayments/getStatusfilter/statuses");
     return response.data.statuses;
 };
+
 export const fetchVendorDetails = createAsyncThunk(
   'outgoing/fetchVendorDetails',
   async (filters: {
     status?: string;
     filterByAmount?: boolean;
     filterByStatus?: boolean;
-    fetchAll?: boolean; // Added fetchAll parameter
+    fetchAll?: boolean;
   }) => {
     try {
       const params = new URLSearchParams();
@@ -81,6 +149,7 @@ export const fetchVendorDetails = createAsyncThunk(
     }
   }
 );
+
 export const fetchGRN = createAsyncThunk('purchaseorder/fetch', async () => {
   const response = await purchaseApi.get<GRN[]>(`/grns/`);
   const grnData = response.data.map(item => ({
@@ -92,7 +161,7 @@ export const fetchGRN = createAsyncThunk('purchaseorder/fetch', async () => {
 
 // Async thunk to add a new Outgoing item
 export const addOutgoing = createAsyncThunk<Outgoing, Omit<Outgoing, 'outgoingId'>>('outgoings/addOutgoing', async (outgoingData) => {
-  const response = await purchaseApi.post("/outgoingpayments/", outgoingData); // Adjust the API endpoint as needed
+  const response = await purchaseApi.post("/outgoingpayments/", outgoingData);
   return response.data;
 });
 
@@ -101,22 +170,25 @@ export const updateOutgoing = createAsyncThunk<Outgoing, Outgoing>('outgoings/up
  const response = await purchaseApi.patch(
       `/outgoingpayments/${outgoingData.outgoingId}`,
       outgoingData,
-    );  return response.data;
+    );  
+  return response.data;
 });
+
 // Thunk
 export const fetchBank = createAsyncThunk<Bank[], void, { dispatch: any }>(
-  'outgoingPayment/fetchBanks',  // Updated path to match slice
+  'outgoingPayment/fetchBanks',
   async (_, { dispatch }) => {
     try {
-      const response = await purchaseApi.get('https://yenerp.com/masterapi/bankmasters/');  // Fixed double slash
+      const response = await purchaseApi.get('https://yenerp.com/masterapi/bankmasters/');
       return response.data;
     } catch (error) {
       dispatch(setSnackbarMessage('Failed to fetch banks. Please try again.'));
       dispatch(setSnackbarOpen(true));
-      throw error;  // Re-throw for rejected case
+      throw error;
     }
   }
 );
+
 export const processPayment = createAsyncThunk<
   void,
   ProcessPaymentRequest,
@@ -169,10 +241,11 @@ export const processPayment = createAsyncThunk<
         paymentDate: paymentDate.toISOString(),
       };
 
-  await purchaseApi.patch(
+      await purchaseApi.patch(
         `/outgoingpayments/${outgoingId}/payment`,
         payload,
-      );    } catch (error: any) {
+      );    
+    } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || error.message || 'Payment processing failed');
     }
   }
@@ -180,17 +253,18 @@ export const processPayment = createAsyncThunk<
 
 export const fetchActiveDebitsVendor = createAsyncThunk<
   DebitNote[],
-  string, // vendorName
+  string,
   {
     rejectValue: string;
   }
 >(
-  'debitNotes/fetchActiveDebitsVendor', // Unique action type
+  'debitNotes/fetchActiveDebitsVendor',
   async (vendorName, { rejectWithValue }) => {
     try {
-const response = await purchaseApi.get(
+      const response = await purchaseApi.get(
         `/debitnote/vendor/${encodeURIComponent(vendorName)}/active-debits`,
-      );      if (!response.data.debits) {
+      );      
+      if (!response.data.debits) {
         throw new Error('No debits found in response');
       }
       return response.data.debits as DebitNote[];
@@ -199,9 +273,10 @@ const response = await purchaseApi.get(
     }
   }
 );
+
 export const fetchActiveDebitsMultipleVendor = createAsyncThunk<
   DebitNote[],
-  string[], // vendorNames array
+  string[],
   {
     rejectValue: string;
   }
@@ -210,10 +285,9 @@ export const fetchActiveDebitsMultipleVendor = createAsyncThunk<
   async (vendorNames, { rejectWithValue }) => {
     try {
       if (!vendorNames || vendorNames.length === 0) {
-        return []; // Return empty if no vendors
+        return [];
       }
 
-      // Use the multiple endpoint for efficiency
       const vendorNamesStr = vendorNames.join(',');
       const response = await purchaseApi.get(
         `/debitnote/multiplevendors/active-debits?vendor_names=${encodeURIComponent(vendorNamesStr)}`,
@@ -236,7 +310,6 @@ export const processBulkPayment = createAsyncThunk<
   'outgoings/processBulkPayment',
   async (bulkPaymentRequest, { rejectWithValue }) => {
     try {
-      // Serialize Date to string (YYYY-MM-DD) for API request
       const requestPayload = {
         ...bulkPaymentRequest,
         paymentDate: bulkPaymentRequest.paymentDate
@@ -250,7 +323,6 @@ export const processBulkPayment = createAsyncThunk<
       );
 
       if (response.status === 207) {
-        // Parse string back to Date in response
         const parsedData = {
           ...response.data,
           results: response.data.results.map((result: any) => ({
@@ -261,11 +333,9 @@ export const processBulkPayment = createAsyncThunk<
         return parsedData as BulkPaymentResponse;
       }
 
-      // If no parsing needed (no paymentDate), return as-is
       return response.data as BulkPaymentResponse;
     } catch (error: any) {
       if (error.response?.status === 207 && error.response?.data) {
-        // Parse error response similarly if it contains paymentDate
         const parsedErrorData = {
           ...error.response.data,
           results: error.response.data.results?.map((result: any) => ({
@@ -282,27 +352,30 @@ export const processBulkPayment = createAsyncThunk<
     }
   }
 );
+
 export const addNewPayment = createAsyncThunk<Outgoing, PaymentDetails>(
   'outgoings/addNewPayment',
   async (paymentData, { rejectWithValue }) => {
-    console.log('addNewPayment called with data:', paymentData); // Log data received
+    console.log('addNewPayment called with data:', paymentData);
 
     try {
       const outgoingWithDate = {
         ...paymentData,
       };
 
-  const response = await purchaseApi.post(
+      const response = await purchaseApi.post(
         "/outgoingpayments/",
         outgoingWithDate,
-      );      console.log('Response from API:', response.data); // Log response from API
+      );      
+      console.log('Response from API:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Error in addNewPayment:', error); // Log the error for further insight
+      console.error('Error in addNewPayment:', error);
       return rejectWithValue(error.response?.data || 'An error occurred while adding payment');
     }
   }
 );
+
 // Async thunk for adding new payment
 export const addNewVendorPayment = createAsyncThunk(
   'outgoings/addNewVendorPayment',
@@ -326,9 +399,10 @@ export const addNewVendorPayment = createAsyncThunk(
 export const fetchTaxDetails = createAsyncThunk<TaxDetail[], string>(
   'outgoings/fetchTaxDetails',
   async (outgoingId) => {
- const response = await purchaseApi.get<TaxDetail[]>(
+    const response = await purchaseApi.get<TaxDetail[]>(
       `/outgoingpayments/${outgoingId}/tax-details`,
-    );    return response.data; // Assuming the response is directly an array of TaxDetail
+    );    
+    return response.data;
   }
 );
 
@@ -336,14 +410,14 @@ export const selectOutgoingPayment = createAsyncThunk<
   Outgoing,
   {
     outgoingId: string;
-    paymentMode: string; // Added paymentMode
-    paymentMethod: string; // For Bank payments: NEFT, RTGS, IMPS, UPI
-    paymentType: string; // Full or Partial Payment
+    paymentMode: string;
+    paymentMethod: string;
+    paymentType: string;
     paymentAmount: number;
-    voucherNumber: string; // For voucher numbers
-    pettyCashAmount?: number; // Optional, for Cash mode
-    hoCash?: number; // Optional, for Cash mode
-    bankName?: string; // Optional, for Bank mode
+    voucherNumber: string;
+    pettyCashAmount?: number;
+    hoCash?: number;
+    bankName?: string;
   }
 >(
   'outgoings/selectOutgoingPayment',
@@ -352,31 +426,29 @@ export const selectOutgoingPayment = createAsyncThunk<
     { rejectWithValue }
   ) => {
     try {
-      // Fetch outgoing payment details
-  const response = await purchaseApi.get<Outgoing>(
+      const response = await purchaseApi.get<Outgoing>(
         `/outgoingpayments/${outgoingId}`,
-      );      const outgoingData = response.data;
+      );
+      const outgoingData = response.data;
 
       const totalPayableAmount = outgoingData.totalPayableAmount ?? 0;
 
-      // Initialize payment fields
       let paymentFields: Record<string, string | number> = {};
 
-      // Handle based on paymentMode (Cash, Bank, etc.)
       switch (paymentMode.toLowerCase()) {
         case 'cash':
           paymentFields = {
             cashVoucherNo: voucherNumber,
-            pettyCashAmount: pettyCashAmount ?? 0, // If Cash, include pettyCashAmount
-            hoCash: hoCash ?? 0, // If Cash, include hoCash
+            pettyCashAmount: pettyCashAmount ?? 0,
+            hoCash: hoCash ?? 0,
           };
           break;
 
         case 'bank':
           paymentFields = {
-            bankName: bankName ?? '', // Include bankName for Bank payments
+            bankName: bankName ?? '',
             paymentMethod,
-            [`${paymentMethod.toLowerCase()}No`]: voucherNumber, // NEFT, RTGS, IMPS, UPI
+            [`${paymentMethod.toLowerCase()}No`]: voucherNumber,
           };
           break;
 
@@ -384,46 +456,42 @@ export const selectOutgoingPayment = createAsyncThunk<
           return rejectWithValue('Invalid payment mode');
       }
 
-      // Handle full or partial payments
       let updatedOutgoing: Outgoing | null = null;
       if (paymentType === 'full') {
         updatedOutgoing = {
           ...outgoingData,
-          totalPayableAmount: 0, // Full payment
-          fullPaymentAmount: totalPayableAmount, // Full amount paid
+          totalPayableAmount: 0,
+          fullPaymentAmount: totalPayableAmount,
           paymentType: 'full',
           status: 'Fully Paid',
-          paymentMode, // Track payment mode
-          ...paymentFields, // Add dynamic payment fields
+          paymentMode,
+          ...paymentFields,
         };
       } else if (paymentType === 'partial') {
         const remainingAmount = totalPayableAmount - paymentAmount;
         updatedOutgoing = {
           ...outgoingData,
-          totalPayableAmount: remainingAmount, // Update remaining balance
-          partialAmount: paymentAmount, // Partial amount
+          totalPayableAmount: remainingAmount,
+          partialAmount: paymentAmount,
           paymentType: 'partial',
           status: remainingAmount === 0 ? 'Fully Paid' : 'Partially Paid',
-          paymentMode, // Track payment mode
-          ...paymentFields, // Add dynamic payment fields
+          paymentMode,
+          ...paymentFields,
         };
       } else {
         return rejectWithValue('Invalid payment type');
       }
 
-      // Ensure updatedOutgoing is not null
       if (!updatedOutgoing) {
         return rejectWithValue('Failed to update outgoing payment: updatedOutgoing is null');
       }
 
-      // Send updated data to the server
- await purchaseApi.patch(
+      await purchaseApi.patch(
         `/outgoingpayments/${outgoingId}`,
         updatedOutgoing,
       );
       return updatedOutgoing;
     } catch (error: any) {
-      // Handle and log error if any occurs
       return rejectWithValue(error.response?.data || 'Error occurred while processing payment');
     }
   }
@@ -432,9 +500,16 @@ export const selectOutgoingPayment = createAsyncThunk<
 // Create slice for Outgoing items
 const outgoingSlice = createSlice({
   name: 'outgoings',
-  initialState,
+  initialState: {
+    ...initialState,
+    columnPreferences: defaultColumnPreferences, // Add this to initialState
+  },
   reducers: {
-    // ADD THE MISSING ACTION HERE
+    // ADD THE SET_COLUMN_PREFERENCES REDUCER
+    setColumnPreferences: (state, action: PayloadAction<ColumnVisibility[]>) => {
+      state.columnPreferences = action.payload;
+    },
+    
     setSelectedOutgoingId: (state, action: PayloadAction<string | null>) => {
       state.selectedOutgoingId = action.payload;
     },
@@ -445,7 +520,7 @@ const outgoingSlice = createSlice({
     setDialogOpen(state, action: PayloadAction<'none' | 'edit'>) {
       state.dialogOpen = action.payload;
     },
-    // ADD THESE NEW REDUCERS FOR SELECTION
+    
     setSelectedOutgoingIds: (state, action: PayloadAction<string[]>) => {
       state.selection.selectedOutgoingIds = action.payload;
     },
@@ -454,28 +529,24 @@ const outgoingSlice = createSlice({
       state.selection.selectedOutgoings = action.payload;
     },
 
-        toggleOutgoingSelection: (state, action: PayloadAction<{ outgoingId: string; outgoing: Outgoing }>) => {
+    toggleOutgoingSelection: (state, action: PayloadAction<{ outgoingId: string; outgoing: Outgoing }>) => {
       const { outgoingId, outgoing } = action.payload;
       const existingIndex = state.selection.selectedOutgoingIds.indexOf(outgoingId);
       
       if (existingIndex >= 0) {
-        // Remove from selection
         state.selection.selectedOutgoingIds.splice(existingIndex, 1);
         state.selection.selectedOutgoings = state.selection.selectedOutgoings.filter(
           item => item.outgoingId !== outgoingId
         );
       } else {
-        // Add to selection
         state.selection.selectedOutgoingIds.push(outgoingId);
         state.selection.selectedOutgoings.push(outgoing);
       }
     },
 
-    // Add this to sync selections when data changes
     syncSelectionsWithCurrentData: (state) => {
       const currentOutgoingIds = new Set(state.outgoings.map(o => o.outgoingId));
       
-      // Remove selections that are no longer in current data
       state.selection.selectedOutgoingIds = state.selection.selectedOutgoingIds.filter(
         id => currentOutgoingIds.has(id)
       );
@@ -483,6 +554,7 @@ const outgoingSlice = createSlice({
         outgoing => currentOutgoingIds.has(outgoing.outgoingId)
       );
     },
+    
     clearSelection: (state) => {
       state.selection.selectedOutgoingIds = [];
       state.selection.selectedOutgoings = [];
@@ -499,7 +571,7 @@ const outgoingSlice = createSlice({
     },
     clearSnackbarMessage(state) {
       state.snackbarMessage = '';
-      state.snackbarOpen = false; // Close the snackbar when clearing the message
+      state.snackbarOpen = false;
     },
     setPagination: (state, action: PayloadAction<{ page: number; size: number }>) => {
       state.currentPage = action.payload.page;
@@ -529,7 +601,6 @@ const outgoingSlice = createSlice({
     clearVendorDebits(state) {
       state.vendorDebits = {};
     },
-    // ... your existing reducers
     clearAdvances: (state) => {
       state.advances = [];
     },
@@ -557,7 +628,6 @@ const outgoingSlice = createSlice({
         state.totalItems = action.payload.totalItems;
         state.totalPayableAmount = action.payload.totalPayableAmount || 0;
 
-        // UPDATE: Sync selected outgoings with fresh data when outgoings change
         state.selection.selectedOutgoings = state.selection.selectedOutgoingIds.map(id =>
           action.payload.outgoings.find(outgoing => outgoing.outgoingId === id)
         ).filter(Boolean) as Outgoing[];
@@ -572,10 +642,9 @@ const outgoingSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-
       .addCase(fetchVendorDetails.fulfilled, (state, action) => {
         state.loading = false;
-        state.outgoingvendor = action.payload; // Store the vendor names in the state
+        state.outgoingvendor = action.payload;
       })
       .addCase(fetchVendorDetails.rejected, (state, action) => {
         state.loading = false;
@@ -590,20 +659,14 @@ const outgoingSlice = createSlice({
           state.outgoings[index] = action.payload;
         }
       })
-      // .addCase(deleteOutgoing.fulfilled, (state, action) => {
-      //   state.outgoings = state.outgoings.filter((item) => item.outgoingId !== action.payload);
-      // })
       .addCase(processPayment.pending, (state) => {
-        state.loading = true; // Optionally handle loading state
+        state.loading = true;
       })
       .addCase(processPayment.fulfilled, (state) => {
-        state.loading = false; // Optionally handle loading state
-        // Optionally, you may want to fetch the updated list of outgoings if needed
-        // dispatch(fetchOutgoings());
+        state.loading = false;
       })
       .addCase(processPayment.rejected, (state, action) => {
-        state.loading = false; // Optionally handle loading state
-        // Set snackbar message or handle the error
+        state.loading = false;
         state.snackbarOpen = true;
         state.snackbarMessage = action.payload as string;
       })
@@ -612,8 +675,7 @@ const outgoingSlice = createSlice({
       })
       .addCase(addNewPayment.fulfilled, (state, action) => {
         state.loading = false;
-        // Assuming the API returns the created outgoing object
-        state.outgoings.push(action.payload); // Add the newly created outgoing to the array
+        state.outgoings.push(action.payload);
       })
       .addCase(addNewPayment.rejected, (state, action) => {
         state.loading = false;
@@ -623,16 +685,13 @@ const outgoingSlice = createSlice({
       })
       .addCase(addNewVendorPayment.fulfilled, (state, action) => {
         state.loading = false;
-        // Assuming the API returns the created outgoing object
-        state.outgoings.push(action.payload); // Add the newly created outgoing to the array
+        state.outgoings.push(action.payload);
       })
       .addCase(addNewVendorPayment.rejected, (state, action) => {
         state.loading = false;
       })
       .addCase(fetchTaxDetails.fulfilled, (state, action) => {
-        // Handle the fetched tax details
-        // You may want to store these details in state or use them as needed
-        console.log('Fetched Tax Details:', action.payload); // Just logging for now
+        console.log('Fetched Tax Details:', action.payload);
       })
       .addCase(fetchGRN.pending, (state) => {
         state.loading = true;
@@ -648,11 +707,11 @@ const outgoingSlice = createSlice({
       })
       .addCase(fetchBank.fulfilled, (state, action: PayloadAction<Bank[]>) => {
         state.loading = false;
-        state.banks = action.payload.filter((bank) => bank.status === 'active');  // Filter active banks here (or in component)
+        state.banks = action.payload.filter((bank) => bank.status === 'active');
       })
       .addCase(fetchBank.rejected, (state, action) => {
         state.loading = false;
-        state.banks = [];  // Reset on error
+        state.banks = [];
         console.error('Fetch banks error:', action.error);
       })
       .addCase(selectOutgoingPayment.pending, (state) => {
@@ -669,12 +728,10 @@ const outgoingSlice = createSlice({
       .addCase(selectOutgoingPayment.rejected, (state, action) => {
         state.loading = false;
       })
-      // outgoingPaymentSlice.ts
       .addCase(processBulkPayment.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      // Updated fulfilled case (no change needed, as parsing is done in thunk)
       .addCase(processBulkPayment.fulfilled, (state, action) => {
         state.loading = false;
         const { results, errors } = action.payload;
@@ -689,10 +746,8 @@ const outgoingSlice = createSlice({
 
         state.snackbarOpen = true;
         state.snackbarMessage = message;
-        // Clear temp states if needed
         state.vendorPayments = {};
         state.vendorDebits = {};
-        // No local updates here - rely on fetchOutgoings for refresh
       })
       .addCase(processBulkPayment.rejected, (state, action) => {
         state.loading = false;
@@ -718,18 +773,18 @@ const outgoingSlice = createSlice({
       })
       .addCase(fetchActiveDebitsMultipleVendor.fulfilled, (state, action) => {
         state.loading = false;
-        // Replace all debits with the new ones
         state.debits = action.payload;
       })
       .addCase(fetchActiveDebitsMultipleVendor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch debit notes';
-      })
+      });
   },
 });
 
 // Export actions from slice
 export const {
+  setColumnPreferences, // ADD THIS EXPORT
   setSearchQuery,
   setDialogOpen,
   setSnackbarOpen,
@@ -745,17 +800,18 @@ export const {
   clearSelection,
   syncSelectionsWithCurrentData,
   clearBulkPaymentState,
-  // ADD THE MISSING ACTION TO EXPORTS
-  setSelectedOutgoingId,  // <-- ADD THIS
-  setSelectedOutgoingIds, // Already exists
-  setSelectedOutgoings    // Already exists
+  setSelectedOutgoingId,
+  setSelectedOutgoingIds,
+  setSelectedOutgoings
 } = outgoingSlice.actions;
 
-// Selector to get Outgoing items from state
+// Selectors
 export const selectOutgoings = (state: RootState) => state.outgoingPayment;
 export const selectCurrentPage = (state: RootState) => state.outgoingPayment.currentPage;
 export const selectPageSize = (state: RootState) => state.outgoingPayment.pageSize;
 export const selectTotalItems = (state: RootState) => state.outgoingPayment.totalItems;
 export const selectTotalPayableAmount = (state: RootState) => state.outgoingPayment.totalPayableAmount;
+export const selectColumnPreferences = (state: RootState) => state.outgoingPayment.columnPreferences;
+
 // Export reducer from slice
 export default outgoingSlice.reducer;

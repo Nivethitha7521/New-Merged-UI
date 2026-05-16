@@ -13,7 +13,7 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'http://192.168.1.102:8000/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 const customRoundOf = (value: number) => {
   return Math.round(value * 100) / 100; 
 };
@@ -166,6 +166,26 @@ export const fetchGrns = createAsyncThunk<FetchGrnsPayload, FetchGrnsArgs>(
       );
     }
   },
+);
+// Add this thunk
+export const checkInvoiceAvailability = createAsyncThunk(
+  "purchaseOrders/checkInvoiceAvailability",
+  async ({ invoiceNo, vendorName, currentGrnId }: { invoiceNo: string; vendorName: string; currentGrnId?: string }, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get("/grns/check-invoice-available", {
+        params: {
+          invoice_no: invoiceNo,
+          vendor_name: vendorName,
+          current_grn_id: currentGrnId
+        }
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data || "Failed to check invoice availability"
+      );
+    }
+  }
 );
 export const fetchReturnedGrns = createAsyncThunk<
   FetchGrnsReturnPayload,
@@ -1128,7 +1148,21 @@ export const grnSlice = createSlice({
           state.snackbarMessageGRN = 'Failed to create amount-only debit note';
         }
         state.snackbarOpenGRN = true;
-      });
+      })
+      // In extraReducers
+.addCase(checkInvoiceAvailability.pending, (state) => {
+  state.invoiceAvailability.checking = true;
+  state.invoiceAvailability.error = null;
+})
+.addCase(checkInvoiceAvailability.fulfilled, (state, action) => {
+  state.invoiceAvailability.checking = false;
+  state.invoiceAvailability.available = action.payload.available;
+  state.invoiceAvailability.message = action.payload.message;
+})
+.addCase(checkInvoiceAvailability.rejected, (state, action) => {
+  state.invoiceAvailability.checking = false;
+  state.invoiceAvailability.error = action.payload as string;
+});
   },
 });
 
@@ -1147,6 +1181,7 @@ export const {
    clearLastRevertData, setShowReturnStockUpdateDialog, // Make sure this is exported
   clearLastReturnData, // Make sure this is exported
 } = grnSlice.actions;
+export const selectInvoiceAvailability = (state: RootState) => state.grn.invoiceAvailability;
 
 export const selectCurrentPage = (state: RootState) => state.grn.currentPage;
 export const selectPageSize = (state: RootState) => state.grn.pageSize;

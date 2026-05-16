@@ -47,7 +47,6 @@ export const usePermissions = () => {
       console.log('✅ Permission Result:', hasPerm);
       return hasPerm;
     } catch (error) {
-      console.error('❌ Permission check error:', error);
       return false;
     }
   };

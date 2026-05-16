@@ -14,14 +14,16 @@ import {
   SearchResponse,
   StorageLocationItem,
   UOM,
-  Vendor,
-  Tax
+  Vendor
 } from '@/Models/purchaseitem';
 import { PurchaseItemType } from '@/Models/itemType';
 
 // ✅ IMPORTANT: use the existing category thunk from PurchaseCategorySlice
-import { fetchCategoriesItem } from './PurchaseCategorySlice';
+import { fetchCategories } from './PurchaseCategorySlice';
 
+
+
+const EXPORT_CSV_URL = 'https://yenerp.com/purchaseapi/rawMaterials/export_csv';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // ---------- EXPORT (OLD) ----------
@@ -29,8 +31,13 @@ export const exportPurchaseItemsToCSV = createAsyncThunk(
   'export/exportPurchaseItemsToCSV',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('http://192.168.1.102:8000/purchaseapi/rawMaterials/purchaseitemexport/export_csv', {
+      if (!EXPORT_CSV_URL) {
+        throw new Error('Export URL is not defined');
+      }
+
+      const response = await axios.get(EXPORT_CSV_URL, {
         responseType: 'blob',
+         
       });
 
       if (response.status !== 200) {
@@ -58,7 +65,7 @@ export const fetchPurchaseItems = createAsyncThunk(
   async ({
     page,
     size,
-    showDeactivated = false,
+    showDeactivated = false, // Add this parameter
     ...filters
   }: {
     page: number;
@@ -71,11 +78,8 @@ export const fetchPurchaseItems = createAsyncThunk(
     const params: Record<string, any> = {
       skip: (page - 1) * size,
       limit: size,
+      status: showDeactivated ? 'deactivated' : 'active', // Add status filter
     };
-
-    if (showDeactivated !== undefined) {
-      params.showDeactivated = showDeactivated;
-    }
 
     Object.entries(filters).forEach(([key, value]) => {
       if (value) params[key] = value;
@@ -83,14 +87,18 @@ export const fetchPurchaseItems = createAsyncThunk(
 
     try {
       console.log('📡 Fetching purchase items with params:', params);
-
-      const response = await purchaseApi.get('/rawMaterials/', {
+      
+      const response = await purchaseApi.get('https://yenerp.com/purchaseapi/rawMaterials/', { 
         params,
+        
+
       });
-
-      let items: PurchaseItem[] = [];
+      
+      console.log('📦 Raw API response:', response.data);
+      
+      let items = [];
       let totalItems = 0;
-
+      
       if (Array.isArray(response.data)) {
         items = response.data;
         totalItems = response.data.length;
@@ -101,129 +109,146 @@ export const fetchPurchaseItems = createAsyncThunk(
         items = response.data || [];
         totalItems = items.length;
       }
-
+      
+      console.log('✅ Processed items:', items);
+      console.log('✅ Total items:', totalItems);
+      
       return {
         items: items,
         totalItems: totalItems,
-        showDeactivated,
+        showDeactivated, // Return this to handle in reducer
       };
     } catch (error: any) {
       console.error('❌ Error fetching purchase items:', error);
+      console.error('❌ Error response:', error.response?.data);
       throw new Error(error.response?.data?.detail || 'Error fetching purchase items');
     }
   }
 );
 
-// ---------- UOM (from Master Admin API) ----------
+// ---------- UOM ----------
 export const fetchUom = createAsyncThunk('uom/fetch', async () => {
   try {
-    const response = await axios.get('https://yenerp.com/masteradminapi/uoms/', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+    const username = localStorage.getItem('username') || 'default_user';
+    
+    const response = await purchaseApi.get<UOM[]>('https://yenerp.com/purchaseapi/purchaseuoms/', {
+    
+
     });
-
-    const activeUoms = response.data.filter((uom: any) => uom.status === 'active');
-
-    const uoms: UOM[] = activeUoms.map((item: any) => ({
-      uomId: item.uomId || item.id,
-      uom: item.uom,
-      status: item.status
-    }));
-
+    
+    console.log('UOM API Response:', response.data);
+    
+    const uoms = response.data.map((item) => ({ uom: item.uom }));
     return uoms;
   } catch (error: any) {
     console.error('Error fetching UOMs:', error);
+    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch UOMs');
   }
 });
 
-// ---------- TAX (from Master Admin API) ----------
-export const fetchTax = createAsyncThunk('tax/fetch', async () => {
-  try {
-    const response = await axios.get('https://yenerp.com/masteradminapi/taxes', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-
-    const activeTaxes = response.data.filter((tax: any) => tax.status === 'active');
-
-    const taxes: Tax[] = activeTaxes.map((item: any) => ({
-      taxId: item.taxId || item.id,
-      taxPercentage: item.taxPercentage,
-      taxName: item.taxName,
-      status: item.status
-    }));
-
-    return taxes;
-  } catch (error: any) {
-    console.error('Error fetching Taxes:', error);
-    throw new Error(error.response?.data?.detail || 'Failed to fetch Taxes');
-  }
-});
 
 // ---------- ITEM TYPE ----------
 export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async () => {
   try {
-    const response = await purchaseApi.get<PurchaseItemType[]>('/itemtypes/', {});
+    // Get the username from your auth state or localStorage
+    const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
+    
+    const response = await purchaseApi.get<PurchaseItemType[]>('https://yenerp.com/purchaseapi/itemtypes/', {
+    
 
+    });
+
+    console.log('Item Types API Response:', response.data);
+    
     const itemtypes = response.data.map(item => ({
       itemtypeId: item.itemtypeId,
       itemtypeName: item.itemtypeName,
-      randomId: item.randomId,
+      randomId: item.randomId, // This is crucial for storing in itemTypeId
     }));
 
     return itemtypes;
   } catch (error: any) {
     console.error('Error fetching item types:', error);
+    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch item types');
   }
 });
 
+
+// ---------- TAX ----------
+export const fetchPurchaseTaxes = createAsyncThunk('purchaseTaxes/fetch', async () => {
+  try {
+    const username = localStorage.getItem('username') || 'default_user';
+    
+    const response = await purchaseApi.get('https://yenerp.com/purchaseapi/purchasetaxes/', {
+     
+
+    });
+    
+    console.log('Tax API Response:', response.data);
+    
+    const tax = (response.data as any[]).map((item) => ({
+      purchasetaxPercentage: item.purchasetaxPercentage,
+    }));
+    return tax;
+  } catch (error: any) {
+    console.error('Error fetching taxes:', error);
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.detail || 'Failed to fetch taxes');
+  }
+});
+
+
 // ---------- STORAGE LOCATION ----------
 export const fetchStorageLocationItems = createAsyncThunk('storageLocations/fetch', async () => {
   try {
-    const response = await purchaseApi.get<StorageLocationItem[]>('/storagelocations/', {});
+    const username = localStorage.getItem('username') || 'default_user';
+    
+    const response = await purchaseApi.get<StorageLocationItem[]>('https://yenerp.com/purchaseapi/storagelocations/', {
+      
 
-    const locations = response.data.map((item) => ({
-      locationId: item.locationId,
-      locationName: item.locationName,
-      randomId: item.randomId,
-      status: item.status
-    }));
-
-    return locations;
+    });
+    
+    console.log('Location API Response:', response.data);
+    
+    const location = response.data.map((item) => ({ locationName: item.locationName }));
+    return location;
   } catch (error: any) {
     console.error('Error fetching locations:', error);
+    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch locations');
   }
 });
 
-// ---------- GROUP ITEMS ----------
 export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', async () => {
   try {
-    const response = await purchaseApi.get('/itemgroups/', {});
+    const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
+    
+    const response = await purchaseApi.get('https://yenerp.com/purchaseapi/itemgroups/', {
+     
 
-    const groupitems = response.data.map((item: any) => ({
+    });
+
+    console.log('Group Items API Response:', response.data);
+
+    const groupitem = response.data.map((item: any) => ({
       itemgroupId: item.itemgroupId,
-      itemgroupName: item.itemgroupName,
-      randomId: item.randomId,
-      status: item.status
+      itemgroupName: item.itemgroupName
     }));
 
-    return groupitems;
+    return groupitem;
   } catch (error: any) {
     console.error('Error fetching group items:', error);
+    console.error('Error response:', error.response?.data);
     throw new Error(error.response?.data?.detail || 'Failed to fetch group items');
   }
 });
 
+
 // ---------- VENDORS ----------
 export const fetchAllVendors = createAsyncThunk('vendors/fetch', async () => {
-  const response = await purchaseApi.get<Vendor[]>('/vendors/');
+  const response = await purchaseApi.get<Vendor[]>('https://yenerp.com/purchaseapi/vendors/',);
   const vendorData = response.data.map((item) => ({
     vendorId: item.vendorId,
     vendorName: item.vendorName,
@@ -231,37 +256,37 @@ export const fetchAllVendors = createAsyncThunk('vendors/fetch', async () => {
   return vendorData;
 });
 
-export const fetchSubcategoriesByCategory = createAsyncThunk(
-  'purchaseItems/fetchSubcategoriesByCategory',
-  async (categoryId: string, { rejectWithValue }) => {
-    try {
-      const response = await purchaseApi.get(
-        `/purchasecategory/${categoryId}/subcategories`
-      );
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch subcategories');
-    }
-  }
-);
-
 // ---------- ADD ITEM ----------
 export const addPurchaseItem = createAsyncThunk(
   'purchaseItems/add',
   async (purchase: Omit<PurchaseItem, 'purchaseitemId'>, { dispatch, rejectWithValue }) => {
     try {
-      const purchaseToAdd = { ...purchase };
+      const username = localStorage.getItem('username') || 'default_user';
+      
+      const purchaseToAdd = {
+        ...purchase,
+      };
+
+      console.log('Sending purchase item data:', purchaseToAdd);
 
       const response = await purchaseApi.post<PurchaseItem>(
-        '/rawMaterials/',
+        'https://yenerp.com/purchaseapi/rawMaterials/',
         purchaseToAdd,
+       
       );
+
+      console.log('Add purchase item response:', response.data);
 
       dispatch(invalidatePurchaseItemsCache());
       dispatch(invalidatePOCache());
       return response.data;
     } catch (error: any) {
       console.error('Failed to add purchase item:', error);
+      console.error('Error response:', error.response?.data);
+       console.error('❌ FULL Backend Response:', error.response);
+       console.error('❌ Backend Data:', error.response?.data);
+  console.error('❌ Backend Detail:', error.response?.data?.detail);
+      // Return detailed error information
       return rejectWithValue({
         message: error.response?.data?.detail || error.response?.data?.message || 'Failed to add purchase item',
         validationErrors: error.response?.data?.detail || null,
@@ -282,21 +307,25 @@ export const POsearchPurchaseItems = createAsyncThunk<
 
   if (cachedData) {
     const { data, timestamp } = JSON.parse(cachedData);
+
     if (now - timestamp < CACHE_DURATION) {
+      console.log('Using cached purchase items data');
       return data;
     } else {
+      console.log('Cache expired, fetching fresh data');
       localStorage.removeItem(cacheKey);
     }
   }
 
   const response = await purchaseApi.get<PurchaseItemSearch[]>(
-    `/rawMaterials/exact-name/`,
+    `https://yenerp.com/purchaseapi/rawMaterials/exact-name/`,
     {
       params: {
         item_name: searchQuery,
         skip,
         limit,
       },
+      
     }
   );
 
@@ -311,6 +340,7 @@ export const POsearchPurchaseItems = createAsyncThunk<
   return response.data;
 });
 
+
 export const invalidatePOCache = createAsyncThunk('purchaseItems/invalidateCache', async () => {
   Object.keys(localStorage).forEach((key) => {
     if (key.startsWith('purchaseItems_')) {
@@ -320,50 +350,67 @@ export const invalidatePOCache = createAsyncThunk('purchaseItems/invalidateCache
   console.log('Purchase items cache invalidated');
 });
 
-// ---------- SEARCH WITH STOCK ----------
+// In purchaseItemSlice.ts, ensure the thunk is properly typed
 export const searchPurchaseItems = createAsyncThunk<
-  PurchaseItemSearchAdd[],
-  {
-    searchQuery: string;
-    skip: number;
-    limit: number;
+  PurchaseItemSearchAdd[],  // Return type
+  { 
+    searchQuery: string; 
+    skip: number; 
+    limit: number; 
     forceRefresh?: boolean;
     locationId?: string | null;
   }
->('purchaseOrder/searchPurchaseItems', async ({
-  searchQuery,
-  skip,
-  limit,
+>('purchaseOrder/searchPurchaseItems', async ({ 
+  searchQuery, 
+  skip, 
+  limit, 
   forceRefresh = false,
   locationId = null
 }) => {
   try {
-    const params: Record<string, any> = {
-      itemName: searchQuery,
-      skip,
+    console.log('🔍 searchPurchaseItems: Fetching fresh data with stock from API', { 
+      searchQuery, 
+      skip, 
+      limit, 
+      locationId 
+    });
+    
+    // Build params object
+    const params: Record<string, any> = { 
+      itemName: searchQuery, 
+      skip, 
       limit
     };
-
+    
+    // Add locationId to params if provided
     if (locationId) {
       params.locationId = locationId;
     }
-
+    
+    // Add cache-busting only if forceRefresh is true
     if (forceRefresh) {
       params._t = Date.now();
     }
-
+    
     const response = await purchaseApi.get<SearchResponse>(
-      `/rawMaterials/search-with-stock`,
+      `https://yenerp.com/purchaseapi/rawMaterials/search-with-stock`,
       { params }
     );
-
-    return response.data?.items || [];
+    
+    const items = response.data?.items || [];
+    console.log(`✅ searchPurchaseItems: Received ${items.length} items with stock for location ${locationId || 'all'}`);
+    
+    // Log stock details for debugging
+    items.forEach(item => {
+      console.log(`  📦 ${item.itemName}: stock=${item.availableStock}, location=${item.locationId}`);
+    });
+    
+    return items;
   } catch (error) {
-    console.error('Error fetching purchase items:', error);
+    console.error('❌ Error fetching purchase items:', error);
     return [];
   }
 });
-
 export const invalidatePurchaseItemsCache = createAsyncThunk(
   'purchaseItems/invalidateCache',
   async () => {
@@ -381,18 +428,29 @@ export const updatePurchaseItem = createAsyncThunk(
   'purchaseItems/update',
   async (purchase: PurchaseItem, { dispatch, rejectWithValue }) => {
     try {
-      const purchaseToUpdate = { ...purchase };
+      
+      const purchaseToUpdate = {
+        ...purchase,
+      };
+      
+      console.log('✏️ Updating purchase item:', purchaseToUpdate);
+      console.log('🆔 Update URL:', `https://yenerp.com/purchaseapi/rawMaterials/${purchase.purchaseitemId}`);
 
       const response = await purchaseApi.patch<PurchaseItem>(
-        `/rawMaterials/${purchase.purchaseitemId}`,
+        `https://yenerp.com/purchaseapi/rawMaterials/${purchase.purchaseitemId}`,
         purchaseToUpdate,
+       
       );
+
+      console.log('✅ Update response:', response.data);
 
       dispatch(invalidatePurchaseItemsCache());
       dispatch(invalidatePOCache());
       return response.data;
     } catch (error: any) {
-      console.error('Update error:', error);
+      console.error('❌ Update error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      
       return rejectWithValue({
         message: error.response?.data?.detail || 'Failed to update purchase item',
         validationErrors: error.response?.data?.detail,
@@ -405,23 +463,33 @@ export const updatePurchaseItem = createAsyncThunk(
 // ---------- DEACTIVATE ----------
 export const deactivatePurchaseItem = createAsyncThunk('purchaseItems/deactivate', async (id: string, { rejectWithValue }) => {
   try {
-    await purchaseApi.patch<PurchaseItem>(
-      `/rawMaterials/${id}/deactivate`,
+    const username = localStorage.getItem('username') || 'default_user';
+    
+    console.log('🔴 Deactivating item with ID:', id);
+    
+    const response = await purchaseApi.patch<PurchaseItem>(
+      `https://yenerp.com/purchaseapi/rawMaterials/${id}/deactivate`,
       { status: 'deactivated' },
+      
     );
+
+    console.log('✅ Deactivation API response:', response.data);
     return id;
   } catch (error: any) {
-    console.error('Deactivate error:', error);
+    console.error('❌ Deactivate error:', error);
+    console.error('❌ Error response:', error.response?.data);
     return rejectWithValue(error.response?.data?.detail || 'Failed to deactivate purchase item');
   }
 });
-
 // ---------- ACTIVATE ----------
 export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', async (id: string, { rejectWithValue }) => {
   try {
+    const username = localStorage.getItem('username') || 'default_user';
+    
     await purchaseApi.patch<PurchaseItem>(
-      `/rawMaterials/${id}/activate`,
+      `https://yenerp.com/purchaseapi/rawMaterials/${id}/activate`,
       { status: 'active' },
+      
     );
     return id;
   } catch (error: any) {
@@ -429,109 +497,79 @@ export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', a
     return rejectWithValue(error.response?.data?.detail || 'Failed to activate purchase item');
   }
 });
-
-// ============================================================
-// BACKUP AND ROLLBACK ACTIONS
-// ============================================================
-
-// Get available backups
-export const fetchBackups = createAsyncThunk(
-  'purchaseItems/fetchBackups',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await purchaseApi.get('/rawMaterials/backups');
-      return response.data.backups || [];
-    } catch (error: any) {
-      console.error('Error fetching backups:', error);
-      return rejectWithValue(error.response?.data?.detail || error.message || 'Failed to fetch backups');
-    }
-  }
-);
-
-// Rollback to a specific backup
-export const rollbackToBackup = createAsyncThunk(
-  'purchaseItems/rollbackToBackup',
-  async (backupId: string, { dispatch, rejectWithValue }) => {
-    try {
-      const response = await purchaseApi.post(`/rawMaterials/rollback?backup_id=${backupId}`);
-
-      // Invalidate caches after rollback
-      dispatch(invalidatePurchaseItemsCache());
-      dispatch(invalidatePOCache());
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Rollback error:', error);
-      return rejectWithValue({
-        message: error.response?.data?.detail || error.message || 'Failed to rollback',
-        status: error.response?.status
-      });
-    }
-  }
-);
-
 // ---------- IMPORT ----------
 export const importPurchaseItems = createAsyncThunk(
   'purchaseItems/import',
-  async ({ file, mode }: ImportPayload, { dispatch, rejectWithValue }) => {
+  async ({ file, mode }: ImportPayload, { rejectWithValue }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('mode', mode);
 
       const response = await purchaseApi.post(
-        '/rawMaterials/import_csv',
+        'https://yenerp.com/purchaseapi/rawMaterials/import_csv',
         formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
+      
       );
-
-      // Invalidate cache after import
-      dispatch(invalidatePurchaseItemsCache());
-      dispatch(invalidatePOCache());
 
       return response.data as ImportResponse;
     } catch (error: any) {
-      console.error('Import error:', error);
-
       if (error.response) {
-        const data = error.response.data;
+        if (error.response.status === 422) {
+          const detail = error.response.data.detail || {};
+          if (detail.missing?.length > 0) {
+            return rejectWithValue({
+              message: detail.message || 'Validation failed',
+              successful: [],
+              updated: [],
+              failed: [
+                {
+                  row: 0,
+                  data: {},
+                  error: 'Missing required columns in CSV file',
+                  missingFields: detail.missing || [],
+                },
+              ],
+              errorCount: detail.error_count || 0,
+            });
+          } else {
+            return rejectWithValue({
+              message: detail.message || 'Validation failed',
+              successful: detail.successful || [],
+              updated: detail.updated || [],
+              failed: detail.sample_errors || [],
+              errorCount: detail.error_count || 0,
+            });
+          }
+        }
         return rejectWithValue({
-          message: data.detail?.message || data.message || 'Import failed',
-          inserted_count: data.inserted_count || 0,
-          updated_count: data.updated_count || 0,
-          failed_count: data.failed_count || 0,
-          successful: data.successful || [],
-          updated: data.updated || [],
-          failed: data.failed || [],
-          backup_id: data.backup_id,
-          rollback_available: data.rollback_available,
+          message: error.response.data.detail?.message || error.response.data.message || 'Import failed',
+          successful: [],
+          updated: [],
+          failed: [],
+          errorCount: 0,
         });
       }
       return rejectWithValue({
         message: error.message || 'Failed to import purchase items',
-        inserted_count: 0,
-        updated_count: 0,
-        failed_count: 0,
         successful: [],
         updated: [],
         failed: [],
+        errorCount: 0,
       });
     }
   }
 );
 
-// ---------- EXPORT ----------
+// ---------- EXPORT (NEW) ----------
 export const exportPurchaseItems = createAsyncThunk(
   'purchaseItems/export',
   async (_, { rejectWithValue }) => {
     try {
       const response = await purchaseApi.get(
-        '/rawMaterials/purchaseitemexport/export_csv',
+        'https://yenerp.com/purchaseapi/rawMaterials/purchaseitemexport/export_csv',
         {
+
           responseType: 'blob',
         }
       );
@@ -539,11 +577,10 @@ export const exportPurchaseItems = createAsyncThunk(
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `purchase_items_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', 'purchase_items.csv');
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
 
       return true;
     } catch (error: any) {
@@ -626,22 +663,10 @@ const purchaseItemSlice = createSlice({
       state.importStatus = 'idle';
       state.importError = null;
       state.importMessage = null;
-      state.importResults = {
-        successful: [],
-        updated: [],
-        failed: []
-      };
     },
     resetExportStatus(state) {
       state.exportStatus = 'idle';
       state.exportError = null;
-    },
-    resetRollbackStatus(state) {
-      state.rollbackStatus = 'idle';
-      state.rollbackError = null;
-    },
-    clearBackups(state) {
-      state.backups = [];
     },
   },
   extraReducers: (builder) => {
@@ -650,33 +675,43 @@ const purchaseItemSlice = createSlice({
       .addCase(fetchPurchaseItems.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchPurchaseItems.fulfilled, (state, action) => {
-        state.loading = false;
-        const { items, totalItems, showDeactivated } = action.payload;
-
-        if (showDeactivated) {
-          state.deactivatedItems = items;
-        } else {
-          state.items = items;
-        }
-        state.totalItems = totalItems;
-        state.error = null;
-      })
+     // In your extraReducers, update the fetchPurchaseItems.fulfilled case:
+.addCase(fetchPurchaseItems.fulfilled, (state, action) => {
+  state.loading = false;
+  
+  const { items, totalItems, showDeactivated } = action.payload;
+  
+  if (showDeactivated) {
+    // When fetching deactivated items
+    state.deactivatedItems = items.filter((item: PurchaseItem) => item.status === 'deactivated');
+    state.totalItems = totalItems;
+  } else {
+    // When fetching active items
+    state.items = items.filter((item: PurchaseItem) => item.status === 'active');
+    state.totalItems = totalItems;
+    
+    // Also fetch deactivated items count separately if needed
+    const deactivatedCount = items.filter((item: PurchaseItem) => item.status === 'deactivated').length;
+    console.log('🔵 Deactivated items count:', deactivatedCount);
+  }
+  
+  state.error = null;
+})
       .addCase(fetchPurchaseItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch purchase items';
       })
 
-      // CATEGORIES
-      .addCase(fetchCategoriesItem.pending, (state) => {
+      // ✅ USE fetchCategories THUNK (from PurchaseCategorySlice)
+      .addCase(fetchCategories.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchCategoriesItem.fulfilled, (state, action) => {
+      .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
         state.categories = action.payload;
         state.error = null;
       })
-      .addCase(fetchCategoriesItem.rejected, (state, action) => {
+      .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch categories';
       })
@@ -696,20 +731,20 @@ const purchaseItemSlice = createSlice({
       })
 
       // TAX
-      .addCase(fetchTax.pending, (state) => {
+      .addCase(fetchPurchaseTaxes.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchTax.fulfilled, (state, action) => {
+      .addCase(fetchPurchaseTaxes.fulfilled, (state, action) => {
         state.loading = false;
         state.taxes = action.payload;
         state.error = null;
       })
-      .addCase(fetchTax.rejected, (state, action) => {
+      .addCase(fetchPurchaseTaxes.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch taxes';
       })
 
-      // LOCATIONS
+      // LOCATION
       .addCase(fetchStorageLocationItems.pending, (state) => {
         state.loading = true;
       })
@@ -723,7 +758,7 @@ const purchaseItemSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch locations';
       })
 
-      // GROUP ITEMS
+      // GROUP ITEM
       .addCase(fetchPurchaseGroupItems.pending, (state) => {
         state.loading = true;
       })
@@ -737,7 +772,7 @@ const purchaseItemSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch group items';
       })
 
-      // ITEM TYPES
+      // ITEM TYPE
       .addCase(fetchPurchaseItemtype.pending, (state) => {
         state.loading = true;
       })
@@ -771,13 +806,13 @@ const purchaseItemSlice = createSlice({
       })
       .addCase(addPurchaseItem.fulfilled, (state, action) => {
         state.loading = false;
-        state.items.unshift(action.payload);
+        state.items.push(action.payload);
         state.successMessage = 'Purchase item created successfully.';
         state.error = null;
       })
       .addCase(addPurchaseItem.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as any)?.message || 'Failed to add purchase item';
+        state.error = action.error.message || 'Failed to add purchase item';
       })
 
       // UPDATE
@@ -786,124 +821,90 @@ const purchaseItemSlice = createSlice({
       })
       .addCase(updatePurchaseItem.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.items.findIndex(item => item.purchaseitemId === action.payload.purchaseitemId);
-        if (index !== -1) {
-          state.items[index] = action.payload;
-        }
+        state.items = state.items.map((item) =>
+          item.purchaseitemId === action.payload.purchaseitemId ? { ...item, ...action.payload } : item
+        );
+        state.items = state.items.filter((item) => containsSearchQuery(item, state.searchQuery));
         state.successMessage = 'Purchase item updated successfully.';
         state.error = null;
       })
       .addCase(updatePurchaseItem.rejected, (state, action) => {
         state.loading = false;
-        state.error = (action.payload as any)?.message || 'Failed to update purchase item';
+        state.error = action.error.message || 'Failed to update purchase item';
       })
 
       // DEACTIVATE
-      .addCase(deactivatePurchaseItem.fulfilled, (state, action) => {
-        const itemToDeactivate = state.items.find(item => item.purchaseitemId === action.payload);
-        if (itemToDeactivate) {
-          const deactivatedItem = { ...itemToDeactivate, status: 'deactivated' };
-          state.items = state.items.filter(item => item.purchaseitemId !== action.payload);
-          state.deactivatedItems.unshift(deactivatedItem);
-        }
-        state.successMessage = 'Purchase item deactivated successfully.';
-      })
-      .addCase(deactivatePurchaseItem.rejected, (state, action) => {
-        state.error = (action.payload as string) || 'Failed to deactivate purchase item';
-      })
+      // In your purchaseItemSlice, update the deactivate extraReducer
+.addCase(deactivatePurchaseItem.fulfilled, (state, action) => {
+  state.loading = false;
+  
+  console.log('🔄 Redux: Processing deactivation for ID:', action.payload);
+  console.log('🔄 Redux: Items before deactivation:', state.items.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
+  
+  // Find the item being deactivated
+  const itemToDeactivate = state.items.find(item => item.purchaseitemId === action.payload);
+  console.log('🔄 Redux: Item to deactivate found:', itemToDeactivate);
+  
+  if (itemToDeactivate) {
+    // Update the item status to deactivated in items array
+    state.items = state.items.map((item) =>
+      item.purchaseitemId === action.payload ? { ...item, status: 'deactivated' } : item
+    );
+    
+    // Add to deactivatedItems array
+    state.deactivatedItems.push({ ...itemToDeactivate, status: 'deactivated' });
+    
+    // Remove from active items array
+    state.items = state.items.filter((item) => item.status !== 'deactivated');
+  }
+  
+  console.log('🔄 Redux: Items after deactivation:', state.items.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
+  console.log('🔄 Redux: Deactivated items after:', state.deactivatedItems.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
+  
+  state.successMessage = 'Purchase item deactivated successfully.';
+  state.error = null;
+})
 
       // ACTIVATE
+      .addCase(activatePurchaseItem.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(activatePurchaseItem.fulfilled, (state, action) => {
-        const itemToActivate = state.deactivatedItems.find(item => item.purchaseitemId === action.payload);
-        if (itemToActivate) {
-          const activatedItem = { ...itemToActivate, status: 'active' };
-          state.deactivatedItems = state.deactivatedItems.filter(item => item.purchaseitemId !== action.payload);
-          state.items.unshift(activatedItem);
-        }
+        state.loading = false;
+        state.deactivatedItems = state.deactivatedItems.filter(
+          (item) => item.purchaseitemId !== action.payload
+        );
+        state.items = state.items.map((item) =>
+          item.purchaseitemId === action.payload ? { ...item, status: 'active' } : item
+        );
         state.successMessage = 'Purchase item activated successfully.';
+        state.error = null;
       })
       .addCase(activatePurchaseItem.rejected, (state, action) => {
-        state.error = (action.payload as string) || 'Failed to activate purchase item';
+        state.loading = false;
+        state.error = action.error.message || 'Failed to activate purchase item';
       })
-.addCase(importPurchaseItems.fulfilled, (state, action: PayloadAction<ImportResponse>) => {
-  state.importStatus = 'succeeded';
-  state.importMessage = action.payload.message;
-  state.importError = null;
 
-  // The API returns successful with proper fields
-  const transformedSuccessful = (action.payload.successful || []).map((item: any) => ({
-    row: item.row,
-    data: {
-      itemName: item.itemName || '',
-      randomId: item.randomId || '',
-      barcode: item.barcode || 0,
-      ...(item.brandName && { brandName: item.brandName }),
-      ...(item.aliasName && { aliasName: item.aliasName }),
-      ...(item.shelfLife && { shelfLife: String(item.shelfLife) })
-    }
-  }));
+      // IMPORT
+      .addCase(importPurchaseItems.pending, (state) => {
+        state.importStatus = 'loading';
+        state.importError = null;
+        state.importMessage = null;
+      })
+      .addCase(importPurchaseItems.fulfilled, (state, action: PayloadAction<ImportResponse>) => {
+        state.importStatus = 'succeeded';
+        state.importMessage = action.payload.message;
+        state.importResults = {
+          successful: action.payload.successful || [],
+          updated: action.payload.updated || [],
+          failed: action.payload.failed || [],
+        };
+      })
+      .addCase(importPurchaseItems.rejected, (state, action) => {
+        state.importStatus = 'failed';
+        state.importError = action.error.message || 'Failed to import purchase items';
+      })
 
-  const transformedUpdated = (action.payload.updated || []).map((item: any) => ({
-    row: item.row,
-    data: { itemName: item.itemName || '' },
-    error: item.error
-  }));
-
-  const transformedFailed = (action.payload.failed || []).map((item: any) => ({
-    row: item.row,
-    data: item.data || {},
-    error: item.error,
-    missingFields: item.missingFields || []
-  }));
-
-  state.importResults = {
-    successful: transformedSuccessful,
-    updated: transformedUpdated,
-    failed: transformedFailed
-  };
-
-  // DON'T set snackbar message here - we'll use dialog only
-  // state.snackbarMessage = `Imported ${action.payload.inserted_count || 0} items, updated ${action.payload.updated_count || 0}`;
-  // state.snackbarOpen = true;
-})
-
-.addCase(importPurchaseItems.rejected, (state, action) => {
-  state.importStatus = 'failed';
-  const payload = action.payload as any;
-  state.importError = payload?.message || 'Failed to import purchase items';
-  
-  // Store the import results even on failure
-  if (payload?.successful) {
-    state.importResults.successful = payload.successful.map((item: any) => ({
-      row: item.row,
-      data: {
-        itemName: item.itemName || '',
-        randomId: item.randomId || '',
-        barcode: item.barcode || 0,
-        ...(item.brandName && { brandName: item.brandName }),
-        ...(item.aliasName && { aliasName: item.aliasName }),
-        ...(item.shelfLife && { shelfLife: String(item.shelfLife) })
-      }
-    }));
-  }
-  
-  if (payload?.updated) {
-    state.importResults.updated = payload.updated.map((item: any) => ({
-      row: item.row,
-      data: { itemName: item.itemName || '' },
-      error: item.error
-    }));
-  }
-  
-  if (payload?.failed) {
-    state.importResults.failed = payload.failed.map((item: any) => ({
-      row: item.row,
-      data: item.data || {},
-      error: item.error,
-      missingFields: item.missingFields || []
-    }));
-  }
-})
       // EXPORT
       .addCase(exportPurchaseItems.pending, (state) => {
         state.exportStatus = 'loading';
@@ -915,46 +916,16 @@ const purchaseItemSlice = createSlice({
       .addCase(exportPurchaseItems.rejected, (state, action) => {
         state.exportStatus = 'failed';
         state.exportError = action.error.message || 'Failed to export purchase items';
-      })
-
-      // FETCH BACKUPS
-      .addCase(fetchBackups.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchBackups.fulfilled, (state, action) => {
-        state.loading = false;
-        state.backups = action.payload;
-        state.error = null;
-      })
-      .addCase(fetchBackups.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Failed to fetch backups';
-      })
-
-      // ROLLBACK
-      .addCase(rollbackToBackup.pending, (state) => {
-        state.rollbackStatus = 'loading';
-        state.rollbackError = null;
-      })
-    // Update rollback.fulfilled case
-.addCase(rollbackToBackup.fulfilled, (state, action) => {
-  state.rollbackStatus = 'succeeded';
-  state.rollbackError = null;
-  // DON'T set snackbar message - dialog will show success
-  // state.snackbarMessage = action.payload.message || 'Rollback completed successfully';
-  // state.snackbarOpen = true;
-  state.loading = false;
-})
-
-.addCase(rollbackToBackup.rejected, (state, action) => {
-  state.rollbackStatus = 'failed';
-  state.rollbackError = (action.payload as any)?.message || 'Failed to rollback';
-  // DON'T set snackbar message - dialog will show error
-  // state.snackbarMessage = (action.payload as any)?.message || 'Rollback failed';
-  // state.snackbarOpen = true;
-});
+      });
   },
 });
+
+// ---------- HELPERS ----------
+const containsSearchQuery = (item: PurchaseItem, searchQuery: string) => {
+  const query = searchQuery.toLowerCase().trim();
+  const itemName = item.itemName ? item.itemName.toLowerCase() : '';
+  return itemName.includes(query);
+};
 
 // ---------- EXPORTS ----------
 export const {
@@ -978,15 +949,12 @@ export const {
   clearFilters,
   resetExportStatus,
   resetImportStatus,
-  resetRollbackStatus,
-  clearBackups,
 } = purchaseItemSlice.actions;
 
 export const selectCurrentPage = (state: RootState) => state.purchaseItems.currentPage;
 export const selectPageSize = (state: RootState) => state.purchaseItems.pageSize;
 export const selectTotalItems = (state: RootState) => state.purchaseItems.totalItems;
 export const selectPurchaseItems = (state: RootState) => state.purchaseItems;
-export const selectBackups = (state: RootState) => state.purchaseItems.backups;
-export const selectRollbackStatus = (state: RootState) => state.purchaseItems.rollbackStatus;
 
 export default purchaseItemSlice.reducer;
+

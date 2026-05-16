@@ -35,6 +35,7 @@ import {
   setShowStockUpdateDialog,
   setShowReturnStockUpdateDialog,
   clearLastReturnData,
+  checkInvoiceAvailability,
 } from '../../../features/yen-purchase/GRN/grnSlice';
 import { ArrowDownward, ArrowUpward, ChevronLeft, ChevronRight, FilterList as FilterListIcon } from '@mui/icons-material';
 // import '../../../components/common.css'
@@ -123,6 +124,12 @@ const GrnPage = () => {
   const [dialogueviewOpen, setDialogueViewOpen] = React.useState(false);
   const grns = useSelector((state: RootState) => state.grn.grns);
   const selectedGrnId = useSelector((state: RootState) => state.grn.selectedGrnId);
+  // Add near other useState declarations
+const [invoiceAvailability, setInvoiceAvailability] = useState<{
+  available: boolean;
+  message: string;
+  checking: boolean;
+}>({ available: true, message: "", checking: false });
   const [editedItems, setEditedItems] = useState<{
     [key: string]: {
       nos: number; igst: number; eachQuantity: number; hsnCode: string; quantity: number; receivedQuantity: number, returnedQuantity: number, taxType: 'cgst_sgst' | 'igst'; damagedQuantity: number, expiryDate: Date | string | null; unitPrice: number, discount: number, totalPrice: number, purchasetaxName: number, sgst: number, cgst: number, discountAmount: number; taxAmount: number; finalPrice: number, befTaxDiscount: number; afTaxDiscount: number; befTaxDiscountAmount: number; afTaxDiscountAmount: number; purchasecategoryName: string; purchasesubcategoryName: any; returnReason?: string; // Add return reason
@@ -275,6 +282,7 @@ const GrnPage = () => {
       stockUpdatesKeys: lastReturnStockUpdates ? Object.keys(lastReturnStockUpdates) : []
     });
   }, [showReturnStockUpdateDialog, lastReturnStockUpdates, lastReturnedGrnId]);
+
   useEffect(() => {
     if (!canRead) return; // 🔥 IMPORTANT LINE (STEP 3)
 
@@ -472,6 +480,47 @@ const GrnPage = () => {
       console.error(`GRN with ID ${grnId} not found`);
     }
   };
+  // Real-time invoice number validation for GRN edit
+useEffect(() => {
+  // Only validate when invoiceOpen is true
+  if (!invoiceOpen || !selectedGrn?.vendorName) {
+    setInvoiceAvailability({ available: true, message: "", checking: false });
+    return;
+  }
+
+  // Don't check if invoice number is empty
+  if (!invoiceNo || invoiceNo.trim() === "") {
+    setInvoiceAvailability({ available: true, message: "", checking: false });
+    return;
+  }
+
+  // Debounce the API call
+  const timer = setTimeout(async () => {
+    setInvoiceAvailability(prev => ({ ...prev, checking: true }));
+    try {
+      const result = await dispatch(checkInvoiceAvailability({
+        invoiceNo: invoiceNo,
+        vendorName: selectedGrn.vendorName,
+        currentGrnId: selectedGrnId || undefined
+      })).unwrap();
+      
+      setInvoiceAvailability({
+        available: result.available,
+        message: result.message,
+        checking: false
+      });
+    } catch (error) {
+      console.error("Error checking invoice:", error);
+      setInvoiceAvailability({
+        available: true,
+        message: "Could not verify invoice number",
+        checking: false
+      });
+    }
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [invoiceNo, selectedGrn?.vendorName, selectedGrnId, invoiceOpen, dispatch]);
   const handleReturnClick = (grnId: string) => {
   const grn = grns.find((g) => g.grnId === grnId);
   if (grn && grn.itemDetails) {
@@ -520,61 +569,70 @@ const GrnPage = () => {
     };
   };
   const apAmounts = calculateAPAmounts();
-  // Update the handleSaveInvoice function
   const handleSaveInvoice = async () => {
-    if (!invoiceNo || !invoiceDate || !selectedGrnId) {
-      console.error('Invoice No, Invoice Date, or GRN ID is missing');
-      return;
-    }
+  if (!invoiceNo || !invoiceDate || !selectedGrnId) {
+    console.error('Invoice No, Invoice Date, or GRN ID is missing');
+    setSnackbarMessage('Invoice No, Invoice Date, or GRN ID is missing');
+    setSnackbarOpen(true);
+    return;
+  }
 
-    const grnId = selectedGrnId;
-    if (grnId === null) {
-      console.error('GRN ID cannot be null');
-      return;
-    }
+  // FINAL VALIDATION before saving
+  if (!invoiceAvailability.available) {
+    setSnackbarMessage(invoiceAvailability.message || 'Invoice number is not available');
+    setSnackbarOpen(true);
+    return;
+  }
 
-    // Disable the Save button by setting loading state
-    setIsSavingInvoice(true);
+  const grnId = selectedGrnId;
+  if (grnId === null) {
+    console.error('GRN ID cannot be null');
+    return;
+  }
 
-    try {
-      // Prepare the payload for the API request
-      const updatedInvoiceDetails = {
-        grnId: grnId,
-        invoiceNo,
-        invoiceDate: invoiceDate.toISOString(),
-      };
+  // Disable the Save button by setting loading state
+  setIsSavingInvoice(true);
 
-      // Dispatch the thunk to update the invoice details
-      await dispatch(updateInvoiceDetails(updatedInvoiceDetails)).unwrap();
+  try {
+    // Prepare the payload for the API request
+    const updatedInvoiceDetails = {
+      grnId: grnId,
+      invoiceNo,
+      invoiceDate: invoiceDate.toISOString(),
+    };
 
-      console.log('Invoice updated successfully');
+    // Dispatch the thunk to update the invoice details
+    await dispatch(updateInvoiceDetails(updatedInvoiceDetails)).unwrap();
 
-      // Fetch the most recent GRNs after successful update
-      await dispatch(fetchGrns({ page: newPage, size: pageSize, status }));
+    console.log('Invoice updated successfully');
 
-      console.log('Recent GRNs fetched successfully');
+    // Fetch the most recent GRNs after successful update
+    await dispatch(fetchGrns({ page: newPage, size: pageSize, status }));
 
-      // Show success message
-      setSnackbarMessage('Invoice details updated successfully');
-      setSnackbarOpen(true);
+    console.log('Recent GRNs fetched successfully');
 
-      // Close the dialog
-      setInvoiceOpen(false);
+    // Show success message
+    setSnackbarMessage('Invoice details updated successfully');
+    setSnackbarOpen(true);
 
-      // Reset form fields
-      setInvoiceNo('');
-      setInvoiceDate(null);
-      setIsTouched(false);
+    // Close the dialog
+    setInvoiceOpen(false);
 
-    } catch (error) {
-      console.error('Error updating invoice:', error);
-      setSnackbarMessage('Failed to update invoice details');
-      setSnackbarOpen(true);
-    } finally {
-      // Re-enable the Save button
-      setIsSavingInvoice(false);
-    }
-  };
+    // Reset form fields
+    setInvoiceNo('');
+    setInvoiceDate(null);
+    setIsTouched(false);
+    setInvoiceAvailability({ available: true, message: "", checking: false });
+
+  } catch (error) {
+    console.error('Error updating invoice:', error);
+    setSnackbarMessage('Failed to update invoice details');
+    setSnackbarOpen(true);
+  } finally {
+    // Re-enable the Save button
+    setIsSavingInvoice(false);
+  }
+};
   const handleHeaderSelectChange = (header: string) => {
     // Toggle header selection and dispatch to Redux
     const newSelectedHeaders = selectedHeaders.includes(header)
@@ -2394,60 +2452,77 @@ const handleFilterClose = () => {
             <Button onClick={handleDialogClose}>Close</Button>
           </DialogActions>
         </Dialog>
-        <Dialog open={invoiceOpen} onClose={handleInvoiceDialogClose}>
-          <DialogTitle>Edit Invoice Details</DialogTitle>
-          <DialogContent>
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Invoice No"
-                  type="text"
-                  value={invoiceNo}
-                  onChange={(e) => setInvoiceNo(e.target.value)}
-                  fullWidth
-                  disabled={isSavingInvoice}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <UnifiedDatePicker
-                  value={invoiceDate}
-                  onChange={(date) => {
-                    setInvoiceDate(date);
-                    setIsTouched(true);
-                  }}
-                  onValidationChange={(isValid) => {
-                    // Optional: handle validation state
-                  }}
-                  dateType="invoice"
-                  label="Invoice Date"
-                  required={true}
-                  orderDate={selectedGrn?.grnDate ? new Date(selectedGrn.grnDate) : null}
-                  skipInitialValidation={true}
-                  disabled={isSavingInvoice}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleInvoiceDialogClose}
-              variant='contained'
-              color="primary"
-              disabled={isSavingInvoice}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSaveInvoice}
-              variant='contained'
-              color="primary"
-              disabled={isSavingInvoice}
-            >
-              {isSavingInvoice ? <CircularProgress size={24} /> : 'Save'}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
+       <Dialog open={invoiceOpen} onClose={handleInvoiceDialogClose}>
+  <DialogTitle>Edit Invoice Details</DialogTitle>
+  <DialogContent>
+    <Grid container spacing={2} sx={{ mt: 1 }}>
+      <Grid item xs={12}>
+        <TextField
+          label="Invoice No"
+          type="text"
+          value={invoiceNo}
+          onChange={(e) => {
+            setInvoiceNo(e.target.value);
+            setIsTouched(true);
+          }}
+          fullWidth
+          disabled={isSavingInvoice}
+          error={isTouched && !invoiceAvailability.available}
+          helperText={
+            !invoiceNo 
+              ? 'Invoice number is required!'
+              : invoiceAvailability.checking 
+                ? 'Checking invoice number...'
+                : !invoiceAvailability.available 
+                  ? invoiceAvailability.message 
+                  : ''
+          }
+          InputProps={{
+            endAdornment: invoiceAvailability.checking && (
+              <CircularProgress size={20} />
+            )
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <UnifiedDatePicker
+          value={invoiceDate}
+          onChange={(date) => {
+            setInvoiceDate(date);
+            setIsTouched(true);
+          }}
+          onValidationChange={(isValid) => {
+            // Optional: handle validation state
+          }}
+          dateType="invoice"
+          label="Invoice Date"
+          required={true}
+          orderDate={selectedGrn?.grnDate ? new Date(selectedGrn.grnDate) : null}
+          skipInitialValidation={true}
+          disabled={isSavingInvoice}
+        />
+      </Grid>
+    </Grid>
+  </DialogContent>
+  <DialogActions>
+    <Button
+      onClick={handleInvoiceDialogClose}
+      variant='contained'
+      color="primary"
+      disabled={isSavingInvoice}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={handleSaveInvoice}
+      variant='contained'
+      color="primary"
+      disabled={isSavingInvoice || !invoiceAvailability.available || !invoiceNo}
+    >
+      {isSavingInvoice ? <CircularProgress size={24} /> : 'Save'}
+    </Button>
+  </DialogActions>
+</Dialog>
         <Dialog open={dialogSaveOpen} onClose={handleCancel}>
           <DialogTitle>Confirm Submission</DialogTitle>
           <DialogContent>

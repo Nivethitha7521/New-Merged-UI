@@ -16,6 +16,7 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Alert,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
@@ -23,6 +24,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ClearIcon from "@mui/icons-material/Clear";
 import VerifiedIcon from '@mui/icons-material/Verified';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { AppDispatch, RootState } from '@/redux/store';
 import {
   fetchApInvoices,
@@ -81,7 +83,7 @@ import { GrnResponse, ItemDetail, ItemDetailResponse } from '@/Models/grnModel';
 import { fetchGrnById, selectGrn } from '@/features/yen-purchase/GRN/grnSlice';
 import { fetchPoById, selectPurchaseListState, setPoDialogOpen, setSelectedPo } from '@/features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import { ItemDetailResponsePO, PoResponse } from '@/Models/purchaseModel';
-import { fetchServiceById } from '@/app/yen-purchase/ServiceOrder/Features/servicelist';
+import { fetchServiceById, returnServiceInvoice, selectReturnServiceError, selectReturnServiceLoading } from '@/app/yen-purchase/ServiceOrder/Features/servicelist';
 import { ServiceData } from '@/app/yen-purchase/ServiceOrder/Models/servicepo';
 import GrnDialog from '@/components/yen-purchase/OutgoingComponent/GRNDialog';
 import PODialog from '@/components/yen-purchase/OutgoingComponent/PODialog';
@@ -137,6 +139,9 @@ const VerifiedApInvoicePage: React.FC = () => {
 
   // Verification selectors
   const verificationLoading = useSelector(selectVerificationLoading);
+  // Service return selectors
+  const returnServiceLoading = useSelector(selectReturnServiceLoading);
+  const returnServiceError = useSelector(selectReturnServiceError);
 
   const { businesses } = useSelector(selectBusinesses);
   const statuses = useSelector(selectStatuses);
@@ -165,6 +170,8 @@ const VerifiedApInvoicePage: React.FC = () => {
   const [dialogSummaryOpen, setDialogSummaryOpen] = useState(false);
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<string>('all');
   const [anchorElDownload, setAnchorElDownload] = useState<null | HTMLElement>(null);
+    const [returnRemarks, setReturnRemarks] = useState('');
+
   const [selectionRange, setSelectionRange] = useState({
     startDate: new Date(),
     endDate: new Date(),
@@ -235,7 +242,26 @@ const VerifiedApInvoicePage: React.FC = () => {
       dispatch(resetStatuses());
     };
   }, [dispatch, pageSize]);
+// Handle return service success
+useEffect(() => {
+  if (!returnServiceLoading && returnServiceError === null && returnDialogOpen) {
+    // Success - close dialogs and refresh
+    setReturnDialogOpen(false);
+    setDetailsDialogOpen(false);
+    dispatch(setSnackbarMessage('Service invoice returned successfully'));
+    dispatch(setSnackbarOpen(true));
+    refetchWithFilters();
+    setReturnRemarks('');
+  }
+}, [returnServiceLoading, returnServiceError, dispatch, returnDialogOpen]);
 
+// Handle return service error
+useEffect(() => {
+  if (returnServiceError) {
+    dispatch(setSnackbarMessage(returnServiceError));
+    dispatch(setSnackbarOpen(true));
+  }
+}, [returnServiceError, dispatch]);
   useEffect(() => {
     if (isInitialLoad) return;
     const timer = setTimeout(() => {
@@ -1381,24 +1407,64 @@ const confirmVerification = async () => {
       console.error('Service fetch error:', error);
     }
   };
-
-  // Return AP handler
-  const handleReturnAp = async () => {
+  const handleReturnClick = () => {
     if (!selectedInvoice) return;
+
+    if (selectedInvoice.invoiceType === 'service') {
+      // For service invoices, open return dialog with remarks
+      setReturnDialogOpen(true);
+    } else {
+      // For goods invoices, open GRN return dialog
+      setReturnDialogOpen(true);
+    }
+  };
+  const handleConfirmReturn = async () => {
+    if (!selectedInvoice) return;
+
     setLoading(true);
     try {
-      await dispatch(convertToGrnFromApReturned(selectedInvoice.invoiceId)).unwrap();
-      refetchWithFilters();
-    } catch (err) {
-      console.error('Error converting AP to GRN:', err);
+      if (selectedInvoice.invoiceType === 'service') {
+        // Use serOId which contains the service MongoDB ObjectId
+        const serviceObjectId = selectedInvoice.serOId;
+
+        if (!serviceObjectId) {
+          throw new Error('Service ID not found in invoice data');
+        }
+
+        console.log('Using service ObjectId:', serviceObjectId);
+
+        await dispatch(returnServiceInvoice({
+          serviceId: serviceObjectId,
+          remarks: returnRemarks
+        })).unwrap();
+
+        // Success - close dialogs and refresh
+        setReturnDialogOpen(false);
+        setDetailsDialogOpen(false);
+        dispatch(setSnackbarMessage('Service returned to Pending successfully'));
+        dispatch(setSnackbarOpen(true));
+        refetchWithFilters();
+        setReturnRemarks('');
+
+      } else {
+        // For goods invoices - call GRN return API
+        await dispatch(convertToGrnFromApReturned(selectedInvoice.invoiceId)).unwrap();
+
+        setReturnDialogOpen(false);
+        setDetailsDialogOpen(false);
+        dispatch(setSnackbarMessage('Goods invoice returned to GRN successfully'));
+        dispatch(setSnackbarOpen(true));
+        refetchWithFilters();
+      }
+    } catch (err: any) {
+      console.error('Error returning invoice:', err);
+      dispatch(setSnackbarMessage(err?.message || err || 'Failed to return invoice'));
+      dispatch(setSnackbarOpen(true));
     } finally {
-      setReturnDialogOpen(false);
-      setDetailsDialogOpen(false);
       setLoading(false);
     }
   };
-
-  // Fullscreen toggle
+    // Fullscreen toggle
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
@@ -2128,45 +2194,62 @@ const confirmVerification = async () => {
               </Box>
             )}
           </DialogContent>
-          <DialogActions>
-            {selectedInvoice?.invoiceType === 'goods' &&
-              selectedInvoice?.status === 'Outgoing Posted' && (
-                <Tooltip title={canEdit ? "Return GRN" : "You don't have permission"}>
-                  <span>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => setReturnDialogOpen(true)}
-                      sx={{ minWidth: '150px' }}
-                      disabled={!canEdit}
-                    >
-                      Return GRN
-                    </Button>
-                  </span>
-                </Tooltip>
-              )}
-            {canApprove &&
-              selectedInvoice?.status !== 'Verified' &&
-              selectedInvoice?.status !== 'Fully Paid' && (
-                <Tooltip title="Verify Invoice">
-                  <Button
-                    variant="contained"
-                    color="success"
-                    onClick={() => handleSingleVerification(selectedInvoice)}
-                    startIcon={<VerifiedIcon />}
-                    sx={{ minWidth: '150px' }}
-                    disabled={verificationLoading}
-                  >
-                    {verificationLoading ? 'Verifying...' : 'Verify Invoice'}
-                  </Button>
-                </Tooltip>
-              )}
-            <Button variant="contained" onClick={handleCloseDetailsDialog}>Close</Button>
-          </DialogActions>
+     <DialogActions sx={{ p: 2, gap: 1 }}>
+  {/* {selectedInvoice?.invoiceType === 'goods' && selectedInvoice?.status === 'Pending Payment' && (
+    <Tooltip title={canEdit ? "Return GRN" : "You don't have permission"}>
+      <span>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleReturnClick}
+          sx={{ minWidth: '150px' }}
+          disabled={!canEdit}
+        >
+          Return GRN
+        </Button>
+      </span>
+    </Tooltip>
+  )}  */}
+
+  {selectedInvoice?.status === 'Pending Payment' && (
+    <Tooltip title={canEdit ? (selectedInvoice?.invoiceType === 'service' ? "Return Service" : "Return GRN") : "You don't have permission"}>
+      <span>
+        <Button
+          variant="contained"
+          color={selectedInvoice?.invoiceType === 'service' ? 'warning' : 'primary'}
+          onClick={handleReturnClick}
+          sx={{ minWidth: '150px' }}
+          startIcon={selectedInvoice?.invoiceType === 'service' ? <RefreshIcon /> : null}
+          disabled={!canEdit}
+        >
+          {selectedInvoice?.invoiceType === 'service' ? 'Return Service' : 'Return GRN'}
+        </Button>
+      </span>
+    </Tooltip>
+  )}
+
+  {/* Verify Button */}
+  {canApprove && selectedInvoice?.status !== 'Verified' && selectedInvoice?.status !== 'Fully Paid' && (
+    <Tooltip title="Verify Invoice">
+      <Button
+        variant="contained"
+        color="success"
+        onClick={() => handleSingleVerification(selectedInvoice)}
+        startIcon={<VerifiedIcon />}
+        sx={{ minWidth: '150px' }}
+        disabled={verificationLoading}
+      >
+        {verificationLoading ? 'Verifying...' : 'Verify Invoice'}
+      </Button>
+    </Tooltip>
+  )}
+  
+  <Button variant="contained" onClick={handleCloseDetailsDialog}>Close</Button>
+</DialogActions>
         </Dialog>
 
         {/* Verification Confirmation Dialog */}
-        <Dialog open={verificationDialogOpen} onClose={() => !verificationLoading && setVerificationDialogOpen(false)}>
+        <Dialog open={verificationDialogOpen} onClose={() => !verificationLoading && setVerificationDialogOpen(false)} maxWidth="sm">
           <DialogTitle>Confirm Verification</DialogTitle>
           <DialogContent>
             <DialogContentText>
@@ -2204,22 +2287,6 @@ const confirmVerification = async () => {
           onClose={() => dispatch(clearSnackbarMessage())}
           message={snackbarMessage}
         />
-
-        {/* Return AP Invoice Confirmation Dialog */}
-        <Dialog open={returnDialogOpen} onClose={() => setReturnDialogOpen(false)}>
-          <DialogTitle>Return AP Invoice</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to return the AP Invoice?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setReturnDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleReturnAp} color="primary">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         <Backdrop
           sx={{
@@ -2320,7 +2387,64 @@ const confirmVerification = async () => {
         />
 
         <DebitCreditNoteDialog />
+    {/* Return Confirmation Dialog - For both Goods and Service */}
+        <Dialog open={returnDialogOpen} onClose={() => !loading && setReturnDialogOpen(false)} maxWidth="sm">
+          <DialogTitle>
+            {selectedInvoice?.invoiceType === 'service' ? 'Return Service Invoice' : 'Return GRN'}
+          </DialogTitle>
+          <DialogContent>
+            {selectedInvoice?.invoiceType === 'service' ? (
+              <>
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2">Returning Service Invoice</Typography>
+                  <Typography variant="body2">
+                    This will mark the service invoice as returned. You can reconvert it later.
+                  </Typography>
+                </Alert>
 
+                <DialogContentText sx={{ mb: 2 }}>
+                  <strong>Service ID:</strong> {selectedInvoice?.serviceId || selectedInvoice?.invoiceId}<br />
+                  <strong>Vendor:</strong> {selectedInvoice?.vendorName}<br />
+                  <strong>Amount:</strong> ₹{selectedInvoice?.invoiceAmount.toFixed(2)}
+                </DialogContentText>
+
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  label="Return Remarks"
+                  type="text"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  variant="outlined"
+                  value={returnRemarks}
+                  onChange={(e) => setReturnRemarks(e.target.value)}
+                  placeholder="Enter reason for return..."
+                />
+              </>
+            ) : (
+              <DialogContentText>
+                Are you sure you want to return this GRN?
+                <br /><br />
+                <strong>GRN ID:</strong> {selectedInvoice?.grnRandomId}<br />
+                <strong>Vendor:</strong> {selectedInvoice?.vendorName}
+              </DialogContentText>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setReturnDialogOpen(false)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmReturn}
+              color="primary"
+              variant="contained"
+              disabled={loading || (selectedInvoice?.invoiceType === 'service' && !returnRemarks.trim())}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Confirm Return'}
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
           open={snackbarOpen}
           message={snackbarMessage}

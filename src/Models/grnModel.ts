@@ -521,6 +521,13 @@ export interface GrnState {
   lastReturnStockUpdates?: ReturnStockUpdateResult;
   lastReturnedGrnId?: string | null;
   showReturnStockUpdateDialog: boolean;
+
+    invoiceAvailability: {
+    checking: boolean;
+    available: boolean;
+    message: string;
+    error: string | null;
+  };
 }
 
 // ====== INITIAL STATE ======
@@ -607,5 +614,10 @@ export const initialState: GrnState = {
   lastReturnStockUpdates: undefined,
   lastReturnedGrnId: null,
   showReturnStockUpdateDialog: false,
-
+  invoiceAvailability: {
+    checking: false,
+    available: true,
+    message: "",
+    error: null
+  }
 };

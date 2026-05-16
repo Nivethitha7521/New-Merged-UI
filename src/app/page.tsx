@@ -75,7 +75,7 @@ if (!browserSessionId) {
 }
   try {
     // ✅ CORRECT URL - Call your FastAPI backend on port 8000
- const response = await fetch('http://192.168.1.102:8000/purchaseapi/login', {
+ const response = await fetch('https://yenerp.com/purchaseapi/login', {
   method: 'POST',
   headers: {
     'Authorization': `Basic ${btoa(`${trimmedUsername}:${trimmedPassword}`)}`,

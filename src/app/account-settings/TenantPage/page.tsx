@@ -34,7 +34,7 @@ const [snackbar, setSnackbar] = useState({
 });
 
 
-  const API = "http://192.168.1.102:8000/purchaseapi";
+  const API = "https://yenerp.com/purchaseapi";
 
   // ✅ Fetch tenants
  const fetchTenants = async () => {

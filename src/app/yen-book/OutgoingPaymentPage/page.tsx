@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import {
@@ -25,7 +25,10 @@ import {
   Tooltip,
   IconButton,
   Autocomplete,
-  AutocompleteChangeReason
+  AutocompleteChangeReason,
+  Menu,
+  MenuItem,
+  Divider
 } from '@mui/material';
 import YenBookPage from '../page';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -34,7 +37,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import PaymentIcon from '@mui/icons-material/Payment';
-import SettingsIcon from '@mui/icons-material/Settings';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import {
   fetchOutgoings,
   selectOutgoings, fetchVendorDetails, fetchBank, selectTotalItems, setPagination,
@@ -44,6 +47,8 @@ import {
   syncSelectionsWithCurrentData,
   clearSelection,
   fetchOutgoingStatuses,
+  initializePreferences,
+  toggleColumnVisibility
 } from '../../../features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import { fetchGrnById, fetchItemwiseGrns, selectGrn } from '@/features/yen-purchase/GRN/grnSlice';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -76,11 +81,6 @@ import { ServiceData } from '@/app/yen-purchase/ServiceOrder/Models/servicepo';
 import ServiceDialog from '@/app/yen-purchase/ServiceOrder/Components/ServiceDialog';
 import { fetchServiceById } from '@/app/yen-purchase/ServiceOrder/Features/servicelist';
 import { usePermissions } from "@/hooks/usePermissions";
-import ColumnSettingsDialog from '../OutgoingPaymentPage/Components/ColumnSettingsDialog';
-import {
-  initializePreferences,
-  selectVisibleColumns,
-} from '../OutgoingPaymentPage/Features/columnPreferencesSlice';
 import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
 
 const OutgoingPaymentComponent = React.memo(() => {
@@ -125,10 +125,63 @@ const OutgoingPaymentComponent = React.memo(() => {
   const dateField = 'invoiceDate';
   const fromDate = moment().utc().startOf('day').toDate();
   const toDate = moment().utc().endOf('day').toDate();
-  const [columnSettingsOpen, setColumnSettingsOpen] = useState(false);
-  const visibleColumns = useSelector(selectVisibleColumns);
+  const [columnFilterAnchorEl, setColumnFilterAnchorEl] = useState<null | HTMLElement>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
+  // Replace your useState for visibleColumns with this:
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const defaultColumns = [
+      { id: 'serialNo', label: 'S.No', align: 'center', sortable: false, visible: true },
+      { id: 'select', label: 'Select', align: 'center', sortable: false, visible: true },
+      { id: 'poNo', label: 'PO.No/SO.No', align: 'left', sortable: false, visible: true },
+      { id: 'grnNo', label: 'GRN No', align: 'left', sortable: false, visible: true },
+      { id: 'apNo', label: 'AP No', align: 'left', sortable: false, visible: true },
+      { id: 'outgoingNo', label: 'Outgoing No', align: 'left', sortable: false, visible: true },
+      { id: 'vendorName', label: 'Vendor Name', align: 'left', sortable: true, visible: true },
+      { id: 'type', label: 'Type', align: 'left', sortable: false, visible: true },
+      { id: 'invoiceNo', label: 'Invoice No', align: 'left', sortable: false, visible: true },
+      { id: 'invoiceDate', label: 'Invoice Date', align: 'left', sortable: true, visible: true },
+      { id: 'invoiceAmount', label: 'Invoice Amount', align: 'right', sortable: false, visible: true },
+      { id: 'taxDetails', label: 'Tax Details', align: 'left', sortable: false, visible: true },
+      { id: 'discountAmount', label: 'Discount Amount', align: 'right', sortable: false, visible: true },
+      { id: 'total', label: 'Total', align: 'right', sortable: false, visible: true },
+      { id: 'paidAmount', label: 'Paid Amount', align: 'right', sortable: false, visible: true },
+      { id: 'remainingAmount', label: 'Remaining Amount', align: 'right', sortable: false, visible: true },
+      { id: 'dueDays', label: 'Due Days', align: 'center', sortable: true, visible: true },
+      { id: 'paymentTerms', label: 'Payment Terms', align: 'center', sortable: true, visible: true },
+      { id: 'verifiedBy', label: 'Verified By', align: 'left', sortable: false, visible: true },
+      { id: 'verifiedDate', label: 'Verified Date', align: 'center', sortable: false, visible: true },
+      { id: 'action', label: 'Action', align: 'center', sortable: false, visible: true },
+    ];
+
+    try {
+      const saved = localStorage.getItem('outgoingPaymentColumnPreferences');
+      if (saved) {
+        const preferences = JSON.parse(saved);
+        return defaultColumns.map(col => ({
+          ...col,
+          visible: preferences.find((p: any) => p.id === col.id)?.visible ?? col.visible
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to load column preferences:', e);
+    }
+
+    return defaultColumns;
+  });
+
+  // And initialize tempVisibleColumns the same way:
+  const [tempVisibleColumns, setTempVisibleColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem('outgoingPaymentColumnPreferences');
+      if (saved) {
+        const preferences = JSON.parse(saved);
+        return preferences.filter((p: any) => p.visible).map((p: any) => p.id);
+      }
+    } catch (e) { }
+    return ['serialNo', 'select', 'poNo', 'grnNo', 'apNo', 'outgoingNo', 'vendorName', 'type', 'invoiceNo', 'invoiceDate', 'invoiceAmount', 'taxDetails', 'discountAmount', 'total', 'paidAmount', 'remainingAmount', 'dueDays', 'paymentTerms', 'verifiedBy', 'verifiedDate', 'action'];
+  });
+  const hasMounted = useRef(false);
   const [confirmDialogProps, setConfirmDialogProps] = useState<{
     title: string;
     description: string | JSX.Element;
@@ -145,37 +198,131 @@ const OutgoingPaymentComponent = React.memo(() => {
     return itemwiseap.find(ap => ap.invoiceId === selectedinvoiceId) || null;
   }, [selectedinvoiceId, itemwiseap]);
 
-  // Initialize column preferences
-  useEffect(() => {
-    dispatch(initializePreferences());
-  }, [dispatch]);
+  // Column names for display
+  const columnNameMap: Record<string, string> = {
+    serialNo: 'S.No',
+    select: 'Select',
+    poNo: 'PO.No/SO.No',
+    grnNo: 'GRN No',
+    apNo: 'AP No',
+    outgoingNo: 'Outgoing No',
+    vendorName: 'Vendor Name',
+    type: 'Type',
+    invoiceNo: 'Invoice No',
+    invoiceDate: 'Invoice Date',
+    invoiceAmount: 'Invoice Amount',
+    taxDetails: 'Tax Details',
+    discountAmount: 'Discount Amount',
+    total: 'Total',
+    paidAmount: 'Paid Amount',
+    remainingAmount: 'Remaining Amount',
+    dueDays: 'Due Days',
+    paymentTerms: 'Payment Terms',
+    verifiedBy: 'Verified By',
+    verifiedDate: 'Verified Date',
+    action: 'Action'
+  };
+
+  // All columns for filter menu
+  const allTableColumns = [
+    'serialNo', 'select', 'poNo', 'grnNo', 'apNo', 'outgoingNo', 'vendorName',
+    'type', 'invoiceNo', 'invoiceDate', 'invoiceAmount', 'taxDetails',
+    'discountAmount', 'total', 'paidAmount', 'remainingAmount', 'dueDays',
+    'paymentTerms', 'verifiedBy', 'verifiedDate', 'action'
+  ];
+
+  const handleColumnFilterClick = (event: React.MouseEvent<HTMLElement>) => {
+    setColumnFilterAnchorEl(event.currentTarget);
+    setTempVisibleColumns(visibleColumns.filter(col => col.visible).map(col => col.id));
+  };
+
+const handleColumnToggle = (columnId: string) => {
+  // Update tempVisibleColumns
+  const newTempVisibleColumns = tempVisibleColumns.includes(columnId)
+    ? tempVisibleColumns.filter((id: string) => id !== columnId)
+    : [...tempVisibleColumns, columnId];
+
+  setTempVisibleColumns(newTempVisibleColumns);
+
+  // Immediately update visibleColumns
+  setVisibleColumns(prev =>
+    prev.map(col => ({
+      ...col,
+      visible: newTempVisibleColumns.includes(col.id)
+    }))
+  );
+};
+  const handleColumnFilterClose = () => {
+    setColumnFilterAnchorEl(null);
+  };
 
   useEffect(() => {
-    if (!canRead) return;
-    if (loadingState === 'idle') {
-      const defaultSortBy = sortColumn ? sortColumn : 'createdDate';
-      const defaultSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
-      const sortFieldMap: { [key: string]: string } = {
-        dueDays: 'intimationDays',
-        paymentTerms: 'paymentTerms',
-        payableAmount: 'payableAmount',
-        totalPaid: 'totalPaid',
-        remainingAmount: 'totalPayableAmount',
-        totalPrice: 'totalPrice',
-        invoiceDate: 'invoiceDate',
-        vendorName: 'vendorName'
-      };
-      const backendSortField = sortFieldMap[defaultSortBy] || 'createdDate';
-      dispatch(fetchOutgoings({
-        page: newPage,
-        size: pageSize,
-        filterByAmount: true,
-        filterBy: 'invoiceDate',
-        sortBy: backendSortField,
-        sortOrder: defaultSortOrder
-      }));
+    const loadPreferences = () => {
+      try {
+        const savedPreferences = localStorage.getItem('outgoingPaymentColumnPreferences');
+        if (savedPreferences) {
+          const preferences = JSON.parse(savedPreferences);
+          // Update visibleColumns based on saved preferences
+          setVisibleColumns(prev =>
+            prev.map(col => ({
+              ...col,
+              visible: preferences.find((p: any) => p.id === col.id)?.visible ?? col.visible
+            }))
+          );
+          // Update tempVisibleColumns
+          const visibleColumnIds = preferences
+            .filter((p: any) => p.visible)
+            .map((p: any) => p.id);
+          setTempVisibleColumns(visibleColumnIds);
+        } else {
+          // Set default: all columns visible
+          const allVisibleIds = visibleColumns.filter(col => col.visible).map(col => col.id);
+          setTempVisibleColumns(allVisibleIds);
+        }
+      } catch (error) {
+        console.error('Failed to load column preferences:', error);
+      }
+    };
+
+    loadPreferences();
+  }, []);
+
+  // Keep only this — just saving, no loading useEffect needed anymore
+  useEffect(() => {
+    try {
+      const preferences = visibleColumns.map(col => ({ id: col.id, visible: col.visible }));
+      localStorage.setItem('outgoingPaymentColumnPreferences', JSON.stringify(preferences));
+    } catch (e) {
+      console.error('Failed to save column preferences:', e);
     }
-  }, [dispatch, loadingState, dateField, newPage, pageSize, sortColumn, sortOrder, canRead]);
+  }, [visibleColumns]);
+  useEffect(() => {
+    if (!canRead) return;
+    if (hasMounted.current) return;
+    hasMounted.current = true;
+
+    const defaultSortBy = sortColumn ? sortColumn : 'createdDate';
+    const defaultSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
+    const sortFieldMap: { [key: string]: string } = {
+      dueDays: 'intimationDays',
+      paymentTerms: 'paymentTerms',
+      payableAmount: 'payableAmount',
+      totalPaid: 'totalPaid',
+      remainingAmount: 'totalPayableAmount',
+      totalPrice: 'totalPrice',
+      invoiceDate: 'invoiceDate',
+      vendorName: 'vendorName'
+    };
+    const backendSortField = sortFieldMap[defaultSortBy] || 'createdDate';
+    dispatch(fetchOutgoings({
+      page: newPage,
+      size: pageSize,
+      filterByAmount: true,
+      filterBy: 'invoiceDate',
+      sortBy: backendSortField,
+      sortOrder: defaultSortOrder
+    }));
+  }, [dispatch, canRead]);
 
   useEffect(() => {
     if (!canRead) return;
@@ -292,36 +439,36 @@ const OutgoingPaymentComponent = React.memo(() => {
     }
   };
 
-const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoiceId?: string) => {
+  const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoiceId?: string) => {
     dispatch(clearDebitCreditNotes());
     let documentIdToUse = '';
     let documentTypeToUse = '';
 
     if (grnId) {
-        documentIdToUse = grnId;
-        documentTypeToUse = 'grn';
+      documentIdToUse = grnId;
+      documentTypeToUse = 'grn';
     } else {
-        documentIdToUse = outgoingId;  // This should be "69eef87c5cc5b9b4eedd522e"
-        documentTypeToUse = 'outgoing_payment';
+      documentIdToUse = outgoingId;
+      documentTypeToUse = 'outgoing_payment';
     }
 
     console.log('Opening Debit Credit Dialog with:', {
-        documentId: documentIdToUse,
-        documentType: documentTypeToUse
+      documentId: documentIdToUse,
+      documentType: documentTypeToUse
     });
 
     dispatch(setDebitCreditDocumentId(documentIdToUse));
     dispatch(setDebitCreditDocumentType(documentTypeToUse));
     dispatch(setDebitCreditDialogOpen(true));
 
-    // This will call: /debitnote/returnprocess/debitnotes/comprehensive/69eef87c5cc5b9b4eedd522e?document_type=outgoing_payment
     await dispatch(fetchAllDebitNotesComprehensive({
-        documentId: documentIdToUse,
-        documentType: documentTypeToUse,
-        includeCleared: true,
-        includeActive: true,
+      documentId: documentIdToUse,
+      documentType: documentTypeToUse,
+      includeCleared: true,
+      includeActive: true,
     })).unwrap();
-};
+  };
+
   const outgoingCreditNoteStatus = useMemo(() => {
     const statusMap: { [key: string]: { isDisabled: boolean; tooltipTitle: string } } = {};
     outgoings.forEach((outgoingdebit) => {
@@ -371,7 +518,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
         fromDate: appliedFromDate,
         toDate: appliedToDate,
         filterByAmount: true,
-        vendorCode: selectedVendor?.randomId,  // ← Send vendorCode
+        vendorCode: selectedVendor?.randomId,
         sortBy: backendSortField,
         sortOrder: backendSortOrder
       }));
@@ -381,15 +528,15 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
         size: pageSize,
         filterBy: dateField,
         filterByAmount: true,
-        fromDate: fromDate,
-        toDate: toDate,
+        vendorCode: selectedVendor?.randomId,
         sortBy: backendSortField,
         sortOrder: backendSortOrder
       }));
     }
   };
+
   const handleNextPage = () => {
-    if (currentPage * pageSize) {
+    if (currentPage < totalPages) {
       handlePageChange(currentPage + 1);
     }
   };
@@ -451,7 +598,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
       fromDate: appliedFromDate,
       toDate: appliedToDate,
       filterByAmount: true,
-      vendorCode: selectedVendor?.randomId || '',  // ← CHANGE THIS: use selectedVendor?.randomId
+      vendorCode: selectedVendor?.randomId || '',
       sortBy: backendSortField,
       sortOrder: backendSortOrder
     }));
@@ -497,7 +644,6 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
     if (formattedEndDate) {
       filterParams.toDate = new Date(formattedEndDate);
     }
-    // ← Use vendorCode from selected vendor
     if (selectedVendor?.randomId) {
       filterParams.vendorCode = selectedVendor.randomId;
     }
@@ -510,6 +656,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
     if (!canRead) return;
     dispatch(fetchOutgoings(filterParams));
   };
+
   const handleFilterClose = () => {
     setIsFilterActive(false);
     setSelectionRange({
@@ -518,7 +665,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
       key: 'selection',
     });
     setStatus('');
-    setSelectedVendor(null);  // ← Clear vendor selection
+    setSelectedVendor(null);
     const sortFieldMap: { [key: string]: string } = {
       dueDays: 'intimationDays',
       paymentTerms: 'paymentTerms',
@@ -536,11 +683,12 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
       size: pageSize,
       filterBy: dateField,
       filterByAmount: true,
-      vendorCode: undefined,  // ← Clear vendorCode
+      vendorCode: undefined,
       sortBy: backendSortField,
       sortOrder: sortOrder === 'asc' ? 'ascending' : 'descending'
     }));
   };
+
   const handleCloseViewItemsDialog = () => {
     setViewItemsDialogOpen(false);
     setSelectedGrn(null);
@@ -836,15 +984,15 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
       theme: 'grid',
       styles: { fontSize: 8, halign: 'right', cellPadding: 2 },
     });
-    const totalPages = doc.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
+    const totalPagesDoc = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPagesDoc; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
       const pageY = doc.internal.pageSize.height - 10;
       const computerGeneratedY = pageY - 10;
       doc.setTextColor(0);
       doc.text("This is computer generated", doc.internal.pageSize.width / 2, computerGeneratedY, { align: 'center' });
-      doc.text(`Page ${i} of ${totalPages}`, doc.internal.pageSize.width / 2, pageY, { align: 'center' });
+      doc.text(`Page ${i} of ${totalPagesDoc}`, doc.internal.pageSize.width / 2, pageY, { align: 'center' });
     }
     doc.save(`${outgoingdetail.randomId}.pdf`);
   };
@@ -871,7 +1019,6 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
   const handleVendorChange = (vendor: VendorSearch | null) => {
     setSelectedVendor(vendor);
 
-    // Immediately fetch with new vendor filter
     if (!canRead) return;
 
     const sortFieldMap: { [key: string]: string } = {
@@ -892,7 +1039,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
       size: pageSize,
       filterByAmount: true,
       filterBy: dateField,
-      vendorCode: vendor?.randomId || '',  // ← Send vendorCode
+      vendorCode: vendor?.randomId || '',
       sortBy: backendSortField,
       sortOrder: backendSortOrder
     }));
@@ -945,7 +1092,6 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
           <Grid item xs="auto">
             <DateRangeDialog selectionRange={selectionRange} setSelectionRange={setSelectionRange} onApply={handleFilterClick} />
           </Grid>
-          {/* Vendor Search - Use VendorSearchAutocomplete like GRN page */}
           <Grid item xs={6} sm={4} md={2}>
             <VendorSearchAutocomplete
               value={selectedVendor}
@@ -953,10 +1099,6 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
               label="All Vendors"
             />
           </Grid>
-          {/* <Grid item xs={6} sm={4} md={1}>
-            <TextField fullWidth value="All Data" variant="outlined" size="small" InputProps={{ readOnly: true }} />
-          </Grid> */}
-          {/* Status Filter */}
           <Grid item xs={6} sm={3} md={2}>
             <Autocomplete
               value={status || null}
@@ -1010,7 +1152,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
           {/* Multiple Payments Button */}
           <Grid item>
             <Tooltip title="Process Multiple Payments">
-              <span>  {/* Add this wrapper span */}
+              <span>
                 <IconButton
                   color='primary'
                   onClick={handlePayClick}
@@ -1027,7 +1169,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
           {/* Download Button */}
           <Grid item>
             <Tooltip title="Download Report">
-              <span>  {/* Add this wrapper span */}
+              <span>
                 <IconButton
                   onClick={handleOpenDialog}
                   color="primary"
@@ -1041,11 +1183,16 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
             </Tooltip>
           </Grid>
 
-          {/* Columns Settings Button */}
+          {/* Column Filter Button - Moved here next to Download button */}
           <Grid item>
-            <Tooltip title="Column Settings">
-              <IconButton onClick={() => setColumnSettingsOpen(true)} color="primary" size="small" className="icon-button-outline">
-                <SettingsIcon />
+            <Tooltip title="Column Filter">
+              <IconButton
+                color="primary"
+                onClick={handleColumnFilterClick}
+                className="icon-button-outline"
+                size="small"
+              >
+                <FilterListIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Grid>
@@ -1058,7 +1205,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
               sx={{
                 maxHeight: 'calc(100vh - 260px)',
                 overflowY: 'auto',
-                overflowX: 'auto',  // Enable horizontal scroll
+                overflowX: 'auto',
                 position: 'relative'
               }}
             >
@@ -1066,13 +1213,13 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
                 stickyHeader
                 size="small"
                 sx={{
-                  minWidth: 1200,  // Minimum width to ensure horizontal scroll
+                  minWidth: 1200,
                   '& .MuiTableCell-root': {
-                    whiteSpace: 'nowrap',  // Force all content to single line
-                    padding: '12px 16px',  // Consistent padding
+                    whiteSpace: 'nowrap',
+                    padding: '12px 16px',
                   },
                   '& .MuiTableCell-head': {
-                    whiteSpace: 'nowrap',  // Force headers to single line
+                    whiteSpace: 'nowrap',
                     backgroundColor: '#f5f5f5',
                     fontWeight: 'bold',
                     borderBottom: '2px solid #e0e0e0',
@@ -1081,7 +1228,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
               >
                 <TableHead>
                   <TableRow>
-                    {visibleColumns.map((column) => {
+                    {visibleColumns.filter(col => col.visible).map((column) => {
                       const isMultiWord = column.label.includes(' ');
 
                       return (
@@ -1092,7 +1239,6 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
                             cursor: column.sortable ? 'pointer' : 'default',
                             backgroundColor: '#f5f5f5',
                             fontWeight: 'bold',
-                            // Always allow wrapping for multi-word headers on all screens
                             whiteSpace: isMultiWord ? 'normal' : 'nowrap',
                             wordBreak: 'break-word',
                             lineHeight: 1.2,
@@ -1106,7 +1252,6 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
                           onClick={() => column.sortable && handleSort(column.id as any)}
                         >
                           {isMultiWord ? (
-                            // Split multi-word labels into 2 rows on ALL screens
                             column.label.split(' ').map((word, index, array) => (
                               <React.Fragment key={index}>
                                 {word}
@@ -1129,7 +1274,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
                 <TableBody>
                   {filteredPayments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={visibleColumns.length} align="center">
+                      <TableCell colSpan={visibleColumns.filter(col => col.visible).length} align="center">
                         No data available
                       </TableCell>
                     </TableRow>
@@ -1141,7 +1286,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
                       };
                       return (
                         <TableRow key={payment.outgoingId || index} hover>
-                          {visibleColumns.map((column) => {
+                          {visibleColumns.filter(col => col.visible).map((column) => {
                             switch (column.id) {
                               case 'serialNo':
                                 return (
@@ -1384,6 +1529,7 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
             </Box>
           </Grid>
         </Grid>
+
         {/* Dialogs */}
         <DebitCreditNoteDialog />
         <PODialog open={poDialogOpen} onClose={() => dispatch(setPoDialogOpen(false))} po={selectedPo} />
@@ -1410,11 +1556,34 @@ const handleViewCreditNotes = async (outgoingId: string, grnId?: string, apInvoi
           </DialogActions>
         </Dialog>
 
+        {/* Column Filter Menu */}
+        {/* Column Filter Menu - Immediate update like Vendor module */}
+        <Menu
+          anchorEl={columnFilterAnchorEl}
+          open={Boolean(columnFilterAnchorEl)}
+          onClose={handleColumnFilterClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          {allTableColumns.map((column) => (
+            <MenuItem
+              key={column}
+              onClick={() => handleColumnToggle(column)}
+              dense
+            >
+              <Checkbox
+                checked={tempVisibleColumns.includes(column)}
+                size="small"
+              />
+              <Typography variant="body2">{columnNameMap[column]}</Typography>
+            </MenuItem>
+          ))}
+        </Menu>
+
         <Snackbar open={snackbarOpen} message={snackbarMessage} autoHideDuration={3000} onClose={() => dispatch(clearSnackbarMessage())} />
         <ConfirmationDialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)} onConfirm={confirmDialogProps.onConfirm} title={confirmDialogProps.title} description={confirmDialogProps.description} />
         <SinglePaymentDialog open={openDetailsDialog} onClose={() => setOpenDetailsDialog(false)} selectedOutgoing={selectedOutgoing} currentPage={currentPage} pageSize={pageSize} dateField={dateField} onPaymentSuccess={() => { if (!canRead) return; dispatch(fetchOutgoings({ page: currentPage, size: pageSize, filterBy: dateField, filterByAmount: true })); }} />
         <ServiceDialog open={dialogOpen} onClose={() => setDialogOpen(false)} service={selectedService} />
-        <ColumnSettingsDialog open={columnSettingsOpen} onClose={() => setColumnSettingsOpen(false)} />
       </Box>
     </Box>
   );

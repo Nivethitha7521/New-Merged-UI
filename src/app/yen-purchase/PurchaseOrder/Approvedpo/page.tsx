@@ -93,6 +93,7 @@ import { UnifiedDatePicker } from "../Component/UnifiedDatePicker";
 import StockUpdateLogsDialog from "../Component/StockUpdateLogsPage";
 import { GrnSettings, grnSettingsService } from "../../service/grnpriceservice";
 import { fetchGRNPriceSettings, validateGRNPrice } from "@/app/yen-settings/Features/GRNSettingsSlice";
+import { checkInvoiceAvailability } from "@/features/yen-purchase/GRN/grnSlice";
 // Add this import at the top with your other imports:
 const parseLocalDate = (dateStr: string | null | undefined): Date | null => {
   if (!dateStr) return null;
@@ -332,6 +333,7 @@ interface OrderDetailsDialogProps {
   grnDate: Date | null;
   setGrnDate: React.Dispatch<React.SetStateAction<Date | null>>;
   isInvoiceDuplicate: boolean;
+  setIsInvoiceDuplicate: React.Dispatch<React.SetStateAction<boolean>>;  // ← ADD THIS
   isTouched: boolean;
   setIsTouched: React.Dispatch<React.SetStateAction<boolean>>;
   taxDetails: TaxDetails;
@@ -361,14 +363,20 @@ interface OrderDetailsDialogProps {
   handleApplyDiscount: () => void;
   removeOverallDiscount: () => void;
   applyingDiscount: boolean;
-  // ADD THESE TWO LINES:
   freights?: FreightData[];
   onEditFreights?: (freights: FreightData[]) => void;
   canEditApproved: boolean;
   receivingLocation: Location | null;
   setReceivingLocation: React.Dispatch<React.SetStateAction<Location | null>>;
-  poLocationId?: string; // Add this to pass PO's location ID
-  onPriceValidationError?: (message: string) => void; // Add this
+  poLocationId?: string;
+  onPriceValidationError?: (message: string) => void;
+  // ADD THESE NEW PROPS
+  invoiceAvailability?: {
+    available: boolean;
+    message: string;
+    checking: boolean;
+  };
+  checkingInvoice?: boolean;
 }
 const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   open,
@@ -384,6 +392,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   grnDate,
   setGrnDate,
   isInvoiceDuplicate,
+  setIsInvoiceDuplicate,  // ← ADD THIS
   isTouched,
   setIsTouched,
   taxDetails,
@@ -415,10 +424,13 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   applyingDiscount,
   freights = [],
   onEditFreights,
-  receivingLocation,  // This comes from parent
-  setReceivingLocation,  // This comes from parent
-  poLocationId,  // This comes from parent
-  onPriceValidationError,  // ← ADD THIS LINE
+  receivingLocation,
+  setReceivingLocation,
+  poLocationId,
+  onPriceValidationError,
+  // ADD THESE NEW PROPS
+  invoiceAvailability,
+  checkingInvoice,
 }) => {
 
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
@@ -428,6 +440,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   const [priceValidationErrors, setPriceValidationErrors] = useState<Record<string, string>>({});
   const dispatch = useDispatch<AppDispatch>();
   const [isValidatingPrice, setIsValidatingPrice] = useState(false);
+
   const { settings: grnSettings, validationResult, loading: settingsLoading } = useSelector(
     (state: any) => state.grnPriceSettings
   );
@@ -750,15 +763,23 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                 onChange={(e) => {
                   setInvoiceNumber(e.target.value);
                   setIsTouched(true);
+                  setIsInvoiceDuplicate(false);
                 }}
-                error={isTouched && (isInvoiceDuplicate || !invoiceNumber)}
+                error={isTouched && (!invoiceNumber || isInvoiceDuplicate)}
                 helperText={
-                  isTouched && !invoiceNumber
+                  !invoiceNumber
                     ? 'Invoice number is required!'
-                    : isTouched && isInvoiceDuplicate
-                      ? 'Invoice number already exists!'
-                      : ''
+                    : checkingInvoice
+                      ? 'Checking invoice number...'
+                      : isInvoiceDuplicate
+                        ? invoiceAvailability?.message || 'Invoice number already exists!'
+                        : ''  // ← Empty - nothing shown when available
                 }
+                InputProps={{
+                  endAdornment: checkingInvoice && (
+                    <CircularProgress size={20} />
+                  )
+                }}
               />
               {/* Replace the old invoice date TextField with this */}
               <UnifiedDatePicker
@@ -1204,6 +1225,12 @@ const ApprovedPurchase: React.FC = () => {
   const [updatedItems, setUpdatedItems] = useState<ItemWithCalculations[]>([]);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [isInvoiceDuplicate, setIsInvoiceDuplicate] = useState(false);
+  // Add these near your other useState declarations
+  const [invoiceAvailability, setInvoiceAvailability] = useState<{
+    available: boolean;
+    message: string;
+    checking: boolean;
+  }>({ available: true, message: "", checking: false });
   const [isTouched, setIsTouched] = useState(false);
   const [invoiceDate, setInvoiceDate] = useState<Date | null>(null);
   const [grnDate, setGrnDate] = useState<Date | null>(null);
@@ -1446,19 +1473,51 @@ const ApprovedPurchase: React.FC = () => {
       })
     );
   }, [dispatch, currentPage, pageSize]);
+  // Real-time invoice number validation against GRN collection
   useEffect(() => {
-    if (invoiceNumber && selectedOrder?.vendorName) {
-      const isDuplicate = purchaseinvoice.some(
-        (order) =>
-          order.invoiceNo === invoiceNumber &&
-          order.purchaseOrderId !== selectedOrder.purchaseOrderId &&
-          order.vendorName === selectedOrder.vendorName
-      );
-      setIsInvoiceDuplicate(isDuplicate);
-    } else {
+    // Don't check if dialog is not open or no selected order
+    if (!openDialog || !selectedOrder?.vendorName) {
+      setInvoiceAvailability({ available: true, message: "", checking: false });
       setIsInvoiceDuplicate(false);
+      return;
     }
-  }, [invoiceNumber, purchaseinvoice, selectedOrder]);
+
+    // Don't check if invoice number is empty
+    if (!invoiceNumber || invoiceNumber.trim() === "") {
+      setInvoiceAvailability({ available: true, message: "", checking: false });
+      setIsInvoiceDuplicate(false);
+      return;
+    }
+
+    // Debounce the API call
+    const timer = setTimeout(async () => {
+      setInvoiceAvailability(prev => ({ ...prev, checking: true }));
+      try {
+        const result = await dispatch(checkInvoiceAvailability({
+          invoiceNo: invoiceNumber,
+          vendorName: selectedOrder.vendorName,
+          // currentGrnId: undefined // For new GRN
+        })).unwrap();
+
+        setInvoiceAvailability({
+          available: result.available,
+          message: result.message,
+          checking: false
+        });
+        setIsInvoiceDuplicate(!result.available);
+      } catch (error) {
+        console.error("Error checking invoice:", error);
+        setInvoiceAvailability({
+          available: true,
+          message: "Could not verify invoice number",
+          checking: false
+        });
+        setIsInvoiceDuplicate(false);
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [invoiceNumber, selectedOrder?.vendorName, openDialog, dispatch]);
   // Add this near the bottom of your ApprovedPurchase component, right before the return statement
   useEffect(() => {
     console.log('STOCK UPDATE DEBUG:');
@@ -3002,6 +3061,7 @@ const ApprovedPurchase: React.FC = () => {
           grnDate={grnDate}
           setGrnDate={setGrnDate}
           isInvoiceDuplicate={isInvoiceDuplicate}
+          setIsInvoiceDuplicate={setIsInvoiceDuplicate}  // ← ADD THIS (need to add to props interface)
           isTouched={isTouched}
           setIsTouched={setIsTouched}
           taxDetails={taxDetails}
@@ -3033,13 +3093,16 @@ const ApprovedPurchase: React.FC = () => {
           applyingDiscount={applyingDiscount}
           freights={freights}
           onEditFreights={handleEditFreights}
-          receivingLocation={receivingLocation}  // Add this
-          setReceivingLocation={setReceivingLocation}  // Add this
-          poLocationId={selectedOrder?.locationId}  // Add this to pass PO's location ID
+          receivingLocation={receivingLocation}
+          setReceivingLocation={setReceivingLocation}
+          poLocationId={selectedOrder?.locationId}
           onPriceValidationError={(message) => {
             setSnackbarInvoiceMessage(message);
             setSnackbarInvoiceOpen(true);
           }}
+          // ADD THESE NEW PROPS
+          invoiceAvailability={invoiceAvailability}
+          checkingInvoice={invoiceAvailability.checking}
         />
         <Dialog open={openEditDialog} onClose={handleCloseDialogs}>
           <DialogTitle>Confirm Submission</DialogTitle>

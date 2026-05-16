@@ -5,7 +5,7 @@ import { ApInvoice, ApInvoiceRandomId, ApInvoiceState, initialState } from '@/Mo
 import purchaseApi from "@/utils/api";
 
 
-const BASE_URL = 'http://192.168.1.102:8000/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchaseapi';
 // Fetch AP Invoices with pagination and advanced filtering
 // Add this async thunk for loading more statuses
 export const loadMoreStatuses = createAsyncThunk(
