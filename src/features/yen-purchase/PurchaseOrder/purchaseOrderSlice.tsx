@@ -181,7 +181,7 @@ export const initialState: PurchaseOrderState = {
 let purchaseItemsCache: Map<string, { data: PurchaseItemSearchAdd[], timestamp: number }> = new Map();
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchasetestapi';
 
 // Async thunks for freight and PO calculations
 export const calculateFreightTotals = createAsyncThunk(
@@ -271,8 +271,7 @@ export const fetchPurchaseOrderById = createAsyncThunk(
     
     const data = response.data;
     
-    console.log('🔴 API RAW RESPONSE items[0]:', JSON.stringify(data.items?.[0]));
-    console.log('🔴 availableStock from API:', data.items?.[0]?.availableStock);
+   
     
     return data;
   },
@@ -280,7 +279,7 @@ export const fetchPurchaseOrderById = createAsyncThunk(
 // Add a new function to invalidate cache when there are updates
 export const invalidatePurchaseItemsCache = () => {
   purchaseItemsCache.clear();
-  console.log("Purchase items cache invalidated");
+ 
 };
 
 export const updatePurchaseItem = createAsyncThunk<
@@ -384,7 +383,7 @@ export const calculateOverallDiscountForAllItems = createAsyncThunk<
   'purchaseOrder/calculateOverallDiscountForAllItems',
   async (payload: CalculateOverallDiscountPayload, { rejectWithValue }) => {
     try {
-      console.log('Sending to backend:', payload);
+    
 
       const response = await purchaseApi.post(
         "/purchaseorders/items/calculate-overall-discount",
@@ -443,10 +442,11 @@ export const importCsvItems = createAsyncThunk(
       const state = getState() as { purchaseOrder: PurchaseOrderState };
       const currentPurchaseOrderData = state.purchaseOrder.purchaseOrderData;
 
+     const locationId = currentPurchaseOrderData.locationId || '';
       const formData = new FormData();
       formData.append('file', file);
       const response = await purchaseApi.post(
-        "/poimport/import-items-csv",
+        `/poimport/import-items-csv?location_id=${locationId}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -493,6 +493,8 @@ export const importCsvItems = createAsyncThunk(
           damagedQuantity: 0,
           discountAmount: 0,
           randomId: item.randomId || '', // CRITICAL: Include randomId
+          availableStock: item.availableStock || 0, // STOCK from inventory
+          locationId: locationId,
           taxAmount: item.pendingTaxAmount || 0,
           cgst: item.pendingCgst || 0,
           sgst: item.pendingSgst || 0,
@@ -928,14 +930,7 @@ const purchaseOrderSlice = createSlice({
      .addCase(fetchPurchaseOrderById.fulfilled, (state, action) => {
   state.loading = false;
 
-  console.log('🚨 REDUX FULFILLED - raw payload:', 
-    action.payload.items?.map((i: Item) => ({
-      name: i.itemName,
-      stock: i.availableStock,
-      type: typeof i.availableStock,
-      randomId: i.randomId
-    }))
-  );
+
 
   const purchaseOrderData = { ...action.payload };
 
@@ -966,14 +961,14 @@ const purchaseOrderSlice = createSlice({
       // Priority 1: Use API response if it has valid stock
       if (item.availableStock !== undefined && item.availableStock !== null) {
         stockValue = Number(item.availableStock);
-        console.log(`📦 Using API stock for ${item.itemName}: ${stockValue}`);
+       
       } 
       // Priority 2: Use existing state stock if API didn't provide
       else if (item.randomId && existingItemsMap.has(item.randomId)) {
         const existing = existingItemsMap.get(item.randomId);
         stockValue = existing.availableStock;
         locationValue = existing.locationId;
-        console.log(`📦 Using existing stock for ${item.itemName}: ${stockValue}`);
+       
       }
       
       // Priority 3: For locationId, prefer API if available, otherwise existing
@@ -987,13 +982,6 @@ const purchaseOrderSlice = createSlice({
     });
   }
 
-  console.log('🚨 REDUX FULFILLED - after processing:', 
-    purchaseOrderData.items?.map((i: Item) => ({
-      name: i.itemName,
-      stock: i.availableStock,
-      locationId: i.locationId
-    }))
-  );
 
   state.purchaseOrderData = purchaseOrderData;
   state.error = null;

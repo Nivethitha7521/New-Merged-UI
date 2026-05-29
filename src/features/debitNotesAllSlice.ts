@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '@/redux/store';
 
-const BASE_URL = 'https://yenerp.com/purchaseapi'; // Adjust as needed for local testing
+const BASE_URL = 'https://yenerp.com/purchasetestapi'; // Adjust as needed for local testing
 
 // ============================================
 // INTERFACES
@@ -178,7 +178,6 @@ export const fetchAllDebitNotes = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log('📋 Fetching ALL debit notes for document:', documentId);
       
       const response = await purchaseApi.get<DebitNotesAllResponse>(
         `/debitnote/returnprocess/debitnotes/view-all/${documentId}`,
@@ -196,13 +195,7 @@ export const fetchAllDebitNotes = createAsyncThunk(
         throw new Error(data.message || 'Failed to fetch debit notes');
       }
       
-      console.log('✅ ALL debit notes loaded:', {
-        total: data.data.summary.total_notes,
-        itemWise: data.data.summary.item_wise_count,
-        amountOnly: data.data.summary.amount_only_count,
-        active: data.data.summary.active_count,
-        cleared: data.data.summary.cleared_count,
-      });
+   
       
       return data.data;
       
@@ -225,7 +218,6 @@ export const downloadAllDebitNotesPdf = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log('📄 Downloading ALL debit notes PDF for:', documentId);
       
       const response = await purchaseApi.get(
         `/debitnote/returnprocess/debitnotes/download-all-pdf/${documentId}`,
@@ -343,11 +335,7 @@ const debitNotesAllSlice = createSlice({
         state.activeNotes = data.notes.active_notes || [];
         state.clearedNotes = data.notes.cleared_notes || [];
         
-        console.log('✅ State updated with ALL debit notes:', {
-          total: state.allNotes.length,
-          itemWise: state.itemWiseNotes.length,
-          amountOnly: state.amountOnlyNotes.length,
-        });
+       
       })
       .addCase(fetchAllDebitNotes.rejected, (state, action) => {
         state.loading = false;
@@ -366,7 +354,6 @@ const debitNotesAllSlice = createSlice({
       .addCase(downloadAllDebitNotesPdf.fulfilled, (state, action) => {
         state.pdfDownloading = false;
         state.successMessage = action.payload.message || 'PDF downloaded successfully';
-        console.log('✅ PDF download successful');
       })
       .addCase(downloadAllDebitNotesPdf.rejected, (state, action) => {
         state.pdfDownloading = false;

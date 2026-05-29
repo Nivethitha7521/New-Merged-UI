@@ -952,7 +952,7 @@ setFormPermissions(applyDefaultHide(JSON.parse(JSON.stringify(HARD_MODULES))));
 
       try {
         // Fetch role
-        const roleRes = await fetch(`https://yenerp.com/purchaseapi/roles?name=${encodeURIComponent(roleName)}`);
+        const roleRes = await fetch(`https://yenerp.com/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
         if (roleRes.ok) {
           const rolesData = await roleRes.json();
           const roleData = Array.isArray(rolesData) ? rolesData.find((r: any) => r.name === roleName) : rolesData;
@@ -967,7 +967,7 @@ setFormPermissions(applyDefaultHide(JSON.parse(JSON.stringify(HARD_MODULES))));
         }
 
         // Fetch permissions
-        const permRes = await fetch(`https://yenerp.com/purchaseapi/permissions?role_name=${encodeURIComponent(roleName)}`);
+        const permRes = await fetch(`https://yenerp.com/purchasetestapi/permissions?role_name=${encodeURIComponent(roleName)}`);
         if (permRes.ok) {
           const permData = await permRes.json();
           
@@ -1221,7 +1221,7 @@ frontendPermissions.forEach((app: AppPermissions) => {
       return;
     }
 
-    console.log("Starting update for role:", roleName, "->", formRoleName);
+   
     
     try {
       // 1. Transform permissions to backend format (including false values)
@@ -1231,12 +1231,12 @@ const sanitizedPermissions = applyDefaultHide(formPermissions);
 // ✅ Now transform this corrected permissions for backend
 const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
 
-      console.log("Permissions to update (with all modules):", backendPerms);
+    
 
       // 2. Update role name if changed
       if (formRoleName !== roleName) {
         try {
-          const roleRes = await fetch(`https://yenerp.com/purchaseapi/roles?name=${encodeURIComponent(roleName)}`);
+          const roleRes = await fetch(`https://yenerp.com/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
           const roleData = await roleRes.json();
           
           let roleToUpdate = null;
@@ -1247,7 +1247,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
           }
           
           if (roleToUpdate && roleToUpdate._id) {
-            await fetch(`https://yenerp.com/purchaseapi/roles/${roleToUpdate._id}`, {
+            await fetch(`https://yenerp.com/purchasetestapi/roles/${roleToUpdate._id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
@@ -1266,10 +1266,10 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
         permissions: backendPerms
       };
       
-      console.log("Sending permissions update with ALL modules...");
+     
       
       // First try to update existing permissions
-      let response = await fetch(`https://yenerp.com/purchaseapi/permissions/${encodeURIComponent(roleName)}`, {
+      let response = await fetch(`https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -1277,13 +1277,13 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
       
       if (response.status === 404) {
         // If not found, try POST to create new
-        console.log("Permissions not found, creating new...");
+       
         const postPayload = {
           role_name: formRoleName,
           permissions: backendPerms
         };
         
-        response = await fetch("https://yenerp.com/purchaseapi/permissions", {
+        response = await fetch("https://yenerp.com/purchasetestapi/permissions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(postPayload)
@@ -1295,13 +1295,13 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
         throw new Error(`Failed to update permissions: ${response.status} - ${errorText}`);
       }
 
-      console.log("✅ Permissions updated successfully with all modules");
+    
 
       // 4. If role name changed, also update permissions document's role_name
       if (formRoleName !== roleName) {
         try {
           // Try to find permissions with old name
-          const checkResponse = await fetch(`https://yenerp.com/purchaseapi/permissions?role_name=${encodeURIComponent(formRoleName)}`);
+          const checkResponse = await fetch(`https://yenerp.com/purchasetestapi/permissions?role_name=${encodeURIComponent(formRoleName)}`);
           const checkData = await checkResponse.json();
           
           if (!checkData || (Array.isArray(checkData) && checkData.length === 0)) {
@@ -1311,14 +1311,14 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
               permissions: backendPerms
             };
             
-            await fetch("https://yenerp.com/purchaseapi/permissions", {
+            await fetch("https://yenerp.com/purchasetestapi/permissions", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(createPayload)
             });
             
             // Delete old permissions
-            await fetch(`https://yenerp.com/purchaseapi/permissions/${encodeURIComponent(roleName)}`, {
+            await fetch(`https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
               method: "DELETE"
             });
           }

@@ -28,7 +28,7 @@ import {
   AutocompleteChangeReason,
   Menu,
   MenuItem,
-  Divider
+  Divider,CircularProgress
 } from '@mui/material';
 import YenBookPage from '../page';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -102,6 +102,7 @@ const OutgoingPaymentComponent = React.memo(() => {
   const [isBulkPaymentOpen, setIsBulkPaymentOpen] = useState(false);
   const [paymentTypeMultiple, setPaymentTypeMultiple] = useState<{ [outgoingId: string]: 'full' | 'partial' }>({});
   const [loadingState, setLoadingState] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
+  const [loadingData, setLoadingData] = useState(true);
   const [fetchedBusinessIds, setFetchedBusinessIds] = useState(new Set());
   const [status, setStatus] = useState('');
   const selectedRows = selection.selectedOutgoingIds;
@@ -296,33 +297,50 @@ const handleColumnToggle = (columnId: string) => {
       console.error('Failed to save column preferences:', e);
     }
   }, [visibleColumns]);
-  useEffect(() => {
-    if (!canRead) return;
-    if (hasMounted.current) return;
-    hasMounted.current = true;
+useEffect(() => {
+  if (!canRead) return;
+  if (hasMounted.current) return;
+  hasMounted.current = true;
 
-    const defaultSortBy = sortColumn ? sortColumn : 'createdDate';
-    const defaultSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
-    const sortFieldMap: { [key: string]: string } = {
-      dueDays: 'intimationDays',
-      paymentTerms: 'paymentTerms',
-      payableAmount: 'payableAmount',
-      totalPaid: 'totalPaid',
-      remainingAmount: 'totalPayableAmount',
-      totalPrice: 'totalPrice',
-      invoiceDate: 'invoiceDate',
-      vendorName: 'vendorName'
-    };
-    const backendSortField = sortFieldMap[defaultSortBy] || 'createdDate';
-    dispatch(fetchOutgoings({
-      page: newPage,
-      size: pageSize,
-      filterByAmount: true,
-      filterBy: 'invoiceDate',
-      sortBy: backendSortField,
-      sortOrder: defaultSortOrder
-    }));
-  }, [dispatch, canRead]);
+  const defaultSortBy = sortColumn ? sortColumn : 'createdDate';
+  const defaultSortOrder = sortOrder === 'asc' ? 'ascending' : 'descending';
+
+  const sortFieldMap: { [key: string]: string } = {
+    dueDays: 'intimationDays',
+    paymentTerms: 'paymentTerms',
+    payableAmount: 'payableAmount',
+    totalPaid: 'totalPaid',
+    remainingAmount: 'totalPayableAmount',
+    totalPrice: 'totalPrice',
+    invoiceDate: 'invoiceDate',
+    vendorName: 'vendorName'
+  };
+
+  const backendSortField = sortFieldMap[defaultSortBy] || 'createdDate';
+
+  const loadOutgoings = async () => {
+    try {
+      setLoadingData(true);
+
+      await dispatch(fetchOutgoings({
+        page: newPage,
+        size: pageSize,
+        filterByAmount: true,
+        filterBy: 'invoiceDate',
+        sortBy: backendSortField,
+        sortOrder: defaultSortOrder
+      })).unwrap();
+
+    } catch (error) {
+      console.error("Failed to fetch outgoings:", error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  loadOutgoings();
+
+}, [dispatch, canRead]);
 
   useEffect(() => {
     if (!canRead) return;
@@ -452,10 +470,7 @@ const handleColumnToggle = (columnId: string) => {
       documentTypeToUse = 'outgoing_payment';
     }
 
-    console.log('Opening Debit Credit Dialog with:', {
-      documentId: documentIdToUse,
-      documentType: documentTypeToUse
-    });
+   
 
     dispatch(setDebitCreditDocumentId(documentIdToUse));
     dispatch(setDebitCreditDocumentType(documentTypeToUse));
@@ -1272,13 +1287,38 @@ const handleColumnToggle = (columnId: string) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredPayments.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={visibleColumns.filter(col => col.visible).length} align="center">
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  ) : (
+                 {loadingData ? (
+  <TableRow>
+    <TableCell
+      colSpan={visibleColumns.filter(col => col.visible).length}
+      align="center"
+      sx={{ py: 6 }}
+    >
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        gap={1}
+      >
+        <CircularProgress size={32} />
+        <Typography variant="body2" color="textSecondary">
+          Loading outgoing payments...
+        </Typography>
+      </Box>
+    </TableCell>
+  </TableRow>
+) : filteredPayments.length === 0 ? (
+  <TableRow>
+    <TableCell
+      colSpan={visibleColumns.filter(col => col.visible).length}
+      align="center"
+      sx={{ py: 6 }}
+    >
+      No data available
+    </TableCell>
+  </TableRow>
+) : (
                     filteredPayments.map((payment, index) => {
                       const { isDisabled, tooltipTitle } = outgoingCreditNoteStatus[payment.outgoingId] || {
                         isDisabled: true,

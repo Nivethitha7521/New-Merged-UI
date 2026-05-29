@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -16,8 +16,8 @@ import {
   ListItemText,
   CircularProgress,
   SelectChangeEvent,
-  Alert,
-  AlertTitle,
+  // Alert,
+  // AlertTitle,
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -78,12 +78,22 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
   const [bankError, setBankError] = useState('');
   const [dateError, setDateError] = useState('');
   const [dateWarning, setDateWarning] = useState('');
-  const [debitAdvanceWarning, setDebitAdvanceWarning] = useState('');
+  // const [debitAdvanceWarning, setDebitAdvanceWarning] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isDebitVerificationRequired, setIsDebitVerificationRequired] = useState(false);
 
-  const totalPayable = selectedOutgoing?.totalPayableAmount || 0;
-
+const [isDebitVerified, setIsDebitVerified] = useState(false);
+const [isDebitExceeded, setIsDebitExceeded] = useState(false);
+const autoAppliedOutgoingRef = useRef<string | null>(null);
+// ── Advance verification state ──
+const [isAdvanceVerificationRequired, setIsAdvanceVerificationRequired] = useState(false);
+const [isAdvanceVerified, setIsAdvanceVerified] = useState(false);
+const [isAdvanceExceeded, setIsAdvanceExceeded] = useState(false);
+const autoAppliedAdvanceRef = useRef<string | null>(null);
+const [advancesLoadedForVendor, setAdvancesLoadedForVendor] = useState<string | null>(null);
+const totalPayable = selectedOutgoing?.totalPayableAmount || 0;
+const [debitsLoadedForVendor, setDebitsLoadedForVendor] = useState<string | null>(null);
   // Compute invoice date string for min date
   const invoiceDate = selectedOutgoing ? new Date(selectedOutgoing[dateField]) : new Date(0);
   const invoiceDateStr = invoiceDate.toISOString().split('T')[0];
@@ -102,16 +112,27 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
     dispatch(fetchBank());
   }, [dispatch]);
 
-  useEffect(() => {
+ useEffect(() => {
     if (selectedOutgoing && open) {
-      dispatch(fetchActiveDebitsVendor(selectedOutgoing.vendorName));
-      dispatch(fetchActiveAdvancesVendorByName(selectedOutgoing.vendorName));
+      // Reset both guards before fetching — auto-apply won't run until fetch completes
+setDebitsLoadedForVendor(null);
+setAdvancesLoadedForVendor(null);       // ADD
+autoAppliedOutgoingRef.current = null;
+autoAppliedAdvanceRef.current = null;   // ADD
+
+dispatch(fetchActiveDebitsVendor(selectedOutgoing.vendorName))
+  .then(() => {
+    setDebitsLoadedForVendor(selectedOutgoing.vendorName);
+  });
+dispatch(fetchActiveAdvancesVendorByName(selectedOutgoing.vendorName))
+  .then(() => {                                              // ADD
+    setAdvancesLoadedForVendor(selectedOutgoing.vendorName); // ADD
+  });                                                        // ADD
+      // dispatch(fetchActiveAdvancesVendorByName(selectedOutgoing.vendorName));
       const initialAmount = totalPayable.toFixed(2);
       const currentDateStr = new Date().toISOString().split('T')[0];
 
-      // Debug: Check what date field contains
-      console.log('Invoice date field:', selectedOutgoing[dateField]);
-      console.log('Parsed invoice date:', new Date(selectedOutgoing[dateField]));
+     
 
       setPaymentDetails({
         paymentMethod: '',
@@ -132,22 +153,155 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
       setBankError('');
       setDateError('');
       setDateWarning('');
-      setDebitAdvanceWarning('');
+      // setDebitAdvanceWarning('');
       setShowConfirmation(false);
     }
   }, [selectedOutgoing, open, dispatch, totalPayable]);
 
-  // Check for debit/advance warning when dialog opens or when debits/advances change
-  useEffect(() => {
-    if (open && (hasAvailableDebits || hasAvailableAdvances) && !hasSelectedDebitsOrAdvances) {
-      setDebitAdvanceWarning(
-        'This vendor has available debit notes or advance payments. Consider applying them to reduce the payable amount.'
-      );
-    } else {
-      setDebitAdvanceWarning('');
-    }
-  }, [open, hasAvailableDebits, hasAvailableAdvances, hasSelectedDebitsOrAdvances]);
+  // // Check for debit/advance warning when dialog opens or when debits/advances change
+  // useEffect(() => {
+  //   if (open && (hasAvailableDebits || hasAvailableAdvances) && !hasSelectedDebitsOrAdvances) {
+  //     setDebitAdvanceWarning(
+  //       'This vendor has available debit notes or advance payments. Consider applying them to reduce the payable amount.'
+  //     );
+  //   } else {
+  //     setDebitAdvanceWarning('');
+  //   }
+  // }, [open, hasAvailableDebits, hasAvailableAdvances, hasSelectedDebitsOrAdvances]);
+// AUTO APPLY DEBIT NOTES
+useEffect(() => {
+  if (!open || !selectedOutgoing || !debits?.length) return;
 
+  if (paymentDetails.selectedDebitNotes.length > 0) return;
+
+  if (autoAppliedOutgoingRef.current === selectedOutgoing.outgoingId) return;
+
+  // Guard: debits must belong to current vendor (fetch complete ஆனதும் மட்டும் run ஆகும்)
+ if (debitsLoadedForVendor !== selectedOutgoing.vendorName) return;
+
+  const validDebits = debits.filter(
+    (debit: any) =>
+      Number(debit.finalAmount || 0) > 0   );
+
+  if (!validDebits.length) return;
+
+  const debitIds = validDebits.map((d: any) => d.randomId);
+
+  const totalDebitAmount = validDebits.reduce(
+    (sum: number, debit: any) =>
+      sum + Number(debit.finalAmount || 0),
+    0
+  );
+const isExceeded = totalDebitAmount > totalPayable;
+
+setIsDebitExceeded(isExceeded);
+  const updatedAmount = Math.max(
+    totalPayable - totalDebitAmount,
+    0
+  ).toFixed(2);
+
+  setPaymentDetails((prev) => ({
+    ...prev,
+    selectedDebitNotes: debitIds,
+    amount: updatedAmount,
+    cashAmount:
+      prev.paymentMode === 'Cash'
+        ? parseFloat(updatedAmount)
+        : 0,
+  }));
+
+  autoAppliedOutgoingRef.current =
+    selectedOutgoing.outgoingId;
+
+  // SINGLE DEBIT
+  if (validDebits.length === 1) {
+    dispatch(
+      setSnackbarMessage(
+        `Debit Note ${validDebits[0].randomId} auto applied`
+      )
+    );
+
+    setIsDebitVerificationRequired(false);
+    setIsDebitVerified(true);
+  }
+
+  // MULTIPLE DEBITS
+  else {
+dispatch(
+      setSnackbarMessage(
+        'Multiple advance payments auto applied. Please verify before processing payment.'
+      )
+    );
+
+    setIsDebitVerificationRequired(true);
+    setIsDebitVerified(false);
+  }
+
+  dispatch(setSnackbarOpen(true));
+
+}, [
+ open,
+  selectedOutgoing?.outgoingId,
+  debits,
+  totalPayable,
+  debitsLoadedForVendor,
+]);
+// AUTO APPLY ADVANCE PAYMENTS
+useEffect(() => {
+  if (!open || !selectedOutgoing || !singleadvance?.length) return;
+  if (paymentDetails.selectedAdvancePayments.length > 0) return;
+  if (autoAppliedAdvanceRef.current === selectedOutgoing.outgoingId) return;
+  if (advancesLoadedForVendor !== selectedOutgoing.vendorName) return;
+
+  const validAdvances = singleadvance.filter(
+    (adv: any) => Number(adv.pendingAmount || 0) > 0
+  );
+  if (!validAdvances.length) return;
+
+  const advanceIds = validAdvances.map((a: any) => a.randomId);
+  const totalAdvanceAmt = validAdvances.reduce(
+    (sum: number, adv: any) => sum + Number(adv.pendingAmount || 0),
+    0
+  );
+
+  const afterDebit = Math.max(
+    totalPayable -
+      paymentDetails.selectedDebitNotes.reduce((sum, id) => {
+        const d = debits.find((x: any) => x.randomId === id);
+        return sum + Number(d?.finalAmount || 0);
+      }, 0),
+    0
+  );
+
+  const isExceeded = totalAdvanceAmt > afterDebit;
+  setIsAdvanceExceeded(isExceeded);
+
+  const updatedAmount = Math.max(afterDebit - totalAdvanceAmt, 0).toFixed(2);
+
+  setPaymentDetails((prev) => ({
+    ...prev,
+    selectedAdvancePayments: advanceIds,
+    amount: updatedAmount,
+    cashAmount: prev.paymentMode === 'Cash' ? parseFloat(updatedAmount) : 0,
+  }));
+
+  autoAppliedAdvanceRef.current = selectedOutgoing.outgoingId;
+
+  if (validAdvances.length === 1) {
+    dispatch(setSnackbarMessage(`Advance Payment ${validAdvances[0].randomId} auto applied`));
+    setIsAdvanceVerificationRequired(false);
+    setIsAdvanceVerified(true);
+  } else {
+    dispatch(
+      setSnackbarMessage(
+        'Multiple advance payments auto applied. Please verify before processing payment.'
+      )
+    );
+    setIsAdvanceVerificationRequired(true);
+    setIsAdvanceVerified(false);
+  }
+  dispatch(setSnackbarOpen(true));
+}, [open, selectedOutgoing?.outgoingId, singleadvance, totalPayable, advancesLoadedForVendor]);
   const uncappedDebitSum = paymentDetails.selectedDebitNotes.reduce((sum, debitId) => {
     const debit = debits.find((d: any) => d.randomId === debitId);
     return sum + (debit ? (debit.finalAmount || 0) : 0);
@@ -325,6 +479,9 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
       const debit = debits.find((d: any) => d.randomId === id);
       return sum + (debit ? (debit.finalAmount || 0) : 0);
     }, 0);
+    const exceedsPayable = newUncappedDebit > totalPayable;
+
+setIsDebitExceeded(exceedsPayable);
     let newAmount = paymentDetails.amount;
     if (paymentDetails.paymentType === 'full') {
       const cappedDebit = Math.min(newUncappedDebit, totalPayable);
@@ -339,14 +496,21 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
     }));
     setError(paymentDetails.paymentType === 'partial' ? validateAmount(newAmount, totalPayable, true) : '');
 
-    // Clear warning if user selected something
-    if (selectedValues.length > 0 || paymentDetails.selectedAdvancePayments.length > 0) {
-      setDebitAdvanceWarning('');
-    } else if (hasAvailableAdvances) {
-      setDebitAdvanceWarning(
-        'This vendor has available debit notes or advance payments. Consider applying them to reduce the payable amount.'
-      );
-    }
+    // // Clear warning if user selected something
+    // if (selectedValues.length > 0 || paymentDetails.selectedAdvancePayments.length > 0) {
+    //   setDebitAdvanceWarning('');
+    // } else if (hasAvailableAdvances) {
+    //   setDebitAdvanceWarning(
+    //     'This vendor has available debit notes or advance payments. Consider applying them to reduce the payable amount.'
+    //   );
+    // }
+if (selectedValues.length > 1) {
+  setIsDebitVerificationRequired(true);
+  setIsDebitVerified(false);
+} else {
+  setIsDebitVerificationRequired(false);
+  setIsDebitVerified(!exceedsPayable);
+}
   };
 
   const handleAdvancePaymentChange = (selectedValues: string[]) => {
@@ -367,18 +531,32 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
       cashAmount: prev.paymentMode === 'Cash' ? parseFloat(newAmount || '0') : 0,
     }));
     setError(paymentDetails.paymentType === 'partial' ? validateAmount(newAmount, totalPayable, true) : '');
+    
+    // ADD: mirror debit verification logic
+    const afterDebit = Math.max(totalPayable - uncappedDebitSum, 0);
+    const exceedsPayable = newUncappedAdvance > afterDebit;
+    setIsAdvanceExceeded(exceedsPayable);
 
-    // Clear warning if user selected something
-    if (selectedValues.length > 0 || paymentDetails.selectedDebitNotes.length > 0) {
-      setDebitAdvanceWarning('');
-    } else if (hasAvailableDebits) {
-      setDebitAdvanceWarning(
-        'This vendor has available debit notes or advance payments. Consider applying them to reduce the payable amount.'
-      );
+    if (selectedValues.length > 1) {
+      setIsAdvanceVerificationRequired(true);
+      setIsAdvanceVerified(false);
+    } else {
+      setIsAdvanceVerificationRequired(false);
+      setIsAdvanceVerified(!exceedsPayable);
     }
+
+    // // Clear warning if user selected something
+    // if (selectedValues.length > 0 || paymentDetails.selectedDebitNotes.length > 0) {
+    //   setDebitAdvanceWarning('');
+    // } else if (hasAvailableDebits) {
+    //   setDebitAdvanceWarning(
+    //     'This vendor has available debit notes or advance payments. Consider applying them to reduce the payable amount.'
+    //   );
+    // }
   };
 
   const resetPaymentDetails = () => {
+    autoAppliedOutgoingRef.current = null;
     setPaymentDetails({
       paymentMethod: '',
       neftNo: '',
@@ -398,8 +576,15 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
     setBankError('');
     setDateError('');
     setDateWarning('');
-    setDebitAdvanceWarning('');
+    // setDebitAdvanceWarning('');
     setShowConfirmation(false);
+    setIsDebitVerificationRequired(false);
+    setIsDebitVerified(false);
+    setIsDebitExceeded(false);
+    setIsAdvanceVerificationRequired(false);  // ADD
+    setIsAdvanceVerified(false);              // ADD
+    setIsAdvanceExceeded(false);              // ADD
+    autoAppliedAdvanceRef.current = null;     // ADD
   };
 
   const handleClose = () => {
@@ -408,6 +593,49 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
   };
 
   const handlePaymentClick = () => {
+// // ADD: General zero-amount validation (covers debit + advance combined)
+// const totalAdjustments = uncappedDebitSum + uncappedAdvanceSum;
+// if (totalAdjustments > totalPayable) {
+//   dispatch(setSnackbarMessage(
+//     `Total adjustment amount (₹${totalAdjustments.toFixed(2)}) exceeds payable amount (₹${totalPayable.toFixed(2)}). Please adjust debit notes or advance payments.`
+//   ));
+//   dispatch(setSnackbarOpen(true));
+//   return;
+// }
+    if (
+  isDebitVerificationRequired &&
+  !isDebitVerified
+) {
+  dispatch(
+    setSnackbarMessage(
+      'Please verify debit notes before processing payment'
+    )
+  );
+
+  dispatch(setSnackbarOpen(true));
+
+  return;
+}
+
+// ADD: Block payment if amount is zero due to full adjustment
+const currentAmount = parseFloat(paymentDetails.amount || '0');
+if (currentAmount === 0 && paymentDetails.paymentType === 'full') {
+  const cappedDebit = Math.min(uncappedDebitSum, totalPayable);
+  const cappedAdvance = Math.min(uncappedAdvanceSum, totalPayable - cappedDebit);
+  const totalCapped = cappedDebit + cappedAdvance;
+  if (totalCapped < totalPayable) {
+    // Amount is 0 but adjustments don't fully cover — shouldn't happen, but guard it
+    dispatch(setSnackbarMessage('Payment amount cannot be zero. Please check debit notes and advance payments.'));
+    dispatch(setSnackbarOpen(true));
+    return;
+  }
+  // Amount is 0 because adjustments fully cover — this is valid, allow it through
+}
+    if (isAdvanceVerificationRequired && !isAdvanceVerified) {
+      dispatch(setSnackbarMessage('Please verify advance payments before processing payment'));
+      dispatch(setSnackbarOpen(true));
+      return;
+    }
     if (!selectedOutgoing) {
       dispatch(setSnackbarMessage('No outgoing payment selected'));
       dispatch(setSnackbarOpen(true));
@@ -534,13 +762,13 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
             Remaining Payable: ₹{(totalPayable - totalDebitAmount - totalAdvanceAmount).toFixed(2)}
           </Typography>
 
-          {/* Debit/Advance Warning */}
+          {/* Debit/Advance Warning
           {debitAdvanceWarning && (
             <Alert severity="warning" sx={{ mt: 2, mb: 1 }} onClose={() => setDebitAdvanceWarning('')}>
               <AlertTitle>Available Adjustments</AlertTitle>
               {debitAdvanceWarning}
             </Alert>
-          )}
+          )} */}
 
           <TextField
             type="date"
@@ -718,7 +946,7 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
           {/* Apply Debit Notes with OK Button */}
           {debits.length > 0 && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2">Apply Debit Notes</Typography>
+              {/* <Typography variant="subtitle2">Apply Debit Notes</Typography> */}
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Apply Debit Notes</InputLabel>
                 <Select
@@ -792,13 +1020,48 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
                   </Box>
                 </Select>
               </FormControl>
-            </Box>
+              {isDebitVerificationRequired && !isDebitVerified && (
+  <Button
+    variant="contained"
+    color="warning"
+    size="small"
+    sx={{ mt: 1 }}
+  onClick={() => {
+
+  // if (isDebitExceeded) {
+  //   dispatch(
+  //     setSnackbarMessage(
+  //       'Please reduce debit note amount within payable amount'
+  //     )
+  //   );
+
+  //   dispatch(setSnackbarOpen(true));
+
+  //   return;
+  // }
+
+  setIsDebitVerified(true);
+
+  dispatch(
+    setSnackbarMessage(
+      'Debit notes verified successfully'
+    )
+  );
+
+  dispatch(setSnackbarOpen(true));
+}}
+  >
+    Verify Debit Notes
+  </Button>
+)}
+
+</Box>
+           
           )}
 
           {/* Apply Advance Payments with OK Button */}
           {singleadvance.length > 0 && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2">Apply Advance Payments</Typography>
               <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Apply Advance Payments</InputLabel>
                 <Select
@@ -889,6 +1152,31 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
                   </Box>
                 </Select>
               </FormControl>
+            
+
+              {/* ADD: Verify Advance Payments button */}
+              {isAdvanceVerificationRequired && !isAdvanceVerified && (
+                <Button
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  sx={{ mt: 1 }}
+                  onClick={() => {
+                    // if (isAdvanceExceeded) {
+                    //   dispatch(setSnackbarMessage('Please reduce advance payment amount within remaining payable amount'));
+                    //   dispatch(setSnackbarOpen(true));
+                    //   return;
+                    // }
+                    setIsAdvanceVerified(true);
+                    dispatch(setSnackbarMessage('Advance payments verified successfully'));
+                    dispatch(setSnackbarOpen(true));
+                  }}
+                >
+                  Verify Advance Payments
+                </Button>
+              )}
+
+            
             </Box>
           )}
         </DialogContent>
@@ -900,8 +1188,13 @@ const SinglePaymentDialog: React.FC<SinglePaymentDialogProps> = ({
           <Button
             onClick={handlePaymentClick}
             color="primary"
-            disabled={isLoading || !!error || !!dateError || (paymentDetails.paymentType === 'partial' && !parseFloat(paymentDetails.amount))}
-            size="small"
+disabled={
+  isLoading ||
+  !!error ||
+  !!dateError ||
+  (paymentDetails.paymentType === 'partial' && !parseFloat(paymentDetails.amount)) 
+  // (uncappedDebitSum + uncappedAdvanceSum) > totalPayable
+}            size="small"
           >
             {isLoading ? <CircularProgress size={24} /> : 'Process Payment'}
           </Button>

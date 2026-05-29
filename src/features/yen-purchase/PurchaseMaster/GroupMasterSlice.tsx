@@ -41,9 +41,7 @@ export const addPurchaseGroupItem = createAsyncThunk<PurchaseGroupItem, Omit<Pur
       const response = await purchaseApi.post('/itemgroups/', groupItemData); // ✅ USE purchaseApi
       return response.data;
     } catch (error: any) {
-      console.log('🔴 API Error Response:', error.response);
-      console.log('🔴 API Error Data:', error.response?.data);
-      console.log('🔴 API Error Status:', error.response?.status);
+     
       
       // Handle 422 validation errors (array of errors)
       if (error.response?.status === 422 && Array.isArray(error.response?.data)) {
@@ -157,7 +155,6 @@ export const exportCSV = createAsyncThunk('purchaseGroupItems/exportCSV', async 
             'x-username': username // ✅ ADD HEADER MANUALLY
           }
     }); // ✅ USE purchaseApi
-    console.log('Export CSV response status:', response.status, 'headers:', response.headers);
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -198,7 +195,6 @@ const purchaseGroupItemSlice = createSlice({
       state.searchQuery = action.payload;
     },
     setDialogOpen(state, action: PayloadAction<'none' | 'edit' | 'deactivated'>) {
-      console.log('setDialogOpen dispatched with:', action.payload);
       state.dialogOpen = action.payload;
     },
     setPurchaseGroupItemData(state, action: PayloadAction<PurchaseGroupItem>) {
@@ -255,7 +251,6 @@ const purchaseGroupItemSlice = createSlice({
         state.snackbarOpen = true;
       })
       .addCase(addPurchaseGroupItem.rejected, (state, action) => {
-        console.log('🔴 Add Item Group Rejected Payload:', action.payload);
         
         let errorMessage = 'Failed to add purchase group item';
         const payload = action.payload as any;
@@ -269,7 +264,6 @@ const purchaseGroupItemSlice = createSlice({
           errorMessage = payload.msg || payload.message || payload.detail || errorMessage;
         }
         
-        console.log('🔴 Final error message:', errorMessage);
         state.snackbarMessage = errorMessage;
         state.snackbarOpen = true;
       })

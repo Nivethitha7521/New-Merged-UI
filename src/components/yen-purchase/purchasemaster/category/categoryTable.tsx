@@ -114,7 +114,6 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
 
   const handleRemoveSubcategory = (subcategory: string) => {
     if (currentCategoryId && canDelete) {
-      console.log('Triggering removeSubcategory:', { categoryId: currentCategoryId, subcategory });
       dispatch(removeSubcategory({ categoryId: currentCategoryId, subcategory }));
       dispatch(fetchCategories());
     } else {

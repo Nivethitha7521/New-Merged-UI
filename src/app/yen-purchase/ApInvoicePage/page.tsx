@@ -285,7 +285,6 @@ useEffect(() => {
     if (totalItems > 0) {
       const calculatedTotalPages = Math.ceil(totalItems / pageSize);
       if (currentPage > calculatedTotalPages) {
-        console.log(`Resetting page from ${currentPage} to 1 because total pages is ${calculatedTotalPages}`);
         dispatch(setCurrentPage(1));
         dispatch(fetchApInvoices({
           page: 1,
@@ -356,7 +355,6 @@ const refetchWithFilters = useCallback((
   if (invoiceTypeFilter !== 'all') filters.invoiceType = invoiceTypeFilter;
   if (selectedStatus && selectedStatus.trim() !== '') filters.status = selectedStatus;
 
-  console.log('Page change with filters:', filters);
 
   dispatch(setCurrentPage(newPage));
   dispatch(fetchApInvoices(filters));
@@ -376,7 +374,6 @@ const refetchWithFilters = useCallback((
 
   // View Credit Notes handler
   const handleViewCreditNotes = async (invoiceId: string) => {
-    console.log('Opening DebitCreditNoteDialog for AP Invoice ID:', invoiceId);
 
     try {
       const invoice = apInvoices.find(inv => inv.invoiceId === invoiceId);
@@ -396,7 +393,6 @@ const refetchWithFilters = useCallback((
         includeActive: true
       })).then((result) => {
         if (fetchAllDebitNotesForDocument.fulfilled.match(result)) {
-          console.log('✅ Debit notes loaded successfully');
         } else {
           console.error('❌ Failed to load debit notes');
         }
@@ -434,8 +430,7 @@ const refetchWithFilters = useCallback((
   }, [apInvoices, debitCreditNotes]);
 
   const handleStatusChange = (event: React.SyntheticEvent, newValue: string | null) => {
-    console.log('Status changed:', newValue);
-
+   
     if (newValue === null) {
       dispatch(clearStatus());
       setTimeout(() => {
@@ -1431,7 +1426,6 @@ const confirmVerification = async () => {
           throw new Error('Service ID not found in invoice data');
         }
 
-        console.log('Using service ObjectId:', serviceObjectId);
 
         await dispatch(returnServiceInvoice({
           serviceId: serviceObjectId,
@@ -1481,7 +1475,6 @@ const confirmVerification = async () => {
       filtered = filtered.filter(invoice => invoice.status === selectedStatus);
     }
 
-    console.log('Filtered invoices count:', filtered.length, 'from total:', apInvoices.length);
 
     return filtered;
   }, [apInvoices, invoiceTypeFilter, selectedStatus]);
@@ -1623,7 +1616,7 @@ const confirmVerification = async () => {
                 value={selectedStatus || null}
                 inputValue={selectedStatus || ''}
                 onChange={(event, newValue) => {
-                  console.log('Status selected:', newValue);
+                
                   if (newValue === null) {
                     dispatch(clearStatus());
                   } else {

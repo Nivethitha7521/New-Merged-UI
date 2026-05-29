@@ -65,22 +65,11 @@ const ReturnStockUpdateDialog: React.FC<ReturnStockUpdateDialogProps> = ({
   grnId,
   onClose,
 }) => {
-  // ✅ ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
-  // Log when dialog opens
-  React.useEffect(() => {
-    if (open) {
-      console.log('📊 ReturnStockUpdateDialog OPENED with:', {
-        stockUpdates: stockUpdates ? 'Has Data' : 'No Data',
-        grnId,
-        stockUpdatesType: stockUpdates ? typeof stockUpdates : 'null',
-        stockUpdatesKeys: stockUpdates ? Object.keys(stockUpdates) : []
-      });
-    }
-  }, [open, stockUpdates, grnId]);
+
 
   // Normalize the stock updates data - moved BEFORE conditional returns
   const normalizedStockUpdates = React.useMemo(() => {
-    console.log('🔄 Normalizing stockUpdates:', stockUpdates);
+   
 
     // If no stock updates, return a default structure
     if (!stockUpdates) {
@@ -101,7 +90,7 @@ const ReturnStockUpdateDialog: React.FC<ReturnStockUpdateDialogProps> = ({
     // If data has a data property, unwrap it
     if (data && typeof data === 'object') {
       if (data.data) {
-        console.log('📦 Unwrapping data.data property');
+      
         data = data.data;
       }
 
@@ -110,11 +99,9 @@ const ReturnStockUpdateDialog: React.FC<ReturnStockUpdateDialogProps> = ({
         data.inventory_updates !== undefined ||
         data.items !== undefined) {
 
-        console.log('✅ Found expected structure with keys:', Object.keys(data));
 
         // If it has items but no counts, calculate counts
         if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-          console.log(`📦 Found ${data.items.length} items`);
           const items = data.items as ReturnStockUpdateItem[];
           const successCount = items.filter(item => item.status === 'success').length;
           const failedCount = items.filter(item => item.status === 'failed').length;
@@ -138,7 +125,6 @@ const ReturnStockUpdateDialog: React.FC<ReturnStockUpdateDialogProps> = ({
       }
     }
 
-    console.log('⚠️ Could not normalize stockUpdates, using as-is');
     return stockUpdates;
   }, [stockUpdates]);
 

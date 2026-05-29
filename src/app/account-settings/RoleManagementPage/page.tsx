@@ -333,7 +333,7 @@ useEffect(() => {
     router.push("/account-settings/RoleManagementPage/create-role");
   };
 const handleEditRole = (roleName: string) => {
-  console.log("📝 Editing role by name:", roleName);
+ 
   
   if (!roleName || roleName.trim() === "") {
     console.error("❌ Invalid role name received:", roleName);
@@ -360,7 +360,7 @@ const handleEditRole = (roleName: string) => {
     return;
   }
   
-  console.log("✅ Found role to edit:", roleToEdit.roleName);
+  
   
   // Use roleName as the identifier
   router.push(`/account-settings/RoleManagementPage/edit-role?name=${encodeURIComponent(roleName)}`);
@@ -370,7 +370,7 @@ const handleDeleteRole = async (roleName: string) => {
   if (!roleToDelete) return;
 
   await fetch(
-    `https://yenerp.com/purchaseapi/roles/${roleToDelete.id}/deactivate`,
+    `https://yenerp.com/purchasetestapi/roles/${roleToDelete.id}/deactivate`,
     { method: "PUT" }
   );
 
@@ -389,7 +389,7 @@ const handleRestoreRole = async (roleName: string) => {
   if (!roleToRestore) return;
 
   await fetch(
-    `https://yenerp.com/purchaseapi/roles/${roleToRestore.id}/restore`,
+    `https://yenerp.com/purchasetestapi/roles/${roleToRestore.id}/restore`,
     { method: "PUT" }
   );
 

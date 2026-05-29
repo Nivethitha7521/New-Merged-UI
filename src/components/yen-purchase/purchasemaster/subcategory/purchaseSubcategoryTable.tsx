@@ -105,8 +105,7 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
     <>
       <IconButton 
   onClick={() => {
-    console.log('✏️ Edit clicked - original index:', subcategories.indexOf(subcategory));
-    console.log('✏️ Edit clicked - reversed index:', reversedSubcategories.indexOf(subcategory));
+   
     handleEdit(subcategories.indexOf(subcategory));
   }}
   disabled={!canEdit}

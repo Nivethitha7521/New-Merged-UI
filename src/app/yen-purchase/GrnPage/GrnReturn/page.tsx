@@ -311,7 +311,7 @@ const GrnReturn: React.FC = () => {
             finalPrice: Number(item.finalPrice) || 0,
           })) as ItemDetailResponsePO[],
         };
-        console.log('transformedPo:', transformedPo);
+       
         dispatch(setSelectedPo(transformedPo));
         setPoDialogOpen(true);
       } else {
@@ -637,7 +637,7 @@ const GrnReturn: React.FC = () => {
   };
 
   const handleDownload = async (grnId: string) => {
-    console.log('handleDownload called with grnId:', grnId);
+   
     const grn = itemwise.find((g) => g.grnId === grnId);
     if (!grn) {
       dispatch(setSnackbarMessageGRN('GRN not found!'));
@@ -878,6 +878,17 @@ const GrnReturn: React.FC = () => {
                   </Button>
                 </Link>
               )}
+                {!returnGrnPermission.hide && (
+    <Link href={"/yen-purchase/GrnPage/HoldGrn"}>
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{ mr: 1 }}
+      >
+        HOLD GRN
+      </Button>
+    </Link>
+  )}
               {!returnGrnPermission.hide && (
                 <Link href={"/yen-purchase/GrnPage/GrnReturn"}>
                   <Button

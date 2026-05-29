@@ -74,7 +74,7 @@ const StorageLocationPage: React.FC = () => {
   const canEdit = hasPermission('yenerp', 'storagelocation', 'edit');
   const canDelete = hasPermission('yenerp', 'storagelocation', 'delete');
 
-  console.log('🎯 Storage Location Action Permissions:', { canAdd, canEdit, canDelete });
+ 
 
 
   useEffect(() => {

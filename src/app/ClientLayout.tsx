@@ -141,7 +141,7 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://yenerp.com"
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
-        const res = await fetch(`${API_BASE}/purchaseapi/ping`, {
+        const res = await fetch(`${API_BASE}/purchasetestapi/ping`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

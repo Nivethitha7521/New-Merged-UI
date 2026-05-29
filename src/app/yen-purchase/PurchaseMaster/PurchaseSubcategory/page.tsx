@@ -75,18 +75,18 @@ const PurchaseSubcategoryPage: React.FC = () => {
   );
 
  const handleDialogOpen = (action: 'add' | 'edit' = 'add') => {
-  console.log('🟢 handleDialogOpen called with action:', action);
+ 
   
   if (action === 'add') {
     if (!canAdd) {
-      console.log('❌ Add permission denied');
+    
       dispatch(setSnackbarMessage('You do not have permission to add subcategories'));
       dispatch(setSnackbarOpen(true));
       return;
     }
   } else if (action === 'edit') {
     if (!canEdit) {
-      console.log('❌ Edit permission denied');
+     
       dispatch(setSnackbarMessage('You do not have permission to edit subcategories'));
       dispatch(setSnackbarOpen(true));
       return;

@@ -5,7 +5,7 @@ import { ApInvoice, ApInvoiceRandomId, ApInvoiceState, initialState } from '@/Mo
 import purchaseApi from "@/utils/api";
 
 
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchasetestapi';
 // Fetch AP Invoices with pagination and advanced filtering
 // Add this async thunk for loading more statuses
 export const loadMoreStatuses = createAsyncThunk(
@@ -264,14 +264,12 @@ export const convertToGrnFromApReturned = createAsyncThunk(
   "apinvoice/convertToGrnFromApReturned",
   async (invoiceId: string, { rejectWithValue }) => {
     try {
-      console.log("Received invoiceId:", invoiceId);
 
       // Single API call to handle all updates
       const response = await purchaseApi.patch(
         `/apinvoices/convert-to-grn-from-returned/${invoiceId}`,
       );
 
-      console.log("Conversion successful:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Error in convertToGrnFromApReturned:", error);
@@ -316,16 +314,11 @@ export const postOutgoingAndUpdateDiscount = createAsyncThunk(
       const effectiveDate = outgoingDate
         ? outgoingDate.toISOString()
         : new Date().toISOString();
-      console.log("Sending payload:", {
-        invoiceId,
-        apDiscountPrice,
-        outgoingDate: effectiveDate,
-      });
+      
       const response = await purchaseApi.patch(
         `/apinvoices/${invoiceId}/convert-to-outgoing-and-discount`,
         { invoiceId, apDiscountPrice, outgoingDate: effectiveDate },
       );
-      console.log("Server response:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Error in postOutgoingAndUpdateDiscount:", error);
@@ -575,12 +568,7 @@ const apInvoiceSlice = createSlice({
 
         const { data, total, page, limit, totalPages } = action.payload;
 
-        console.log('Received from thunk:', {
-          dataLength: data?.length,
-          total,
-          page,
-          totalPages
-        });
+     
 
         // Ensure we have valid data
         state.apInvoices = Array.isArray(data) ? data : [];
@@ -591,12 +579,7 @@ const apInvoiceSlice = createSlice({
           Math.ceil(state.totalItems / state.pageSize) || 1;
         state.hasMore = state.currentPage < state.totalPages;
 
-        console.log('Final state:', {
-          invoicesCount: state.apInvoices.length,
-          totalItems: state.totalItems,
-          currentPage: state.currentPage,
-          totalPages: state.totalPages
-        });
+       
       })
 
       .addCase(fetchApInvoices.rejected, (state, action) => {

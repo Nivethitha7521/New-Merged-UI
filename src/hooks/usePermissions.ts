@@ -4,24 +4,24 @@ import { RootState } from '../redux/store';
 export const usePermissions = () => {
   const authState = useSelector((state: RootState) => state.auth);
   
-  console.log('🔐 Full Auth State:', authState);
+ 
 
   const getPermissions = () => {
     // Get from Redux auth state first
     let permissions = authState.permissions;
     
-    console.log('📋 Permissions from Auth:', permissions);
+  
     
     // If empty, check localStorage as fallback
     if (!permissions || Object.keys(permissions).length === 0) {
       try {
         const storedPermissions = localStorage.getItem('userPermissions');
         if (storedPermissions) {
-          console.log('💾 Using localStorage permissions');
+         
           return JSON.parse(storedPermissions);
         }
       } catch (error) {
-        console.error('Error parsing localStorage permissions:', error);
+       
       }
     }
     
@@ -33,10 +33,10 @@ export const usePermissions = () => {
 
   const hasPermission = (app: string, module: string, action: string): boolean => {
     try {
-      console.log('🔍 Checking Permission:', { app, module, action });
+     
       
       if (!permissions || Object.keys(permissions).length === 0) {
-        console.log('❌ No permissions found');
+       
         return false;
       }
       
@@ -44,7 +44,7 @@ export const usePermissions = () => {
       const modulePerms = appPerms[module] || {};
       
       const hasPerm = modulePerms[action] === true || modulePerms[action] === 1;
-      console.log('✅ Permission Result:', hasPerm);
+     
       return hasPerm;
     } catch (error) {
       return false;

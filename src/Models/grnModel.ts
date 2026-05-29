@@ -458,7 +458,8 @@ export interface GrnState {
   grns: GrnData[];
   itemwise: GrnData[];
   itemDetails: ItemDetail[];
-
+holdGrns: GrnData[];
+holdGrnTotalItems: number;
   // UI state
   searchQuery: string;
   selectedGrnId: string | null;
@@ -532,6 +533,8 @@ export interface GrnState {
 
 // ====== INITIAL STATE ======
 export const initialState: GrnState = {
+  holdGrns: [],
+holdGrnTotalItems: 0,
   grns: [],
   itemwise: [],
   itemDetails: [],

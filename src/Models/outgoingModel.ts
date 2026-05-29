@@ -146,6 +146,9 @@ export interface PaymentHistory {
   debitAmount?: number;
     advanceAmount?: number; // ADDED: For advance payments
   advancePaymentsApplied?: string[]; // ADDED: For advance payment IDs
+  paymentId?: string;
+isCancelled?: boolean;
+historyId?: string;
 }
 // Interface for Outgoing slice state
 export interface OutgoingState {

@@ -149,11 +149,7 @@ const canEdit = hasPermission("yenerp", "serviceorders_rejected", "edit");
 const canDelete = hasPermission("yenerp", "serviceorders_rejected", "delete");
 const canReadPending = hasPermission("yenerp", "serviceorders_pending", "read");
 const canReadApproved = hasPermission("yenerp", "serviceorders_approved", "read");
-console.log("Rejected Service Permissions:", {
-  canRead,
-  canEdit,
-  canDelete,
-});
+
 
   const dispatch = useDispatch<AppDispatch>();
   const serviceOrder = useSelector(selectServiceState);

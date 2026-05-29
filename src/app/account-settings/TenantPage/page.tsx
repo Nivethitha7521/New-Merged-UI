@@ -34,7 +34,7 @@ const [snackbar, setSnackbar] = useState({
 });
 
 
-  const API = "https://yenerp.com/purchaseapi";
+  const API = "https://yenerp.com/purchasetestapi";
 
   // ✅ Fetch tenants
  const fetchTenants = async () => {

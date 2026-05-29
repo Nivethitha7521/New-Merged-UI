@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '@/redux/store';
 
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchasetestapi';
 
 // ============================================
 // INTERFACES (Updated for comprehensive API)
@@ -176,7 +176,6 @@ export const fetchAllDebitNotesForDocument = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log('📋 Fetching debit notes for document:', documentId, 'type:', documentType);
       
       const response = await purchaseApi.get<ComprehensiveDebitNotesResponse>(
         `/debitnote/returnprocess/debitnotes/comprehensive/${documentId}`,
@@ -190,7 +189,6 @@ export const fetchAllDebitNotesForDocument = createAsyncThunk(
       );
       
       const data = response.data;
-      console.log('✅ Debit notes loaded successfully');
       return data;
       
     } catch (error: any) {
@@ -220,12 +218,7 @@ export const fetchAllDebitNotesComprehensive = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log('📋 Making API request to:', `/debitnote/returnprocess/debitnotes/comprehensive/${documentId}`);
-      console.log('Params:', {
-        document_type: documentType,
-        include_cleared: includeCleared,
-        include_active: includeActive
-      });
+      
       
       const response = await purchaseApi.get<ComprehensiveDebitNotesResponse>(
         `/debitnote/returnprocess/debitnotes/comprehensive/${documentId}`,
@@ -238,7 +231,6 @@ export const fetchAllDebitNotesComprehensive = createAsyncThunk(
         }
       );
       
-      console.log('✅ API response received:', response.status, response.data);
       return response.data;
       
     } catch (error: any) {
@@ -290,7 +282,6 @@ export const downloadAllDebitNotesPdf = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log('📄 Downloading ALL debit notes PDF for:', documentId);
       
       const response = await purchaseApi.get(
         `/debitnote/returnprocess/DebitCreditNote/pdf-all/${documentId}`,
@@ -428,13 +419,7 @@ const debitCreditNoteSlice = createSlice({
           return legacyNote;
         });
         
-        console.log('✅ State updated with comprehensive debit notes:', {
-          total: state.allDebitNotes.length,
-          active: state.activeNotes.length,
-          cleared: state.clearedNotes.length,
-          itemWise: state.itemWiseNotes.length,
-          amountOnly: state.amountOnlyNotes.length,
-        });
+      
       })
       .addCase(fetchAllDebitNotesComprehensive.rejected, (state, action) => {
         state.loading = false;
@@ -537,13 +522,7 @@ const debitCreditNoteSlice = createSlice({
           return legacyNote;
         });
         
-        console.log('✅ State updated with debit notes:', {
-          total: state.allDebitNotes.length,
-          active: state.activeNotes.length,
-          cleared: state.clearedNotes.length,
-          itemWise: state.itemWiseNotes.length,
-          amountOnly: state.amountOnlyNotes.length,
-        });
+        
       })
       .addCase(fetchAllDebitNotesForDocument.rejected, (state, action) => {
         state.loading = false;

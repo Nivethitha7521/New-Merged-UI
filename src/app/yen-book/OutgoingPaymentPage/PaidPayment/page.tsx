@@ -1,6 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import CancelIcon from '@mui/icons-material/Cancel';
+import PartialPaymentCancelDialog
+from "../Components/PartialPaymentCancelDialog";
+import {
+  revertPayment,
+  cancelPartialPayments
+}
+from "@/features/yen-purchase/Outgoing/outgoingPaymentSlice";
 import {
   Grid,
   Typography,
@@ -82,6 +90,23 @@ const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
 const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
   const [filteredOutgoing, setFilteredOutgoing] = useState<Outgoing[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [cancelDialogOpen,
+setCancelDialogOpen] =
+useState(false);
+
+const [selectedPayment,
+setSelectedPayment] =
+useState<any>(null);
+const [confirmDialogOpen,
+setConfirmDialogOpen] =
+useState(false);
+
+const [revertPaymentData,
+setRevertPaymentData] =
+useState<{
+  outgoingId: string;
+  paymentId: string;
+} | null>(null);
   const currentPage = useSelector(selectCurrentPage);
   const pageSize = useSelector(selectPageSize);
   const totalItems = useSelector(selectTotalItems);
@@ -137,7 +162,9 @@ const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
 
     if (payment.paymentHistory && payment.paymentHistory.length > 0) {
       payment.paymentHistory.forEach((history: any) => {
-        totalPaid += history.amount || 0;
+       if (!history.isCancelled) {
+   totalPaid += history.amount || 0;
+}
       });
     }
 
@@ -147,6 +174,20 @@ const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
   const paidOutgoings = outgoings.filter(payment => {
     return payment.status === 'Fully Paid' || payment.status === 'Partially Paid';
   });
+  
+const handleRevertPayment = (
+  outgoingId: string,
+  paymentId: string
+) => {
+
+  setRevertPaymentData({
+    outgoingId,
+    paymentId
+  });
+
+  setConfirmDialogOpen(true);
+
+};
 const handlePageChange = (newPage: number) => {
   if (newPage < 1 || newPage > Math.ceil(totalItems / pageSize)) {
     return;
@@ -205,14 +246,12 @@ const handleFilterClick = () => {
     filterParams.vendorCode = selectedVendor.randomId;
   }
 
-  console.log('Applying filters:', filterParams);
 
   dispatch(fetchOutgoings(filterParams))
     .then((response) => {
       const data = response.payload as { outgoings: Outgoing[]; totalItems: number } | string;
 
-      console.log('Filtered outgoings:', data);
-
+    
       if (typeof data === 'string') {
         dispatch(setSnackbarMessage(data));
         dispatch(setSnackbarOpen(true));
@@ -287,7 +326,97 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
+const handleOpenCancelDialog = (payment: any) => {
+  const activePaymentHistory = (payment.paymentHistory || [])
+    .filter((history: any) => !history.isCancelled);  // ← இது மட்டும் change
 
+  setSelectedPayment({
+    ...payment,
+    paymentHistory: activePaymentHistory
+  });
+
+  setCancelDialogOpen(true);
+};
+const handlePartialCancel = async (
+   historyIds: string[]
+) => {
+
+   if (!selectedPayment) return;
+
+   try {
+
+      await dispatch(
+
+         cancelPartialPayments({
+
+            outgoingId:
+               selectedPayment.outgoingId,
+
+            historyIds
+
+         })
+
+      ).unwrap();
+
+      dispatch(fetchOutgoings({
+
+         page: currentPage,
+
+         size: pageSize,
+
+         filterByStatus: true,
+
+         filterBy: dateField,
+
+         fromDate: StartDate,
+
+         toDate: EndDate,
+
+      }));
+
+      setCancelDialogOpen(false);
+
+   } catch (error) {
+
+      console.error(error);
+
+   }
+};
+const handleConfirmRevert = async () => {
+
+  if (!revertPaymentData) return;
+
+  try {
+
+    await dispatch(
+      revertPayment({
+        outgoingId:
+          revertPaymentData.outgoingId,
+
+        paymentId:
+          revertPaymentData.paymentId
+      })
+    ).unwrap();
+
+    dispatch(fetchOutgoings({
+      page: currentPage,
+      size: pageSize,
+      filterByStatus: true,
+      filterBy: dateField,
+      fromDate: StartDate,
+      toDate: EndDate,
+    }));
+
+    setConfirmDialogOpen(false);
+
+    setRevertPaymentData(null);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+};
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
@@ -829,6 +958,46 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
                           >
                             <PictureAsPdfIcon />
                           </IconButton>
+                         <Tooltip title="Cancel Payment">
+<IconButton
+  sx={{
+    color: "#1976d2",
+    "&:hover": {
+      backgroundColor: "rgba(25, 118, 210, 0.08)",
+    },
+  }}
+  onClick={() => {
+    
+
+    // FULL PAYMENT
+    if (
+      payment.paymentType === "full"
+    ) {
+
+      handleRevertPayment(
+        payment.outgoingId,
+        payment.paymentHistory?.find(
+          (history: any) =>
+            !history.isCancelled
+        )?.paymentId || ''
+      );
+
+    }
+
+    // PARTIAL PAYMENT
+    else {
+
+      handleOpenCancelDialog(
+        payment
+      );
+
+    }
+
+  }}
+>
+  <CancelIcon />
+</IconButton>
+</Tooltip>
                         </TableCell>
                       </TableRow>
                     );
@@ -928,8 +1097,10 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {selectedOutgoing.paymentHistory.map((payment: any, index: number) => (
-                            <TableRow key={index}>
+                          {selectedOutgoing.paymentHistory
+  .filter((payment: any) => !payment.isCancelled)
+  .map((payment: any, index: number) => (
+  <TableRow key={index}>
                               <TableCell>
                                 {payment.date ? format(new Date(payment.date), 'dd-MM-yyyy') : 'N/A'}
                               </TableCell>
@@ -988,9 +1159,68 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+  open={confirmDialogOpen}
+  onClose={() =>
+    setConfirmDialogOpen(false)
+  }
+>
+  <DialogTitle>
+    Cancel Payment
+  </DialogTitle>
+
+  <DialogContent>
+
+    <Typography>
+      Are you sure you want to
+      cancel this payment?
+    </Typography>
+
+  </DialogContent>
+
+  <DialogActions>
+
+    <Button
+      onClick={() =>
+        setConfirmDialogOpen(false)
+      }
+      color="inherit"
+    >
+      No
+    </Button>
+
+  <Button
+  onClick={handleConfirmRevert}
+  variant="contained"
+  sx={{
+    backgroundColor: "#1976d2",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "#1565c0",
+    },
+  }}
+>
+  Yes, Cancel
+</Button>
+
+  </DialogActions>
+</Dialog>
 <PaymentHistoryDialog 
   open={openPaymentHistoryDialog} 
   onClose={() => setOpenPaymentHistoryDialog(false)} 
+/>
+<PartialPaymentCancelDialog
+
+   open={cancelDialogOpen}
+
+   onClose={() =>
+      setCancelDialogOpen(false)
+   }
+
+   payment={selectedPayment}
+
+   onCancel={handlePartialCancel}
+
 />
 
         <Snackbar

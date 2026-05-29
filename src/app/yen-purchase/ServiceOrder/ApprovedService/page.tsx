@@ -159,10 +159,7 @@ const canEdit = hasPermission("yenerp", "serviceorders_approved", "edit");
 const canReadPending = hasPermission("yenerp", "serviceorders_pending", "read");
 const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read");
 
-console.log("Approved Service Permissions:", {
-  canRead,
-  canEdit,
-});
+
   const serviceOrder = useSelector(selectServiceState);
   const { services, loading, error, snackbarMessage, snackbarOpen } = serviceOrder;
   const { businesses } = useSelector(selectBusinesses);

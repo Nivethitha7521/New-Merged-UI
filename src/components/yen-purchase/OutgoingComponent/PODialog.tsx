@@ -12,10 +12,8 @@ interface PODialogProps {
 
 const PODialog: React.FC<PODialogProps> = ({ open, onClose, po }) => {
     const [isFullScreen, setIsFullScreen] = useState(false);
-  console.log('PODialog rendered, open:', open); // Debug: Log open state
 
   const handleClose = () => {
-    console.log('PODialog handleClose called'); // Debug: Log close action
     onClose();
   };
 const toggleFullScreen = () => {

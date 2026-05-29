@@ -169,7 +169,6 @@ const LedgerPage = () => {
         doc.addImage(business.imageUrl, 'JPEG', 20, 15, 25, 25); // Direct addImage with URL
       }
     } catch (error) {
-      console.log('Logo not available, proceeding without logo');
     }
 
     // Header text
@@ -420,18 +419,7 @@ const LedgerPage = () => {
     setOpenDialog(false);
   };
 
-  // FIX: Debug transactions to see what's coming from API
-  useEffect(() => {
-    if (transactions && transactions.length > 0) {
-      console.log('Transactions from API:', transactions);
-      console.log('Transaction types:', transactions.map(t => ({
-        type: t.type,
-        description: t.description,
-        amount: t.credit_amount > 0 ? t.credit_amount : t.debit_amount,
-        balance: t.balance
-      })));
-    }
-  }, [transactions]);
+
 
   // All-time summary values from ledgerData
   const allTimeOpeningBalance = ledgerData?.openingBalance || 0;
@@ -452,7 +440,6 @@ const LedgerPage = () => {
 
   // FIX: Check if we have invoice transactions
   const hasInvoices = transactions?.some(t => t.type === 'invoice');
-  console.log('Has invoice transactions:', hasInvoices);
   const canReadLedger = hasPermission("yenerp", "ledger", "read");
   if (!canReadLedger) {
     return (

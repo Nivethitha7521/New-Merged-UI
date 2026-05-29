@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchasetestapi';
 
 interface DeviceFingerprint {
   userAgent: string;

@@ -122,7 +122,7 @@ useEffect(() => {
   };
 
   const handleConfirmSubmit = () => {
-    console.log('handleConfirmSubmit called with:', localValues);
+  
     const normalizedName = localValues.locationName.trim().replace(/\s+/g, ' ');
     const error = validateLocationName(normalizedName);
     if (error) {
@@ -133,7 +133,7 @@ useEffect(() => {
     }
 
     if (isSubmitting) {
-      console.log('Submission blocked: already submitting');
+     
       return;
     }
 

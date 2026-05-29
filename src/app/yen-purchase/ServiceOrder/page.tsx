@@ -147,13 +147,6 @@ const canDelete = hasPermission("yenerp", "serviceorders_pending", "delete");
 const canReadApproved = hasPermission("yenerp", "serviceorders_approved", "read");
 const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read");
 
-console.log("🔍 Service Order Pending Permissions:", {
-  canAdd,
-  canEdit,
-  canApprove,
-  canRead,
-  canDelete,
-});
 
   const serviceOrder = useSelector(selectServiceState);
   const { services, loading, error, snackbarMessage, snackbarOpen } = serviceOrder;
@@ -313,9 +306,7 @@ console.log("🔍 Service Order Pending Permissions:", {
       const descriptions = getDescriptionsFromFlatArrays(selected);
       setSelectedDescriptions(descriptions);
 
-      // Log for debugging
-      console.log('Selected service:', selected);
-      console.log('Generated descriptions:', descriptions);
+    
 
       setDialogOpen(true);
     }

@@ -36,15 +36,13 @@ const GrnDebitDialog: React.FC<GrnDebitDialogProps> = ({ grnId, open, onClose })
     };
   }, [open, grnId, dispatch, debitCreditNotes]);
 
-  useEffect(() => {
-    console.log('debitCreditNotes:', debitCreditNotes); // Debug state
-  }, [debitCreditNotes]);
+
 const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
   const handleDownloadPdf = async (noteId: string) => {
     try {
-      await downloadPdf(`https://yenerp.com/purchaseapi/grns/returnprocess/DebitCreditNote/pdf/${noteId}`, `DebitCreditNote_${noteId}.pdf`);
+      await downloadPdf(`https://yenerp.com/purchasetestapi/grns/returnprocess/DebitCreditNote/pdf/${noteId}`, `DebitCreditNote_${noteId}.pdf`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
     }

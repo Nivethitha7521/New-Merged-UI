@@ -23,7 +23,7 @@ import { fetchCategories } from './PurchaseCategorySlice';
 
 
 
-const EXPORT_CSV_URL = 'https://yenerp.com/purchaseapi/rawMaterials/export_csv';
+const EXPORT_CSV_URL = 'https://yenerp.com/purchasetestapi/rawMaterials/export_csv';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // ---------- EXPORT (OLD) ----------
@@ -86,15 +86,13 @@ export const fetchPurchaseItems = createAsyncThunk(
     });
 
     try {
-      console.log('📡 Fetching purchase items with params:', params);
       
-      const response = await purchaseApi.get('https://yenerp.com/purchaseapi/rawMaterials/', { 
+      const response = await purchaseApi.get('https://yenerp.com/purchasetestapi/rawMaterials/', { 
         params,
         
 
       });
       
-      console.log('📦 Raw API response:', response.data);
       
       let items = [];
       let totalItems = 0;
@@ -110,17 +108,14 @@ export const fetchPurchaseItems = createAsyncThunk(
         totalItems = items.length;
       }
       
-      console.log('✅ Processed items:', items);
-      console.log('✅ Total items:', totalItems);
-      
+           
       return {
         items: items,
         totalItems: totalItems,
         showDeactivated, // Return this to handle in reducer
       };
     } catch (error: any) {
-      console.error('❌ Error fetching purchase items:', error);
-      console.error('❌ Error response:', error.response?.data);
+     
       throw new Error(error.response?.data?.detail || 'Error fetching purchase items');
     }
   }
@@ -131,18 +126,16 @@ export const fetchUom = createAsyncThunk('uom/fetch', async () => {
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    const response = await purchaseApi.get<UOM[]>('https://yenerp.com/purchaseapi/purchaseuoms/', {
+    const response = await purchaseApi.get<UOM[]>('https://yenerp.com/purchasetestapi/purchaseuoms/', {
     
 
     });
     
-    console.log('UOM API Response:', response.data);
     
     const uoms = response.data.map((item) => ({ uom: item.uom }));
     return uoms;
   } catch (error: any) {
-    console.error('Error fetching UOMs:', error);
-    console.error('Error response:', error.response?.data);
+  
     throw new Error(error.response?.data?.detail || 'Failed to fetch UOMs');
   }
 });
@@ -154,12 +147,11 @@ export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async ()
     // Get the username from your auth state or localStorage
     const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
     
-    const response = await purchaseApi.get<PurchaseItemType[]>('https://yenerp.com/purchaseapi/itemtypes/', {
+    const response = await purchaseApi.get<PurchaseItemType[]>('https://yenerp.com/purchasetestapi/itemtypes/', {
     
 
     });
 
-    console.log('Item Types API Response:', response.data);
     
     const itemtypes = response.data.map(item => ({
       itemtypeId: item.itemtypeId,
@@ -169,8 +161,7 @@ export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async ()
 
     return itemtypes;
   } catch (error: any) {
-    console.error('Error fetching item types:', error);
-    console.error('Error response:', error.response?.data);
+   
     throw new Error(error.response?.data?.detail || 'Failed to fetch item types');
   }
 });
@@ -181,20 +172,18 @@ export const fetchPurchaseTaxes = createAsyncThunk('purchaseTaxes/fetch', async 
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    const response = await purchaseApi.get('https://yenerp.com/purchaseapi/purchasetaxes/', {
+    const response = await purchaseApi.get('https://yenerp.com/purchasetestapi/purchasetaxes/', {
      
 
     });
     
-    console.log('Tax API Response:', response.data);
     
     const tax = (response.data as any[]).map((item) => ({
       purchasetaxPercentage: item.purchasetaxPercentage,
     }));
     return tax;
   } catch (error: any) {
-    console.error('Error fetching taxes:', error);
-    console.error('Error response:', error.response?.data);
+  
     throw new Error(error.response?.data?.detail || 'Failed to fetch taxes');
   }
 });
@@ -205,18 +194,16 @@ export const fetchStorageLocationItems = createAsyncThunk('storageLocations/fetc
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    const response = await purchaseApi.get<StorageLocationItem[]>('https://yenerp.com/purchaseapi/storagelocations/', {
+    const response = await purchaseApi.get<StorageLocationItem[]>('https://yenerp.com/purchasetestapi/storagelocations/', {
       
 
     });
     
-    console.log('Location API Response:', response.data);
     
     const location = response.data.map((item) => ({ locationName: item.locationName }));
     return location;
   } catch (error: any) {
-    console.error('Error fetching locations:', error);
-    console.error('Error response:', error.response?.data);
+  
     throw new Error(error.response?.data?.detail || 'Failed to fetch locations');
   }
 });
@@ -225,12 +212,11 @@ export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', asyn
   try {
     const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
     
-    const response = await purchaseApi.get('https://yenerp.com/purchaseapi/itemgroups/', {
+    const response = await purchaseApi.get('https://yenerp.com/purchasetestapi/itemgroups/', {
      
 
     });
 
-    console.log('Group Items API Response:', response.data);
 
     const groupitem = response.data.map((item: any) => ({
       itemgroupId: item.itemgroupId,
@@ -239,8 +225,7 @@ export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', asyn
 
     return groupitem;
   } catch (error: any) {
-    console.error('Error fetching group items:', error);
-    console.error('Error response:', error.response?.data);
+  
     throw new Error(error.response?.data?.detail || 'Failed to fetch group items');
   }
 });
@@ -248,7 +233,7 @@ export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', asyn
 
 // ---------- VENDORS ----------
 export const fetchAllVendors = createAsyncThunk('vendors/fetch', async () => {
-  const response = await purchaseApi.get<Vendor[]>('https://yenerp.com/purchaseapi/vendors/',);
+  const response = await purchaseApi.get<Vendor[]>('https://yenerp.com/purchasetestapi/vendors/',);
   const vendorData = response.data.map((item) => ({
     vendorId: item.vendorId,
     vendorName: item.vendorName,
@@ -267,25 +252,19 @@ export const addPurchaseItem = createAsyncThunk(
         ...purchase,
       };
 
-      console.log('Sending purchase item data:', purchaseToAdd);
 
       const response = await purchaseApi.post<PurchaseItem>(
-        'https://yenerp.com/purchaseapi/rawMaterials/',
+        'https://yenerp.com/purchasetestapi/rawMaterials/',
         purchaseToAdd,
        
       );
 
-      console.log('Add purchase item response:', response.data);
 
       dispatch(invalidatePurchaseItemsCache());
       dispatch(invalidatePOCache());
       return response.data;
     } catch (error: any) {
-      console.error('Failed to add purchase item:', error);
-      console.error('Error response:', error.response?.data);
-       console.error('❌ FULL Backend Response:', error.response);
-       console.error('❌ Backend Data:', error.response?.data);
-  console.error('❌ Backend Detail:', error.response?.data?.detail);
+     
       // Return detailed error information
       return rejectWithValue({
         message: error.response?.data?.detail || error.response?.data?.message || 'Failed to add purchase item',
@@ -309,16 +288,14 @@ export const POsearchPurchaseItems = createAsyncThunk<
     const { data, timestamp } = JSON.parse(cachedData);
 
     if (now - timestamp < CACHE_DURATION) {
-      console.log('Using cached purchase items data');
       return data;
     } else {
-      console.log('Cache expired, fetching fresh data');
       localStorage.removeItem(cacheKey);
     }
   }
 
   const response = await purchaseApi.get<PurchaseItemSearch[]>(
-    `https://yenerp.com/purchaseapi/rawMaterials/exact-name/`,
+    `https://yenerp.com/purchasetestapi/rawMaterials/exact-name/`,
     {
       params: {
         item_name: searchQuery,
@@ -347,7 +324,6 @@ export const invalidatePOCache = createAsyncThunk('purchaseItems/invalidateCache
       localStorage.removeItem(key);
     }
   });
-  console.log('Purchase items cache invalidated');
 });
 
 // In purchaseItemSlice.ts, ensure the thunk is properly typed
@@ -368,12 +344,7 @@ export const searchPurchaseItems = createAsyncThunk<
   locationId = null
 }) => {
   try {
-    console.log('🔍 searchPurchaseItems: Fetching fresh data with stock from API', { 
-      searchQuery, 
-      skip, 
-      limit, 
-      locationId 
-    });
+    
     
     // Build params object
     const params: Record<string, any> = { 
@@ -393,21 +364,18 @@ export const searchPurchaseItems = createAsyncThunk<
     }
     
     const response = await purchaseApi.get<SearchResponse>(
-      `https://yenerp.com/purchaseapi/rawMaterials/search-with-stock`,
+      `https://yenerp.com/purchasetestapi/rawMaterials/search-with-stock`,
       { params }
     );
     
     const items = response.data?.items || [];
-    console.log(`✅ searchPurchaseItems: Received ${items.length} items with stock for location ${locationId || 'all'}`);
+   
     
-    // Log stock details for debugging
-    items.forEach(item => {
-      console.log(`  📦 ${item.itemName}: stock=${item.availableStock}, location=${item.locationId}`);
-    });
+
     
     return items;
   } catch (error) {
-    console.error('❌ Error fetching purchase items:', error);
+   
     return [];
   }
 });
@@ -419,7 +387,6 @@ export const invalidatePurchaseItemsCache = createAsyncThunk(
         localStorage.removeItem(key);
       }
     });
-    console.log('Purchase items cache invalidated');
   }
 );
 
@@ -433,23 +400,20 @@ export const updatePurchaseItem = createAsyncThunk(
         ...purchase,
       };
       
-      console.log('✏️ Updating purchase item:', purchaseToUpdate);
-      console.log('🆔 Update URL:', `https://yenerp.com/purchaseapi/rawMaterials/${purchase.purchaseitemId}`);
+    
 
       const response = await purchaseApi.patch<PurchaseItem>(
-        `https://yenerp.com/purchaseapi/rawMaterials/${purchase.purchaseitemId}`,
+        `https://yenerp.com/purchasetestapi/rawMaterials/${purchase.purchaseitemId}`,
         purchaseToUpdate,
        
       );
 
-      console.log('✅ Update response:', response.data);
 
       dispatch(invalidatePurchaseItemsCache());
       dispatch(invalidatePOCache());
       return response.data;
     } catch (error: any) {
-      console.error('❌ Update error:', error);
-      console.error('❌ Error response:', error.response?.data);
+     
       
       return rejectWithValue({
         message: error.response?.data?.detail || 'Failed to update purchase item',
@@ -465,19 +429,16 @@ export const deactivatePurchaseItem = createAsyncThunk('purchaseItems/deactivate
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    console.log('🔴 Deactivating item with ID:', id);
     
     const response = await purchaseApi.patch<PurchaseItem>(
-      `https://yenerp.com/purchaseapi/rawMaterials/${id}/deactivate`,
+      `https://yenerp.com/purchasetestapi/rawMaterials/${id}/deactivate`,
       { status: 'deactivated' },
       
     );
 
-    console.log('✅ Deactivation API response:', response.data);
     return id;
   } catch (error: any) {
-    console.error('❌ Deactivate error:', error);
-    console.error('❌ Error response:', error.response?.data);
+  
     return rejectWithValue(error.response?.data?.detail || 'Failed to deactivate purchase item');
   }
 });
@@ -487,13 +448,13 @@ export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', a
     const username = localStorage.getItem('username') || 'default_user';
     
     await purchaseApi.patch<PurchaseItem>(
-      `https://yenerp.com/purchaseapi/rawMaterials/${id}/activate`,
+      `https://yenerp.com/purchasetestapi/rawMaterials/${id}/activate`,
       { status: 'active' },
       
     );
     return id;
   } catch (error: any) {
-    console.error('Activate error:', error);
+  
     return rejectWithValue(error.response?.data?.detail || 'Failed to activate purchase item');
   }
 });
@@ -507,7 +468,7 @@ export const importPurchaseItems = createAsyncThunk(
       formData.append('mode', mode);
 
       const response = await purchaseApi.post(
-        'https://yenerp.com/purchaseapi/rawMaterials/import_csv',
+        'https://yenerp.com/purchasetestapi/rawMaterials/import_csv',
         formData,
       
       );
@@ -567,7 +528,7 @@ export const exportPurchaseItems = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await purchaseApi.get(
-        'https://yenerp.com/purchaseapi/rawMaterials/purchaseitemexport/export_csv',
+        'https://yenerp.com/purchasetestapi/rawMaterials/purchaseitemexport/export_csv',
         {
 
           responseType: 'blob',
@@ -692,7 +653,6 @@ const purchaseItemSlice = createSlice({
     
     // Also fetch deactivated items count separately if needed
     const deactivatedCount = items.filter((item: PurchaseItem) => item.status === 'deactivated').length;
-    console.log('🔵 Deactivated items count:', deactivatedCount);
   }
   
   state.error = null;
@@ -838,12 +798,9 @@ const purchaseItemSlice = createSlice({
 .addCase(deactivatePurchaseItem.fulfilled, (state, action) => {
   state.loading = false;
   
-  console.log('🔄 Redux: Processing deactivation for ID:', action.payload);
-  console.log('🔄 Redux: Items before deactivation:', state.items.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
-  
+ 
   // Find the item being deactivated
   const itemToDeactivate = state.items.find(item => item.purchaseitemId === action.payload);
-  console.log('🔄 Redux: Item to deactivate found:', itemToDeactivate);
   
   if (itemToDeactivate) {
     // Update the item status to deactivated in items array
@@ -858,9 +815,7 @@ const purchaseItemSlice = createSlice({
     state.items = state.items.filter((item) => item.status !== 'deactivated');
   }
   
-  console.log('🔄 Redux: Items after deactivation:', state.items.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
-  console.log('🔄 Redux: Deactivated items after:', state.deactivatedItems.map(item => ({ id: item.purchaseitemId, name: item.itemName })));
-  
+   
   state.successMessage = 'Purchase item deactivated successfully.';
   state.error = null;
 })

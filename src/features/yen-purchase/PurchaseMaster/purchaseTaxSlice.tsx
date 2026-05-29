@@ -80,7 +80,6 @@ export const importPurchaseTaxes = createAsyncThunk(
           },
         },
       );
-      console.log("Tax Import API response:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Tax Import error:", error.response?.data || error.message);

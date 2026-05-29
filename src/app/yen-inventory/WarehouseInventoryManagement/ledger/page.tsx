@@ -80,9 +80,7 @@ const router = useRouter();
 const { hasPermission, isModuleVisible,permissions } = usePermissions();
 
 const canRead = hasPermission("yenerp", "warehousestockledger", "read");
-console.log("🔍 ALL PERMISSIONS:", permissions);
-console.log("📦 warehouse module:", permissions?.yenerp?.warehousestockledger);
-console.log("🏪 outlet module:", permissions?.yenerp?.stockledger);
+
     const stockLedger = useSelector(selectStockLedger);
     const loading = useSelector(selectStockLoading);
     const searchResults = useSelector(selectSearchResults);

@@ -1004,7 +1004,6 @@ const RejectedPo: React.FC = () => {
       filtered = filtered.filter(purchase => purchase.randomId == randomIdSearch);
     }
     
-    console.log('Filtered Orders (Frontend):', filtered);
     
     // After frontend filters, dispatch the fetchPurchaseOrders action to fetch filtered data from the backend
     dispatch(fetchPurchaseOrders({
@@ -1021,7 +1020,7 @@ const RejectedPo: React.FC = () => {
       .then(response => {
         const data = response.payload || [];
         if (data.length === 0) {
-          console.log('No matching orders found.');
+     
           setSnackbarMessage('No matching orders found.');
           setSnackbarOpen(true);
         } else {

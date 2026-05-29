@@ -40,7 +40,7 @@ const PurchaseItemAutocomplete: React.FC<PurchaseItemAutocompleteProps> = ({
     if (value) {
       // Set the input value to show the item name
       setInputValue(value.itemName);
-      console.log('✅ Set inputValue to:', value.itemName);
+    
       
       // CRITICAL FIX: Set cursor to end of input after value is set
       setTimeout(() => {
@@ -49,7 +49,7 @@ const PurchaseItemAutocomplete: React.FC<PurchaseItemAutocompleteProps> = ({
           inputElementRef.current.focus();
           const length = inputElementRef.current.value.length;
           inputElementRef.current.setSelectionRange(length, length);
-          console.log('✅ Cursor moved to end of input');
+         
         }
       }, 50);
     } else {

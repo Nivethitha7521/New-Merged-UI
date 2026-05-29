@@ -72,16 +72,7 @@ const RevertStockUpdateDialog: React.FC<RevertStockUpdateDialogProps> = ({
   grnId,
   onClose,
 }) => {
-  // Debug log
-  React.useEffect(() => {
-    if (open) {
-      console.log('📊 RevertStockUpdateDialog OPENED with:', {
-        stockUpdates,
-        grnId,
-        hasItems: stockUpdates?.items?.length || 0
-      });
-    }
-  }, [open, stockUpdates, grnId]);
+
 
   // If no stockUpdates, show a simple dialog with message
   if (!stockUpdates) {

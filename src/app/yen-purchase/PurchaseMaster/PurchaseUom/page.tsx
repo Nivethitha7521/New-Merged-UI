@@ -173,7 +173,7 @@ const UOMPage: React.FC = () => {
       dispatch(setSnackbarMessage('You do not have permission to deactivate UOM'));
       dispatch(setSnackbarOpen(true));
       return;
-    }console.log('🎯 Starting deactivate for ID:', purchaseuomId);
+    }
     try {
        await dispatch(deactivateUOMItem(purchaseuomId)).unwrap();
       dispatch(setSnackbarMessage('UOM deactivated successfully'));

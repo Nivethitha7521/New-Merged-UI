@@ -30,7 +30,6 @@ const Vendor = memo(() => {
 
 
 
-  console.log('🎯 Vendor Action Permissions:', { canAdd, canEdit, canDelete, canImport, canExport });
   const {
     items, deactivatedItems, dialogOpen, vendorTypeItems,
     showDeactivated, snackbarMessage, snackbarOpen, exportStatus,

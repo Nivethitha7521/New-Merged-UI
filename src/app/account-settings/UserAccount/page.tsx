@@ -136,12 +136,10 @@ const [passwordTouched, setPasswordTouched] = useState(false);
   // ✅ ADD THIS FUNCTION TO FETCH ROLES FROM BACKEND
   const fetchRolesFromBackend = async () => {
     try {
-      console.log("Fetching roles from backend...");
-      const response = await fetch('https://yenerp.com/purchaseapi/roles');
+      const response = await fetch('https://yenerp.com/purchasetestapi/roles');
       
       if (response.ok) {
         const rolesFromBackend = await response.json();
-        console.log("Roles from backend:", rolesFromBackend);
         
         if (Array.isArray(rolesFromBackend)) {
           // Filter only active roles and transform for dropdown
@@ -161,7 +159,6 @@ const [passwordTouched, setPasswordTouched] = useState(false);
 
           
           setRoles(activeRoles);
-          console.log("Active roles for dropdown:", activeRoles);
         } else {
           console.error('Unexpected response format for roles:', rolesFromBackend);
           setRoles([]);
@@ -180,8 +177,7 @@ const [passwordTouched, setPasswordTouched] = useState(false);
   // ✅ Fetch permissions and create role -> apps mapping
 const fetchRoleAppsFromPermissions = async () => {
   try {
-    console.log("Fetching permissions to map role -> apps...");
-    const res = await fetch("https://yenerp.com/purchaseapi/permissions");
+    const res = await fetch("https://yenerp.com/purchasetestapi/permissions");
 
     if (!res.ok) return;
 
@@ -278,9 +274,7 @@ if (appHasPermission) {
     }
 
     setRoleAppsMap(map);
-    console.log("✅ roleAppsMap NEW:", map);
   } catch (err) {
-    console.error("Error mapping apps:", err);
   }
 };
 
@@ -367,7 +361,6 @@ if (
 
     if (editingUserId) {
       // ✅ UPDATE EXISTING USER
-      console.log("🔄 Updating user...", editingUserId);
       
       const updateData: any = {
         username: formUser.username,
@@ -383,7 +376,7 @@ if (
         updateData.password = formUser.password;
       }
       
-      const response = await fetch(`https://yenerp.com/purchaseapi/users/${editingUserId}`, {
+      const response = await fetch(`https://yenerp.com/purchasetestapi/users/${editingUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -420,7 +413,6 @@ if (
 }
 
       const result = await response.json();
-      console.log("✅ User updated successfully:", result);
       
      setUsers(users.map(user => 
   user.id === editingUserId ? { 
@@ -439,9 +431,8 @@ setSnackbar({
       
     } else {
       // ✅ CREATE NEW USER (your existing code)
-      console.log("🔄 Creating user in role management system...");
 
-      const response = await fetch('https://yenerp.com/purchaseapi/users', {
+      const response = await fetch('https://yenerp.com/purchasetestapi/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -488,7 +479,6 @@ if (!response.ok) {
 
 
       const result = await response.json();
-      console.log("✅ User created successfully:", result);
       
       // ✅ ADD USER TO REDUX STORE FOR IMMEDIATE UI UPDATE
       const newUser = {
@@ -534,7 +524,7 @@ setSnackbar({
  const handleDeactivateUser = async (userId: string) => {
   try {
     // 🔥 1. Update backend
-    await fetch(`https://yenerp.com/purchaseapi/users/${userId}/deactivate`, {
+    await fetch(`https://yenerp.com/purchasetestapi/users/${userId}/deactivate`, {
       method: "PATCH",
     });
 
@@ -559,7 +549,7 @@ setSnackbar({
 
  const handleRestoreUser = async (userId: string) => {
   try {
-    await fetch(`https://yenerp.com/purchaseapi/users/${userId}/activate`, {
+    await fetch(`https://yenerp.com/purchasetestapi/users/${userId}/activate`, {
       method: "PATCH",
     });
 
@@ -596,12 +586,10 @@ setSnackbar({
 // ✅ UPDATE THIS FUNCTION TO FETCH FROM ROLE MANAGEMENT
 const fetchUsersFromBackend = async () => {
   try {
-    console.log("Fetching users from backend...");
-    const response = await fetch('https://yenerp.com/purchaseapi/users');
+    const response = await fetch('https://yenerp.com/purchasetestapi/users');
     
     if (response.ok) {
       const usersFromBackend = await response.json();
-      console.log("Users from backend:", usersFromBackend);
       
       if (Array.isArray(usersFromBackend)) {
         const transformedUsers = usersFromBackend.map((user: any) => ({
@@ -615,7 +603,6 @@ const fetchUsersFromBackend = async () => {
         }));
         
         setUsers(transformedUsers);
-        console.log("Transformed users:", transformedUsers);
       } else {
         console.error('Unexpected response format from backend:', usersFromBackend);
         setUsers([]);

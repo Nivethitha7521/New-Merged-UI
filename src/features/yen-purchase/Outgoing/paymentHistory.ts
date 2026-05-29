@@ -108,13 +108,11 @@ export const fetchGroupedPayments = createAsyncThunk(
       params.append('page', page.toString());
       params.append('limit', limit.toString());
       
-      console.log('Fetching grouped payments from URL:', `/outgoingpayments/payments/grouped?${params.toString()}`);
       
       const response = await purchaseApi.get(
         `/outgoingpayments/payments/grouped?${params.toString()}`
       );
       
-      console.log('Grouped payments response:', response.data);
       return response.data as PaymentsGroupedResponse;
     } catch (error: any) {
       console.error('API Error details:', {
@@ -138,13 +136,11 @@ export const fetchPaymentById = createAsyncThunk(
   'payments/fetchPaymentById',
   async (paymentId: string, { rejectWithValue }) => {
     try {
-      console.log('Fetching payment details for:', paymentId);
       
       const response = await purchaseApi.get(
         `/outgoingpayments/payments/by-payment-id/${paymentId}`
       );
       
-      console.log('Payment details response:', response.data);
       return response.data as PaymentDetailResponse;
     } catch (error: any) {
       console.error('Error fetching payment details:', error);

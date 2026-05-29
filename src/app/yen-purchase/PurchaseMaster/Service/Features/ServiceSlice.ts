@@ -187,7 +187,7 @@ const serviceSlice = createSlice({
       state.searchQuery = action.payload;
     },
     setDialogOpen(state, action: PayloadAction<'none' | 'edit' | 'deactivated'>) {
-      console.log('setDialogOpen dispatched with:', action.payload);
+    
       state.dialogOpen = action.payload;
     },
     setServiceData(state, action: PayloadAction<Service>) {

@@ -248,7 +248,6 @@ const [invoiceAvailability, setInvoiceAvailability] = useState<{
         const storedBusinesses = localStorage.getItem("businesses");
         if (storedBusinesses && isValidJSON(storedBusinesses)) {
           const parsedBusinesses = JSON.parse(storedBusinesses);
-          console.log("Loaded businesses from localStorage:", parsedBusinesses);
         } else {
           await dispatch(fetchBusinesses()).unwrap(); // Wait for the dispatch to complete
         }
@@ -274,13 +273,7 @@ const [invoiceAvailability, setInvoiceAvailability] = useState<{
   }, []);
   // Add this useEffect to monitor state changes
   useEffect(() => {
-    console.log('🔄 Redux State Monitor:', {
-      showReturnStockUpdateDialog,
-      lastReturnStockUpdates: lastReturnStockUpdates ? 'Has Data' : 'No Data',
-      lastReturnedGrnId,
-      stockUpdatesType: lastReturnStockUpdates ? typeof lastReturnStockUpdates : 'null',
-      stockUpdatesKeys: lastReturnStockUpdates ? Object.keys(lastReturnStockUpdates) : []
-    });
+    
   }, [showReturnStockUpdateDialog, lastReturnStockUpdates, lastReturnedGrnId]);
 
   useEffect(() => {
@@ -467,7 +460,6 @@ const [invoiceAvailability, setInvoiceAvailability] = useState<{
   }, [selectedGrn]);
   // Function to handle opening the invoice edit dialog
   const handleEditInvoice = (grnId: string) => {
-    console.log(`GRN ID Clicked for Editing Invoice: ${grnId}`);
     const selectedGrn = grns.find(grn => grn.grnId === grnId); // Assume grns is available in scope
     if (selectedGrn) {
       // Set invoice details from selected GRN
@@ -539,7 +531,6 @@ useEffect(() => {
       }, 0);
     }
     
-    console.log(`📦 GRN ${grn.randomId} - Original Amount: ₹${calculatedTotal}`);
     
     setSelectedGrnItems(grn.itemDetails);
     setSelectedGrnAmount(calculatedTotal); // ← THIS WAS MISSING
@@ -604,12 +595,10 @@ useEffect(() => {
     // Dispatch the thunk to update the invoice details
     await dispatch(updateInvoiceDetails(updatedInvoiceDetails)).unwrap();
 
-    console.log('Invoice updated successfully');
 
     // Fetch the most recent GRNs after successful update
     await dispatch(fetchGrns({ page: newPage, size: pageSize, status }));
 
-    console.log('Recent GRNs fetched successfully');
 
     // Show success message
     setSnackbarMessage('Invoice details updated successfully');
@@ -1005,7 +994,6 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
       apInvoiceDate: apInvoiceDateValue,
       outgoingDate: outgoingDateValue,
     };
-    console.log('Payload for save (AP Round Off):', payload.apRoundOff);
     try {
       setLoading(true);
       const resultAction = await dispatch(updateItemDetails(payload));
@@ -1048,7 +1036,6 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
       const result = await dispatch(revertGrnToPO(grnId)).unwrap();
       let message = `GRN successfully reverted to PO`;
 
-      console.log('Revert result with stock updates:', result);
 
       if (result.stockUpdates) {
         message += ` (Inventory updated: ${result.stockUpdates.inventory_updates} locations)`;
@@ -1067,7 +1054,6 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
       // Show the REVERT stock update dialog with the stock updates from backend
       dispatch(setShowStockUpdateDialog(true));
 
-      console.log('Reversion successful with stock updates:', result.stockUpdates);
     } catch (error: any) {
       console.error('Reversion failed:', error);
       setSnackbarMessage(error || 'Failed to revert GRN to PO');
@@ -1549,7 +1535,6 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
             finalPrice: Number(item.finalPrice) || 0,
           })) as ItemDetailResponsePO[],
         };
-        console.log('transformedPo:', transformedPo); // Debug: Verify orderDate
         dispatch(setSelectedPo(transformedPo));
         setPoDialogOpen(true); // Open PODialog
       } else {
@@ -1693,7 +1678,6 @@ const handleFilterClick = () => {
     .then((payload: FetchGrnsPayload) => {
       const data = payload.grns || [];
       if (data.length === 0) {
-        console.log('No matching GRN found.');
         setSnackbarMessageGRN('No matching GRN found.');
         setSnackbarOpenGRN(true);
       } else {
@@ -1724,7 +1708,6 @@ const handleFilterClose = () => {
   if (error) {
     return <Typography>Error: {error}</Typography>;
   }
-  console.log(filteredGrns);
   return (
     <Box >
       <YenPurchasePage />
@@ -1734,23 +1717,39 @@ const handleFilterClose = () => {
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={1} ml={1}>
             {/* Buttons */}
             <Box display="flex" alignItems="center">
-              {canRead && (
-                <Link href={"/yen-purchase/GrnPage"}>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: 'white', // White background
-                      color: 'black', // Black text
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Slightly darker on hover
-                      },
-                      mr: 1,
-                    }}
-                  >
-                    GRN List
-                  </Button>
-                </Link>
-              )}
+            {canRead && (
+  <Link href={"/yen-purchase/GrnPage"}>
+    <Button
+      variant="contained"
+      sx={{
+        backgroundColor: 'white',
+        color: 'black',
+        '&:hover': {
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        },
+        mr: 1,
+      }}
+    >
+      GRN List
+    </Button>
+  </Link>
+)}
+{canRead && (
+  <Link href={"/yen-purchase/GrnPage/HoldGrn"}>
+  <Button
+  variant="contained"
+  sx={{
+    backgroundColor: "#1976d2",
+    color: "#fff",
+    // "&:hover": {
+    //   backgroundColor: "#ffffff",
+    // },
+  }}
+>
+  HOLD GRN
+</Button>
+  </Link>
+)}
               {canReturnRead && (
                 <Link href={"/yen-purchase/GrnPage/GrnReturn"}>
                   <Button variant="contained" color="primary" sx={{ mr: 2 }}>

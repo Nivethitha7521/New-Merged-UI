@@ -548,32 +548,41 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
 
     setIsValidatingPrice(true);
 
-    try {
-      const item = updatedItems.find(i => i.itemId === itemId);
-      const itemName = item?.itemName || 'Item';
+try {
+  const item = updatedItems.find(i => i.itemId === itemId);
+  const itemName = item?.itemName || 'Item';
 
-      const result = await dispatch(validateGRNPrice({
-        poPrice,
-        grnPrice,
-        itemName
-      })).unwrap();
+  const result = await dispatch(validateGRNPrice({
+    poPrice,
+    grnPrice,
+    itemName
+  })).unwrap();
 
-      if (!result.valid) {
-        setPriceValidationErrors(prev => ({
-          ...prev,
-          [itemId]: result.message
-        }));
-        return false;
-      } else {
-        setPriceValidationErrors(prev => ({ ...prev, [itemId]: '' }));
-        return true;
-      }
-    } catch (error) {
-      console.error('Validation error:', error);
-      return true; // Allow on error
-    } finally {
-      setIsValidatingPrice(false);
-    }
+  // HOLD GRN ALLOWED
+  if (result.hold) {
+
+    setPriceValidationErrors(prev => ({
+      ...prev,
+      [itemId]: ''
+    }));
+
+    return true;
+  }
+
+  // NORMAL VALIDATION
+  setPriceValidationErrors(prev => ({
+    ...prev,
+    [itemId]: ''
+  }));
+
+  return true;
+
+} catch (error) {
+  console.error('Validation error:', error);
+  return true;
+} finally {
+  setIsValidatingPrice(false);
+}
   }, [grnSettings, updatedItems, dispatch]);
   // Then in the save button logic, add this check:
   const handleOpenConfirmDialog = () => {
@@ -854,7 +863,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                   calculatedItems
                     .filter((item) => item.status !== "Received")
                     .map((item: ItemWithCalculations, index: number) => {
-                      const poPrice = item.newPrice || 0;
+                     const poPrice = item.existingPrice || 0;
                       return (
                         <TableRowMemo
                           key={item.itemId}
@@ -1135,8 +1144,8 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
                     !isReceivedQuantityValid() ||
                     isInvoiceDuplicate ||
                     !invoiceNumber ||
-                    finalTotalAmount < 0 ||
-                    hasPriceValidationErrors()  // Add this condition
+                    finalTotalAmount < 0 
+                  
                   }
                   sx={{ ml: 1 }}
                 >
@@ -1289,7 +1298,6 @@ const ApprovedPurchase: React.FC = () => {
     setOverallDiscountAmount(0);
     setDiscountType('after'); // Always reset to 'after' on close
     setOriginalItemDiscounts({});
-    console.log("Dialogs closed, states reset");
   }, []);
   const calculatedItems = useMemo(() => {
     if (!selectedOrder || updatedItems.length === 0) return [];
@@ -1298,7 +1306,7 @@ const ApprovedPurchase: React.FC = () => {
       if (!originalItem) return item;
       const receivedQuantity = Number(item.receivedQuantity) || 0;
       const pendingTotalQuantity = item.pendingTotalQuantity;
-      const grnPrice = item.grnPrice !== undefined ? item.grnPrice : (item.newPrice || 0);
+      const grnPrice = item.grnPrice !== undefined ? item.grnPrice : (item.existingPrice || item.newPrice || 0);
       const taxPercentage = item.taxPercentage || 0;
       const befTaxDiscount = Number(item.befTaxDiscount) || 0;
       const afTaxDiscount = Number(item.afTaxDiscount) || 0;
@@ -1417,6 +1425,7 @@ const ApprovedPurchase: React.FC = () => {
           ...item,
           receivedQuantity: pendingTotalQuantity,
           grnPrice: undefined,
+          existingPrice: item.existingPrice || item.newPrice || 0,
           befTaxDiscount: item.befTaxDiscount || 0,
           afTaxDiscount: item.afTaxDiscount || 0,
           expiryDate: item.expiryDate ? new Date(item.expiryDate + 'T00:00:00Z') : null,
@@ -1518,17 +1527,7 @@ const ApprovedPurchase: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [invoiceNumber, selectedOrder?.vendorName, openDialog, dispatch]);
-  // Add this near the bottom of your ApprovedPurchase component, right before the return statement
-  useEffect(() => {
-    console.log('STOCK UPDATE DEBUG:');
-    console.log('- showStockUpdateDialog:', showStockUpdateDialog);
-    console.log('- stockUpdateResult:', stockUpdateResult);
 
-    if (stockUpdateResult) {
-      console.log('- items length:', stockUpdateResult.items?.length);
-      console.log('- first item:', stockUpdateResult.items?.[0]);
-    }
-  }, [showStockUpdateDialog, stockUpdateResult]);
   const validateExpiryDates = useCallback((): boolean => {
     let hasErrors = false;
     const newErrors: Record<number, Record<string, string>> = {};
@@ -1578,7 +1577,7 @@ const ApprovedPurchase: React.FC = () => {
   }, [updatedItems, touched]);
   const handleQuantityChange = useCallback(
     (itemId: string, field: "receivedQuantity", value: string | number) => {
-      console.log("Quantity Change:", { itemId, field, value });
+    
       const index = updatedItems.findIndex((item) => item.itemId === itemId);
       const originalItem = selectedOrder?.items.find((original) => original.itemId === itemId);
       const originalPendingTotalQuantity = originalItem?.pendingTotalQuantity || 0;
@@ -1782,7 +1781,6 @@ const ApprovedPurchase: React.FC = () => {
   );
   // Update handleSaveChanges to include the validation
   const handleSaveChanges = useCallback(async () => {
-    console.log("Saving Changes:", { updatedItems, invoiceNumber, invoiceDate, roundOffAmount, freights });
 
     if (!selectedOrder?.purchaseOrderId) {
       setSnackbarInvoiceMessage("Please select a valid order with a purchase order ID.");
@@ -1939,9 +1937,7 @@ const ApprovedPurchase: React.FC = () => {
       };
     });
 
-    console.log("Items being sent to backend:", items);
-    console.log("Freights being sent to backend:", freights);
-    console.log("Round off amount:", roundOffAmount);
+   
 
     try {
       setIsProcessing(true);
@@ -1960,7 +1956,7 @@ const ApprovedPurchase: React.FC = () => {
         })
       ).unwrap();
 
-      console.log("Update Result:", updateResult);
+     
       setRoundOffAmount(0);
 
       const updatedOrderItems = selectedOrder.items.map((originalItem) => {
@@ -2123,8 +2119,8 @@ const ApprovedPurchase: React.FC = () => {
   // FIXED: Added null-check for order.items to prevent runtime error in some()
   const filteredOrders = useMemo(() =>
     purchaseList.filter((order) =>
-      (order.poStatus === "Approved" || order.poStatus === "PartiallyReceived") &&
-      // Only show orders that have at least one item with pending quantity
+      (order.poStatus === "Approved" || order.poStatus === "PartiallyReceived" || 
+       (order.poStatus === "HoldGRN" && order.items && order.items.some(item => (item.pendingTotalQuantity || 0) > 0))) &&
       (order.items && order.items.some(item => (item.pendingTotalQuantity || 0) > 0))
     ), [purchaseList]);
   // FULL: Updated handleViewDetailsClick function
@@ -2194,6 +2190,7 @@ const ApprovedPurchase: React.FC = () => {
           ...item,
           receivedQuantity: pendingTotalQuantity,
           grnPrice: undefined,
+          existingPrice: item.existingPrice || item.newPrice || 0,
           befTaxDiscount: item.befTaxDiscount || 0,
           afTaxDiscount: item.afTaxDiscount || 0,
           expiryDate: expiryDate && !isNaN(expiryDate.getTime()) ? expiryDate : null,
@@ -2433,7 +2430,7 @@ const ApprovedPurchase: React.FC = () => {
   const handleEditFreights = (updatedFreights: FreightData[]) => {
     setFreights(updatedFreights);
     // TODO: Add API call to update freights in backend
-    console.log('Updated freights:', updatedFreights);
+   
   };
   const handleExportAllVendorsCSV = useCallback(
     ({ filteredOrders, setSnackbarInvoiceMessage, setSnackbarInvoiceOpen }: ExportProps) => {
@@ -2638,7 +2635,7 @@ const ApprovedPurchase: React.FC = () => {
       size: pageSize,
       dateField: "approvedDate",
       vendorCode: vendor ? vendor.randomId : "",  // ← CHANGE: send vendorCode
-      status: "Approved,PartiallyReceived",
+      status: "Approved,PartiallyReceived,HoldGRN",
       itemName: searchQueryItem,
       randomId: selectedRandomId,
     }));
@@ -2651,7 +2648,7 @@ const ApprovedPurchase: React.FC = () => {
       size: pageSize,
       dateField: "approvedDate",
       vendorName: selectedVendor ? selectedVendor.vendorName : "",
-      status: "Approved,PartiallyReceived",
+      status: "Approved,PartiallyReceived,HoldGRN",
       itemName: searchQueryItem,
       randomId,
     }));
@@ -2669,7 +2666,7 @@ const ApprovedPurchase: React.FC = () => {
       size: pageSize,
       dateField: "approvedDate",
       vendorName: selectedVendor ? selectedVendor.vendorName : "",
-      status: "Approved,PartiallyReceived",
+      status: "Approved,PartiallyReceived,HoldGRN",
       itemName: item ? item.itemName : "",
       randomId: selectedRandomId,
     }));
@@ -2684,7 +2681,7 @@ const ApprovedPurchase: React.FC = () => {
       fromDate: moment(selectionRange.startDate).startOf("day").toDate(),
       toDate: moment(selectionRange.endDate).endOf("day").toDate(),
       vendorCode: selectedVendor ? selectedVendor.randomId : "",  // ← CHANGE: send vendorCode
-      status: "Approved,PartiallyReceived",
+      status: "Approved,PartiallyReceived,HoldGRN",
       itemName: newItem ? newItem.itemName : "",
       randomId: selectedRandomId,
     }));
@@ -2700,7 +2697,7 @@ const ApprovedPurchase: React.FC = () => {
       page: 1,
       size: pageSize,
       dateField: "approvedDate",
-      status: "Approved,PartiallyReceived",
+      status: "Approved,PartiallyReceived,HoldGRN",
       vendorCode: undefined,  // ← Clear vendorCode
     }));
   }, [dispatch, pageSize]);
@@ -2757,7 +2754,6 @@ const ApprovedPurchase: React.FC = () => {
       };
       // Assuming calculateOverallDiscount thunk returns Promise<OverallDiscountResponse>
       const result: OverallDiscountResponse = await dispatch(calculateOverallDiscount(request)).unwrap();
-      console.log('Discount Response:', result); // Debug: Remove in prod
       if (result.success) {
         const newItems = updatedItems.map((item) => {
           // Now typed: r is OverallDiscountResponseItem
@@ -3132,7 +3128,7 @@ const ApprovedPurchase: React.FC = () => {
                           size: pageSize,
                           dateField: "approvedDate",
                           vendorName: selectedVendor ? selectedVendor.vendorName : "",
-                          status: "Approved,PartiallyReceived",
+                          status: "Approved,PartiallyReceived,HoldGRN",
                           itemName: newItem ? newItem.itemName : "",
                           randomId: selectedRandomId,
                         })
@@ -3250,7 +3246,6 @@ const ApprovedPurchase: React.FC = () => {
         <StockUpdateDialog
           open={showStockUpdateDialog}
           onClose={() => {
-            console.log('Closing Stock Update Dialog');
             dispatch(closeStockUpdateDialog());
           }}
           result={stockUpdateResult}

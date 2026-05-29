@@ -210,7 +210,7 @@ const DebitCreditNoteDialog: React.FC = () => {
 
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error("Error downloading PDF:", error);
+     
       alert("Failed to download PDF. Please try again.");
     }
   };
@@ -218,12 +218,11 @@ const DebitCreditNoteDialog: React.FC = () => {
   // Handle single PDF download
   const handleDownloadSinglePdf = async (noteId: string) => {
     if (!noteId) {
-      console.error('No noteId provided');
+     
       return;
     }
     
     try {
-      console.log('Downloading PDF for noteId:', noteId);
       const safeFilename = `DebitNote_${noteId.replace(/\//g, '_')}.pdf`;
       await downloadPdf(noteId, safeFilename);
     } catch (error) {
@@ -236,7 +235,6 @@ const DebitCreditNoteDialog: React.FC = () => {
     if (!documentId) return;
 
     try {
-      console.log("Downloading all notes PDF for document:", documentId);
       
       const encodedDocumentId = encodeURIComponent(documentId);
       const response = await purchaseApi.get(
@@ -260,7 +258,7 @@ const DebitCreditNoteDialog: React.FC = () => {
 
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading all PDF:", error);
+    
       alert("Failed to download all PDFs. Please try again.");
     }
   };
@@ -268,10 +266,7 @@ const DebitCreditNoteDialog: React.FC = () => {
   // Fetch ALL debit notes when dialog opens
   useEffect(() => {
     if (dialogOpen && documentId && documentType && !hasFetched.current) {
-      console.log('📋 Fetching debit notes for document:', {
-        documentId,
-        documentType
-      });
+    
       
       hasFetched.current = true;
       setIsLoadingView(true);
@@ -283,15 +278,8 @@ const DebitCreditNoteDialog: React.FC = () => {
         includeActive: true,
       }))
         .unwrap()
-        .then((result: any) => {
-          console.log('✅ Debit notes loaded:', {
-            total: result?.notes?.length || 0,
-            summary: result?.summary,
-          });
-        })
-        .catch((error: any) => {
-          console.error('❌ Error loading debit notes:', error);
-        })
+       
+      
         .finally(() => {
           setIsLoadingView(false);
         });
@@ -315,7 +303,7 @@ const DebitCreditNoteDialog: React.FC = () => {
   };
 
   const handleClose = () => {
-    console.log('Closing DebitCreditNoteDialog');
+  
     dispatch(setDebitCreditDialogOpen(false));
     dispatch(clearDebitCreditNotes());
     setExpandedNote(null);

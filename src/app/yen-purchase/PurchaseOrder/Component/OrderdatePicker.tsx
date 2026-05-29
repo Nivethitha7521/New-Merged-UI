@@ -138,11 +138,7 @@ export const OrderDatePicker: React.FC<OrderDatePickerProps> = ({
         0, 0, 0, 0
       ));
       
-      console.log('📤 Validating date:', {
-        original: date.toLocaleDateString('en-IN'),
-        month: date.getMonth() + 1,
-        utcSent: utcDate.toISOString()
-      });
+
       
       const result = await dispatch(validateDate({ 
         date: utcDate, 
@@ -240,15 +236,7 @@ export const OrderDatePicker: React.FC<OrderDatePickerProps> = ({
     // Convert to UTC midnight for storage
     const utcDate = newValue ? toDate(newValue) : null;
     
-    if (newValue) {
-      console.log('📅 DatePicker Debug:', {
-        local: newValue.tz('Asia/Kolkata').format('DD/MM/YYYY'),
-        utc: utcDate?.toISOString(),
-        month: newValue.tz('Asia/Kolkata').month() + 1
-      });
-    } else {
-      console.log('📅 DatePicker Debug: Date cleared');
-    }
+
     
     onChange(utcDate);
     

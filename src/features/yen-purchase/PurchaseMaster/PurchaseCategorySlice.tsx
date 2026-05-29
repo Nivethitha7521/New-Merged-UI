@@ -115,7 +115,6 @@ export const importPurchaseCategoriesCSV = createAsyncThunk(
           },
         }
       );
-      console.log('Category Import API response:', response.data); // Debug log
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Failed to import CSV');

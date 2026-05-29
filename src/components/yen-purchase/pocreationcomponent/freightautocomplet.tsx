@@ -70,7 +70,6 @@ const FreightAutocomplete: React.FC<FreightAutocompleteProps> = ({
       if (defaultFreight) {
         onChange(defaultFreight);
         hasSetDefault.current = true;
-        console.log('Default freight set to:', defaultFreight.freightName);
       }
     }
   }, [freightItems, value, onChange, defaultFreightName]);

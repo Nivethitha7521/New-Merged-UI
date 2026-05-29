@@ -244,7 +244,6 @@ const PendingPaymentComponent = React.memo(() => {
         }
 
         if (data.length === 0) {
-          console.log('No matching outgoing found.');
           dispatch(setSnackbarMessage('No matching Outgoing Payment found.'));
           dispatch(setSnackbarOpen(true));
         }

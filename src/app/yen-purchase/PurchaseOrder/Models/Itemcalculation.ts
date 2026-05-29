@@ -31,6 +31,7 @@ export interface ItemWithCalculations {
   pendingCount?: number;
   pendingQuantity?: number;
   pendingTotalQuantity: number;
+  existingPrice?: number;
   newPrice: number;
   grnPrice?: number;
   taxPercentage: number;

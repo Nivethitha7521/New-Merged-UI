@@ -230,9 +230,11 @@ const CreateServicePage: React.FC = () => {
   const [openFreightDialog, setOpenFreightDialog] = useState(false);
 
   // INCLUDE TAX STATE
-  const [includeTax, setIncludeTax] = useState(true);
-  const [baseAmount, setBaseAmount] = useState(0);
-  const [feeWithTax, setFeeWithTax] = useState(0);
+const [includeTax, setIncludeTax] = useState(true);
+const [baseAmount, setBaseAmount] = useState<number>(0);
+const [feeWithTax, setFeeWithTax] = useState<number>(0);
+const [feeInputValue, setFeeInputValue] = useState<string>('');
+const [baseInputValue, setBaseInputValue] = useState<string>('');
 
   // ===== CHECK IF INDIVIDUAL DISCOUNTS EXIST =====
   const hasIndividualDiscounts = useMemo(() => {
@@ -541,7 +543,12 @@ const CreateServicePage: React.FC = () => {
         const calculatedFeeWithTax = newDescription.tax_per > 0
           ? baseAmount * (1 + (newDescription.tax_per / 100))
           : baseAmount;
-        setFeeWithTax(parseFloat(calculatedFeeWithTax.toFixed(2)));
+        const roundedFee =
+  parseFloat(calculatedFeeWithTax.toFixed(2));
+
+setFeeWithTax(roundedFee);
+setFeeInputValue(roundedFee.toString());
+setBaseInputValue(baseAmount.toString());
         dispatch(setNewDescriptionData({
           ...newDescription,
           include_tax: true,
@@ -557,7 +564,7 @@ const CreateServicePage: React.FC = () => {
         const calculatedBase = newDescription.tax_per > 0
           ? feeWithTax / (1 + (newDescription.tax_per / 100))
           : feeWithTax;
-        setBaseAmount(parseFloat(calculatedBase.toFixed(2)));
+        setBaseInputValue(parseFloat(calculatedBase.toFixed(2)).toString());
         dispatch(setNewDescriptionData({
           ...newDescription,
           include_tax: false,
@@ -572,47 +579,121 @@ const CreateServicePage: React.FC = () => {
     setIncludeTax(newIncludeTax);
   };
 
-  const handleFeeWithTaxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d{0,8}(\.\d{0,2})?$/.test(value) || value === '') {
-      const parsedValue = value === '' ? 0 : parseFloat(value) || 0;
+const handleFeeWithTaxChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const rawValue = e.target.value;
+
+  // Allow: empty, numbers, single decimal point, up to 2 decimal places
+  if (rawValue === '' || /^\d*\.?\d{0,2}$/.test(rawValue)) {
+
+    setFeeInputValue(rawValue);
+
+    if (rawValue === '') {
+      setFeeWithTax(0);
+
+      dispatch(setNewDescriptionData({
+        ...newDescription,
+        fee: 0,
+        fee_with_tax: 0,
+        base_amount: 0,
+        include_tax: true,
+      }));
+
+      return;
+    }
+
+    const parsedValue = parseFloat(rawValue);
+
+    if (!isNaN(parsedValue)) {
+
       setFeeWithTax(parsedValue);
+
       let calculatedBase = parsedValue;
-      if (newDescription.tax_per > 0) {
-        calculatedBase = parsedValue / (1 + (newDescription.tax_per / 100));
+
+      if (newDescription.tax_per > 0 && parsedValue > 0) {
+        calculatedBase =
+          parsedValue / (1 + (newDescription.tax_per / 100));
       }
-      setBaseAmount(parseFloat(calculatedBase.toFixed(2)));
+
+      const roundedBase =
+        parseFloat(calculatedBase.toFixed(2));
+
+      setBaseAmount(roundedBase);
+
       dispatch(setNewDescriptionData({
         ...newDescription,
         fee: parsedValue,
         fee_with_tax: parsedValue,
-        base_amount: parseFloat(calculatedBase.toFixed(2)),
+        base_amount: roundedBase,
         include_tax: true,
       }));
-      setErrors(prev => ({ ...prev, fee: false }));
-    }
-  };
 
-  const handleBaseAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d{0,8}(\.\d{0,2})?$/.test(value) || value === '') {
-      const parsedValue = value === '' ? 0 : parseFloat(value) || 0;
+      setErrors(prev => ({
+        ...prev,
+        fee: false
+      }));
+    }
+  }
+};
+
+const handleBaseAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
+
+  const rawValue = e.target.value;
+
+  if (rawValue === '' || /^\d*\.?\d{0,2}$/.test(rawValue)) {
+
+    setBaseInputValue(rawValue);
+
+    if (rawValue === '') {
+
+      setBaseAmount(0);
+      setFeeWithTax(0);
+      setBaseInputValue('');
+
+      dispatch(setNewDescriptionData({
+        ...newDescription,
+        base_amount: 0,
+        fee: 0,
+        fee_with_tax: 0,
+        include_tax: false,
+      }));
+
+      return;
+    }
+
+    const parsedValue = parseFloat(rawValue);
+
+    if (!isNaN(parsedValue)) {
+
       setBaseAmount(parsedValue);
+
       let calculatedFeeWithTax = parsedValue;
+
       if (newDescription.tax_per > 0) {
-        calculatedFeeWithTax = parsedValue * (1 + (newDescription.tax_per / 100));
+        calculatedFeeWithTax =
+          parsedValue * (1 + (newDescription.tax_per / 100));
       }
-      setFeeWithTax(parseFloat(calculatedFeeWithTax.toFixed(2)));
+
+      const roundedFee =
+        parseFloat(calculatedFeeWithTax.toFixed(2));
+
+      setFeeWithTax(roundedFee);
+      setFeeInputValue(roundedFee.toString());
+
       dispatch(setNewDescriptionData({
         ...newDescription,
         base_amount: parsedValue,
-        fee: parseFloat(calculatedFeeWithTax.toFixed(2)),
-        fee_with_tax: parseFloat(calculatedFeeWithTax.toFixed(2)),
+        fee: roundedFee,
+        fee_with_tax: roundedFee,
         include_tax: false,
       }));
-      setErrors(prev => ({ ...prev, fee: false }));
+
+      setErrors(prev => ({
+        ...prev,
+        fee: false
+      }));
     }
-  };
+  }
+};
 
   const handleWorkOrderDateChange = useCallback((date: Date | null) => {
     dispatch(setServiceData({ ...serviceData, workOrderDate: formatDateForBackend(date) }));
@@ -706,7 +787,12 @@ const CreateServicePage: React.FC = () => {
           } else if (!includeTax && baseAmount > 0) {
             const taxAmount = baseAmount * (parsedValue / 100);
             const calculatedFeeWithTax = baseAmount + taxAmount;
-            setFeeWithTax(parseFloat(calculatedFeeWithTax.toFixed(2)));
+           const roundedFee =
+  parseFloat(calculatedFeeWithTax.toFixed(2));
+
+setFeeWithTax(roundedFee);
+setFeeInputValue(roundedFee.toString());
+setBaseInputValue(baseAmount.toString());
           }
           setErrors(prev => ({ ...prev, taxPer: false }));
         }
@@ -860,11 +946,21 @@ const CreateServicePage: React.FC = () => {
         index: undefined,
       } as any));
 
-      setIncludeTax(true);
-      setFeeWithTax(0);
-      setBaseAmount(0);
-      setSelectedService(null);
-      setErrors({ description: false, fromDate: false, toDate: false, fee: false, taxPer: false, quantity: false, remarks: false });
+     setIncludeTax(true);
+setFeeWithTax(0);
+setFeeInputValue('');
+setBaseAmount(0);
+setSelectedService(null);
+
+setErrors({
+  description: false,
+  fromDate: false,
+  toDate: false,
+  fee: false,
+  taxPer: false,
+  quantity: false,
+  remarks: false
+});
 
       setTimeout(() => { setNeedsTotalsRefresh(true); }, 100);
 
@@ -1643,7 +1739,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
                 {includeTax ? (
                   <TextField
                     fullWidth label="Fee (₹) *with tax*" name="feeWithTax" type="text"
-                    value={feeWithTax === 0 ? '' : feeWithTax} onChange={handleFeeWithTaxChange}
+                    value={feeInputValue} onChange={handleFeeWithTaxChange}
                     size="small" error={errors.fee}
                     helperText={errors.fee ? 'Fee is required' : 'Amount including tax'}
                     inputProps={{ min: 0, step: '0.01' }} autoComplete="off"
@@ -1651,7 +1747,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
                 ) : (
                   <TextField
                     fullWidth label="Base Amt (₹) *without tax*" name="baseAmount" type="text"
-                    value={baseAmount === 0 ? '' : baseAmount} onChange={handleBaseAmountChange}
+                    value={baseInputValue} onChange={handleBaseAmountChange}
                     size="small" error={errors.fee}
                     helperText={errors.fee ? 'Base amount is required' : 'Amount before tax'}
                     inputProps={{ min: 0, step: '0.01' }} autoComplete="off"

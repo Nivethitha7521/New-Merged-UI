@@ -72,7 +72,7 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
       // Create dayjs object in IST timezone
       return dayjs(d).tz('Asia/Kolkata');
     } catch (error) {
-      console.error('Error converting date:', error);
+     
       return null;
     }
   };
@@ -108,10 +108,10 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
       setLoading(true);
       try {
         const result = await dispatch(fetchDateSettings()).unwrap();
-        console.log('📋 Settings loaded:', result);
+       
         setSettings(result);
       } catch (error) {
-        console.error('Failed to load date settings:', error);
+      
       } finally {
         setLoading(false);
       }
@@ -152,12 +152,7 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
         0, 0, 0, 0
       ));
       
-      console.log('📤 Validating expected delivery date:', {
-        orderDate: orderUtcDate.toISOString(),
-        expectedDelivery: deliveryUtcDate.toISOString(),
-        orderLocal: orderDateInput.toLocaleDateString('en-IN'),
-        deliveryLocal: date.toLocaleDateString('en-IN')
-      });
+     
       
       // Use validateDate with dateType='expected' and pass orderDate
       const result = await dispatch(validateDate({ 
@@ -166,7 +161,7 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
         orderDate: orderUtcDate
       })).unwrap();
       
-      console.log('✅ Validation result:', result);
+     
       setValidationResult(result);
       
       if (!result.valid) {
@@ -177,7 +172,7 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
         onValidationChange?.(true);
       }
     } catch (error: any) {
-      console.error('Validation error:', error);
+    
       const errorResult = {
         valid: false,
         message: error?.message || 'Validation failed',
@@ -253,11 +248,7 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
       minDate = orderDayjs;
     }
 
-    console.log('📅 Date picker props:', {
-      minDate: minDate?.format('DD/MM/YYYY'),
-      maxDate: maxDate?.format('DD/MM/YYYY'),
-      orderDate: orderDayjs?.format('DD/MM/YYYY')
-    });
+  
 
     // Create disable function if min/max defined
     if (minDate || maxDate) {
@@ -288,13 +279,7 @@ export const ExpectedDeliveryDatePicker: React.FC<ExpectedDeliveryDatePickerProp
     // Convert to UTC midnight for storage
     const utcDate = newValue ? toDate(newValue) : null;
     
-    if (newValue && orderDate) {
-      console.log('📅 Expected Delivery Debug:', {
-        local: newValue.tz('Asia/Kolkata').format('DD/MM/YYYY'),
-        utc: utcDate?.toISOString(),
-        orderDate: orderDate ? new Date(orderDate).toLocaleDateString('en-IN') : 'none'
-      });
-    }
+
     
     onChange(utcDate);
   };

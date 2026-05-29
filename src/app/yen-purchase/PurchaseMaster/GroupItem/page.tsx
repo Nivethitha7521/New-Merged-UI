@@ -152,10 +152,7 @@ const handleImportCSV = (file: File): Promise<any> => {
       dispatch(setSnackbarOpen(true));
       return;
     }
- console.log('🔴 Sending payload to API:', {
-    ...values,
-    itemgroupName: normalizedName
-  });
+ 
     const isDuplicate = [...purchaseGroupItems, ...deactivatedItems].some(
       (groupitem) =>
         normalizeNameForComparison(groupitem.itemgroupName) === normalizeNameForComparison(normalizedName) &&

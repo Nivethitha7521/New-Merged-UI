@@ -83,7 +83,6 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
           }
 
           if (locationFromPO) {
-            console.log("✅ Edit mode: Setting location from PO:", locationFromPO.branchName);
             onChange(locationFromPO);
             setInputValue(locationFromPO.branchName || '');
           }
@@ -95,11 +94,11 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
         );
         
         if (defaultLocation) {
-          console.log("🏭 Create mode: Setting default location to Production WH-Main:", defaultLocation.branchName);
+        
           onChange(defaultLocation);
           setInputValue(defaultLocation.branchName || '');
         } else if (options.length > 0) {
-          console.log("⚠️ Production WH-Main not found, using first available location:", options[0].branchName);
+         
           onChange(options[0]);
           setInputValue(options[0].branchName || '');
         }
@@ -122,7 +121,7 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
     event: React.SyntheticEvent,
     newValue: Location | null
   ) => {
-    console.log("📍 Location selected by user:", newValue);
+   
     
     if (newValue === null) {
       // User cleared the selection

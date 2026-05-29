@@ -107,7 +107,7 @@ type AppPermissions = { appName: string; modules: ModuleItem[] };
 const transformPermissionsForBackend = (frontendPermissions: AppPermissions[]): any => {
   const backendPermissions: any = {};
   
-  console.log('🔄 Starting transformation...');
+ 
   
   frontendPermissions.forEach(app => {
     // ✅ CHANGE: Map both YEN_PURCHASE and YEN_BOOK to "yenerp"
@@ -133,21 +133,21 @@ else if (app.appName === "YEN_OUTLET_MANAGER") {
 }
 
     
-    console.log(`📦 Processing app: ${app.appName} → ${appName}`);
+   
     
     if (!backendPermissions[appName]) {
       backendPermissions[appName] = {};
     }
     
     app.modules.forEach(module => {
-      console.log(`  📁 Processing module: ${module.name}`);
+     
       
       module.submodules.forEach(submodule => {
         const submoduleKey = getBackendSubmoduleKey(submodule.id, submodule.name);
         
-        console.log(`    📄 Submodule: ${submodule.name} → ${submoduleKey}`);
-        console.log(`    🔧 Actions:`, submodule.actions);
-        console.log("🧠 editSubActions:", submodule.editSubActions);
+       
+       
+       
         // Check if any permission is true (except hide)
         const hasAnyPermission = 
           submodule.actions.read || 
@@ -157,8 +157,7 @@ else if (app.appName === "YEN_OUTLET_MANAGER") {
           submodule.actions.approve||
           submodule.actions.hide;
         
-        console.log(`    ✅ Has any permission: ${hasAnyPermission}`);
-        
+       
        // ✅ detect completely empty row
 const noPermissionSelected =
   !submodule.actions.read &&
@@ -183,20 +182,13 @@ backendPermissions[appName][submoduleKey] = {
     : {}),
 };
 
-// ✅ move console outside
-console.log(
-  `✅ Permission set for ${submoduleKey}:`,
-  backendPermissions[appName][submoduleKey]
-);
+
 
       }); // ✅ submodule loop CLOSE
     });   // ✅ module loop CLOSE
   });     // ✅ app loop CLOSE
 
-  console.log(
-    '📤 Final Backend Permissions:',
-    JSON.stringify(backendPermissions, null, 2)
-  );
+
 
   return backendPermissions;
 };
@@ -1065,7 +1057,7 @@ return;
   }
 
   try {
-    console.log("🔄 Starting role creation process...");
+   
     
     // 1️⃣ First create ROLE entry
     const rolePayload = {
@@ -1075,9 +1067,9 @@ return;
       role_type: ROLE_OPTIONS.includes(formRoleName) ? "Predefined" : "Custom"
     };
 
-    console.log("📤 Sending role payload:", rolePayload);
+   
 
-    const roleResponse = await fetch("https://yenerp.com/purchaseapi/roles", {
+    const roleResponse = await fetch("https://yenerp.com/purchasetestapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1100,18 +1092,18 @@ return;
 
 
     const createdRole = await roleResponse.json();
-    console.log("✅ Role created:", createdRole);
+   
 
     const roleId = createdRole._id || createdRole.id;
     if (!roleId) {
       throw new Error("Role created but no ID returned from server");
     }
-    console.log("🔥 BEFORE TRANSFORM (formPermissions):", formPermissions);
+    
 
     // 2️⃣ Convert permission UI → backend structure
     const backendPermissions = transformPermissionsForBackend(formPermissions);
-    console.log("🔥 AFTER TRANSFORM (backendPermissions):", backendPermissions);
-    console.log("📊 Transformed permissions:", backendPermissions);
+   
+   
 
     // Check if any permissions selected
     const hasPermissions = Object.keys(backendPermissions).length > 0;
@@ -1125,9 +1117,9 @@ return;
       permissions: backendPermissions
     };
 
-    console.log("📤 Sending permissions payload:", permissionPayload);
+   
 
-    const permResponse = await fetch("https://yenerp.com/purchaseapi/permissions", {
+    const permResponse = await fetch("https://yenerp.com/purchasetestapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)
@@ -1140,7 +1132,7 @@ return;
       console.warn("⚠️ Role created but permissions may not be saved");
     } else {
       const createdPermission = await permResponse.json();
-      console.log("✅ Permissions saved:", createdPermission);
+     
     }
 
     // 4️⃣ Prepare frontend role object
@@ -1153,7 +1145,7 @@ return;
       permissions: formPermissions
     };
 
-    console.log("💾 Frontend role object:", frontendRole);
+   
 
     // 5️⃣ Update Redux
     dispatch(addRoleLocally(frontendRole));

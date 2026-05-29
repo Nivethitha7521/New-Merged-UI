@@ -655,7 +655,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                               setFieldValue('itemType', selectedTypeName);
                               if (selectedType) {
                                 setFieldValue('itemTypeId', selectedType.randomId);
-                                console.log(`✅ Selected item type: ${selectedTypeName} with randomId: ${selectedType.randomId}`);
+                               
                               }
                             }}
                             required

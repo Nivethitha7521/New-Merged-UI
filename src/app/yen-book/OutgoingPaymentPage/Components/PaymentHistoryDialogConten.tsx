@@ -290,18 +290,30 @@ const handlePDFExport = async () => {
     return `₹ ${formatAmount(amount)}`;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'fully paid':
-        return 'success';
-      case 'partially paid':
-        return 'warning';
-      case 'pending':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
+const getStatusColor = (
+  status: string,
+  isCancelled?: boolean
+) => {
+
+  if (isCancelled) {
+    return 'error';
+  }
+
+  switch (status?.toLowerCase()) {
+
+    case 'fully paid':
+      return 'success';
+
+    case 'partially paid':
+      return 'warning';
+
+    case 'pending':
+      return 'error';
+
+    default:
+      return 'default';
+  }
+};
 
   if (!canRead) {
     return (
@@ -422,11 +434,22 @@ const handlePDFExport = async () => {
                   <Grid item {...getAccordionSummaryGrid()}>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center',
                       justifyContent: isMobile ? 'flex-start' : 'flex-end' }}>
-                      <Chip
-                        label={group.status}
-                        color={getStatusColor(group.status)}
-                        size="small"
-                      />
+                     <Chip
+  label={
+    group.paymentHistory?.some(
+      (payment: any) => payment.isCancelled
+    )
+      ? "Cancelled"
+      : group.status
+  }
+  color={getStatusColor(
+    group.status,
+    group.paymentHistory?.some(
+      (payment: any) => payment.isCancelled
+    )
+  )}
+  size="small"
+/>
 
                       <Tooltip title={`Download PDF for ${group.paymentId}`}>
                         <IconButton
@@ -487,24 +510,72 @@ const handlePDFExport = async () => {
                       <Table size="small" stickyHeader>
                         <TableHead>
                           <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                           
                             <TableCell>Date</TableCell>
-                            <TableCell align="right">Amount (₹)</TableCell>
+                           <TableCell
+  align="center"
+  sx={{
+    minWidth: "160px",
+    pr: 4,
+    whiteSpace: "nowrap",
+  }}
+>
+  Amount (₹)
+</TableCell>
                             <TableCell>Type</TableCell>
                             <TableCell>Method</TableCell>
                             <TableCell>Reference</TableCell>
+                            <TableCell>Status</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {group.paymentHistory.map((payment: any, idx: number) => (
                             <TableRow key={`${group.paymentId}-${idx}`}>
-                              <TableCell>{formatDate(payment.date)}</TableCell>
-                              <TableCell align="right">{formatCurrency(payment.amount)}</TableCell>
+                             
+                            <TableCell
+  sx={{
+    whiteSpace: "nowrap",
+    minWidth: "120px",
+  }}
+>
+  {formatDate(payment.date)}
+</TableCell>
+                             <TableCell
+  align="center"
+  sx={{
+    minWidth: "160px",
+    pr: 4,
+    whiteSpace: "nowrap",
+  }}
+>
+  {formatCurrency(payment.amount)}
+</TableCell>
                               <TableCell>{payment.paymentType}</TableCell>
                               <TableCell>{payment.paymentMethod}</TableCell>
                               <TableCell>
                                 {payment.neftNo || payment.rtgsNo || payment.impsNo ||
                                   payment.upi || payment.bankName || '-'}
                               </TableCell>
+                               <TableCell>
+
+  <Chip
+
+    label={
+      payment.isCancelled
+        ? "Cancelled"
+        : "Active"
+    }
+
+    color={
+      payment.isCancelled
+        ? "error"
+        : "success"
+    }
+
+    size="small"
+  />
+
+</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -615,7 +686,7 @@ const handlePDFExport = async () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>Date</TableCell>
-                          <TableCell align="right">Amount</TableCell>
+                          <TableCell align="center">Amount</TableCell>
                           <TableCell>Type</TableCell>
                           <TableCell>Method</TableCell>
                           <TableCell>Reference</TableCell>
@@ -625,7 +696,7 @@ const handlePDFExport = async () => {
                         {selectedPayment.paymentHistory.map((payment: any, idx: number) => (
                           <TableRow key={`detail-${idx}`}>
                             <TableCell>{formatDate(payment.date)}</TableCell>
-                            <TableCell align="right">{formatCurrency(payment.amount)}</TableCell>
+                            <TableCell align="center">{formatCurrency(payment.amount)}</TableCell>
                             <TableCell>{payment.paymentType}</TableCell>
                             <TableCell>{payment.paymentMethod}</TableCell>
                             <TableCell>

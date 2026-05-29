@@ -38,7 +38,6 @@ export const saveDateSettings = createAsyncThunk(
       // Remove id from payload
       const { id, ...settingsToSend } = settings;
       
-      console.log('📤 Attempting PATCH with tenant:', tenantId);
       
       // Try PATCH first (updates existing)
       const patchResponse = await purchaseApi.patch(
@@ -47,7 +46,6 @@ export const saveDateSettings = createAsyncThunk(
         { headers: { 'x-tenant-id': tenantId } }
       );
       
-      console.log('✅ PATCH successful');
       
       // IMPORTANT FIX: Return the settings that were sent, not the response
       // The PATCH endpoint returns { message: "Updated successfully" }
@@ -59,7 +57,6 @@ export const saveDateSettings = createAsyncThunk(
     } catch (error: any) {
       // If 404 (not found), then do POST (create new)
       if (error.response?.status === 404) {
-        console.log('📤 Settings not found, attempting POST...');
         
         // Re-check tenant ID
         const tenantIdForPost = getTenantId();
@@ -83,7 +80,6 @@ export const saveDateSettings = createAsyncThunk(
             { headers: { 'x-tenant-id': tenantIdForPost } }
           );
           
-          console.log('✅ POST successful with tenant:', tenantIdForPost);
           
           // IMPORTANT FIX: Return the settings with the response data merged
           // The POST endpoint returns the created document
@@ -237,7 +233,6 @@ const purchaseDateSettingsSlice = createSlice({
         state.lastUpdated = new Date().toISOString();
         
         // Don't auto-fetch - we already have the data!
-        console.log('✅ Redux state updated with saved settings');
       })
       .addCase(saveDateSettings.rejected, (state, action) => {
         state.loading = false;

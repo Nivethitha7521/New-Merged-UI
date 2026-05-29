@@ -84,7 +84,6 @@ export const importPurchaseUom = createAsyncThunk(
           },
         }
       );
-      console.log('UOM Import API response:', response.data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || error.message);

@@ -183,7 +183,7 @@ export const convertServiceToAPOutgoing = createAsyncThunk<
         params.append('invoiceDate', invoiceDate);
       }
 
-      console.log('API Request params:', Object.fromEntries(params)); // Debug log
+ 
 
       const response = await purchaseApi.post<ServiceToAPResponse>(
         `/servicepo/convert-service-to-ap-outgoing/${service_id}`,

@@ -80,7 +80,7 @@ export const fetchOutgoings = createAsyncThunk<
   'outgoings/fetchOutgoings',
   async (args, { rejectWithValue }) => {
     try {
-      const url = 'https://yenerp.com/purchaseapi/outgoingpayments/';
+      const url = 'https://yenerp.com/purchasetestapi/outgoingpayments/';
       const params: any = {
         skip: (args.page - 1) * args.size,
         limit: args.size,
@@ -98,7 +98,6 @@ export const fetchOutgoings = createAsyncThunk<
       if (args.filterBy) params.filterBy = args.filterBy;
       if (args.status) params.status = args.status;
 
-      console.log('🔍 API Call Params:', params);
 
       const response = await purchaseApi.get("/outgoingpayments/", { params });
 
@@ -179,7 +178,7 @@ export const fetchBank = createAsyncThunk<Bank[], void, { dispatch: any }>(
   'outgoingPayment/fetchBanks',
   async (_, { dispatch }) => {
     try {
-      const response = await purchaseApi.get('https://yenerp.com/masterapi/bankmasters/');
+      const response = await axios.get('https://yenerp.com/masterapi/bankmasters/');
       return response.data;
     } catch (error) {
       dispatch(setSnackbarMessage('Failed to fetch banks. Please try again.'));
@@ -352,11 +351,57 @@ export const processBulkPayment = createAsyncThunk<
     }
   }
 );
+export const revertPayment = createAsyncThunk<
+  any,
+  { outgoingId: string; paymentId: string },
+  { rejectValue: string }
+>(
+  'outgoings/revertPayment',
+  async ({ outgoingId, paymentId }, { rejectWithValue }) => {
+    try {
 
+      const response = await purchaseApi.patch(
+        `/outgoingpayments/revert-payment/${outgoingId}/${paymentId}`
+      );
+
+      return response.data;
+
+    } catch (error: any) {
+
+      return rejectWithValue(
+        error.response?.data?.detail ||
+        'Failed to revert payment'
+      );
+
+    }
+  }
+);
+export const cancelPartialPayments = createAsyncThunk(
+  "outgoing/cancelPartialPayments",
+  async (
+    {
+      outgoingId,
+      historyIds
+    }: {
+      outgoingId: string;
+      historyIds: string[];
+    },
+    thunkAPI
+  ) => {
+    try {
+      const response = await purchaseApi.patch(
+        `/outgoingpayments/${outgoingId}/cancel-partial-payments`,  // ← add "outgoingpayments/"
+        { historyIds }
+      );
+      return response.data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  }
+);
 export const addNewPayment = createAsyncThunk<Outgoing, PaymentDetails>(
   'outgoings/addNewPayment',
   async (paymentData, { rejectWithValue }) => {
-    console.log('addNewPayment called with data:', paymentData);
 
     try {
       const outgoingWithDate = {
@@ -367,7 +412,6 @@ export const addNewPayment = createAsyncThunk<Outgoing, PaymentDetails>(
         "/outgoingpayments/",
         outgoingWithDate,
       );      
-      console.log('Response from API:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Error in addNewPayment:', error);
@@ -380,13 +424,11 @@ export const addNewPayment = createAsyncThunk<Outgoing, PaymentDetails>(
 export const addNewVendorPayment = createAsyncThunk(
   'outgoings/addNewVendorPayment',
   async (paymentData: any, { rejectWithValue }) => {
-    console.log('addNewPayment called with data:', paymentData);
     try {
       const response = await purchaseApi.post("/outgoingpayments/advance/", {
         ...paymentData,
         isPreOutgoing: !paymentData.poId,
       });
-      console.log('Response from API:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Error in addNewPayment:', error);
@@ -691,7 +733,6 @@ const outgoingSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchTaxDetails.fulfilled, (state, action) => {
-        console.log('Fetched Tax Details:', action.payload);
       })
       .addCase(fetchGRN.pending, (state) => {
         state.loading = true;
@@ -755,6 +796,23 @@ const outgoingSlice = createSlice({
         state.snackbarOpen = true;
         state.snackbarMessage = action.payload as string;
       })
+      .addCase(revertPayment.pending, (state) => {
+  state.loading = true;
+})
+.addCase(revertPayment.fulfilled, (state, action) => {
+  state.loading = false;
+
+  state.snackbarOpen = true;
+  state.snackbarMessage =
+    action.payload.message || "Payment reverted successfully";
+})
+.addCase(revertPayment.rejected, (state, action) => {
+  state.loading = false;
+
+  state.snackbarOpen = true;
+  state.snackbarMessage =
+    action.payload || "Failed to revert payment";
+})
       .addCase(fetchActiveDebitsVendor.pending, (state) => {
         state.loading = true;
         state.error = null;

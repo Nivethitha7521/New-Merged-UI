@@ -11,6 +11,7 @@ export interface GRNPriceValidationResult {
   valid: boolean;
   message: string;
   isActive: boolean;
+  hold?: boolean;
   poPrice?: number;
   grnPrice?: number;
   maxAllowed?: number;

@@ -122,8 +122,7 @@ const [permissionLoading, setPermissionLoading] = useState(true);
     const canEdit = hasPermission('yenerp', 'purchaseitem', 'edit');
     const canDelete = hasPermission('yenerp', 'purchaseitem', 'delete');
 
-    console.log('🎯 Purchase Item Action Permissions:', { canAdd, canEdit, canDelete });
-    console.log('👁️ Module Visible:', moduleVisible);
+   
 
     setPermissionState({
       canAdd,
@@ -314,27 +313,22 @@ useEffect(() => {
 const handleConfirmDeactivate = async () => {
   try {
     if (itemToDeactivate) {
-      console.log('🔴 Starting deactivation process...');
-      console.log('📋 Item to deactivate:', itemToDeactivate);
-      console.log('🔄 Current active items before:', items);
-      console.log('🔄 Current deactivated items before:', deactivatedItems);
+     
 
       await dispatch(deactivatePurchaseItem(itemToDeactivate.purchaseitemId)).unwrap();
       
-      console.log('✅ Deactivation API call completed');
-      console.log('🔄 Current active items after:', items);
-      console.log('🔄 Current deactivated items after:', deactivatedItems);
+    
 
       dispatch(setSnackbarMessage('Purchase item deactivated successfully'));
       dispatch(setSnackbarOpen(true));
       dispatch(setDeactivateDialogOpen(false));
 
       // Force refresh the data
-      console.log('🔄 Refreshing data after deactivation...');
+     
       dispatch(fetchPurchaseItems({ page: currentPage, size: pageSize }));
     }
   } catch (error: any) {
-    console.error('❌ Deactivation error:', error);
+   
     dispatch(setSnackbarMessage(`Failed to deactivate purchase item: ${error.message}`));
     dispatch(setSnackbarOpen(true));
   }
@@ -495,7 +489,7 @@ const handleConfirmDeactivate = async () => {
 // In your PurchasePage.tsx, update the handleSubmit function
 const handleSubmit = async (values: any) => {
   try {
-    console.log('🔄 Submitting form data:', values);
+   
     
     // Check if editIndex is valid for edit mode
     if (editIndex !== null && (editIndex < 0 || editIndex >= items.length)) {
@@ -559,8 +553,7 @@ const handleSubmit = async (values: any) => {
         itemType: values.itemType || itemToEdit.itemType,
       };
 
-      console.log('📤 Edit data being sent:', dataToSend);
-      console.log('📤 Item Type randomId being sent:', selectedItemType.randomId);
+    
 
     } else {
       // ADD MODE
@@ -573,8 +566,7 @@ const handleSubmit = async (values: any) => {
         itemType: values.itemType,
       };
       
-      console.log('📤 Add data being sent:', dataToSend);
-      console.log('📤 Item Type randomId being sent:', selectedItemType.randomId);
+     
     }
 
     if (editIndex !== null) {
@@ -608,7 +600,7 @@ const handleSubmit = async (values: any) => {
 };
 // ✅ ADD handleRefresh FUNCTION HERE - after handleSubmit and before paginatedItems
 const handleRefresh = () => {
-  console.log('🔄 Manual refresh triggered');
+ 
   
   const currentFilters = {
     ...(filters.itemName && { itemName: filters.itemName }),

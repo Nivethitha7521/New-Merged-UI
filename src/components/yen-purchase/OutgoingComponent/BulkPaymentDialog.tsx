@@ -194,21 +194,17 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
 
       if (vendorNames.length > 0) {
         const debitsPromise = dispatch(fetchActiveDebitsMultipleVendor(vendorNames)).unwrap().catch((error: any) => {
-          console.error('Failed to fetch debits:', error);
+         
           return [];
         });
         const advancesPromise = dispatch(fetchActiveAdvancesMultipleVendor(vendorNames)).unwrap().catch((error: any) => {
-          console.error('Failed to fetch advances:', error);
+         
           return [];
         });
 
         Promise.all([debitsPromise, advancesPromise])
-          .then(([debitsResult, advancesResult]) => {
-            console.log(`Fetched payment options for ${vendorNames.length} vendors (debits: ${debitsResult.length}, advances: ${advancesResult.length})`);
-          })
-          .catch((error) => {
-            console.error('Unexpected error in payment options fetch:', error);
-          })
+          
+         
           .finally(() => {
             setIsLoading(false);
           });
@@ -666,7 +662,7 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
         onClose();
       }
     } catch (error) {
-      console.error('Payment processing failed:', error);
+     
       setErrors((prev) => ({
         ...prev,
         _general: 'Failed to process payment. Please try again.'

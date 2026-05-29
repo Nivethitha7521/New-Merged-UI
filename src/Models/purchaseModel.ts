@@ -79,6 +79,7 @@ export interface ApprovalHistory {
   approvedAt?: string;
 }
 export interface PurchaseOrderData {
+  
   purchaseOrderId: string;
   vendorName: string;
   vendorId: string;
@@ -135,6 +136,8 @@ export interface PurchaseOrderData {
   poQuantitysgst?: number;
   poQuantitycgst?: number;
   poQuantityigst?: number;
+
+  hasImages?: boolean; 
 
 }
 

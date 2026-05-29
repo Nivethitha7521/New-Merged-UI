@@ -311,14 +311,12 @@ const handleReturnProcess = useCallback(async (outgoing: any) => {
             // Use grandTotal or totalReceivedAmount from GRN
             maxDebitAmount = grnResult.grandTotal || grnResult.totalReceivedAmount || 0;
             
-            console.log('Original GRN amount for return:', maxDebitAmount);
-            console.log('Payment status - totalPayableAmount:', outgoing.totalPayableAmount);
+           
         } else {
             // Fallback to invoice total if no GRN
             maxDebitAmount = outgoing.totalPrice || outgoing.payableAmount || 0;
         }
 
-        console.log('Processing return for:', { grnId, outgoingId, randomId, maxDebitAmount });
 
         setSelectedDocumentId(outgoingId);
         setSelectedDocumentNumber(randomId);
@@ -372,7 +370,6 @@ const handleReturnProcess = useCallback(async (outgoing: any) => {
     }, []);
 
     const handleReturnComplete = useCallback(() => {
-        console.log('Return completed, closing dialogs...');
 
         setReturnOptionOpen(false);
         setItemWiseDialogOpen(false);
@@ -407,12 +404,10 @@ const handleReturnProcess = useCallback(async (outgoing: any) => {
     }, [dispatch, currentPage, pageSize, isFilterActive, selectionRange, selectedVendorName]);
 
     const handleStockUpdateClose = useCallback(() => {
-        console.log('Closing stock update dialog');
         dispatch(clearLastReturnData());
     }, [dispatch]);
 
     const handleReturnCancel = useCallback(() => {
-        console.log('Return cancelled, closing all dialogs');
         setReturnOptionOpen(false);
         setItemWiseDialogOpen(false);
         setAmountWiseDialogOpen(false);

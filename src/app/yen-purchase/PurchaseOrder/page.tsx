@@ -120,13 +120,7 @@ const Polist: React.FC = () => {
   const canRead = hasPermission("yenerp", "purchaseorders_pending", "read");
   const canDelete = hasPermission("yenerp", "purchaseorders_pending", "delete");
 
-  console.log("🔍 Purchase Order Permissions:", {
-    canAdd,
-    canEdit,
-    canApprove,
-    canRead,
-    canDelete,
-  });
+
   const { purchaseList, pendingPurchaseList, loading, error, randomIds, poRandomIds, snackbarMessage, snackbarOpen } = useSelector(selectPurchaseListState);
   const { businesses } = useSelector(selectBusinesses);
   const [selectedOrder, setSelectedOrderState] = useState<any | null>(null);
@@ -184,6 +178,12 @@ const Polist: React.FC = () => {
   const [touched, setTouched] = useState<Record<number, Record<string, boolean>>>({}); // Tracks touched fields by item index and field name
   const [errors, setErrors] = useState<Record<number, Record<string, string>>>({}); // Tracks errors by item index and field name
   const [isFullScreen, setIsFullScreen] = useState(false);
+    const fetchedOnce = useRef<Set<string>>(new Set());
+  const fetchImagesOnce = useCallback((orderId: string) => {
+    if (fetchedOnce.current.has(orderId)) return;
+    fetchedOnce.current.add(orderId);
+    dispatch(fetchAllImages(orderId));
+  }, [dispatch]);
   const [overallDiscount, setOverallDiscount] = useState<number>(0); // New state for overall discount
   const hideApproved =
     permissions?.yenerp?.purchaseorders_approved?.hide === true;
@@ -191,13 +191,10 @@ const Polist: React.FC = () => {
     permissions?.yenerp?.purchaseorders_rejected?.hide === true;
 
 
-  // Add this after your useSelector line
-  console.log('Pending Purchase List:', pendingPurchaseList);
-  console.log('Loading:', loading);
-  console.log('Error:', error);
+
   // Also check if the API call is being made
   useEffect(() => {
-    console.log('Fetching purchase orders...');
+  
     if (shouldFetch && !loading) {
       const action = fetchPendingPurchaseOrders({
         page: newPage,
@@ -230,6 +227,18 @@ const Polist: React.FC = () => {
   const toggleFullScreen = () => {
     setIsFullScreen(!isFullScreen);
   };
+  useEffect(() => {
+  if (!pendingPurchaseList) return;
+  pendingPurchaseList.forEach((order) => {
+    if (
+      order.hasImages &&
+      !fetchedOnce.current.has(order.purchaseOrderId)
+    ) {
+      fetchedOnce.current.add(order.purchaseOrderId);
+      dispatch(fetchAllImages(order.purchaseOrderId));
+    }
+  });
+}, [pendingPurchaseList, dispatch]);
   // To fetch a specific vendor by name
   useEffect(() => {
     if (selectedOrder) {
@@ -393,41 +402,7 @@ const handlePageChange = (newPage: number) => {
   const handleCloseSnackbar = () => {
     dispatch(setSnackbarOpen(false)); // Close snackbar when user dismisses
   };
-  useEffect(() => {
-    (pendingPurchaseList || []).forEach(order => {
-      const orderId = order.purchaseOrderId;
-      // Only fetch if we haven't already fetched images for this order
-      if (!fetchedPurchaseOrderIds.has(orderId)) {
-        // Fetch all images for this purchase order
-        dispatch(fetchAllImages(orderId))
-          .unwrap()
-          .then(() => {
-            // Mark this order as fetched
-            setFetchedPurchaseOrderIds(prev => new Set(prev).add(orderId));
-          })
-          .catch((error: any) => {
-            console.error('Failed to fetch images for order:', orderId, error);
-          });
-      }
-    });
-  }, [pendingPurchaseList, dispatch, fetchedPurchaseOrderIds]);
-  // Alternative: If you want to fetch images one by one with indices
-  useEffect(() => {
-    (pendingPurchaseList || []).forEach(order => {
-      const orderId = order.purchaseOrderId;
 
-      if (!fetchedPurchaseOrderIds.has(orderId)) {
-        dispatch(fetchAllImages(orderId))
-          .unwrap()
-          .catch(() => {
-            // ❌ NO CONSOLE ERROR
-            dispatch(setOrderImageUrls({ orderId, urls: [] }));
-          });
-
-        setFetchedPurchaseOrderIds(prev => new Set(prev).add(orderId));
-      }
-    });
-  }, [pendingPurchaseList]);
   // In your file input change handler:
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, orderId: string, displayIndex: number) => {
     const file = e.target.files?.[0];
@@ -543,7 +518,7 @@ const handlePageChange = (newPage: number) => {
       // FIXED: Removed the filter to show ALL items, even if pendingTotalQuantity <= 0
       // This ensures items appear in the UI regardless of quantity
       const filteredItems = selectedOrder.items || []; // No filtering by quantity > 0
-      console.log('Filtered Items (All):', filteredItems); // Debug log to verify items are loaded
+     
       setSelectedOrderState({ ...selectedOrder, items: filteredItems });
       setUpdatedItems(filteredItems.map(item => ({
         ...item,
@@ -563,7 +538,7 @@ const handlePageChange = (newPage: number) => {
         pendingAfTaxDiscountAmount: item.pendingAfTaxDiscountAmount || 0,
         pendingTaxAmount: item.pendingTaxAmount || 0,
       })));
-      console.log('Updated Items:', filteredItems.map(item => ({ ...item, pendingTotalQuantity: item.pendingTotalQuantity }))); // Debug log
+     
       setOverallDiscount(selectedOrder.discountPrice || 0); // Initialize overall discount
       const initialTouched = filteredItems.reduce((acc, _, index) => ({
         ...acc,
@@ -604,7 +579,7 @@ const handlePageChange = (newPage: number) => {
     setSelectedOrderId(null);
   };
   const handleInputChange = (index: number, field: string, value: string | number) => {
-    console.log(`Updating item at index ${index}: ${field} = ${value}`);
+   
     setTouched(prev => ({
       ...prev,
       [index]: { ...prev[index], [field]: true }
@@ -641,10 +616,10 @@ const handlePageChange = (newPage: number) => {
           const price = updatedItem.newPrice === '' ? 0 : Number(updatedItem.newPrice);
           // Calculate pending total quantity
           updatedItem.pendingTotalQuantity = count * quantity;
-          console.log(`Updated pendingTotalQuantity for item ${item.itemId}: ${updatedItem.pendingTotalQuantity}`);
+         
           // Explicitly update poQuantity
           updatedItem.poQuantity = updatedItem.pendingTotalQuantity;
-          console.log(`Updated poQuantity for item ${item.itemId}: ${updatedItem.poQuantity}`);
+         
           // Calculate total price
           updatedItem.pendingTotalPrice = updatedItem.pendingTotalQuantity * price;
           // Calculate discounts and tax
@@ -664,12 +639,11 @@ const handlePageChange = (newPage: number) => {
           updatedItem.pendingCgst = cgst;
           updatedItem.pendingIgst = igst;
           updatedItem.pendingFinalPrice = finalPriceAfterTaxDiscount;
-          console.log(`Updated item ${item.itemId}:`, updatedItem);
+         
           return updatedItem;
         }
         return item;
       });
-      console.log('New items array:', newItems);
       return newItems;
     });
   };
@@ -1007,7 +981,6 @@ const handlePageChange = (newPage: number) => {
   const handleConfirmSave = () => {
     if (!canEdit) return;
     if (updatedItems.length > 0) {
-      console.log('Updated Items:', updatedItems);
       if (!selectedOrder?.purchaseOrderId) {
         console.error('No purchase order selected.');
         dispatch(setSnackbarMessage('No purchase order selected.'));
@@ -1048,7 +1021,6 @@ const handlePageChange = (newPage: number) => {
           pendingAfTaxDiscountAmount: item.pendingAfTaxDiscountAmount ?? null,
         }
       }));
-      console.log('Payload:', { items });
       // Include freight amounts in the payload if needed
       const payload = {
         items,
@@ -1061,7 +1033,6 @@ const handlePageChange = (newPage: number) => {
         updatedItems: items
       }))
         .then(response => {
-          console.log('Response:', response);
           dispatch(setSnackbarMessage('Changes saved successfully!'));
           dispatch(setSnackbarOpen(true));
           // Re-fetch the updated purchase orders to refresh the UI
@@ -1097,13 +1068,11 @@ const handleFilterClick = () => {
     apiParams.toDate = endDate.toISOString().split('T')[0];
   }
   
-  console.log('API Filter Parameters:', apiParams);
   
   dispatch(fetchPendingPurchaseOrders(apiParams))
     .then(response => {
       const data = response.payload || [];
       if (data.length === 0) {
-        console.log('No matching orders found.');
         setSnackbarMessage('No matching orders found.');
         setSnackbarOpen(true);
       }
@@ -1153,9 +1122,7 @@ const handleFilterClick = () => {
     if (!selectedOrder) return;
 
     try {
-      console.log(
-        `Approving PO: ${selectedOrder.randomId || orderId} | Send WhatsApp: ${sendWhatsapp}`
-      );
+     
 
       setApproveOpen(false);
 
@@ -1919,21 +1886,21 @@ const handleFilterClick = () => {
                       <TableCell>
                         <PhotoDisplay
                           orderId={order.purchaseOrderId}
-                          imageUrls={Array.isArray(imageUrls?.[order.purchaseOrderId])
-                            ? imageUrls[order.purchaseOrderId]
-                            : []}
+                          imageUrls={
+  order.hasImages && Array.isArray(imageUrls?.[order.purchaseOrderId])
+    ? imageUrls[order.purchaseOrderId]
+    : []
+}
                           canAdd={canAdd}
                           canEdit={canEdit}
                           onImageClick={(url, displayIndex) => {
-                            setSelectedImage(url);
-                            setSelectedImageIndex(displayIndex - 1); // Store as 0-based in state
-                            setOpenImageDialog(true);
-                          }}
-                          onUploadClick={(orderId, backendIndex) => {
-
-                            // Trigger file input click with 1-based index
-                            document.getElementById(`file-input-${orderId}-${backendIndex}`)?.click();
-                          }}
+        setSelectedImage(url);
+        setSelectedImageIndex(displayIndex - 1);
+        setOpenImageDialog(true);
+      }}
+                              onUploadClick={(orderId, backendIndex) => {
+        document.getElementById(`file-input-${orderId}-${backendIndex}`)?.click();
+      }}
                         />
                         {[1, 2, 3].map((displayIndex) => (
                           <input

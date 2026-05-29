@@ -133,12 +133,10 @@ const handleSave = async () => {
     setSaveError('');
     
     // Log what we're saving
-    console.log('💾 Saving settings:', settings);
     
     // Call PATCH endpoint (uses Redux loading state automatically)
     const result = await dispatch(saveDateSettings(settings)).unwrap();
     
-    console.log('✅ Save successful:', result);
     setSuccessMessage('Date settings saved successfully!');
     
     // Refresh data to ensure UI is in sync

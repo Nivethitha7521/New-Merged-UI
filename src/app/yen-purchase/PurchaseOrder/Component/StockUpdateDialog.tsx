@@ -62,10 +62,10 @@ interface StockUpdateDialogProps {
 }
 
 const StockUpdateDialog: React.FC<StockUpdateDialogProps> = ({ open, onClose, result }) => {
-  console.log('StockUpdateDialog - Received props:', { open, result });
+ 
 
   if (!result) {
-    console.log('StockUpdateDialog - No result provided');
+   
     return null;
   }
 

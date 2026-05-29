@@ -13,7 +13,7 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'https://yenerp.com/purchaseapi';
+const BASE_URL = 'https://yenerp.com/purchasetestapi';
 const customRoundOf = (value: number) => {
   return Math.round(value * 100) / 100; 
 };
@@ -49,7 +49,6 @@ export const createQuantityBasedDebitNote = createAsyncThunk<
   'grn/createQuantityBasedDebitNote',
   async (debitNoteData: CreateDebitNoteRequest, { rejectWithValue }) => {
     try {
-      console.log('Creating quantity-based debit note:', debitNoteData);
 
       // Quantity-based endpoint for item-wise returns
       const response = await purchaseApi.post<DebitCreditNoteResponse>(
@@ -57,7 +56,6 @@ export const createQuantityBasedDebitNote = createAsyncThunk<
         debitNoteData
       );
 
-      console.log('Quantity-based debit note created:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Create quantity debit note error:', error);
@@ -78,8 +76,7 @@ export const createAmountOnlyDebitNote = createAsyncThunk<
   'grn/createAmountOnlyDebitNote',
   async (debitNoteData: AmountDebitNoteRequest, { rejectWithValue }) => {
     try {
-      console.log('Creating amount-only debit note with data:', debitNoteData);
-      console.log('Request URL:', `${BASE_URL}/grns/returnprocess/AmountDebitNote/create`);
+     
 
       const response = await purchaseApi.post<AmountDebitNoteResponse>(
         `/grns/returnprocess/AmountDebitNote/create`,
@@ -91,7 +88,6 @@ export const createAmountOnlyDebitNote = createAsyncThunk<
         }
       );
 
-      console.log('Amount-only debit note created:', response.data);
       return response.data;
     } catch (error: any) {
       console.error('Create amount debit note error:', error);
@@ -382,11 +378,7 @@ export const updateItemDetails = createAsyncThunk(
       };
     } catch (error: any) {
       console.error("Update item details error:", error);
-       console.log("🔥 FULL ERROR OBJECT:", error);
-  console.log("🔥 ERROR RESPONSE:", error?.response);
-  console.log("🔥 ERROR STATUS:", error?.response?.status);
-  console.log("🔥 ERROR DATA:", error?.response?.data);
-  console.log("🔥 ERROR DETAIL:", error?.response?.data?.detail);
+      
       return rejectWithValue(
         error.response?.data || "Failed to update item details",
       );
@@ -427,11 +419,10 @@ export const fetchReturnReasons = createAsyncThunk(
   "grn/fetchReturnReasons",
   async (_, { rejectWithValue }) => {
     try {
-      console.log("Fetching return reasons...");
       const response = await purchaseApi.get<ReturnReason[]>(
         "/grns/getgrn/return-reasons",
       );
-      console.log("Return reasons fetched:", response.data);
+    
       return response.data;
     } catch (error: any) {
       console.error("Fetch return reasons error:", error);
@@ -468,24 +459,13 @@ export const returnGrn = createAsyncThunk(
         `/grns/${payload.grnId}/return`,
         payload.returnData,
       );
-       console.log('🔍 ========== RETURN GRN RESPONSE ==========');
-      console.log('🔍 Full response:', response);
-      console.log('🔍 Response data:', response.data);
       
-      // Log specific stock values
-      console.log('🔍 Stock values from response:', {
-        stockUpdateResult: response.data.stockUpdateResult,
-        returnStockUpdateResult: response.data.returnStockUpdateResult,
-        purchaseitem_updates: response.data.stockUpdateResult?.purchaseitem_updates,
-        inventory_updates: response.data.stockUpdateResult?.inventory_updates,
-        itemsCount: response.data.stockUpdateResult?.items?.length,
-        items: response.data.stockUpdateResult?.items
-      });
+      
+     
       
       return response.data;
     } catch (error: any) {
-      console.error('🔴 Return GRN error:', error);
-      console.error('🔴 Error response:', error.response?.data);
+     
       return rejectWithValue(
         error.response?.data?.detail || "Failed to return GRN",
       );
@@ -528,14 +508,14 @@ export const createAmountDebitNote = createAsyncThunk<
   'grn/createAmountDebitNote',
   async (debitNoteData: AmountDebitNoteRequest, { rejectWithValue }) => {
     try {
-      console.log('Creating amount-only debit note:', debitNoteData);
+     
 
       const response = await purchaseApi.post<AmountDebitNoteResponse>(
         `/grns/returnprocess/AmountDebitNote/create`,
         debitNoteData
       );
 
-      console.log('Amount-only debit note created:', response.data);
+     
       return response.data;
     } catch (error: any) {
       console.error('Create amount debit note error:', error);
@@ -556,14 +536,14 @@ export const createDebitCreditNote = createAsyncThunk<
   'grn/createDebitCreditNote',
   async (debitNoteData: CreateDebitNoteRequest, { rejectWithValue }) => {
     try {
-      console.log('Creating quantity-based debit note:', debitNoteData);
+    
 
       const response = await purchaseApi.post<DebitCreditNoteResponse>(
         `/grns/returnprocess/DebitCreditNote/create`,
         debitNoteData
       );
 
-      console.log('Quantity-based debit note created:', response.data);
+     
       return response.data;
     } catch (error: any) {
       console.error('Create debit credit note error:', error);
@@ -662,7 +642,84 @@ export const updateItemStatus = createAsyncThunk(
     }
   },
 );
+// Fetch Hold GRNs
+export const fetchHoldGrns = createAsyncThunk<
+  { grns: GrnData[]; totalItems: number },
+  { page: number; size: number; fromDate?: Date; toDate?: Date; vendorName?: string },
+  { rejectValue: string }
+>(
+  'grns/fetchHold',
+  async ({ page, size, fromDate, toDate, vendorName }, { rejectWithValue }) => {
+    try {
+      const params: Record<string, any> = {
+        skip: (page - 1) * size,
+        limit: size,
+      };
+      if (vendorName) params.vendorName = vendorName;
+      if (fromDate) params.fromDate = fromDate.toISOString();
+      if (toDate) params.toDate = toDate.toISOString();
 
+      const response = await purchaseApi.get<GrnData[]>('/grns/hold/list', { params });
+      return {
+        grns: response.data,
+        totalItems: Number(response.headers['x-total-count'] ?? response.data.length),
+      };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || 'Error fetching Hold GRNs'
+      );
+    }
+  }
+);
+
+// Approve Hold GRN
+export const approveHoldGrn = createAsyncThunk<
+  { message: string; grnId: string; newPoStatus: string },
+  string,
+  { rejectValue: string }
+>(
+  'grn/approveHoldGrn',
+  async (grnId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.patch(`/grns/${grnId}/approve-hold`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || 'Failed to approve Hold GRN'
+      );
+    }
+  }
+);
+
+export const downloadHoldGrnPDF = createAsyncThunk(
+  'grn/downloadHoldGrnPDF',
+  async (purchaseOrderId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get(
+        `/purchaseorders/download-pdf/${purchaseOrderId}`,
+        {
+          responseType: "blob",
+          params: { show_pending: false }
+        }
+      );
+
+      const file = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const fileURL = URL.createObjectURL(file);
+
+      window.open(fileURL, "_blank");
+
+      return purchaseOrderId;
+
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || 'Failed to download PDF'
+      );
+    }
+  }
+);
 export const grnSlice = createSlice({
   name: 'grn',
   initialState,
@@ -855,17 +912,7 @@ export const grnSlice = createSlice({
      .addCase(returnGrn.fulfilled, (state, action: PayloadAction<any>) => {
   state.loading = false;
 
-  console.log('🔍 ========== RETURN GRN FULFILLED ==========');
-  console.log('🔍 Full payload:', action.payload);
-  
-  // Log specific stock values
-  console.log('🔍 Stock values from payload:', {
-    stockUpdateResult: action.payload.stockUpdateResult,
-    returnStockUpdateResult: action.payload.returnStockUpdateResult,
-    purchaseitem_updates: action.payload.stockUpdateResult?.purchaseitem_updates,
-    inventory_updates: action.payload.stockUpdateResult?.inventory_updates,
-    items: action.payload.stockUpdateResult?.items
-  });
+
 
   // Update the GRN in the list
   const index = state.grns.findIndex(grn => grn.grnId === action.payload.grnId);
@@ -880,12 +927,12 @@ export const grnSlice = createSlice({
   // Check for stockUpdateResult field (preferred)
   if (action.payload.stockUpdateResult) {
     stockUpdateResult = action.payload.stockUpdateResult;
-    console.log('✅ Found stockUpdateResult:', stockUpdateResult);
+  
   } 
   // Check for returnStockUpdateResult field (backward compatibility)
   else if (action.payload.returnStockUpdateResult) {
     stockUpdateResult = action.payload.returnStockUpdateResult;
-    console.log('✅ Found returnStockUpdateResult:', stockUpdateResult);
+  
   } 
   // Check if the payload itself has stock update fields
   else if (action.payload.purchaseitem_updates !== undefined) {
@@ -896,18 +943,11 @@ export const grnSlice = createSlice({
       inventory_errors: action.payload.inventory_errors || 0,
       items: action.payload.items || []
     };
-    console.log('✅ Constructed stock update result from payload fields');
+   
   }
 
   if (stockUpdateResult) {
-    console.log('✅ Setting return stock update result in state:', {
-      purchaseitem_updates: stockUpdateResult.purchaseitem_updates,
-      inventory_updates: stockUpdateResult.inventory_updates,
-      inventory_not_found: stockUpdateResult.inventory_not_found,
-      inventory_errors: stockUpdateResult.inventory_errors,
-      itemsCount: stockUpdateResult.items?.length || 0,
-      items: stockUpdateResult.items
-    });
+
 
     // Make sure items array exists and has data
     if (!stockUpdateResult.items || stockUpdateResult.items.length === 0) {
@@ -925,7 +965,6 @@ export const grnSlice = createSlice({
             afterStock: item.receivedQuantity - item.returnedQuantity,
             status: 'success'
           }));
-        console.log('✅ Created items from itemDetails:', stockUpdateResult.items);
       }
     }
 
@@ -934,8 +973,7 @@ export const grnSlice = createSlice({
     state.lastReturnedGrnId = action.payload.grnId || action.payload.grn_id;
     state.showReturnStockUpdateDialog = true;
     
-    console.log('✅ showReturnStockUpdateDialog set to TRUE');
-    console.log('✅ State updated with lastReturnStockUpdates:', state.lastReturnStockUpdates);
+   
   } else {
     console.warn('❌ No stock update data found in response!');
     
@@ -965,7 +1003,6 @@ export const grnSlice = createSlice({
           success: true
         };
         
-        console.log('✅ Using constructed stock data from itemDetails:', fallbackResult);
         
         state.lastReturnStockUpdates = fallbackResult;
         state.lastReturnedGrnId = action.payload.grnId || action.payload.grn_id;
@@ -1042,7 +1079,6 @@ export const grnSlice = createSlice({
       .addCase(fetchDebitCreditNotesByGrn.fulfilled, (state, action: PayloadAction<DebitCreditNote[]>) => {
         state.loading = false;
         state.debitCreditNotes = action.payload;
-        console.log('Updated debitCreditNotes:', action.payload); // Debug log
       })
       .addCase(fetchDebitCreditNotesByGrn.rejected, (state, action) => {
         state.loading = false;
@@ -1089,7 +1125,6 @@ export const grnSlice = createSlice({
         state.snackbarMessageGRN = action.payload.message;
         state.snackbarOpenGRN = true;
 
-        console.log('GRN reverted to PO with stock updates:', action.payload.stockUpdates);
       })
       .addCase(revertGrnToPO.rejected, (state, action) => {
         state.revertLoading = false;
@@ -1128,7 +1163,6 @@ export const grnSlice = createSlice({
         state.snackbarMessageGRN = action.payload.message;
         state.snackbarOpenGRN = true;
 
-        console.log('Amount debit note created:', action.payload);
       })
       .addCase(createAmountOnlyDebitNote.rejected, (state, action) => {
         state.loading = false;
@@ -1162,6 +1196,36 @@ export const grnSlice = createSlice({
 .addCase(checkInvoiceAvailability.rejected, (state, action) => {
   state.invoiceAvailability.checking = false;
   state.invoiceAvailability.error = action.payload as string;
+})
+.addCase(fetchHoldGrns.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(fetchHoldGrns.fulfilled, (state, action) => {
+  state.loading = false;
+  state.holdGrns = action.payload.grns;
+  state.holdGrnTotalItems = action.payload.totalItems;
+})
+.addCase(fetchHoldGrns.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload as string;
+})
+.addCase(approveHoldGrn.pending, (state) => {
+  state.loading = true;
+})
+.addCase(approveHoldGrn.fulfilled, (state, action) => {
+  state.loading = false;
+  // Remove approved GRN from holdGrns list
+  state.holdGrns = state.holdGrns.filter(
+    (g) => g.grnId !== action.payload.grnId
+  );
+  state.snackbarMessageGRN = 'Hold GRN approved! Moved to GRN List.';
+  state.snackbarOpenGRN = true;
+})
+.addCase(approveHoldGrn.rejected, (state, action) => {
+  state.loading = false;
+  state.snackbarMessageGRN = action.payload as string || 'Failed to approve Hold GRN';
+  state.snackbarOpenGRN = true;
 });
   },
 });

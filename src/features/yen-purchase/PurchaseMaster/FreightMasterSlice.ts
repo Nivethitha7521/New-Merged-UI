@@ -24,15 +24,12 @@ export const fetchFreightItems = createAsyncThunk(
   'freightItems/fetchFreightItems',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('🟡 Fetching all freight items...');
+     
       const response = await purchaseApi.get<Freight[]>('/freights/');
-      console.log('✅ Raw API response:', response.data);
-      console.log('✅ Total items:', response.data.length);
-      console.log('✅ Active items:', response.data.filter(item => item.status === 'active').length);
-      console.log('✅ Inactive items:', response.data.filter(item => item.status === 'inactive').length);
+    
       return response.data;
     } catch (error: any) {
-      console.log('❌ Error fetching freight items:', error);
+     
       return rejectWithValue(error.response?.data?.detail || 'Failed to fetch freight items');
     }
   }
@@ -47,9 +44,7 @@ export const addFreightItem = createAsyncThunk<Freight, Omit<Freight, 'freightId
       const response = await purchaseApi.post('/freights/', freightData); // ✅ USE purchaseApi
       return response.data;
     } catch (error: any) {
-      console.log('🔴 API Error Response:', error.response);
-      console.log('🔴 API Error Data:', error.response?.data);
-      console.log('🔴 API Error Status:', error.response?.status);
+     
       
       // Handle 422 validation errors (array of errors)
       if (error.response?.status === 422 && Array.isArray(error.response?.data)) {
@@ -88,12 +83,11 @@ export const deactivateFreightItem = createAsyncThunk<Freight, string>(
   'freightItems/deactivateFreightItem',
   async (freightId, { rejectWithValue }) => {
     try {
-      console.log('🟡 Deactivating freight ID:', freightId);
+     
       const response = await purchaseApi.patch(`/freights/${freightId}/deactivate`);
-      console.log('✅ Deactivation response:', response.data);
+     
       return response.data;
     } catch (error: any) {
-      console.log('❌ Deactivation failed:', error);
       return rejectWithValue(error.response?.data?.detail || 'Failed to deactivate freight item');
     }
   }
@@ -156,7 +150,6 @@ export const exportCSV = createAsyncThunk('freightItems/exportCSV', async (_, { 
       responseType: 'blob',
      
     }); // ✅ USE purchaseApi
-    console.log('Export CSV response status:', response.status, 'headers:', response.headers);
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -197,7 +190,6 @@ const freightSlice = createSlice({
       state.searchQuery = action.payload;
     },
     setDialogOpen(state, action: PayloadAction<'none' | 'edit' | 'deactivated'>) {
-      console.log('setDialogOpen dispatched with:', action.payload);
       state.dialogOpen = action.payload;
     },
     setFreightData(state, action: PayloadAction<Freight>) {
@@ -254,7 +246,6 @@ const freightSlice = createSlice({
         state.snackbarOpen = true;
       })
       .addCase(addFreightItem.rejected, (state, action) => {
-        console.log('🔴 Add Freight Rejected Payload:', action.payload);
         
         let errorMessage = 'Failed to add freight item';
         const payload = action.payload as any;
@@ -268,7 +259,6 @@ const freightSlice = createSlice({
           errorMessage = payload.msg || payload.message || payload.detail || errorMessage;
         }
         
-        console.log('🔴 Final error message:', errorMessage);
         state.snackbarMessage = errorMessage;
         state.snackbarOpen = true;
       })

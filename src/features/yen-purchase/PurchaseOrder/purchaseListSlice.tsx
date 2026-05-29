@@ -10,7 +10,7 @@ import purchaseApi from "@/utils/api";
 
 
 const LIMIT = 20;
-const API_BASE_URL = 'https://yenerp.com/purchaseapi';
+const API_BASE_URL = 'https://yenerp.com/purchasetestapi';
 
 export const fetchPurchaseOrderRandomIds = createAsyncThunk(
   "purchaseOrder/fetchRandomIds",
@@ -118,10 +118,10 @@ export const fetchGrnConvertedPurchaseOrders = createAsyncThunk(
         return [];
       }
 
-      console.log('Fetched GRN Converted purchase orders:', response.data);
+     
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching GRN converted purchase orders:', error);
+     
       throw new Error(error.response?.data?.detail || 'Error fetching GRN converted purchase orders');
     }
   }
@@ -192,7 +192,7 @@ export const fetchPurchaseOrders = createAsyncThunk(
       return response.data;
 
     } catch (error: any) {
-      console.error('Error fetching purchase orders:', error);
+     
       throw error;
     }
   }
@@ -260,10 +260,10 @@ export const fetchPendingPurchaseOrders = createAsyncThunk(
         return [];
       }
 
-      console.log('Fetched pending purchase orders:', response.data);
+     
       return response.data.purchaseOrders;
     } catch (error: any) {
-      console.error('Error fetching pending purchase orders:', error);
+     
       return { errorMessage: 'Error fetching pending purchase orders. Please try again.' };
     }
   }
@@ -275,7 +275,7 @@ export const fetchStockUpdateLogs = createAsyncThunk(
       const response = await purchaseApi.get(`/purchaseorders/stock-logs/${purchaseOrderId}`);
       return response.data;
     } catch (error: any) {
-      console.error('Error fetching stock update logs:', error);
+     
       return rejectWithValue(
         error.response?.data?.message || error.message || 'Failed to fetch stock update logs'
       );
@@ -335,7 +335,6 @@ export const deactivatePurchaseOrder = createAsyncThunk(
       );
       return purchaseOrderId;
     } catch (error: any) {
-      console.error("Error deactivating purchase order:", error);
       return rejectWithValue("Failed to deactivate purchase order");
     }
   },
@@ -370,7 +369,6 @@ export const updatePurchaseOrder = createAsyncThunk(
       return response.data;
 
     } catch (error: any) {
-      console.error("Failed to update purchase order:", error);
       throw error;
     }
   }
@@ -406,7 +404,7 @@ export const approvePurchaseOrder = createAsyncThunk(
     const { purchaseOrderId } = payload;
 
     try {
-      console.log(`[Thunk] Approving PO: ${purchaseOrderId}`);
+    
 
       // Always use the SMS/WhatsApp endpoint
       const url = `/purchaseorders/approved/${purchaseOrderId}`;
@@ -421,10 +419,9 @@ export const approvePurchaseOrder = createAsyncThunk(
         }
       );
 
-      console.log("[Thunk] Approval response:", response.data);
+     
       return response.data;
     } catch (error: any) {
-      console.error(`[Thunk] Error approving PO ${purchaseOrderId}:`, error);
       return rejectWithValue(
         error.response?.data?.message ||
           error.message ||
@@ -499,7 +496,6 @@ export const fetchPoById = createAsyncThunk(
         orderDate: data.orderDate || null,
       };
     } catch (error: any) {
-      console.error("Failed to fetch PO details:", error);
       return rejectWithValue(
         error.response?.data || "Failed to fetch PO details",
       );
@@ -571,8 +567,7 @@ export const updateReceivedDamagedQuantities = createAsyncThunk(
         locationName: params.locationName,  // ADD THIS
       };
 
-      console.log("Sending request data:", requestData);
-
+     
       const response = await purchaseApi.patch(
         `/purchaseorders/receivedupdates/${params.purchaseOrderId}`,
         requestData,
@@ -584,8 +579,6 @@ export const updateReceivedDamagedQuantities = createAsyncThunk(
       );
       return response.data;
     } catch (error: any) {
-      console.error("Error in updateReceivedDamagedQuantities:", error);
-      console.error("Error response:", error.response?.data);
       return rejectWithValue(
         error.response?.data || error.message || "Failed to update purchase order",
       );
@@ -1048,9 +1041,7 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
         // ALWAYS show the dialog if we have items
         if (items.length > 0) {
           state.showStockUpdateDialog = true;
-          console.log('✅ SHOWING DIALOG with', items.length, 'items');
         } else {
-          console.log('⚠️ No items to show in dialog');
         }
 
       })
@@ -1219,18 +1210,18 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
         state.error = action.error.message || 'Failed to fetch purchase orders';
       })
         .addCase(fetchPendingPurchaseOrders.pending, (state) => {
-        console.log('Fetch pending purchase orders - PENDING');
+       
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPendingPurchaseOrders.fulfilled, (state, action) => {
-        console.log('Fetch pending purchase orders - FULFILLED', action.payload);
+       
         state.loading = false;
         state.pendingPurchaseList = action.payload.data || action.payload; // Adjust based on your API response structure
         state.totalItems = action.payload.totalCount || action.payload.length;
       })
       .addCase(fetchPendingPurchaseOrders.rejected, (state, action) => {
-        console.log('Fetch pending purchase orders - REJECTED', action.error);
+       
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch purchase orders';
       })
@@ -1278,12 +1269,12 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
       state.error = action.payload as string;
     })
     . addCase(fetchGrnConvertedPurchaseOrders.pending, (state) => {
-    console.log('Fetch GRN converted purchase orders - PENDING');
+   
     state.loading = true;
     state.error = null;
   })
   .addCase(fetchGrnConvertedPurchaseOrders.fulfilled, (state, action) => {
-    console.log('Fetch GRN converted purchase orders - FULFILLED', action.payload);
+  
     state.loading = false;
     state.grnConvertedPurchaseList = action.payload.purchaseOrders || [];
     state.totalGrnConvertedItems = action.payload.totalItems || 0;
@@ -1291,7 +1282,7 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
     state.pageSize = action.meta.arg.size;
   })
   .addCase(fetchGrnConvertedPurchaseOrders.rejected, (state, action) => {
-    console.log('Fetch GRN converted purchase orders - REJECTED', action.error);
+   
     state.loading = false;
     state.error = action.error.message || 'Failed to fetch GRN converted purchase orders';
   })
