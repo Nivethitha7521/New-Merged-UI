@@ -31,6 +31,7 @@ const getBackendSubmoduleKey = (submoduleId: string, submoduleName: string): str
     'po_approved': 'purchaseorders_approved',
     'po_rejected': 'purchaseorders_rejected',
     'po_grn_converted': 'purchaseorders_grn_converted',
+    'po_hold_grn': 'holdgrn',
     // SERVICE ORDER
     'so_pending': 'serviceorders_pending',
     'so_approved': 'serviceorders_approved',
@@ -243,6 +244,18 @@ const HARD_MODULES: AppPermissions[] = [
   id: "po_grn_converted", 
   name: "GRN Converted", 
   actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } 
+},
+{
+  id: "po_hold_grn",
+  name: "Hold GRN",
+  actions: {
+    read: false,
+    add: false,
+    edit: false,
+    delete: false,
+    hide: false,
+    approve: false
+  }
 },
 
         ]
@@ -1069,7 +1082,7 @@ return;
 
    
 
-    const roleResponse = await fetch("https://yenerp.com/purchasetestapi/roles", {
+    const roleResponse = await fetch("http://127.0.0.1:8000/purchasetestapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1119,7 +1132,7 @@ return;
 
    
 
-    const permResponse = await fetch("https://yenerp.com/purchasetestapi/permissions", {
+    const permResponse = await fetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)

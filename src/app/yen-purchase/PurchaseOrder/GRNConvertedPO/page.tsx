@@ -80,7 +80,12 @@ const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
 const GrnConvertedPo: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, permissions } = usePermissions();
-
+// const isHoldGrnVisible =
+//   permissions?.yenerp?.grns &&
+//   !(permissions?.yenerp?.grns?.hide === true);
+        const isHoldGrnVisible =
+  permissions?.yenerp?.holdgrn &&
+  !(permissions?.yenerp?.holdgrn?.hide === true);
 // Module visible check
 const isGrnConvertedVisible =
   permissions?.yenerp?.purchaseorders_grn_converted &&
@@ -1384,7 +1389,17 @@ if (!canRead) {
               </Button>
   </Link>
 )}
-
+{isHoldGrnVisible && (
+  <Link href={"/yen-purchase/PurchaseOrder/HoldGrn"}>
+    <Button
+      variant="contained"
+      color="primary"
+      sx={{ ml: 1 }}
+    >
+      Hold GRN
+    </Button>
+  </Link>
+)}
           </Box>
           
           {/* Filter Section */}

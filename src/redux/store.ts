@@ -227,7 +227,7 @@ const store = configureStore({
     // freetype: freetypeReducer,
     // locations: locationReducer,
     // posDevice: posDeviceReducer,
- 
+
   },
   
 });

@@ -92,7 +92,9 @@ const Polist: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { hasPermission, permissions } = usePermissions();
-
+// const isHoldGrnVisible =
+//   permissions?.yenerp?.grns &&
+//   !(permissions?.yenerp?.grns?.hide === true);
   const isPendingModuleVisible =
     permissions?.yenerp?.purchaseorders_pending &&
     !(
@@ -105,6 +107,9 @@ const Polist: React.FC = () => {
       permissions?.yenerp?.purchaseorders_grn_converted?.hide === true ||
       permissions?.yenerp?.purchaseorders_grn_converted?.hide === 1
     );
+    const isHoldGrnVisible =
+  permissions?.yenerp?.holdgrn &&
+  !(permissions?.yenerp?.holdgrn?.hide === true);
   // READ hide values for PO modules
   const hidePending =
     permissions?.yenerp?.purchaseorders_pending?.hide === true;
@@ -1218,26 +1223,39 @@ const handleFilterClick = () => {
                 </Button>
               </Link>
             )}
-            {!hideRejected && (
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ marginLeft: '10px', marginRight: '10px' }}
-                onClick={() => router.push('/yen-purchase/PurchaseOrder/RejectedPo')}
-              >
-                Rejected
-              </Button>
-            )}
-            {isGrnConvertedVisible && (
-              <Link href={"/yen-purchase/PurchaseOrder/GRNConvertedPO"}>
-                <Button
-                  variant="contained"
-                  color='primary'
-                >
-                  GRN Converted
-                </Button>
-              </Link>
-            )}
+           {!hideRejected && (
+  <Button
+    variant="contained"
+    color="primary"
+    sx={{ marginLeft: '10px', marginRight: '4px' }}
+    onClick={() => router.push('/yen-purchase/PurchaseOrder/RejectedPo')}
+  >
+    Rejected
+  </Button>
+)}
+
+{isGrnConvertedVisible && (
+  <Link href={"/yen-purchase/PurchaseOrder/GRNConvertedPO"}>
+    <Button
+      variant="contained"
+      color="primary"
+      sx={{ marginLeft: '4px' }}
+    >
+      GRN CONVERTED
+    </Button>
+  </Link>
+)}
+{isHoldGrnVisible && (
+  <Link href={"/yen-purchase/PurchaseOrder/HoldGrn"}>
+    <Button
+      variant="contained"
+      color="primary"
+      sx={{ marginLeft: '10px' }}
+    >
+      HOLD GRN
+    </Button>
+  </Link>
+)}
 
             {/* <Grid container justifyContent="flex-end">
               <Grid item>

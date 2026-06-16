@@ -48,6 +48,8 @@ const PurchaseTable: React.FC<PurchaseTableProps> = ({
             <TableCell>SubCategory</TableCell>
             <TableCell>Item Group</TableCell>
             <TableCell className='table-number-right'>Purchase Price</TableCell>
+            <TableCell className='table-number-right'>Reorder Level</TableCell>
+<TableCell className='table-number-right'>Target Stock Level</TableCell>
             <TableCell>Created Date</TableCell>
             <TableCell>Last Updated Date</TableCell>
             <TableCell>Actions</TableCell>
@@ -56,13 +58,13 @@ const PurchaseTable: React.FC<PurchaseTableProps> = ({
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={10} align='center'>
+              <TableCell colSpan={12} align='center'>
                 Loading...
               </TableCell>
             </TableRow>
           ) : items.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={10} style={{ textAlign: 'center' }}>
+              <TableCell colSpan={12} style={{ textAlign: 'center' }}>
                 No items found.
               </TableCell>
             </TableRow>
@@ -77,6 +79,8 @@ const PurchaseTable: React.FC<PurchaseTableProps> = ({
                 <TableCell>{item.purchasesubcategoryName || 'N/A'}</TableCell>
                 <TableCell>{item.itemgroupName || 'N/A'}</TableCell>
                 <TableCell className='table-number-right'>{item.purchasePrice !== null ? item.purchasePrice : 'N/A'}</TableCell>
+                <TableCell className='table-number-right'>{item.reorderLevel ?? 'N/A'}</TableCell>
+<TableCell className='table-number-right'>{item.targetStockLevel ?? 'N/A'}</TableCell>
                 <TableCell>{item.createdDate ? format(item.createdDate, 'dd-MM-yyyy') : ''}</TableCell>
                 <TableCell>{item.lastUpdatedDate ? format(item.lastUpdatedDate, 'dd-MM-yyyy') : ''}</TableCell>
                 <TableCell>

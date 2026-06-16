@@ -8,12 +8,16 @@ import {
   IconButton, Snackbar, Tooltip, Grid, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, Switch,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
+import StockUpdateDialog from "@/app/yen-purchase/PurchaseOrder/Component/StockUpdateDialog";
+
 import {
   fetchHoldGrns,
   approveHoldGrn,
   downloadHoldGrnPDF,
   selectGrn,
-  clearSnackbarMessage,
+  clearSnackbarMessage,setShowStockUpdateDialog,   // ADD
+  clearLastRevertData,revertHoldGrnToPOOnly
 } from "@/features/yen-purchase/GRN/grnSlice";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -84,13 +88,17 @@ const TableRowMemo = React.memo(({
   const aftDiscount = Number(item.afTaxDiscount) || 0;
   const taxPercent = Number(item.taxPercentage) || 0;
 
-  const totalPrice = receivedQty * grnPriceNum;
-  const befDiscountAmt = totalPrice * (befDiscount / 100);
-  const taxableAmt = totalPrice - befDiscountAmt;
-  const taxAmt = taxableAmt * (taxPercent / 100);
-  const afterTaxAmt = taxableAmt + taxAmt;
-  const aftDiscountAmt = afterTaxAmt * (aftDiscount / 100);
-  const itemTotal = afterTaxAmt - aftDiscountAmt;
+const totalPrice = receivedQty * grnPriceNum;
+const befDiscountAmt = totalPrice * (befDiscount / 100);
+const taxableAmt = totalPrice - befDiscountAmt;
+const taxAmt = taxableAmt * (taxPercent / 100);
+const afterTaxAmt = taxableAmt + taxAmt;
+const aftDiscountAmt = afterTaxAmt * (aftDiscount / 100);
+const itemTotal = afterTaxAmt - aftDiscountAmt;
+// Per unit taxable amount (grnPrice + tax on grnPrice)
+const perUnitTaxAmt = customRoundDigit(grnPriceNum * (taxPercent / 100));
+const displayTaxableAmount = customRoundDigit(grnPriceNum + perUnitTaxAmt);  // 569 + 28.45 = 597.45
+const displayItemTotal = totalPrice;  // 5 × 569 = 2845.00
 
   return (
     <TableRow>
@@ -126,7 +134,9 @@ const TableRowMemo = React.memo(({
           placeholder="Enter price"
         />
       </TableCell>
-      <TableCell className='table-number-right'>{taxableAmt.toFixed(2)}</TableCell>
+      <TableCell className='table-number-right'>
+  {displayTaxableAmount.toFixed(2)}
+</TableCell>
       <TableCell className='table-number-right'>
         <TextField
           autoComplete="off"
@@ -159,7 +169,9 @@ const TableRowMemo = React.memo(({
           InputLabelProps={{ shrink: true }}
         />
       </TableCell>
-      <TableCell className='table-number-right'>{itemTotal.toFixed(2)}</TableCell>
+      <TableCell className='table-number-right'>
+  {displayItemTotal.toFixed(2)}
+</TableCell>
     </TableRow>
   );
 });
@@ -167,14 +179,22 @@ TableRowMemo.displayName = "TableRowMemo";
 
 const HoldGrnPage = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
   const {
     holdGrns,
     holdGrnTotalItems,
     loading,
     snackbarMessageGRN,
-    snackbarOpenGRN,
+    snackbarOpenGRN,showStockUpdateDialog,        // ADD
+  lastRevertStockUpdates,
   } = useSelector(selectGrn);
-
+// holdgrn permissions
+const holdGrnPermissions = useSelector(
+  (state: any) => state.auth?.permissions?.yenerp?.holdgrn || {}
+);
+const canRead   = holdGrnPermissions?.read   ?? false;
+const canEdit   = holdGrnPermissions?.edit   ?? false;
+const canApprove = holdGrnPermissions?.approve ?? false;
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(50);
   const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
@@ -202,14 +222,22 @@ const HoldGrnPage = () => {
   const [touched, setTouched] = useState<Record<number, Record<string, boolean>>>({});
   const [errors, setErrors] = useState<any>({});
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  // ADD THESE TWO NEW STATE LINES
+const [revertingId, setRevertingId] = useState<string | null>(null);
+const [openRevertConfirm, setOpenRevertConfirm] = useState(false);
   const [freights, setFreights] = useState<FreightData[]>([]);
   const [receivingLocation, setReceivingLocation] = useState<any>(null);
   const [openFreightDialog, setOpenFreightDialog] = useState(false);
 
   // Fetch on mount
-  useEffect(() => {
-    dispatch(fetchHoldGrns({ page: 1, size: pageSize }));
-  }, [dispatch, pageSize]);
+useEffect(() => {
+  dispatch(fetchHoldGrns({ page: 1, size: pageSize }));
+  // Tab open ஆச்சு → notification clear
+  try {
+    localStorage.removeItem('holdGrnNotificationCount');
+    window.dispatchEvent(new CustomEvent('holdGrnCountChanged'));
+  } catch (e) {}
+}, [dispatch, pageSize]);
 
   const handleFilter = () => {
     dispatch(
@@ -246,8 +274,8 @@ const HoldGrnPage = () => {
     setApprovingId(grnId);
     try {
       await dispatch(approveHoldGrn(grnId)).unwrap();
-      setSnackbarMessage("Hold GRN approved! Now visible in GRN List.");
-      setSnackbarOpen(true);
+      // setSnackbarMessage("Hold GRN approved! Now visible in GRN List.");
+      // setSnackbarOpen(true);
       dispatch(fetchHoldGrns({ page: currentPage, size: pageSize }));
       setOpenDialog(false);
       setSelectedGrn(null);
@@ -269,7 +297,8 @@ const HoldGrnPage = () => {
       itemId: item.itemId || `item_${idx}`,
       receivedQuantity: item.receivedQuantity || 0,
       grnPrice: item.grnPrice || item.unitPrice || 0,
-      newPrice: item.existingPrice || item.newPrice || item.poPrice || 0,
+      newPrice: item.grnPrice || item.unitPrice || 0,        // GRN price (550)
+      existingPrice: item.existingPrice || 0, // PO price (401) ← KEY FIX
       befTaxDiscount: item.befTaxDiscount || 0,
       afTaxDiscount: item.afTaxDiscount || 0,
       taxPercentage: item.purchasetaxName || item.taxPercentage || 0,
@@ -320,12 +349,15 @@ const HoldGrnPage = () => {
       const discountAmountAfterTax = customRoundDigit(afterTaxAmount * (afTaxDiscount / 100));
       const finalPrice = customRoundDigit(afterTaxAmount - discountAmountAfterTax);
 
-      return {
-        ...item,
-        calculatedTaxableAmount: taxableAmount,
-        calculatedTaxAmount: taxAmount,
-        calculatedFinalPrice: finalPrice,
-      };
+     const perUnitTax = customRoundDigit(grnPrice * (taxPercentage / 100));
+const perUnitTaxableAmount = customRoundDigit(grnPrice + perUnitTax);  // 597.45
+
+return {
+  ...item,
+  calculatedTaxableAmount: perUnitTaxableAmount,  // per unit display ✅
+  calculatedTaxAmount: taxAmount,
+  calculatedFinalPrice: finalPrice,
+};
     });
   }, [updatedItems]);
 
@@ -404,7 +436,22 @@ const HoldGrnPage = () => {
       setOpenConfirmDialog(false);
     }
   };
-
+// ADD THIS NEW FUNCTION HERE ↓
+const handleRevertToPO = async (grnId: string) => {
+  setRevertingId(grnId);
+  try {
+    await dispatch(revertHoldGrnToPOOnly(grnId)).unwrap();
+    dispatch(fetchHoldGrns({ page: currentPage, size: pageSize }));
+    setOpenDialog(false);
+    setSelectedGrn(null);
+  } catch (err: any) {
+    setSnackbarMessage(err || "Failed to revert to PO");
+    setSnackbarOpen(true);
+  } finally {
+    setRevertingId(null);
+    setOpenRevertConfirm(false);
+  }
+};
 const handleDownloadPDF = async (grn: any) => {
   try {
 
@@ -445,6 +492,7 @@ const handleDownloadPDF = async (grn: any) => {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
         <CircularProgress />
+        
       </Box>
     );
   }
@@ -454,21 +502,31 @@ const handleDownloadPDF = async (grn: any) => {
       <YenPurchasePage />
       <Box sx={{ px: 1, backgroundColor: "white" }}>
         {/* Tab Buttons */}
-        <Box display="flex" alignItems="center" mb={1} mt={1} ml={1}>
-          <Link href={"/yen-purchase/GrnPage"}>
-            <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-              GRN List
-            </Button>
-          </Link>
-          <Button variant="contained" sx={{ backgroundColor: "white", color: "black", mr: 1 }}>
-            Hold GRN
-          </Button>
-          <Link href={"/yen-purchase/GrnPage/GrnReturn"}>
-            <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-              Return GRN
-            </Button>
-          </Link>
-        </Box>
+      <Box display="flex" alignItems="center" mb={1} mt={1} ml={1}>
+  <Link href={"/yen-purchase/PurchaseOrder"}>
+    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
+      Pending
+    </Button>
+  </Link>
+  <Link href={"/yen-purchase/PurchaseOrder/Approvedpo"}>
+    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
+      Approved
+    </Button>
+  </Link>
+  <Link href={"/yen-purchase/PurchaseOrder/RejectedPo"}>
+    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
+      Rejected
+    </Button>
+  </Link>
+  <Link href={"/yen-purchase/PurchaseOrder/GRNConvertedPO"}>
+    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
+      GRN Converted
+    </Button>
+  </Link>
+  <Button variant="contained" sx={{ backgroundColor: "white", color: "black", mr: 1 }}>
+    Hold GRN
+  </Button>
+</Box>
 
         {/* Filters */}
         <Grid container alignItems="center" spacing={0.5} wrap="nowrap" ml={0.5} mb={1}>
@@ -543,10 +601,18 @@ const handleDownloadPDF = async (grn: any) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {!holdGrns || holdGrns.length === 0 ? (
-                <TableRow><TableCell colSpan={9} align="center">No Hold GRN data available</TableCell></TableRow>
-              ) : (
-                holdGrns.map((grn, index) => (
+             {!canRead ? (
+  <TableRow>
+    <TableCell colSpan={9} align="center">
+      You don&apos;t have permission to view Hold GRNs
+    </TableCell>
+  </TableRow>
+) : !holdGrns || holdGrns.length === 0 ? (
+  <TableRow>
+    <TableCell colSpan={9} align="center">No Hold GRN data available</TableCell>
+  </TableRow>
+) : (
+  holdGrns.map((grn, index) => (
                   <TableRow key={grn.grnId}>
                     <TableCell className="table-number-right">{(currentPage - 1) * pageSize + index + 1}</TableCell>
                     <TableCell>{grn.randomId || grn.grnId}</TableCell>
@@ -568,11 +634,21 @@ const handleDownloadPDF = async (grn: any) => {
                     <TableCell>HOLD GRN</TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={0.5}>
-                        <Tooltip title="View Details">
-                          <IconButton onClick={() => handleViewDetails(grn)} color="primary" size="small">
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                      <Tooltip title="View Details">
+  <IconButton
+    onClick={() => {
+      if (grn.grnSource === "Multi") {
+        router.push(`/yen-purchase/PurchaseOrder/Hold/MultiHoldGrn?grnId=${grn.grnId}`);
+      } else {
+        handleViewDetails(grn);
+      }
+    }}
+    color="primary"
+    size="small"
+  >
+    <VisibilityIcon fontSize="small" />
+  </IconButton>
+</Tooltip>
                         <Tooltip title="Download">
   <IconButton
     onClick={() => handleDownloadPDF(grn)}
@@ -732,7 +808,7 @@ const handleDownloadPDF = async (grn: any) => {
                     calculatedItems
                       .filter(item => item.status !== "Received")
                       .map((item, index) => {
-                        const poPrice = item.newPrice || 0;
+                        const poPrice = item.existingPrice || 0;
                         return (
                           <TableRowMemo
                             key={item.itemId}
@@ -926,27 +1002,52 @@ const handleDownloadPDF = async (grn: any) => {
           </DialogContent>
 
           {/* ── Dialog Actions — Cancel + GRN Approved ── */}
-          <DialogActions>
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button onClick={() => setOpenDialog(false)} color="secondary">
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleGrnApproveFromDialog}
-                disabled={approvingId === selectedGrn?.grnId}
-                startIcon={
-                  approvingId === selectedGrn?.grnId
-                    ? <CircularProgress size={16} />
-                    : <CheckCircleIcon />
-                }
-                sx={{ ml: 1 }}
-              >
-                GRN Approved
-              </Button>
-            </Box>
-          </DialogActions>
+        {/* ── Dialog Actions — Cancel + Revert to PO + GRN Approved ── */}
+<DialogActions>
+  <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+    <Button onClick={() => setOpenDialog(false)} color="secondary">
+      Cancel
+    </Button>
+
+    {/* Revert to PO — holdgrn edit + revert_to_po subaction */}
+   <Tooltip title={!canEdit ? "You don't have permission to revert" : ""}>
+  <span>
+    <Button
+      variant="contained"
+      color="warning"
+      onClick={() => setOpenRevertConfirm(true)}
+      disabled={!canEdit || revertingId === selectedGrn?.grnId}
+      sx={{ ml: 1 }}
+    >
+          {revertingId === selectedGrn?.grnId
+            ? <CircularProgress size={16} />
+            : "Revert to PO"
+          }
+        </Button>
+      </span>
+    </Tooltip>
+
+    {/* GRN Approved — holdgrn edit permission */}
+   <Tooltip title={!canApprove ? "You don't have permission to approve" : ""}>
+  <span>
+    <Button
+      variant="contained"
+      color="success"
+      onClick={handleGrnApproveFromDialog}
+      disabled={!canApprove || approvingId === selectedGrn?.grnId}
+          startIcon={
+            approvingId === selectedGrn?.grnId
+              ? <CircularProgress size={16} />
+              : <CheckCircleIcon />
+          }
+          sx={{ ml: 1 }}
+        >
+          GRN Approved
+        </Button>
+      </span>
+    </Tooltip>
+  </Box>
+</DialogActions>
         </Dialog>
 
         {/* Confirmation Dialog */}
@@ -959,10 +1060,50 @@ const handleDownloadPDF = async (grn: any) => {
           confirmText="GRN Approved"
           cancelText="Cancel"
         />
+        {/* Revert to PO Confirmation */}
+<ConfirmationDialog
+  open={openRevertConfirm}
+  onClose={() => setOpenRevertConfirm(false)}
+  onConfirm={() => selectedGrn && handleRevertToPO(selectedGrn.grnId)}
+  title="Revert Hold GRN to PO"
+  description="This will revert the GRN back to PO. Stock will NOT be changed since this is a Hold GRN. Only PO quantities will be restored."
+  confirmText="Revert to PO"
+  cancelText="Cancel"
+/>
 
         {/* Snackbars */}
         <Snackbar open={snackbarOpen} message={snackbarMessage} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} />
         <Snackbar open={snackbarOpenGRN} message={snackbarMessageGRN} autoHideDuration={3000} onClose={() => dispatch(clearSnackbarMessage())} />
+          <StockUpdateDialog
+  open={showStockUpdateDialog}
+  onClose={() => dispatch(clearLastRevertData())}
+  result={
+    lastRevertStockUpdates
+      ? {
+          success: lastRevertStockUpdates.success ?? true,
+          totalProcessed: lastRevertStockUpdates.totalProcessed ?? 0,
+          successful: lastRevertStockUpdates.successful ?? 0,
+          failed: lastRevertStockUpdates.failed ?? 0,
+          items: (lastRevertStockUpdates.items ?? []).map((item) => ({
+            randomId: item.randomId,
+            itemName: item.itemName,
+            stockChange: 0,
+            newStock: 0,
+            locationStockChange: item.locationStockChange,
+            newLocationStock: item.newLocationStock,
+            locationId: item.locationId,
+            priceUpdated: item.priceUpdated,
+            status: item.status,
+            reason: item.reason,
+          })),
+          // Backend returns stock_updates / price_updates for approveHoldGrn
+          stock_updates: lastRevertStockUpdates.inventory_updates ?? 0,
+          price_updates: lastRevertStockUpdates.purchaseitem_updates ?? 0,
+          timestamp: lastRevertStockUpdates.timestamp ?? new Date().toISOString(),
+        }
+      : null
+  }
+/>
       </Box>
     </Box>
   );

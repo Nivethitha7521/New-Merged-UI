@@ -74,6 +74,20 @@ const validationSchema = yup.object({
     .moreThan(0, 'Purchase price must be greater than 0'),
   uom: yup.string().required('UOM is required'),
   purchasetaxName: yup.number().required('Tax required'),
+  reorderLevel: yup
+  .number()
+  .typeError('Reorder level must be a number')
+  .required('Reorder level is required')
+  .min(0, 'Reorder level cannot be negative'),
+
+targetStockLevel: yup
+  .number()
+  .typeError('Target stock level must be a number')
+  .required('Target stock level is required')
+  .min(
+    yup.ref('reorderLevel'),
+    'Target Stock Level must be greater than or equal to Reorder Level'
+  ),
   purchasesubcategoryName: yup.string().required('Subcategory is required'),
 });
 
@@ -90,6 +104,7 @@ const initialPurchaseState = {
   purchasePrice: 0,
   purchasetaxName: '',
   reorderLevel: 0,
+  targetStockLevel: 0, 
   itemType: '',
   hsnCode: '',
   shelfLife: '',
@@ -432,6 +447,7 @@ const handleConfirmDeactivate = async () => {
       { label: 'Purchase Price (Required)', key: 'purchasePrice' },
       { label: 'Tax Percentage (Required)', key: 'purchasetaxName' },
       { label: 'Reorder Level (Required)', key: 'reorderLevel' },
+      { label: 'Target Stock Level (Required)', key: 'targetStockLevel' },
       { label: 'Item Type (Required)', key: 'itemType' },
       { label: 'HSN Code (Required)', key: 'hsnCode' },
       { label: 'Shelf Life (Required)', key: 'shelfLife' },
@@ -454,6 +470,7 @@ const handleConfirmDeactivate = async () => {
         purchasePrice: 100,
         purchasetaxName: '18',
         reorderLevel: 10,
+        targetStockLevel: 100,
         itemType: 'Sample Type',
         hsnCode: '123456',
         shelfLife: '1 year',

@@ -370,7 +370,7 @@ const handleDeleteRole = async (roleName: string) => {
   if (!roleToDelete) return;
 
   await fetch(
-    `https://yenerp.com/purchasetestapi/roles/${roleToDelete.id}/deactivate`,
+    `http://127.0.0.1:8000/purchasetestapi/roles/${roleToDelete.id}/deactivate`,
     { method: "PUT" }
   );
 
@@ -389,7 +389,7 @@ const handleRestoreRole = async (roleName: string) => {
   if (!roleToRestore) return;
 
   await fetch(
-    `https://yenerp.com/purchasetestapi/roles/${roleToRestore.id}/restore`,
+    `http://127.0.0.1:8000/purchasetestapi/roles/${roleToRestore.id}/restore`,
     { method: "PUT" }
   );
 

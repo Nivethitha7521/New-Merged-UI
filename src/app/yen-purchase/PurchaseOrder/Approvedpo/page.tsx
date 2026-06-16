@@ -3,6 +3,9 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import InventoryIcon from '@mui/icons-material/Inventory';
+import { Checkbox } from "@mui/material";
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import DraftsIcon from "@mui/icons-material/Drafts";
 import {
   Box,
   TextField,
@@ -29,7 +32,10 @@ import {
   Tooltip,
   Switch,
   TableFooter,
-  TablePagination,
+  TablePagination,Badge,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -63,7 +69,10 @@ import {
   fetchAllImages,
   calculateOverallDiscount, closeStockUpdateDialog,
   downloadPurchaseOrderPDF,
-  setShowStockLogsDialog, // New thunk import
+  setShowStockLogsDialog,fetchMultiPoGrnDrafts,
+selectMultiPoGrnDrafts,
+selectMultiPoGrnDraftCount,
+markMultiPoGrnDraftOpened,deleteMultiPoGrnDraft,
 } from "../../../../features/yen-purchase/PurchaseOrder/purchaseListSlice";
 import { AppDispatch } from "@/redux/store";
 import YenPurchasePage from "../../page";
@@ -150,6 +159,7 @@ const TableRowMemo = React.memo(
   }) => {
     // Get validation error for this item
     const validationError = priceValidationError[item.itemId];
+    
     const [localGrnValue, setLocalGrnValue] = useState<string>(
       item.grnPrice !== undefined && item.grnPrice !== null
         ? String(item.grnPrice)
@@ -436,6 +446,7 @@ const OrderDetailsDialog: React.FC<OrderDetailsDialogProps> = ({
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [openFreightDialog, setOpenFreightDialog] = useState(false);
+
   // Add these state variables inside OrderDetailsDialog component
   const [priceValidationErrors, setPriceValidationErrors] = useState<Record<string, string>>({});
   const dispatch = useDispatch<AppDispatch>();
@@ -681,6 +692,7 @@ try {
     }
     setRoundOffAmount(currentValue);
   };
+
   // Auto-suggest for round-off placeholder (to nearest whole number)
   const roundOffSuggestion = useMemo(() => {
     const fractional = totalOrderAmount % 1;
@@ -765,31 +777,46 @@ try {
         }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2, flexShrink: 0 }}>
             <Box display="flex" gap={2} mt={1} mb={2}>
-              <TextField
-                label="Invoice Number"
-                autoComplete="off"
-                value={invoiceNumber}
-                onChange={(e) => {
-                  setInvoiceNumber(e.target.value);
-                  setIsTouched(true);
-                  setIsInvoiceDuplicate(false);
-                }}
-                error={isTouched && (!invoiceNumber || isInvoiceDuplicate)}
-                helperText={
-                  !invoiceNumber
-                    ? 'Invoice number is required!'
-                    : checkingInvoice
-                      ? 'Checking invoice number...'
-                      : isInvoiceDuplicate
-                        ? invoiceAvailability?.message || 'Invoice number already exists!'
-                        : ''  // ← Empty - nothing shown when available
-                }
-                InputProps={{
-                  endAdornment: checkingInvoice && (
-                    <CircularProgress size={20} />
-                  )
-                }}
-              />
+             <TextField
+  label="Invoice Number"
+  autoComplete="off"
+  value={invoiceNumber}
+  onChange={(e) => {
+    setInvoiceNumber(e.target.value);
+    setIsTouched(true);
+    setIsInvoiceDuplicate(false);
+  }}
+  error={isTouched && !invoiceNumber}  // red only when empty
+  helperText={
+    isTouched && !invoiceNumber
+      ? 'Invoice number is required!'
+      : isInvoiceDuplicate
+        ? invoiceAvailability?.message || '⚠️ Invoice number already exists!'
+        : checkingInvoice
+          ? 'Checking...'
+          : ''
+  }
+  FormHelperTextProps={{
+    sx: {
+      color: isInvoiceDuplicate ? 'warning.main' : undefined,
+      fontWeight: isInvoiceDuplicate ? 'bold' : undefined,
+    }
+  }}
+  sx={{
+    '& .MuiOutlinedInput-root': isInvoiceDuplicate ? {
+      '& fieldset': { borderColor: 'warning.main' },
+      '&:hover fieldset': { borderColor: 'warning.main' },
+      '&.Mui-focused fieldset': { borderColor: 'warning.main' },
+    } : {}
+  }}
+  InputProps={{
+    endAdornment: checkingInvoice ? (
+      <CircularProgress size={20} />
+    ) : isInvoiceDuplicate ? (
+      <span style={{ color: 'orange', fontWeight: 'bold', fontSize: '18px' }}>⚠️</span>
+    ) : null
+  }}
+/>
               {/* Replace the old invoice date TextField with this */}
               <UnifiedDatePicker
                 value={invoiceDate}
@@ -1138,15 +1165,16 @@ try {
                   variant="contained"
                   color="success"
                   onClick={handleOpenConfirmDialog}
-                  disabled={
-                    !canEditApproved ||
-                    isProcessing ||
-                    !isReceivedQuantityValid() ||
-                    isInvoiceDuplicate ||
-                    !invoiceNumber ||
-                    finalTotalAmount < 0 
-                  
-                  }
+              disabled={
+  !canEditApproved ||
+  isProcessing ||
+  !isReceivedQuantityValid() ||
+  isInvoiceDuplicate ||
+  invoiceAvailability?.checking ||
+  invoiceAvailability?.available === false ||
+  !invoiceNumber ||
+  finalTotalAmount < 0
+}
                   sx={{ ml: 1 }}
                 >
                   Convert to GRN
@@ -1187,13 +1215,24 @@ const ApprovedPurchase: React.FC = () => {
 
   const { hasPermission, permissions } = usePermissions();
   const router = useRouter();
+    const [deleteDraftConfirmOpen, setDeleteDraftConfirmOpen] = useState(false);
+const [draftToDelete, setDraftToDelete] = useState<any>(null);
   const hidePending =
     permissions?.yenerp?.purchaseorders_pending?.hide === true;
+        const isHoldGrnVisible =
+  permissions?.yenerp?.holdgrn &&
+  !(permissions?.yenerp?.holdgrn?.hide === true);
   const hideApproved =
     permissions?.yenerp?.purchaseorders_approved?.hide === true;
   const hideRejected =
     permissions?.yenerp?.purchaseorders_rejected?.hide === true;
-
+// const isHoldGrnVisible =
+//   permissions?.yenerp?.grns &&
+//   !(permissions?.yenerp?.grns?.hide === true);
+  const [holdGrnCount, setHoldGrnCount] = useState(() => {
+  if (typeof window === 'undefined') return 0;
+  return parseInt(localStorage.getItem('holdGrnNotificationCount') || '0');
+});
   // permission actions ✅
   const canViewApproved = hasPermission(
     "yenerp",
@@ -1276,6 +1315,12 @@ const ApprovedPurchase: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<PurchaseItemSearch | null>(null);
   const [fetchedBusinessIds, setFetchedBusinessIds] = useState(new Set());
   const [freights, setFreights] = useState<FreightData[]>([]);
+  const [selectedPoIds, setSelectedPoIds] = useState<Set<string>>(new Set());
+  const [selectedPoVendor, setSelectedPoVendor] = useState<string | null>(null);
+  const multiPoDrafts = useSelector(selectMultiPoGrnDrafts);
+const multiPoDraftCount = useSelector(selectMultiPoGrnDraftCount);
+const [draftDialogOpen, setDraftDialogOpen] = useState(false);
+const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   // Add this with your other useState declarations
   const [receivingLocation, setReceivingLocation] = useState<Location | null>(null);
   const handleCloseDialogs = useCallback(() => {
@@ -1306,7 +1351,8 @@ const ApprovedPurchase: React.FC = () => {
       if (!originalItem) return item;
       const receivedQuantity = Number(item.receivedQuantity) || 0;
       const pendingTotalQuantity = item.pendingTotalQuantity;
-      const grnPrice = item.grnPrice !== undefined ? item.grnPrice : (item.existingPrice || item.newPrice || 0);
+      const grnPrice = item.grnPrice !== undefined ? item.grnPrice : (item.newPrice || item.existingPrice || 0);
+
       const taxPercentage = item.taxPercentage || 0;
       const befTaxDiscount = Number(item.befTaxDiscount) || 0;
       const afTaxDiscount = Number(item.afTaxDiscount) || 0;
@@ -1411,7 +1457,28 @@ const ApprovedPurchase: React.FC = () => {
       ),
     [calculatedItems]
   );
+  const handleAskDeleteDraft = useCallback((draft: any) => {
+  setDraftToDelete(draft);
+  setDeleteDraftConfirmOpen(true);
+}, []);
 
+const handleConfirmDeleteDraft = useCallback(async () => {
+  if (!draftToDelete?.draftId) return;
+
+  try {
+    await dispatch(deleteMultiPoGrnDraft(draftToDelete.draftId)).unwrap();
+    await dispatch(fetchMultiPoGrnDrafts());
+
+    setSnackbarInvoiceMessage("Draft deleted successfully.");
+    setSnackbarInvoiceOpen(true);
+  } catch (err: any) {
+    setSnackbarInvoiceMessage(err?.message || "Failed to delete draft.");
+    setSnackbarInvoiceOpen(true);
+  } finally {
+    setDeleteDraftConfirmOpen(false);
+    setDraftToDelete(null);
+  }
+}, [dispatch, draftToDelete]);
   useEffect(() => {
     if (selectedOrder) {
       setInvoiceNumber(selectedOrder.invoiceNo || "");
@@ -1425,7 +1492,7 @@ const ApprovedPurchase: React.FC = () => {
           ...item,
           receivedQuantity: pendingTotalQuantity,
           grnPrice: undefined,
-          existingPrice: item.existingPrice || item.newPrice || 0,
+          existingPrice: item.newPrice || item.existingPrice || 0,
           befTaxDiscount: item.befTaxDiscount || 0,
           afTaxDiscount: item.afTaxDiscount || 0,
           expiryDate: item.expiryDate ? new Date(item.expiryDate + 'T00:00:00Z') : null,
@@ -1466,6 +1533,13 @@ const ApprovedPurchase: React.FC = () => {
     }
   }, [selectedOrder]);
   useEffect(() => {
+  const handleCountChange = () => {
+    setHoldGrnCount(parseInt(localStorage.getItem('holdGrnNotificationCount') || '0'));
+  };
+  window.addEventListener('holdGrnCountChanged', handleCountChange);
+  return () => window.removeEventListener('holdGrnCountChanged', handleCountChange);
+}, []);
+  useEffect(() => {
     if (businesses.length > 0 && businesses[0].businessId && !fetchedBusinessIds.has(businesses[0].businessId)) {
       dispatch(fetchPhoto(businesses[0].businessId));
       setFetchedBusinessIds((prev) => new Set(prev).add(businesses[0].businessId));
@@ -1482,6 +1556,9 @@ const ApprovedPurchase: React.FC = () => {
       })
     );
   }, [dispatch, currentPage, pageSize]);
+  useEffect(() => {
+  dispatch(fetchMultiPoGrnDrafts());
+}, [dispatch]);
   // Real-time invoice number validation against GRN collection
   useEffect(() => {
     // Don't check if dialog is not open or no selected order
@@ -1802,11 +1879,14 @@ const ApprovedPurchase: React.FC = () => {
       return;
     }
 
-    if (isInvoiceDuplicate) {
-      setSnackbarInvoiceMessage("Duplicate invoice number detected. Please enter a unique invoice number.");
-      setSnackbarInvoiceOpen(true);
-      return;
-    }
+  if (invoiceAvailability.checking) {
+  return; // silently block, no snackbar needed
+}
+
+if (!invoiceAvailability.available || isInvoiceDuplicate) {
+  setIsInvoiceDuplicate(true); // ensure field warning is shown
+  return; // silently block, no snackbar, warning shows in field
+}
 
     // Validate round off doesn't make total negative
     const finalTotal = totalOrderAmount + roundOffAmount;
@@ -2042,21 +2122,25 @@ const ApprovedPurchase: React.FC = () => {
         })
       ).unwrap();
 
-      setSnackbarInvoiceMessage('Changes saved successfully!');
+      setSnackbarInvoiceMessage('GRN Converted successfully!');
       setSnackbarInvoiceOpen(true);
       handleCloseDialogs();
-    } catch (error: any) {
-      console.error("Save Error:", error);
-      let errorMessage = "Failed to save changes. ";
-      if (error.message) {
-        errorMessage += error.message;
-      } else if (typeof error === 'string') {
-        errorMessage += error;
-      } else {
-        errorMessage += "Please check your inputs and try again.";
-      }
-      setSnackbarInvoiceMessage(errorMessage);
-      setSnackbarInvoiceOpen(true);
+  // CHANGE TO:
+} catch (error: any) {
+  // Don't log empty error objects
+  if (error && Object.keys(error).length > 0) {
+    console.error("Save Error:", error);
+  }
+  
+  // Extract message from various error shapes
+  const errorMessage =
+    error?.detail ||           // FastAPI HTTP errors
+    error?.message ||          // Standard JS errors
+    (typeof error === 'string' ? error : null) ||
+    "Failed to save changes. Please check your inputs and try again.";
+  
+  setSnackbarInvoiceMessage(errorMessage);
+  setSnackbarInvoiceOpen(true);
 
       if (selectedOrder) {
         setUpdatedItems(
@@ -2190,7 +2274,7 @@ const ApprovedPurchase: React.FC = () => {
           ...item,
           receivedQuantity: pendingTotalQuantity,
           grnPrice: undefined,
-          existingPrice: item.existingPrice || item.newPrice || 0,
+          existingPrice: item.newPrice || item.existingPrice || 0,
           befTaxDiscount: item.befTaxDiscount || 0,
           afTaxDiscount: item.afTaxDiscount || 0,
           expiryDate: expiryDate && !isNaN(expiryDate.getTime()) ? expiryDate : null,
@@ -2641,6 +2725,92 @@ const ApprovedPurchase: React.FC = () => {
     }));
   }, [dispatch, pageSize, selectionRange, searchQueryItem, selectedRandomId]);
 
+
+
+ const handleCheckboxChange = useCallback((orderId: string) => {
+  const order = filteredOrders.find(o => o.purchaseOrderId === orderId);
+  if (!order) return;
+
+  setSelectedPoIds(prev => {
+    const next = new Set(prev);
+
+    // deselect
+    if (next.has(orderId)) {
+      next.delete(orderId);
+
+      if (next.size === 0) {
+        setSelectedPoVendor(null);
+        setIsMultiSelectMode(false);
+      } else {
+        setIsMultiSelectMode(true);
+      }
+
+      return next;
+    }
+
+    // first selection
+    if (next.size === 0) {
+      next.add(orderId);
+      setSelectedPoVendor(order.vendorName || "");
+      setIsMultiSelectMode(true);
+      return next;
+    }
+
+    // validate same vendor
+    if ((order.vendorName || "") !== selectedPoVendor) {
+      setSnackbarInvoiceMessage(
+        "You can only select Purchase Orders from the same vendor for Multi PO GRN conversion."
+      );
+      setSnackbarInvoiceOpen(true);
+      return prev;
+    }
+
+    next.add(orderId);
+    setIsMultiSelectMode(true);
+    return next;
+  });
+}, [filteredOrders, selectedPoVendor]);
+
+const handleSelectAll = useCallback((checked: boolean) => {
+  if (!checked) {
+    setSelectedPoIds(new Set());
+    setSelectedPoVendor(null);
+    setIsMultiSelectMode(false);
+    return;
+  }
+
+  if (filteredOrders.length === 0) return;
+
+  const firstVendor = filteredOrders[0].vendorName || "";
+  const sameVendorOrders = filteredOrders.filter(
+    o => (o.vendorName || "") === firstVendor
+  );
+
+  if (sameVendorOrders.length !== filteredOrders.length) {
+    setSnackbarInvoiceMessage(
+      "You can only select Purchase Orders from the same vendor for Multi PO GRN conversion."
+    );
+    setSnackbarInvoiceOpen(true);
+  }
+
+  setSelectedPoIds(new Set(sameVendorOrders.map(o => o.purchaseOrderId)));
+  setSelectedPoVendor(firstVendor);
+  setIsMultiSelectMode(sameVendorOrders.length > 0);
+}, [filteredOrders]);
+
+const handleMultiPoConvert = useCallback(() => {
+  if (selectedPoIds.size < 2) {
+    // Shouldn't happen since button is disabled, but guard anyway
+    return;
+  }
+  const ids = Array.from(selectedPoIds).join(',');
+  router.push(`/yen-purchase/PurchaseOrder/Approvedpo/MultiPoGrn?poIds=${ids}`);
+}, [selectedPoIds, router]);
+const handleOpenDraft = async (draftId: string) => {
+  await dispatch(markMultiPoGrnDraftOpened(draftId));
+  setDraftDialogOpen(false);
+  router.push(`/yen-purchase/PurchaseOrder/Approvedpo/MultiPoGrn?draftId=${draftId}`);
+};
   const handleRandomIdChange = useCallback((randomId: string) => {
     setSelectedRandomId(randomId);
     dispatch(fetchPurchaseOrders({
@@ -2889,7 +3059,38 @@ const ApprovedPurchase: React.FC = () => {
                 GRN Converted
               </Button>
             </Link>
+
           )}
+{isHoldGrnVisible && (
+  <Link href={"/yen-purchase/PurchaseOrder/HoldGrn"}>
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <Button variant="contained" color="primary" sx={{ ml: 1 }}>
+        Hold GRN
+      </Button>
+      {holdGrnCount > 0 && (
+        <Box sx={{
+          position: 'absolute',
+          top: -6,
+          right: -6,
+          backgroundColor: 'red',
+          color: 'white',
+          borderRadius: '50%',
+          width: 20,
+          height: 20,
+          fontSize: 11,
+          fontWeight: 'bold',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }}>
+          {holdGrnCount}
+        </Box>
+      )}
+    </Box>
+  </Link>
+)}
         </Box>
         {/* Filter and search UI - keep as is */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap", width: "100%", mb: 1 }}>
@@ -2929,6 +3130,50 @@ const ApprovedPurchase: React.FC = () => {
             </Grid>
             <Grid item sx={{ flexGrow: 1 }} />
             <Grid item xs="auto">
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Tooltip title="Multi PO Drafts">
+      <IconButton
+        color="primary"
+        size="small"
+        onClick={() => setDraftDialogOpen(true)}
+      >
+        <Badge badgeContent={multiPoDraftCount} color="error">
+          <DraftsIcon fontSize="small" />
+        </Badge>
+      </IconButton>
+    </Tooltip>
+
+    <Typography variant="caption">
+      Drafts
+    </Typography>
+  </Box>
+</Grid>
+            <Grid item xs="auto">
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Tooltip title={
+      selectedPoIds.size < 2
+        ? "Select 2 or more POs to convert together"
+        : `Convert ${selectedPoIds.size} selected POs to GRN`
+    }>
+      <span>
+        <IconButton
+          onClick={handleMultiPoConvert}
+          color="success"
+          size="small"
+          sx={{ p: 0.3 }}
+          className="icon-button-outline"
+          disabled={selectedPoIds.size < 2}
+        >
+          <SwapHorizIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+    <Typography variant="caption" align="center" sx={{ maxWidth: 60, wordBreak: "break-word", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, mt: 0.2 }}>
+      Multi GRN
+    </Typography>
+  </Box>
+</Grid>
+            <Grid item xs="auto">
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <IconButton
                   onClick={(e) => setAnchorEl(e.currentTarget)}
@@ -2961,6 +3206,14 @@ const ApprovedPurchase: React.FC = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+    <Checkbox
+      indeterminate={selectedPoIds.size > 0 && selectedPoIds.size < filteredOrders.length}
+      checked={filteredOrders.length > 0 && selectedPoIds.size === filteredOrders.length}
+      onChange={(e) => handleSelectAll(e.target.checked)}
+      size="small"
+    />
+  </TableCell>
                 <TableCell className='table-number-right'>S.No</TableCell>
                 <TableCell>Order ID</TableCell>
                 <TableCell>Vendor Name</TableCell>
@@ -2979,8 +3232,19 @@ const ApprovedPurchase: React.FC = () => {
                 </TableRow>
               ) : (
                 filteredOrders.map((order, index) => (
-                  <TableRow key={order.purchaseOrderId}>
-                    <TableCell className='table-number-right'>{index + 1}</TableCell>
+                  <TableRow
+  key={order.purchaseOrderId}
+  selected={selectedPoIds.has(order.purchaseOrderId)}
+  sx={selectedPoIds.has(order.purchaseOrderId) ? { backgroundColor: '#e8f5e9' } : {}}
+>
+  <TableCell padding="checkbox">
+    <Checkbox
+      checked={selectedPoIds.has(order.purchaseOrderId)}
+      onChange={() => handleCheckboxChange(order.purchaseOrderId)}
+      size="small"
+    />
+  </TableCell>
+  <TableCell className='table-number-right'>{index + 1}</TableCell>
                     <TableCell>{order.randomId}</TableCell>
                     <TableCell>{order.vendorName}</TableCell>
                     <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
@@ -2994,20 +3258,18 @@ const ApprovedPurchase: React.FC = () => {
                     <TableCell className='table-number-right'>{(order.pendingOrderAmount || 0).toFixed(2)}</TableCell>
                     <TableCell>{order.poStatus}</TableCell>
                     <TableCell>
-                      <Tooltip title="View Details">
-                        <IconButton
-                          onClick={() =>
-                            handleViewDetailsClick(order.purchaseOrderId)
-                          }
-                          disabled={!canViewApproved}
-                          sx={{
-                            color: canViewApproved ? "primary.main" : "gray",
-                            opacity: canViewApproved ? 1 : 0.4,
-                          }}
-                        >
-                          <VisibilityIcon />
-                        </IconButton>
-                      </Tooltip>
+                      <Tooltip title={isMultiSelectMode ? "Deselect all to view individual PO" : "View Details"}>
+  <IconButton
+    onClick={() => !isMultiSelectMode && handleViewDetailsClick(order.purchaseOrderId)}
+    disabled={!canViewApproved || isMultiSelectMode}
+    sx={{
+      color: (canViewApproved && !isMultiSelectMode) ? "primary.main" : "gray",
+      opacity: (canViewApproved && !isMultiSelectMode) ? 1 : 0.4
+    }}
+  >
+    <VisibilityIcon />
+  </IconButton>
+</Tooltip>
                       <Tooltip title="Download">
                         <IconButton
                           color="primary"
@@ -3230,6 +3492,82 @@ const ApprovedPurchase: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
+   <Dialog
+  open={draftDialogOpen}
+  onClose={() => setDraftDialogOpen(false)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle>Multi-PO GRN Drafts</DialogTitle>
+
+  <DialogContent>
+    {multiPoDrafts.length === 0 ? (
+      <Typography>No drafts found.</Typography>
+    ) : (
+      <List>
+        {multiPoDrafts.map((draft: any) => (
+          <ListItem
+            key={draft.draftId}
+            divider
+            secondaryAction={
+              <Tooltip title="Delete Draft">
+                <IconButton
+                  edge="end"
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAskDeleteDraft(draft);
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            }
+            sx={{ cursor: "pointer", pr: 7 }}
+            onClick={() => handleOpenDraft(draft.draftId)}
+          >
+            <ListItemText
+              primary={`${draft.vendorName || "-"} | ${draft.poRandomIds?.join(", ") || ""}`}
+              secondary={`Invoice: ${draft.invoiceNo || "-"} | Last saved: ${
+                draft.lastUpdatedDate
+                  ? new Date(draft.lastUpdatedDate).toLocaleString()
+                  : "-"
+              }`}
+            />
+          </ListItem>
+        ))}
+      </List>
+    )}
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setDraftDialogOpen(false)}>Close</Button>
+  </DialogActions>
+</Dialog>
+
+<Dialog
+  open={deleteDraftConfirmOpen}
+  onClose={() => setDeleteDraftConfirmOpen(false)}
+>
+  <DialogTitle>Delete Draft</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      Are you sure you want to delete this draft?
+    </DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setDeleteDraftConfirmOpen(false)}>
+      Cancel
+    </Button>
+    <Button
+      color="error"
+      variant="contained"
+      onClick={handleConfirmDeleteDraft}
+    >
+      Delete
+    </Button>
+  </DialogActions>
+</Dialog>
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={6000}

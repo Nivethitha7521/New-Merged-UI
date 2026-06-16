@@ -8,6 +8,7 @@ import {
   Chip,
   Alert,
 } from '@mui/material';
+import purchaseApi from "@/utils/api";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
@@ -253,7 +254,132 @@ const CreatePurchasePage: React.FC = () => {
       });
   }
 }, [isEditMode, editId, dispatch, router, vendors]);
+// ─── Auto-fill from PR Generated (Convert to PO flow) ───────────────────
+// ─── Auto-fill from PR Generated (Convert to PO flow) ───────────────────
+  useEffect(() => {
+    if (isEditMode) return;
+    if (vendors.length === 0) return; // Wait for vendors to load
 
+    const prDataRaw = sessionStorage.getItem("prToPO");
+    if (!prDataRaw) return;
+
+    try {
+      const prData = JSON.parse(prDataRaw);
+      if (!prData.fromPR) return;
+
+      // Delay to ensure all mount useEffects (form reset, etc.) have run first
+      const timer = setTimeout(async () => {
+        // Auto-fill vendor
+        if (prData.vendorName) {
+          const matchedVendor = vendors.find(
+            (v: VendorSummary) =>
+              v.vendorId === prData.vendorId || v.vendorName === prData.vendorName
+          );
+         if (matchedVendor) {
+            setVendorSearch(matchedVendor);
+
+            // ── Fetch fresh vendor data to ensure paymentTerms/creditLimit ──
+            // vendors from localStorage cache may miss some fields
+            let vendorData = matchedVendor;
+            try {
+              const freshRes = await purchaseApi.get(
+                `/vendors/vendor-names/?vendor_name=${encodeURIComponent(matchedVendor.vendorName)}&limit=1`
+              );
+              if (freshRes.data && freshRes.data.length > 0) {
+                vendorData = { ...matchedVendor, ...freshRes.data[0] };
+              }
+            } catch (e) {
+              console.warn("Could not fetch fresh vendor data, using cached", e);
+            }
+
+            dispatch(
+              setPurchaseOrderData({
+                ...purchaseOrderData,
+                vendorName:         vendorData.vendorName,
+                vendorCode:         vendorData.randomId,
+                vendorId:           vendorData.vendorId,
+                vendorContact:      vendorData.contactpersonPhone,
+                contactpersonEmail: vendorData.contactpersonEmail,
+                address:            vendorData.address,
+                country:            vendorData.country,
+                paymentTerms:       vendorData.paymentTerms   || matchedVendor.paymentTerms   || "",
+                creditLimit:        vendorData.creditLimit    ?? matchedVendor.creditLimit    ?? 0,
+                state:              vendorData.state,
+                city:               vendorData.city,
+                postalCode:         vendorData.postalCode,
+                gstNumber:          vendorData.gstNumber,
+              })
+            );
+            setFormErrors((prev) => ({
+              ...prev,
+              vendorName: false,
+              paymentTerms: false,
+              creditLimit: false,
+            }));
+          }
+        }
+
+        // Auto-fill item — set synthetic item for autocomplete display
+        const syntheticItem: PurchaseItemSearchAdd = {
+          purchaseitemId:          prData.itemCode || "",
+          itemName:                prData.itemName,
+          itemCode:                prData.itemCode || "",
+          randomId:                prData.itemCode || "",
+          purchasePrice:           prData.unitPrice || 0,
+          purchasetaxName:         18,
+          uom:                     prData.uom || "",
+          purchasecategoryName:    "",
+          purchasesubcategoryName: "",
+          hsnCode:                 "",
+          availableStock:          0,
+          locationId:              purchaseOrderData.locationId || "",
+        };
+        setNewItemsearch(syntheticItem);
+
+        dispatch(
+          setNewItemData({
+            itemId:               prData.itemCode || "",
+            itemName:             prData.itemName,
+            itemCode:             prData.itemCode,
+            randomId:             prData.itemCode,
+            newPrice:             prData.unitPrice || 0,
+            existingPrice:        prData.unitPrice || 0,
+            uom:                  prData.uom,
+            taxPercentage:        18,
+            pendingCount:         1,
+            pendingQuantity:      prData.suggestedQty,
+            pendingTotalQuantity: prData.suggestedQty,
+            poQuantity:           prData.suggestedQty,
+            taxType:              "cgst_sgst",
+            befTaxDiscountType:   "percentage",
+            afTaxDiscountType:    "percentage",
+            priceVariance:        0,
+            befTaxDiscount:       0,
+            afTaxDiscount:        0,
+            befTaxDiscountAmount: 0,
+            afTaxDiscountAmount:  0,
+            pendingTotalPrice:    0,
+            availableStock:       0,
+            locationId:           purchaseOrderData.locationId || "",
+          })
+        );
+
+        // Set input fields directly
+        setCountInput("1");
+        setQuantityInput(String(prData.suggestedQty));
+        setNewPriceTypeInput(String(prData.unitPrice || 0));
+
+        dispatch(setSnackbarMessage(
+          `Auto-filled from PR: ${prData.itemName} | Vendor: ${prData.vendorName || "—"}`
+        ));
+        dispatch(setSnackbarOpen(true));
+      }, 300); // 300ms delay ensures mount effects finish first
+
+      return () => clearTimeout(timer);
+    } catch (e) {
+      console.error("Failed to parse prToPO", e);
+    }
+  }, [vendors, isEditMode]); // Re-run when vendors load
   // Replace the existing useEffect for location
   useEffect(() => {
     // In edit mode, set location from purchaseOrderData
@@ -1589,11 +1715,16 @@ const CreatePurchasePage: React.FC = () => {
       const orderDate = purchaseOrderData.orderDate || new Date().toISOString();
       const expectedDeliveryDate =
         purchaseOrderData.expectedDeliveryDate || new Date().toISOString();
+
+      // Check if this is a PR-originated PO
+      const prRawCheck = sessionStorage.getItem("prToPO");
+      const isFromPR = prRawCheck ? (() => { try { return JSON.parse(prRawCheck).fromPR === true; } catch { return false; } })() : false;
       const dataToSubmit = {
         ...purchaseOrderData,
         orderDate,
         expectedDeliveryDate,
         vendorCode: purchaseOrderData.vendorCode, // Ensure this is included
+        fromPR: isFromPR,
         pendingOrderAmount: roundedTotalOrderAmount,
         pendingDiscountAmount: roundedTotalDiscount,
         pendingTaxAmount: roundedTotalTax,
@@ -1639,7 +1770,7 @@ const CreatePurchasePage: React.FC = () => {
             `Purchase Order ${result.randomId || editId} successfully updated.`,
           ),
         );
-      } else {
+    } else {
         result = await dispatch(addPurchaseOrder(dataToSubmit)).unwrap();
         dispatch(
           setSnackbarMessage(
@@ -1654,7 +1785,36 @@ const CreatePurchasePage: React.FC = () => {
       await dispatch(fetchPurchaseOrders());
       handleClear();
       setDialogOpen(false);
-      router.push("/yen-purchase/PurchaseOrder");
+
+      // ─── If created from PR, store result so PR page can show "Convert to PO" ───
+     // ─── If created from PR flow ───────────────────────────────────────────
+      const prDataRaw = sessionStorage.getItem("prToPO");
+      if (prDataRaw && !isEditMode) {
+        try {
+          const prData = JSON.parse(prDataRaw);
+          if (prData.fromPR && prData.prRandomId && result?.randomId) {
+
+            // Call backend to update PR status + handle partial split
+            await purchaseApi.post("/inventory-agent/pr-convert-po", {
+              prRandomId: prData.prRandomId,
+              orderedQty:  prData.suggestedQty,   // the qty user ordered
+              poRandomId:  result.randomId,
+            });
+
+            // Store for PR page snackbar
+            sessionStorage.setItem("prToPO_created", JSON.stringify({
+              prRandomId: prData.prRandomId,
+              poRandomId: result.randomId,
+            }));
+            sessionStorage.removeItem("prToPO");
+          }
+        } catch (e) {
+          console.error("Failed to update PR after PO creation", e);
+        }
+        router.push("/yen-purchase/PurchaseRequisition/PRGenerated");
+      } else {
+        router.push("/yen-purchase/PurchaseOrder");
+      }
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
         const newErrors = {

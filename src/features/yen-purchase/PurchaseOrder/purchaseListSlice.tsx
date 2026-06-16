@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { RootState } from '@/redux/store';
 import { format } from 'date-fns';
-import { initialState, PhotoResponse,  Item, PurchaseInvoice, PurchaseOrderData, PurchaseRandomId, UploadResponse, StockUpdateItem} from '@/Models/purchaseModel';
+import { initialState, PhotoResponse, Item, PurchaseInvoice, PurchaseOrderData, PurchaseRandomId, UploadResponse, StockUpdateItem, MultiPoGrnDraft } from '@/Models/purchaseModel';
 import { GrnData } from '@/Models/grnModel';
 import { OverallDiscountRequest, OverallDiscountResponse } from '@/app/yen-purchase/PurchaseOrder/Models/Itemcalculation';
 import { FreightData } from '@/app/yen-purchase/PurchaseOrder/Component/freightSelectionDialog';
@@ -10,7 +10,7 @@ import purchaseApi from "@/utils/api";
 
 
 const LIMIT = 20;
-const API_BASE_URL = 'https://yenerp.com/purchasetestapi';
+const API_BASE_URL = 'http://127.0.0.1:8000/purchasetestapi';
 
 export const fetchPurchaseOrderRandomIds = createAsyncThunk(
   "purchaseOrder/fetchRandomIds",
@@ -578,11 +578,15 @@ export const updateReceivedDamagedQuantities = createAsyncThunk(
         },
       );
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || error.message || "Failed to update purchase order",
-      );
-    }
+  } catch (error: any) {
+  return rejectWithValue(
+    error.response?.data?.detail ||   // FastAPI detail string
+    error.response?.data?.message ||
+    error.response?.data ||
+    error.message ||
+    "Failed to update purchase order",
+  );
+}
   },
 );
 // Updated async thunks
@@ -716,6 +720,87 @@ export const calculateOverallDiscount = createAsyncThunk<
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.message || 'API Error');
+    }
+  }
+);
+export const saveMultiPoGrnDraft = createAsyncThunk(
+  "purchaseList/saveMultiPoGrnDraft",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.post("/purchaseorders/drafts/multi-grn", payload);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || "Failed to save draft");
+    }
+  }
+);
+
+export const fetchMultiPoGrnDrafts = createAsyncThunk(
+  "purchaseList/fetchMultiPoGrnDrafts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get("/purchaseorders/drafts/multi-grn");
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || "Failed to fetch drafts");
+    }
+  }
+);
+
+export const fetchMultiPoGrnDraftById = createAsyncThunk(
+  "purchaseList/fetchMultiPoGrnDraftById",
+  async (draftId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.get(`/purchaseorders/drafts/multi-grn/${draftId}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || "Failed to fetch draft");
+    }
+  }
+);
+
+export const markMultiPoGrnDraftOpened = createAsyncThunk(
+  "purchaseList/markMultiPoGrnDraftOpened",
+  async (draftId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.patch(`/purchaseorders/drafts/multi-grn/${draftId}/opened`);
+      return { draftId, ...response.data };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.detail || "Failed to mark draft opened");
+    }
+  }
+);
+
+export const deleteMultiPoGrnDraft = createAsyncThunk(
+  "purchaseList/deleteMultiPoGrnDraft",
+  async (draftId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.delete(
+        `/purchaseorders/drafts/multi-grn/${draftId}`
+      );
+
+      return response.data?.draftId || draftId;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || "Failed to delete draft"
+      );
+    }
+  }
+);
+
+export const convertMultiplePOsToSingleGRN = createAsyncThunk(
+  "purchaseList/convertMultiplePOsToSingleGRN",
+  async (payload: any, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.patch(
+  `/purchaseorders/receivedupdates/multi`,
+  payload
+);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || error.message || "Failed to create Multi PO GRN"
+      );
     }
   }
 );
@@ -1043,7 +1128,16 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
           state.showStockUpdateDialog = true;
         } else {
         }
-
+ // ADD ONLY THESE LINES AT THE END, before the closing brace:
+  if (action.payload.poStatus === 'HoldGRN') {
+    try {
+      const current = parseInt(localStorage.getItem('holdGrnNotificationCount') || '0');
+      localStorage.setItem('holdGrnNotificationCount', String(current + 1));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('holdGrnCountChanged'));
+      }
+    } catch (e) {}
+  }
       })
       // Handle rejected state for updating received and damaged quantities
       .addCase(updateReceivedDamagedQuantities.rejected, (state, action) => {
@@ -1300,6 +1394,89 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
   state.stockLogs.error = action.payload as string;
   state.stockLogs.data = null;
 })
+// ADD this case in extraReducers:
+.addCase(convertMultiplePOsToSingleGRN.pending, (state) => {
+  state.loading = true;
+})
+.addCase(convertMultiplePOsToSingleGRN.fulfilled, (state, action) => {
+  state.loading = false;
+
+  const stockData = action.payload?.stockUpdate;
+
+  if (stockData) {
+    const items = stockData.items || [];
+
+    state.stockUpdateResult = {
+      success: stockData.success ?? true,
+      totalProcessed: stockData.totalProcessed ?? items.length,
+      successful: stockData.successful ?? items.filter((i: any) => i.status === "success").length,
+      failed: stockData.failed ?? items.filter((i: any) => i.status === "failed").length,
+      items: items,
+      timestamp: stockData.timestamp || new Date().toISOString(),
+    };
+
+    state.showStockUpdateDialog = items.length > 0;
+  }
+
+  if (action.payload.isHoldGrn) {
+    try {
+      const current = parseInt(localStorage.getItem('holdGrnNotificationCount') || '0');
+      localStorage.setItem('holdGrnNotificationCount', String(current + 1));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('holdGrnCountChanged'));
+      }
+    } catch (e) {}
+  }
+})
+.addCase(convertMultiplePOsToSingleGRN.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload as string;
+})
+.addCase(fetchMultiPoGrnDrafts.pending, (state) => {
+  state.multiPoGrnDraftLoading = true;
+})
+.addCase(fetchMultiPoGrnDrafts.fulfilled, (state, action) => {
+  state.multiPoGrnDraftLoading = false;
+  state.multiPoGrnDrafts = action.payload || [];
+  state.multiPoGrnDraftCount = (action.payload || []).filter((d: MultiPoGrnDraft) => d.isUnread).length;
+})
+.addCase(fetchMultiPoGrnDrafts.rejected, (state, action) => {
+  state.multiPoGrnDraftLoading = false;
+  state.error = action.payload as string;
+})
+.addCase(fetchMultiPoGrnDraftById.fulfilled, (state, action) => {
+  state.selectedMultiPoGrnDraft = action.payload;
+})
+.addCase(saveMultiPoGrnDraft.fulfilled, (state, action) => {
+  const draft = action.payload;
+  const idx = state.multiPoGrnDrafts.findIndex((d: MultiPoGrnDraft) => d.draftId === draft.draftId);
+  if (idx >= 0) state.multiPoGrnDrafts[idx] = draft;
+  else state.multiPoGrnDrafts.unshift(draft);
+  state.multiPoGrnDraftCount = state.multiPoGrnDrafts.filter((d: MultiPoGrnDraft) => d.isUnread).length;
+})
+.addCase(markMultiPoGrnDraftOpened.fulfilled, (state, action) => {
+  const draft = state.multiPoGrnDrafts.find((d: MultiPoGrnDraft) => d.draftId === action.payload.draftId);
+  if (draft) draft.isUnread = false;
+  state.multiPoGrnDraftCount = state.multiPoGrnDrafts.filter((d: MultiPoGrnDraft) => d.isUnread).length;
+})
+.addCase(deleteMultiPoGrnDraft.pending, (state) => {
+  state.multiPoGrnDraftLoading = true;
+})
+.addCase(deleteMultiPoGrnDraft.fulfilled, (state, action) => {
+  state.multiPoGrnDraftLoading = false;
+
+  state.multiPoGrnDrafts = state.multiPoGrnDrafts.filter(
+    (d: MultiPoGrnDraft) => d.draftId !== action.payload
+  );
+
+  state.multiPoGrnDraftCount = state.multiPoGrnDrafts.filter(
+    (d: MultiPoGrnDraft) => d.isUnread
+  ).length;
+})
+.addCase(deleteMultiPoGrnDraft.rejected, (state, action) => {
+  state.multiPoGrnDraftLoading = false;
+  state.error = action.payload as string;
+})
 ;
   },
 });
@@ -1324,6 +1501,15 @@ export const selectPurchaseListState = (state: RootState) => state.purchaseList;
 export const selectCurrentPage = (state: RootState) => state.purchaseList.currentPage;
 export const selectPageSize = (state: RootState) => state.purchaseList.pageSize;
 export const selectTotalItems = (state: RootState) => state.purchaseList.totalItems;
+
+export const selectMultiPoGrnDrafts = (state: RootState) =>
+  state.purchaseList.multiPoGrnDrafts;
+
+export const selectMultiPoGrnDraftCount = (state: RootState) =>
+  state.purchaseList.multiPoGrnDraftCount;
+
+export const selectSelectedMultiPoGrnDraft = (state: RootState) =>
+  state.purchaseList.selectedMultiPoGrnDraft;
 // Add these selectors
 export const selectStockLogs = (state: RootState) => ({
   data: state.purchaseList.stockLogs.data,

@@ -21,6 +21,7 @@ interface PurchaseItemData {
   purchasePrice: number;
   purchasetaxName: number;
   reorderLevel: number;
+  targetStockLevel: number;
   itemType: string;
   hsnCode: string;
   shelfLife: string;
@@ -73,6 +74,7 @@ const HEADER_MAPPING: { [key: string]: string } = {
   purchasePrice: "Purchase Price",
   purchasetaxName: "Tax Rate",
   reorderLevel: "Reorder Level",
+  targetStockLevel: "Target Stock Level",
   itemType: "Item Type",
   hsnCode: "HSN Code",
   shelfLife: "Shelf Life",
@@ -248,6 +250,7 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
         purchasePrice: 50.00,
         purchasetaxName: 18,
         reorderLevel: 10,
+        targetStockLevel: 100,
         itemType: "Sample Type",
         hsnCode: "123456",
         shelfLife: "12 months",

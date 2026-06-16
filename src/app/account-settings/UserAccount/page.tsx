@@ -136,7 +136,7 @@ const [passwordTouched, setPasswordTouched] = useState(false);
   // ✅ ADD THIS FUNCTION TO FETCH ROLES FROM BACKEND
   const fetchRolesFromBackend = async () => {
     try {
-      const response = await fetch('https://yenerp.com/purchasetestapi/roles');
+      const response = await fetch('http://127.0.0.1:8000/purchasetestapi/roles');
       
       if (response.ok) {
         const rolesFromBackend = await response.json();
@@ -177,7 +177,7 @@ const [passwordTouched, setPasswordTouched] = useState(false);
   // ✅ Fetch permissions and create role -> apps mapping
 const fetchRoleAppsFromPermissions = async () => {
   try {
-    const res = await fetch("https://yenerp.com/purchasetestapi/permissions");
+    const res = await fetch("http://127.0.0.1:8000/purchasetestapi/permissions");
 
     if (!res.ok) return;
 
@@ -376,7 +376,7 @@ if (
         updateData.password = formUser.password;
       }
       
-      const response = await fetch(`https://yenerp.com/purchasetestapi/users/${editingUserId}`, {
+      const response = await fetch(`http://127.0.0.1:8000/purchasetestapi/users/${editingUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -432,7 +432,7 @@ setSnackbar({
     } else {
       // ✅ CREATE NEW USER (your existing code)
 
-      const response = await fetch('https://yenerp.com/purchasetestapi/users', {
+      const response = await fetch('http://127.0.0.1:8000/purchasetestapi/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -524,7 +524,7 @@ setSnackbar({
  const handleDeactivateUser = async (userId: string) => {
   try {
     // 🔥 1. Update backend
-    await fetch(`https://yenerp.com/purchasetestapi/users/${userId}/deactivate`, {
+    await fetch(`http://127.0.0.1:8000/purchasetestapi/users/${userId}/deactivate`, {
       method: "PATCH",
     });
 
@@ -549,7 +549,7 @@ setSnackbar({
 
  const handleRestoreUser = async (userId: string) => {
   try {
-    await fetch(`https://yenerp.com/purchasetestapi/users/${userId}/activate`, {
+    await fetch(`http://127.0.0.1:8000/purchasetestapi/users/${userId}/activate`, {
       method: "PATCH",
     });
 
@@ -586,7 +586,7 @@ setSnackbar({
 // ✅ UPDATE THIS FUNCTION TO FETCH FROM ROLE MANAGEMENT
 const fetchUsersFromBackend = async () => {
   try {
-    const response = await fetch('https://yenerp.com/purchasetestapi/users');
+    const response = await fetch('http://127.0.0.1:8000/purchasetestapi/users');
     
     if (response.ok) {
       const usersFromBackend = await response.json();

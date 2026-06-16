@@ -117,6 +117,12 @@ const RejectedPo: React.FC = () => {
   const [newItem, setNewItem] = useState<PurchaseItemSearch | null>(null);
   const [shouldFetch, setShouldFetch] = useState(true);
   const filteredOrders = purchaseList.filter(order => order.poStatus === 'Rejected');
+//  const isHoldGrnVisible =
+//   permissions?.yenerp?.grns &&
+//   !(permissions?.yenerp?.grns?.hide === true);
+        const isHoldGrnVisible =
+  permissions?.yenerp?.holdgrn &&
+  !(permissions?.yenerp?.holdgrn?.hide === true);
   const canViewRejected = hasPermission(
     "yenerp",
     "purchaseorders_rejected",
@@ -1227,6 +1233,17 @@ const RejectedPo: React.FC = () => {
               </Button>
             </Link>
           )}
+          {isHoldGrnVisible && (
+  <Link href={"/yen-purchase/PurchaseOrder/HoldGrn"}>
+    <Button
+      variant="contained"
+      color="primary"
+      sx={{ ml: 1 }}
+    >
+      Hold GRN
+    </Button>
+  </Link>
+)}
           </Box>
           
           <Box

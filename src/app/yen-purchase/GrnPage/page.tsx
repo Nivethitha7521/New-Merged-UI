@@ -36,6 +36,7 @@ import {
   setShowReturnStockUpdateDialog,
   clearLastReturnData,
   checkInvoiceAvailability,
+  revertMultiGrnToPO
 } from '../../../features/yen-purchase/GRN/grnSlice';
 import { ArrowDownward, ArrowUpward, ChevronLeft, ChevronRight, FilterList as FilterListIcon } from '@mui/icons-material';
 // import '../../../components/common.css'
@@ -73,7 +74,7 @@ import {
 import PODialog from '@/components/yen-purchase/OutgoingComponent/PODialog';
 import RevertStockUpdateDialog from './Components/RevertStockUpdate';
 import { UnifiedDatePicker } from '../PurchaseOrder/Component/UnifiedDatePicker';
-
+import { Chip } from "@mui/material";
 const customRound = (amount: number) => {
   const roundedAmount = Math.round(amount);
   if (roundedAmount - amount < 0.03) {
@@ -191,6 +192,15 @@ const [invoiceAvailability, setInvoiceAvailability] = useState<{
   const [apRoundOffError, setApRoundOffError] = useState<string>('');
   const [apRoundOffInput, setApRoundOffInput] = useState<string>(""); // Raw input string
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false); // New: State for dialog
+  const [poListDialogOpen, setPoListDialogOpen] = useState(false);
+const [selectedPoList, setSelectedPoList] = useState<{
+  poIds: string[];
+  poRandomIds: string[];
+}>({
+  poIds: [],
+  poRandomIds: [],
+});
+const [collapsedPoGroups, setCollapsedPoGroups] = useState<Record<string, boolean>>({});
   // Sort selectedHeaders based on preferredHeaderOrder
   const sortedSelectedHeaders = useMemo(() => {
     // Create a copy of selectedHeaders to avoid mutating the original array
@@ -1033,7 +1043,13 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
       return;
     }
     try {
-      const result = await dispatch(revertGrnToPO(grnId)).unwrap();
+      const grn = grns.find((g) => g.grnId === grnId);
+
+const result = await dispatch(
+  grn?.grnSource === "Multi" || (grn?.poCount || 0) > 1
+    ? revertMultiGrnToPO(grnId)
+    : revertGrnToPO(grnId)
+).unwrap();
       let message = `GRN successfully reverted to PO`;
 
 
@@ -1734,22 +1750,14 @@ const handleFilterClose = () => {
     </Button>
   </Link>
 )}
-{canRead && (
-  <Link href={"/yen-purchase/GrnPage/HoldGrn"}>
-  <Button
-  variant="contained"
-  sx={{
-    backgroundColor: "#1976d2",
-    color: "#fff",
-    // "&:hover": {
-    //   backgroundColor: "#ffffff",
-    // },
-  }}
->
-  HOLD GRN
-</Button>
-  </Link>
-)}
+{/* {canRead && (
+ <Link href={"/yen-purchase/GrnPage/HoldGrn"}>
+  <Button variant="contained" color="primary" sx={{ mr: 1 }}>
+    HOLD GRN
+  </Button>
+</Link>
+
+)} */}
               {canReturnRead && (
                 <Link href={"/yen-purchase/GrnPage/GrnReturn"}>
                   <Button variant="contained" color="primary" sx={{ mr: 2 }}>
@@ -1903,7 +1911,9 @@ const handleFilterClose = () => {
               <TableRow>
                 <TableCell className='table-number-right'>S.No</TableCell>
                 <TableCell>GRN Id</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>Po Id</TableCell>
+                <TableCell>PO Count</TableCell>
                 <TableCell>Vendor Name</TableCell>
                 <TableCell>Invoice No</TableCell>
                 <TableCell>Invoice Date</TableCell>
@@ -1936,22 +1946,104 @@ const handleFilterClose = () => {
                       <TableCell className='table-number-right'>{index + 1}</TableCell>
                       <TableCell>{grn.randomId}</TableCell>
                       <TableCell>
-                        {grn.purchaseOrderId ? (
-                          <span
-                            style={{
-                              color: 'purple',
-                              cursor: 'pointer',
-                              textDecoration: 'underline'
-                            }}
-                            onClick={() => handlePoClick(grn.purchaseOrderId)}
-                          >
-                            {grn.poRandomID}
-                          </span>
-                        ) : (
-                          grn.poRandomID || 'N/A'
-                        )}
-                      </TableCell>
-                      <TableCell>{grn.vendorName}</TableCell>
+  <Chip
+    label={grn.grnSource === "Multi" ? "MULTI" : "SINGLE"}
+    size="small"
+    color={grn.grnSource === "Multi" ? "success" : "info"}
+    variant="outlined"
+  />
+</TableCell>
+<TableCell>
+  {grn.grnSource === "Multi" ? (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Typography
+        component="span"
+        onClick={() => handlePoClick(grn.purchaseOrderIds?.[0] || '')}
+        sx={{
+          color: "#8e24aa",
+          textDecoration: "underline",
+          cursor: "pointer",
+          fontWeight: 500,
+        }}
+      >
+        {grn.poRandomIds?.[0] || grn.poRandomID}
+      </Typography>
+
+     {(grn.poCount || grn.poRandomIds?.length || 0) > 1 && (
+  <Typography
+    component="span"
+    onClick={async () => {
+      // Fetch all POs and show in PODialog
+      const allPoIds = grn.purchaseOrderIds || [];
+      if (allPoIds.length > 0) {
+        try {
+          const results = await Promise.all(
+            allPoIds.map((id) => dispatch(fetchPoById(id)).unwrap())
+          );
+          const transformedPos = results.filter(Boolean).map((result) => ({
+            purchaseOrderId: result.purchaseOrderId,
+            randomId: result.randomId,
+            vendorName: result.vendorName,
+            orderDate: typeof result.orderDate === 'string'
+              ? result.orderDate
+              : result.orderDate?.toISOString() || null,
+            itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
+              itemId: item.itemId ?? 'N/A',
+              itemName: item.itemName ?? 'Unknown',
+              receivedQuantity: Number(item.receivedQuantity) || 0,
+              poQuantity: Number(item.poQuantity) || 0,
+              newPrice: Number(item.newPrice) || 0,
+              totalPrice: Number(item.totalPrice) || 0,
+              purchasetaxName: Number(item.purchasetaxName) || 0,
+              taxPercentage: Number(item.taxPercentage) || 0,
+              taxAmount: Number(item.taxAmount) || 0,
+              discountAmount: Number(item.discountAmount) || 0,
+              finalPrice: Number(item.finalPrice) || 0,
+            })) as ItemDetailResponsePO[],
+          }));
+          // Store in local state for PODialog
+          setSelectedPoList({
+            poIds: grn.purchaseOrderIds || [],
+            poRandomIds: grn.poRandomIds || [],
+          });
+          dispatch(setSelectedPo(transformedPos[0]));
+          // Need a multiPos state — use existing poListDialog approach or add new state
+          setPoListDialogOpen(true); // Keep list dialog for now — Fix 1 handles the click
+        } catch (error) {
+          console.error('Failed to fetch POs:', error);
+        }
+      }
+    }}
+    sx={{
+      color: "#8e24aa",
+      textDecoration: "underline",
+      cursor: "pointer",
+      fontWeight: 500,
+    }}
+  >
+    +{Number(grn.poCount || grn.poRandomIds?.length || 1) - 1}
+  </Typography>
+)}
+    </Box>
+  ) : (
+    <Typography
+      component="span"
+      onClick={() => handlePoClick(grn.purchaseOrderId || '')}
+      sx={{
+        color: "#1976d2",
+        textDecoration: "underline",
+        cursor: "pointer",
+        fontWeight: 500,
+      }}
+    >
+      {grn.poRandomID}
+    </Typography>
+  )}
+</TableCell>
+
+<TableCell>{grn.poCount || 1}</TableCell>
+
+<TableCell>{grn.vendorName}</TableCell>
                       <TableCell>{grn.invoiceNo}</TableCell>
                       <TableCell>{grn.invoiceDate ? format(grn.invoiceDate, 'dd-MM-yyyy') : ''}</TableCell>
                       <TableCell>{grn.grnDate ? format(grn.grnDate, 'dd-MM-yyyy') : ''}</TableCell>
@@ -2105,23 +2197,79 @@ const handleFilterClose = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box sx={{ pl: 0, width: '100%' }}>
                     <Box sx={{ pl: 0, width: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>PO NO:</Typography>
-                        <Typography variant="h6">{selectedGrn?.poRandomID || 'PO0001'}</Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{'-->'}</Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>GRN NO:</Typography>
-                        <Typography variant="h6">{selectedGrn?.randomId || 'GN0001'}</Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Vendorname:</Typography>
-                        <Typography variant="h6">{selectedGrn?.vendorName || 'KK MOTORS'}</Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Invoice No:</Typography>
-                        <Typography variant="h6">{selectedGrn?.invoiceNo}</Typography>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Invoice Date:</Typography>
-                        <Typography variant="h6">
-                          {selectedGrn?.invoiceDate ? format(new Date(selectedGrn.invoiceDate), 'dd-MM-yyyy') : 'N/A'}
-                        </Typography>
-                      </Box>
+                    {selectedGrn?.grnSource === "Multi" ? (
+  <Box sx={{ mb: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }}>
+      <Typography variant="body2">
+        <strong>PO Linked :</strong>
+      </Typography>
+
+      <Typography variant="body2">
+        <strong>PO Count :</strong>{" "}
+        {selectedGrn?.poCount || selectedGrn?.poRandomIds?.length || 0}
+      </Typography>
+
+      <Typography variant="body2">
+        <strong>GRN NO :</strong>{" "}
+        {selectedGrn?.randomId || "GN0001"}
+      </Typography>
+    </Box>
+
+    <Box component="ul" sx={{ mt: 0.5, mb: 0, pl: 3 }}>
+      {(selectedGrn?.poRandomIds || []).map((poNo: string, index: number) => (
+        <li key={index}>
+          <Typography component="span" variant="body2" sx={{ color: "#8e24aa", fontWeight: 500 }}>
+            {poNo}
+          </Typography>
+        </li>
+      ))}
+    </Box>
+  </Box>
+) : (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>PO NO:</Typography>
+    <Typography variant="h6">{selectedGrn?.poRandomID || 'PO0001'}</Typography>
+    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{'-->'}</Typography>
+    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>GRN NO:</Typography>
+    <Typography variant="h6">{selectedGrn?.randomId || 'GN0001'}</Typography>
+  </Box>
+)}<Box
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 2.5,
+    mb: 1,
+  }}
+>
+  <Typography variant="body2">
+    <strong>Vendorname:</strong> {selectedGrn?.vendorName || "KK MOTORS"}
+  </Typography>
+
+  <Typography variant="body2">
+    <strong>Invoice No:</strong> {selectedGrn?.invoiceNo || "N/A"}
+  </Typography>
+
+  <Typography variant="body2">
+    <strong>Invoice Date:</strong>{" "}
+    {selectedGrn?.invoiceDate ? format(new Date(selectedGrn.invoiceDate), "dd-MM-yyyy") : "N/A"}
+  </Typography>
+
+  <Typography variant="body2">
+    <strong>GRN Date:</strong>{" "}
+    {selectedGrn?.grnDate ? format(new Date(selectedGrn.grnDate), "dd-MM-yyyy") : "N/A"}
+  </Typography>
+
+  <Box sx={{ width: 165 }}>
+    <SmartDatePicker
+      label="AP Invoice Date"
+      value={apInvoiceDate}
+      onChange={setApInvoiceDate}
+      maxDate={new Date()}
+      disabled={true}
+    />
+  </Box>
+</Box>
                     </Box>
                     {/* GRN Date, AP Invoice Date and Outgoing Date in the same row */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', mb: 1 }}>
@@ -2206,6 +2354,301 @@ const handleFilterClose = () => {
               </Grid>
               {/* Rest of your table code remains the same */}
               <Grid item xs={12}>
+                 {selectedGrn?.grnSource === "Multi" ? (
+(() => {
+  // Build groups — use sourcePurchaseOrderId as key, fallback to item index
+  const groups: Record<string, { poRandomId: string; items: typeof selectedGrn.itemDetails }> = {};
+  
+  (selectedGrn.itemDetails || []).forEach(item => {
+    // Cast to any to access fields not in TypeScript model
+    const anyItem = item as any;
+    const poId = anyItem.sourcePurchaseOrderId || anyItem.sourcePoId || 'po_' + anyItem.itemId;
+    const poRandom = anyItem.sourcePoRandomId || anyItem.sourcePoRandom || 'Unknown PO';
+    
+    if (!groups[poId]) groups[poId] = { poRandomId: poRandom, items: [] };
+    groups[poId].items.push(item);
+  });
+
+  // If all items ended up in one group with wrong key, try to split by poRandomIds from GRN
+  const groupKeys = Object.keys(groups);
+  
+  return (
+    <>
+      {Object.entries(groups).map(([poId, group]) => {
+        const poSubTotal = group.items.reduce((s, i) => s + ((i.unitPrice || 0) * (i.receivedQuantity || 0)), 0);
+        const poFinalTotal = group.items.reduce((s, i) => s + (i.finalPrice || 0), 0);
+
+        const poTaxTotal = group.items.reduce((s, i) => s + (i.taxAmount || 0), 0);
+
+const poDiscountTotal = group.items.reduce(
+  (s, i) => s + (i.befTaxDiscountAmount || 0) + (i.afTaxDiscountAmount || 0),
+  0
+);
+
+const poRoundOff = (selectedGrn?.grnRoundOffAmount || 0) / Object.keys(groups).length;
+const poFreightTax = (selectedGrn?.totalFreightTaxAmount || 0) / Object.keys(groups).length;
+const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).length;
+
+        const poTaxDetails: Record<string, { sgst: number; cgst: number; igst: number; sgstRate: number; cgstRate: number; igstRate: number }> = {};
+        group.items.forEach(item => {
+          const taxRate = (item as any).taxPercentage || item.purchasetaxName || 0;
+          const taxType = (item as any).taxType || '';
+          if (taxRate > 0) {
+            const key = taxRate.toString();
+            if (!poTaxDetails[key]) poTaxDetails[key] = { sgst: 0, cgst: 0, igst: 0, sgstRate: taxRate / 2, cgstRate: taxRate / 2, igstRate: taxRate };
+            const taxAmt = (item.taxAmount || 0);
+            if (taxType === 'cgst_sgst') {
+              poTaxDetails[key].sgst += taxAmt / 2;
+              poTaxDetails[key].cgst += taxAmt / 2;
+            } else if (taxType === 'igst') {
+              poTaxDetails[key].igst += taxAmt;
+            }
+          }
+        });
+
+        // DEFAULT EXPANDED: ?? false means expanded by default
+        const collapsed = collapsedPoGroups[poId] ?? true;
+
+        return (
+          <Box key={poId} sx={{ mb: 3 }}>
+            {/* PO Header */}
+            <Box
+              onClick={() => setCollapsedPoGroups(prev => ({ ...prev, [poId]: !prev[poId] }))}
+              sx={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                backgroundColor: '#e3f2fd', px: 2, py: 1,
+                borderRadius: collapsed ? '4px' : '4px 4px 0 0',
+                border: '1px solid #90caf9',
+                borderBottom: collapsed ? '1px solid #90caf9' : 'none',
+                cursor: 'pointer', userSelect: 'none',
+                '&:hover': { backgroundColor: '#d0e8fb' },
+              }}
+            >
+              <Typography variant="subtitle1" fontWeight="bold" color="primary">
+                PO ID: {group.poRandomId}
+              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="subtitle2" fontWeight="bold" color="primary">
+                  PO Final Amount: ₹{poFinalTotal.toFixed(2)}
+                </Typography>
+                <Typography sx={{ color: 'primary.main', fontSize: 18 }}>
+                  {collapsed ? '▼' : '▲'}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* TABLE — shown when NOT collapsed */}
+            {!collapsed && (
+              <TableContainer component={Paper} sx={{ border: '1px solid #90caf9', borderTop: 'none', borderRadius: '0 0 4px 4px' }}>
+                <Table stickyHeader size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>S.No</TableCell>
+                      {sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').map(header => (
+                        <TableCell key={header}>{headerDisplayNames[header] || header}</TableCell>
+                      ))}
+                      {sortedSelectedHeaders.includes('totalPrice') && <TableCell align="right">Total Price</TableCell>}
+                      {sortedSelectedHeaders.includes('finalPrice') && <TableCell align="right">Final Price</TableCell>}
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {/* Item rows */}
+                    {group.items.map((item, index) => (
+                      <TableRow key={item.itemId}>
+                        <TableCell>{index + 1}</TableCell>
+                        {sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').map(header => (
+                          <TableCell key={header}>
+                            {header === 'itemName' && (item.itemName || '')}
+                            {header === 'nos' && (item.nos || 0)}
+                            {header === 'eachQuantity' && (item.eachQuantity || 0)}
+                            {header === 'receivedQuantity' && (item.receivedQuantity || 0)}
+                            {header === 'returnedQuantity' && (item.returnedQuantity || 0)}
+                            {header === 'totalQuantity' && (
+                              typeof item.totalQuantity === 'number' && item.totalQuantity !== 0
+                                ? item.totalQuantity : (item.receivedQuantity || 0)
+                            )}
+                            {header === 'uom' && (item.uom || '')}
+                            {header === 'unitPrice' && (item.unitPrice || 0).toFixed(2)}
+                            {header === 'priceVariance' && (
+                              <span style={{
+                                color: item.priceVariance && item.priceVariance !== 0 ? '#d32f2f' : 'inherit',
+                                fontWeight: item.priceVariance && item.priceVariance !== 0 ? 'bold' : 'normal'
+                              }}>
+                                {item.priceVariance !== null && item.priceVariance !== undefined && item.priceVariance !== 0
+                                  ? `${item.priceVariance > 0 ? '+' : ''}${item.priceVariance.toFixed(2)}`
+                                  : '0.00'}
+                              </span>
+                            )}
+                            {header === 'purchasetaxName' && ((item as any).taxPercentage || item.purchasetaxName || 0)}
+                            {header === 'befTaxDiscount' && (
+                              <TextField size="small" type="number"
+                                value={editedItems[item.itemId]?.befTaxDiscount ?? item.befTaxDiscount}
+                                onChange={e => handleEditChange(item.itemId, 'befTaxDiscount', Number(e.target.value))}
+                              />
+                            )}
+                            {header === 'afTaxDiscount' && (
+                              <TextField size="small" type="number"
+                                value={editedItems[item.itemId]?.afTaxDiscount ?? item.afTaxDiscount}
+                                onChange={e => handleEditChange(item.itemId, 'afTaxDiscount', Number(e.target.value))}
+                              />
+                            )}
+                            {header === 'expiryDate' && (
+                              <TextField size="small" type="date"
+                                value={
+                                  editedItems[item.itemId]?.expiryDate
+                                    ? new Date(editedItems[item.itemId]!.expiryDate as string).toLocaleDateString('en-CA')
+                                    : item.expiryDate ? new Date(item.expiryDate).toLocaleDateString('en-CA') : ''
+                                }
+                                onChange={e => handleEditChange(item.itemId, 'expiryDate', e.target.value)}
+                                inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                                disabled
+                              />
+                            )}
+                          </TableCell>
+                        ))}
+                        {sortedSelectedHeaders.includes('totalPrice') && (
+                          <TableCell align="right">{(item.totalPrice || 0).toFixed(2)}</TableCell>
+                        )}
+                        {sortedSelectedHeaders.includes('finalPrice') && (
+                          <TableCell align="right">{(editedItems[item.itemId]?.finalPrice || item.finalPrice || 0).toFixed(2)}</TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+
+                    {/* Sub Total */}
+                   {/* AP Round Off Input */}
+<TableRow>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    <strong>AP Round Off:</strong>
+  </TableCell>
+  <TableCell align="right">
+    <TextField
+      autoComplete="off"
+      type="text"
+      value={apRoundOffInput}
+      onChange={handleApRoundOffInputChange}
+      onBlur={handleApRoundOffBlur}
+      placeholder="0.00"
+      size="small"
+      style={{ width: "120px" }}
+      inputProps={{ step: 0.01, min: -2, max: 2 }}
+      error={!!apRoundOffError}
+      helperText={apRoundOffError || ""}
+    />
+  </TableCell>
+</TableRow>
+
+<TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    <strong>AP Round Off Applied:</strong>
+  </TableCell>
+  <TableCell align="right">
+    {apRoundOff > 0 ? `+${apRoundOff}` : apRoundOff.toString()}
+  </TableCell>
+</TableRow>
+
+<TableRow sx={{ backgroundColor: "#e8f5e9" }}>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    <strong>New AP Total:</strong>
+  </TableCell>
+  <TableCell align="right">
+    {(poFinalTotal + apRoundOff).toFixed(2)}
+  </TableCell>
+</TableRow>
+
+                    {/* Tax rows per PO */}
+                    {Object.entries(poTaxDetails).sort(([a], [b]) => parseFloat(a) - parseFloat(b)).map(([rate, { sgst, cgst, igst, sgstRate, cgstRate, igstRate }]) => (
+                      <React.Fragment key={rate}>
+                        {sgst > 0 && (
+                          <TableRow>
+                            <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+                              SGST @{sgstRate.toFixed(2)}%:
+                            </TableCell>
+                            <TableCell colSpan={(sortedSelectedHeaders.includes('totalPrice') ? 1 : 0) + (sortedSelectedHeaders.includes('finalPrice') ? 1 : 0) || 1} align="right">
+                              {sgst.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {cgst > 0 && (
+                          <TableRow>
+                            <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+                              CGST @{cgstRate.toFixed(2)}%:
+                            </TableCell>
+                            <TableCell colSpan={(sortedSelectedHeaders.includes('totalPrice') ? 1 : 0) + (sortedSelectedHeaders.includes('finalPrice') ? 1 : 0) || 1} align="right">
+                              {cgst.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        {igst > 0 && (
+                          <TableRow>
+                            <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+                              IGST @{igstRate.toFixed(2)}%:
+                            </TableCell>
+                            <TableCell colSpan={(sortedSelectedHeaders.includes('totalPrice') ? 1 : 0) + (sortedSelectedHeaders.includes('finalPrice') ? 1 : 0) || 1} align="right">
+                              {igst.toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </React.Fragment>
+                    ))}
+
+                    {/* PO Total Amount */}
+                   <TableRow>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    RoundOff Amount:
+  </TableCell>
+  <TableCell align="right">{poRoundOff.toFixed(2)}</TableCell>
+</TableRow>
+
+<TableRow>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    Freight Tax:
+  </TableCell>
+  <TableCell align="right">{poFreightTax.toFixed(2)}</TableCell>
+</TableRow>
+
+<TableRow>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    Freight:
+  </TableCell>
+  <TableCell align="right">{poFreight.toFixed(2)}</TableCell>
+</TableRow>
+
+<TableRow>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    Discount Amount:
+  </TableCell>
+  <TableCell align="right">{poDiscountTotal.toFixed(2)}</TableCell>
+</TableRow>
+
+<TableRow>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    <strong>Tax Amount:</strong>
+  </TableCell>
+  <TableCell align="right">{poTaxTotal.toFixed(2)}</TableCell>
+</TableRow>
+
+<TableRow sx={{ backgroundColor: '#e8f5e9', borderTop: '2px solid #388e3c' }}>
+  <TableCell colSpan={sortedSelectedHeaders.filter(h => h !== 'totalPrice' && h !== 'finalPrice').length + 1} align="right">
+    <strong>Final Total Amount:</strong>
+  </TableCell>
+  <TableCell align="right">
+    <strong>{poFinalTotal.toFixed(2)}</strong>
+  </TableCell>
+</TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Box>
+        );
+      })}
+
+
+    </>
+  );
+})()
+  ) : (
                 <TableContainer component={Paper}>
                   <Table stickyHeader>
                     <TableHead>
@@ -2428,6 +2871,7 @@ const handleFilterClose = () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                )}
               </Grid>
             </Grid>
           </DialogContent>
@@ -2608,6 +3052,43 @@ const handleFilterClose = () => {
           autoHideDuration={3000}
           onClose={() => setSnackbarOpen(false)} // Automatically close the Snackbar
         />
+        {/* ADD HERE */}
+<Dialog
+  open={poListDialogOpen}
+  onClose={() => setPoListDialogOpen(false)}
+  maxWidth="xs"
+  fullWidth
+>
+  <DialogTitle>PO IDs</DialogTitle>
+
+<DialogContent dividers>
+  {selectedPoList.poRandomIds.map((poRandomId, index) => (
+    <Box key={index} sx={{ mb: 1 }}>
+      <Typography
+        component="span"
+        onClick={() => {
+          setPoListDialogOpen(false);
+          handlePoClick(selectedPoList.poIds[index]);
+        }}
+        sx={{
+          color: "#8e24aa",
+          textDecoration: "underline",
+          cursor: "pointer",
+          fontWeight: 500,
+        }}
+      >
+        {poRandomId}
+      </Typography>
+    </Box>
+  ))}
+</DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setPoListDialogOpen(false)}>
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
         <Snackbar
           open={snackbarOpenGRN}
           message={snackbarMessageGRN}
