@@ -9,7 +9,6 @@ import apInvoiceReducer from '../features/yen-purchase/AP/apInvoiceSlice';
 import outgoingPaymentReducer from '../features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import vendorReducer from '../features/yen-purchase/PurchaseMaster/vendorSlice';
 import purchaseItemReducer from '../features/yen-purchase/PurchaseMaster/purchaseItemSlice';
-import purchaseRequisitionReducer from '../features/purchaseRequisitionSlice';
 import budgetReducer from '../features/budgetSlice';
 import barcodeReducer from '../features/barcodeSlice';
 import customerReducer from '../features/customerSlice';
@@ -123,7 +122,6 @@ const store = configureStore({
     vendor: vendorReducer,
     purchaseItems: purchaseItemReducer,
     masterPurchase:purchaseMasterItemReducer,
-    purchaseRequisition: purchaseRequisitionReducer,
     budget: budgetReducer,
     barcode: barcodeReducer,
     customer: customerReducer,

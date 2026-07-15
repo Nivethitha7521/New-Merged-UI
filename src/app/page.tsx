@@ -47,21 +47,20 @@ useEffect(() => {
   setIsCheckingSession(false);
 }, []);
 
-const getDomain = () => {
- if (typeof window !== "undefined") {
-   return window.location.host;   // 🔥 includes port also
- }
- return "";
-};
+// const getDomain = () => {
+//  if (typeof window !== "undefined") {
+//    return window.location.host;   // 🔥 includes port also
+//  }
+//  return "";
+// };
 // In your login/page.tsx - SIMPLIFIED
 const handleLogin = async () => {
   if (isLoggingIn) return;
 
   const trimmedUsername = username.trim();
-  const trimmedPassword = password.trim();
-
-  if (!trimmedUsername || !trimmedPassword) {
-    toast.error('Please enter both username and password');
+const loginPassword = password;
+if (!trimmedUsername || !loginPassword) {
+     toast.error("Please enter email or phone number and password");
     return;
   }
 
@@ -75,11 +74,16 @@ if (!browserSessionId) {
 }
   try {
     // ✅ CORRECT URL - Call your FastAPI backend on port 8000
+// ✅ CORRECT URL - Call your FastAPI backend on port 8000
+console.log("LOGIN DEBUG", {
+  username: trimmedUsername,
+  passwordLength: loginPassword.length,
+  passwordValue: JSON.stringify(loginPassword),
+});
  const response = await fetch('http://127.0.0.1:8000/purchasetestapi/login', {
   method: 'POST',
   headers: {
-    'Authorization': `Basic ${btoa(`${trimmedUsername}:${trimmedPassword}`)}`,
-    'x-domain': getDomain(),    // 🔥 THIS IS THE IMPORTANT FIX
+'Authorization': `Basic ${btoa(`${trimmedUsername}:${loginPassword}`)}`,
   'x-browser-session-id':browserSessionId,
   },
 });
@@ -112,7 +116,7 @@ localStorage.setItem("userPermissions", JSON.stringify(result.permissions));
 sessionStorage.setItem("accessToken", result.access_token);
 sessionStorage.setItem("username", result.username);
 sessionStorage.setItem("tenant_id", result.tenant_id);
-
+sessionStorage.setItem("tenantName", result.tenantName || '');
 localStorage.setItem("userRole", result.role_name);  
 // 🔥 NEW — TELL REDUX LOGIN SUCCESS
 dispatch(jwtLoginSuccess({
@@ -127,8 +131,7 @@ toast.success(
 );
 
 
-router.push("/yen-purchase");
-
+window.location.href = "/yen-purchase";
 
 
 
@@ -294,7 +297,7 @@ router.push("/yen-purchase");
                   'Sign In'
                 )}
               </button>
-               <div className="text-center mt-4">
+<div className="text-center mt-4">
     <button
       type="button"
       onClick={() => router.push("/forgot-password")}
@@ -304,6 +307,19 @@ router.push("/yen-purchase");
     </button>
   </div>
             </form>
+
+            <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => router.push("/signup")}
+                  className="text-blue-600 font-medium hover:underline"
+                >
+                  Create Account
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>

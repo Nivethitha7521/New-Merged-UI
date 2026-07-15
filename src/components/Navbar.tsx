@@ -26,7 +26,12 @@ const Navbar: React.FC<NavbarProps> = ({ moduleName, username, onToggleMenu }) =
   const { businesses } = useSelector(selectBusinesses);
   const [fetchedBusinessIds, setFetchedBusinessIds] = useState(new Set<string>());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
- 
+  const [companyName, setCompanyName] = useState('YEN ERP');
+
+  useEffect(() => {
+    const storedName = sessionStorage.getItem('tenantName') || sessionStorage.getItem('companyName');
+    if (storedName) setCompanyName(storedName);
+  }, []);
 
   // Fetch businesses on mount
 // Fetch businesses on mount — only if not already loaded
@@ -58,7 +63,7 @@ useEffect(() => {
   };
 
 
-  const handleConfirmLogout = async () => {
+const handleConfirmLogout = async () => {
     setManualLogoutFlag();
 
     setIsDialogOpen(false);
@@ -66,21 +71,19 @@ useEffect(() => {
   try {
   await dispatch(logout('manual')).unwrap();
 
-  // ✅ Clear only session storage
   sessionStorage.clear();
-
-  // ❌ DO NOT clear full localStorage here
   localStorage.removeItem('browserSessionId');
 
-  router.push('/');
+  // 🔥 Full page reload — clears ALL in-memory Redux state
+  // (businesses, roles, permissions etc from the previous session)
+  window.location.href = '/';
 } catch (error) {
   console.error('Logout failed:', error);
 
-  // Even if API fails, still logout locally
   sessionStorage.clear();
   localStorage.removeItem('browserSessionId');
 
-  router.push('/');
+  window.location.href = '/';
 }
 
   };
@@ -95,14 +98,16 @@ useEffect(() => {
             <button onClick={onToggleMenu} className="menu-toggle-button" aria-label="Toggle menu">
               <FiMenu />
             </button>
-            <Image
-              src="/images/blacklogo.png"
-              alt="YEN ERP Logo"
-              width={100}
-              height={40}
-              className="logo"
-              priority
-            />
+            <Typography
+              sx={{
+                fontSize: '20px !important',
+                fontWeight: 700,
+                color: '#1a1a1a',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {companyName}
+            </Typography>
           </div>
 
     <div className="navbar-center">

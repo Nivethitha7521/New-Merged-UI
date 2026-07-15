@@ -1,128 +1,53 @@
 'use client';
-import { useState, useEffect} from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Image from "next/image";
 
 export default function ForgotPassword() {
-  const [username, setUsername] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-const [email, setEmail] = useState("");
-const [emailLoading, setEmailLoading] = useState(false);
-const [isAutoFetching, setIsAutoFetching] = useState(false);
 
   const sendOtp = async () => {
- if (!username.trim() && !email.trim()) {
-  toast.error("Please enter username or email");
-  return;
-}
+    const trimmed = identifier.trim();
 
+    if (!trimmed) {
+      toast.error("Please enter your registered email or mobile number");
+      return;
+    }
 
     setLoading(true);
     try {
-      const query = new URLSearchParams();
+      const res = await fetch(
+        `http://127.0.0.1:8000/purchasetestapi/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: trimmed }),
+        }
+      );
 
-if (username.trim()) {
-  query.append("username", username.trim());
-} else if (email.trim()) {
-  query.append("email", email.trim());
-}
-
-
-
-const res = await fetch(
-  `http://127.0.0.1:8000/purchasetestapi/users/forgot-password?${query.toString()}`,
-  { method: "POST" }
-);
-
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const err = await res.json();
-        toast.error(err.detail);
+        toast.error(data.detail || "Something went wrong. Please try again.");
         return;
       }
 
-    toast.success("OTP sent to registered email");
-sessionStorage.setItem("fp_username", username);
-
+      // Security: backend always returns a generic message, whether or not
+      // the account exists — never reveal account existence here.
+      toast.success(data.message || "If the account exists, an OTP has been sent.");
+      sessionStorage.setItem("fp_identifier", trimmed);
+      sessionStorage.setItem("fp_otp_sent_at", Date.now().toString());
 
       router.push("/forgot-password/verify-otp");
     } catch {
-      toast.error("Server error");
+      toast.error("Server error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  const fetchUsernameByEmail = async (mail: string) => {
-  if (!mail.trim()) {
-    setUsername("");
-    return;
-  }
- setIsAutoFetching(true);
-  try {
-    const res = await fetch(
-     `http://127.0.0.1:8000/purchasetestapi/users/email/${encodeURIComponent(mail)}/username`
-
-    );
-
-    if (!res.ok) {
-      return;
-    }
-
-    const data = await res.json();
-    setUsername(data.username);
-  } catch {
-    setUsername("");
-  } finally {
-    setIsAutoFetching(false); // 🔥 enable button after complete
-  }
-};
-
-const fetchEmailByUsername = async (uname: string) => {
-  if (!uname.trim()) {
-    setEmail("");
-    return;
-  }
- setIsAutoFetching(true);
- ;
-  try {
-    const res = await fetch(
-    `http://127.0.0.1:8000/purchasetestapi/users/username/${encodeURIComponent(uname)}/email`
-
-    );
-
-    if (!res.ok) {
-      setEmail("");
-      return;
-    }
-
-    const data = await res.json();
-    setEmail(data.email);
-  } catch {
-    setEmail("");
-  } finally {
-    setIsAutoFetching(false);
-  }
-};
-useEffect(() => {
-  if (!email.trim()) return;
-
-  const delay = setTimeout(() => {
-    fetchUsernameByEmail(email);
-  }, 300); // 300ms debounce
-
-  return () => clearTimeout(delay);
-}, [email]);
-useEffect(() => {
-  if (!username.trim()) return;
-
-  const delay = setTimeout(() => {
-    fetchEmailByUsername(username);
-  }, 300); // 300ms debounce
-
-  return () => clearTimeout(delay);
-}, [username]);
 
   return (
     <div className="min-h-screen flex">
@@ -148,78 +73,47 @@ useEffect(() => {
         <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
 
           {/* STEP INDICATOR */}
-      {/* STEP INDICATOR – EXACT LIKE IMAGE */}
-<div className="flex items-center justify-center mb-8">
-  {/* STEP 1 */}
-  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
-    1
-  </div>
-
-  {/* LINE */}
-  <div className="w-12 h-[2px] bg-gray-200 mx-2"></div>
-
-  {/* STEP 2 */}
-  <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-medium">
-    2
-  </div>
-
-  {/* LINE */}
-  <div className="w-12 h-[2px] bg-gray-200 mx-2"></div>
-
-  {/* STEP 3 */}
-  <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-medium">
-    3
-  </div>
-</div>
+          <div className="flex items-center justify-center mb-8">
+            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
+              1
+            </div>
+            <div className="w-12 h-[2px] bg-gray-200 mx-2"></div>
+            <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-medium">
+              2
+            </div>
+            <div className="w-12 h-[2px] bg-gray-200 mx-2"></div>
+            <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-medium">
+              3
+            </div>
+          </div>
 
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Reset Password</h1>
             <p className="text-gray-500 mt-1">
-              Enter your username or email to receive an OTP
+              Enter your registered work email or mobile number to receive an OTP
             </p>
           </div>
 
-          {/* USERNAME */}
+          {/* EMAIL OR MOBILE */}
           <div className="mb-5">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Username
+              Registered Email or Mobile Number
             </label>
             <input
               type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-             
-
+              placeholder="Enter your email or mobile number"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendOtp()}
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
-          {/* EMAIL (AUTO FILLED) */}
-<div className="mb-5">
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Email
-  </label>
-
- <input
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  placeholder="Enter your registered email"
-  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-/>
-
-
-</div>
 
           {/* SEND OTP */}
           <button
             onClick={sendOtp}
-           disabled={
-  loading ||
-  isAutoFetching ||
-  (!username.trim() && !email.trim())
-}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-medium transition"
+            disabled={loading || !identifier.trim()}
+            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Sending..." : "Send OTP"}
           </button>
@@ -232,8 +126,6 @@ useEffect(() => {
             >
               ← Back to Login
             </button>
-
-            
           </div>
         </div>
       </div>

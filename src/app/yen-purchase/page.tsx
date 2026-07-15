@@ -53,17 +53,7 @@ const YenPurchasePage = () => {
   const grnKeys             = ["grns", "grns_return"];
   const apInvoiceKeys       = ["apinvoices"];
 
-  // ── NEW: Purchase Requisition permission key ──────────────────────────────
-  // Add "purchase_requisition" to your permissions if you want to control visibility.
-  // If the key doesn't exist yet, it defaults to visible (returns true below).
-  const purchaseRequisitionKeys = ["purchase_requisition"];
-  const isPurchaseRequisitionVisible = purchaseRequisitionKeys.some((k) => {
-    const m = permissions?.[k];
-    // If key not configured yet → show by default
-    if (!m) return true;
-    if (m.hide === true || m.hide === 1) return false;
-    return true;
-  });
+  
 
   const isAnyModuleVisible = (keys: string[]) => keys.some((k) => isModuleVisible(k));
 
@@ -85,13 +75,7 @@ const YenPurchasePage = () => {
           path:    "/yen-purchase/PurchaseItemPage",
           visible: isAnyModuleVisible(purchaseitemKeys),
         },
-        // ── NEW TAB ────────────────────────────────────────────────────────
-        {
-          label:   "Purchase Requisition",
-          path:    "/yen-purchase/PurchaseRequisition",
-          visible: isPurchaseRequisitionVisible,
-        },
-        // ──────────────────────────────────────────────────────────────────
+
         {
           label:   "Purchase Order",
           path:    "/yen-purchase/PurchaseOrder",
@@ -124,7 +108,6 @@ const YenPurchasePage = () => {
     ...serviceOrderKeys,
     ...grnKeys,
     ...apInvoiceKeys,
-    ...purchaseRequisitionKeys,  // ← included so menu shows
   ];
 
   const INVENTORY_KEYS = [

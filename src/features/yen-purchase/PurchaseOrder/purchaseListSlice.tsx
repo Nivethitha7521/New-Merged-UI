@@ -1442,7 +1442,9 @@ updateLocalPendingPOFreights: (state, action: PayloadAction<{
 })
 .addCase(fetchMultiPoGrnDrafts.rejected, (state, action) => {
   state.multiPoGrnDraftLoading = false;
-  state.error = action.payload as string;
+  // Intentionally NOT setting state.error here — this is a background,
+  // secondary fetch (the multi-PO GRN drafts badge). Its failure must
+  // never blank out the whole Approved PO page.
 })
 .addCase(fetchMultiPoGrnDraftById.fulfilled, (state, action) => {
   state.selectedMultiPoGrnDraft = action.payload;

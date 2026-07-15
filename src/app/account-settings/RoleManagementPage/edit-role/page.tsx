@@ -6,7 +6,7 @@ import { updateRoleLocally } from '@/features/account-setting/roleSlice';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Slide from '@mui/material/Slide';
-
+import { authFetch } from '@/utils/authFetch';
 import Tooltip from "@mui/material/Tooltip";
 
 // Types
@@ -923,7 +923,7 @@ const permissionSource =
           });
         }
 
-        if (permissionData) {
+       if (permissionData) {
           sub.actions = {
             read: Boolean(permissionData.read),
             add: Boolean(permissionData.add),
@@ -933,7 +933,7 @@ const permissionSource =
             approve: Boolean(permissionData.approve || false),
           };
         }
-        if (permissionData.edit_actions) {
+        if (permissionData && permissionData.edit_actions) {
   sub.editSubActions = {
     convert_to_ap: Boolean(permissionData.edit_actions.convert_to_ap),
     return_grn: Boolean(permissionData.edit_actions.return_grn),
@@ -965,7 +965,7 @@ setFormPermissions(applyDefaultHide(JSON.parse(JSON.stringify(HARD_MODULES))));
 
       try {
         // Fetch role
-        const roleRes = await fetch(`http://127.0.0.1:8000/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
+        const roleRes = await authFetch(`http://127.0.0.1:8000/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
         if (roleRes.ok) {
           const rolesData = await roleRes.json();
           const roleData = Array.isArray(rolesData) ? rolesData.find((r: any) => r.name === roleName) : rolesData;
@@ -980,7 +980,8 @@ setFormPermissions(applyDefaultHide(JSON.parse(JSON.stringify(HARD_MODULES))));
         }
 
         // Fetch permissions
-        const permRes = await fetch(`http://127.0.0.1:8000/purchasetestapi/permissions?role_name=${encodeURIComponent(roleName)}`);
+        // Fetch permissions
+        const permRes = await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions?role_name=${encodeURIComponent(roleName)}`);
         if (permRes.ok) {
           const permData = await permRes.json();
           
@@ -1249,7 +1250,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
       // 2. Update role name if changed
       if (formRoleName !== roleName) {
         try {
-          const roleRes = await fetch(`http://127.0.0.1:8000/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
+          const roleRes = await authFetch(`http://127.0.0.1:8000/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
           const roleData = await roleRes.json();
           
           let roleToUpdate = null;
@@ -1260,7 +1261,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
           }
           
           if (roleToUpdate && roleToUpdate._id) {
-            await fetch(`http://127.0.0.1:8000/purchasetestapi/roles/${roleToUpdate._id}`, {
+            await authFetch(`http://127.0.0.1:8000/purchasetestapi/roles/${roleToUpdate._id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
@@ -1282,7 +1283,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
      
       
       // First try to update existing permissions
-      let response = await fetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
+      let response = await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -1296,7 +1297,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
           permissions: backendPerms
         };
         
-        response = await fetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
+        response = await authFetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(postPayload)
@@ -1314,7 +1315,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
       if (formRoleName !== roleName) {
         try {
           // Try to find permissions with old name
-          const checkResponse = await fetch(`http://127.0.0.1:8000/purchasetestapi/permissions?role_name=${encodeURIComponent(formRoleName)}`);
+          const checkResponse = await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions?role_name=${encodeURIComponent(formRoleName)}`);
           const checkData = await checkResponse.json();
           
           if (!checkData || (Array.isArray(checkData) && checkData.length === 0)) {
@@ -1324,14 +1325,14 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
               permissions: backendPerms
             };
             
-            await fetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
+            await authFetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(createPayload)
             });
             
             // Delete old permissions
-            await fetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
+            await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
               method: "DELETE"
             });
           }

@@ -11,6 +11,8 @@ import { Add as AddIcon, GetApp as GetAppIcon, Upload as UploadIcon } from '@mui
 import FilterAltIcon from '@mui/icons-material/FilterAlt'; // Import the filter icon
 import ClearIcon from "@mui/icons-material/Clear"; // Clear icon
 import { usePermissions } from "@/hooks/usePermissions";
+import purchaseApi from "@/utils/api";
+
 import {
   selectPurchaseListState, fetchImageByIndex,
   updateMultipleItemQuantities, approvePurchaseOrder, uploadPurchaseOrderPhotos, editPhotoByIndex,
@@ -209,6 +211,7 @@ const Polist: React.FC = () => {
       setShouldFetch(false);
     }
   }, [dispatch, newPage, pageSize, shouldFetch, loading]);
+
   useEffect(() => {
     dispatch(fetchBusinesses());
   }, [dispatch]);
@@ -1868,6 +1871,8 @@ const handleFilterClick = () => {
                 <TableCell className="table-number-right">Total PO Items</TableCell>
                 <TableCell className="table-number-right">Total Price</TableCell>
                 <TableCell className="table-text-left">Status</TableCell>
+               
+
                 <TableCell className="table-text-left">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -1935,6 +1940,7 @@ const handleFilterClick = () => {
                       <TableCell className="table-number-right">{totalQuantity}</TableCell>
                       <TableCell className="table-number-right">{order.pendingOrderAmount.toFixed(2)}</TableCell>
                       <TableCell className="table-text-left">{order.poStatus}</TableCell>
+
                       <TableCell>
                         <Box display="flex" alignItems="center">
                           {/* View Button with Eye Icon */}

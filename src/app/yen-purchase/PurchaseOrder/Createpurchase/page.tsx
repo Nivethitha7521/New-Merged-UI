@@ -255,131 +255,243 @@ const CreatePurchasePage: React.FC = () => {
   }
 }, [isEditMode, editId, dispatch, router, vendors]);
 // ─── Auto-fill from PR Generated (Convert to PO flow) ───────────────────
-// ─── Auto-fill from PR Generated (Convert to PO flow) ───────────────────
-  useEffect(() => {
-    if (isEditMode) return;
-    if (vendors.length === 0) return; // Wait for vendors to load
+useEffect(() => {
+  if (isEditMode) return;
 
-    const prDataRaw = sessionStorage.getItem("prToPO");
-    if (!prDataRaw) return;
+  const prDataRaw = sessionStorage.getItem("prToPO");
+  if (!prDataRaw) return;
 
-    try {
-      const prData = JSON.parse(prDataRaw);
-      if (!prData.fromPR) return;
+  try {
+    const prData = JSON.parse(prDataRaw);
+    if (!prData.fromPR) return;
 
-      // Delay to ensure all mount useEffects (form reset, etc.) have run first
-      const timer = setTimeout(async () => {
-        // Auto-fill vendor
-        if (prData.vendorName) {
-          const matchedVendor = vendors.find(
-            (v: VendorSummary) =>
-              v.vendorId === prData.vendorId || v.vendorName === prData.vendorName
-          );
-         if (matchedVendor) {
-            setVendorSearch(matchedVendor);
+    const timer = setTimeout(async () => {
+      // MULTI PR: do not auto-select vendor, only add selected PR items into table
+    if (prData.isMultiPR && Array.isArray(prData.prItems)) {
+  const prItems = await Promise.all(
+    prData.prItems.map(async (prItem: any, index: number) => {
+      let fullItem: any = null;
 
-            // ── Fetch fresh vendor data to ensure paymentTerms/creditLimit ──
-            // vendors from localStorage cache may miss some fields
-            let vendorData = matchedVendor;
-            try {
-              const freshRes = await purchaseApi.get(
-                `/vendors/vendor-names/?vendor_name=${encodeURIComponent(matchedVendor.vendorName)}&limit=1`
-              );
-              if (freshRes.data && freshRes.data.length > 0) {
-                vendorData = { ...matchedVendor, ...freshRes.data[0] };
-              }
-            } catch (e) {
-              console.warn("Could not fetch fresh vendor data, using cached", e);
-            }
+      try {
+        const searchResult = await dispatch(
+          searchPurchaseItems({
+            searchQuery: prItem.itemName,
+            skip: 0,
+            limit: 20,
+            locationId: purchaseOrderData.locationId || "",
+            forceRefresh: true,
+          } as any)
+        ).unwrap();
 
-            dispatch(
-              setPurchaseOrderData({
-                ...purchaseOrderData,
-                vendorName:         vendorData.vendorName,
-                vendorCode:         vendorData.randomId,
-                vendorId:           vendorData.vendorId,
-                vendorContact:      vendorData.contactpersonPhone,
-                contactpersonEmail: vendorData.contactpersonEmail,
-                address:            vendorData.address,
-                country:            vendorData.country,
-                paymentTerms:       vendorData.paymentTerms   || matchedVendor.paymentTerms   || "",
-                creditLimit:        vendorData.creditLimit    ?? matchedVendor.creditLimit    ?? 0,
-                state:              vendorData.state,
-                city:               vendorData.city,
-                postalCode:         vendorData.postalCode,
-                gstNumber:          vendorData.gstNumber,
-              })
-            );
-            setFormErrors((prev) => ({
-              ...prev,
-              vendorName: false,
-              paymentTerms: false,
-              creditLimit: false,
-            }));
-          }
-        }
+        fullItem = searchResult?.find((x: any) =>
+          x.randomId === prItem.itemCode ||
+          x.itemCode === prItem.itemCode ||
+          x.itemName === prItem.itemName
+        );
+      } catch (e) {
+        console.warn("Tax fetch failed for PR item", prItem.itemName, e);
+      }
 
-        // Auto-fill item — set synthetic item for autocomplete display
-        const syntheticItem: PurchaseItemSearchAdd = {
-          purchaseitemId:          prData.itemCode || "",
-          itemName:                prData.itemName,
-          itemCode:                prData.itemCode || "",
-          randomId:                prData.itemCode || "",
-          purchasePrice:           prData.unitPrice || 0,
-          purchasetaxName:         18,
-          uom:                     prData.uom || "",
-          purchasecategoryName:    "",
-          purchasesubcategoryName: "",
-          hsnCode:                 "",
-          availableStock:          0,
-          locationId:              purchaseOrderData.locationId || "",
-        };
-        setNewItemsearch(syntheticItem);
+      const qty = Number(prItem.suggestedQty || 0);
+      const price = Number(prItem.unitPrice || fullItem?.purchasePrice || 0);
 
-        dispatch(
-          setNewItemData({
-            itemId:               prData.itemCode || "",
-            itemName:             prData.itemName,
-            itemCode:             prData.itemCode,
-            randomId:             prData.itemCode,
-            newPrice:             prData.unitPrice || 0,
-            existingPrice:        prData.unitPrice || 0,
-            uom:                  prData.uom,
-            taxPercentage:        18,
-            pendingCount:         1,
-            pendingQuantity:      prData.suggestedQty,
-            pendingTotalQuantity: prData.suggestedQty,
-            poQuantity:           prData.suggestedQty,
-            taxType:              "cgst_sgst",
-            befTaxDiscountType:   "percentage",
-            afTaxDiscountType:    "percentage",
-            priceVariance:        0,
-            befTaxDiscount:       0,
-            afTaxDiscount:        0,
-            befTaxDiscountAmount: 0,
-            afTaxDiscountAmount:  0,
-            pendingTotalPrice:    0,
-            availableStock:       0,
-            locationId:           purchaseOrderData.locationId || "",
-          })
+      const taxPercentage = Number(
+        fullItem?.purchasetaxName ??
+        fullItem?.taxPercentage ??
+        prItem.taxPercentage ??
+        0
+      );
+
+      const totalPrice = qty * price;
+      const sgst = totalPrice * (taxPercentage / 2 / 100);
+      const cgst = totalPrice * (taxPercentage / 2 / 100);
+      const igst = 0;
+      const taxAmount = sgst + cgst + igst;
+      const finalPrice = totalPrice + taxAmount;
+
+      return {
+        itemId: fullItem?.purchaseitemId || `${prItem.itemCode || prItem.prRandomId}-${index}`,
+        itemCode: fullItem?.itemCode || prItem.itemCode || "",
+        itemName: fullItem?.itemName || prItem.itemName,
+        quantity: qty,
+        poQuantity: qty,
+
+        poQuantityTaxAmount: taxAmount,
+        poQuantityDiscountAmount: 0,
+        poQuantitypendingTotalPrice: totalPrice,
+        poQuantitypendingFinalPrice: finalPrice,
+        poQuantitysgst: sgst,
+        poQuantitycgst: cgst,
+        poQuantityigst: igst,
+
+        purchasecategoryName: fullItem?.purchasecategoryName || prItem.purchasecategoryName || "",
+        purchasesubcategoryName: fullItem?.purchasesubcategoryName || prItem.purchasesubcategoryName || null,
+        uom: fullItem?.uom || prItem.uom || "",
+        count: 0,
+        eachQuantity: 0,
+        receivedQuantity: 0,
+        damagedQuantity: 0,
+
+        taxPercentage,
+        existingPrice: price,
+        newPrice: price,
+        priceVariance: 0,
+
+        sgst,
+        cgst,
+        igst,
+        taxType: "cgst_sgst",
+
+        befTaxDiscount: 0,
+        afTaxDiscount: 0,
+        befTaxDiscountAmount: 0,
+        afTaxDiscountAmount: 0,
+        befTaxDiscountType: "percentage",
+        afTaxDiscountType: "percentage",
+        discountAmount: 0,
+        taxAmount,
+
+        barcode: fullItem?.barcode || "",
+        pendingCount: 1,
+        pendingQuantity: qty,
+        pendingTotalQuantity: qty,
+        pendingTaxAmount: taxAmount,
+        pendingDiscountAmount: 0,
+        pendingSgst: sgst,
+        pendingCgst: cgst,
+        pendingIgst: igst,
+        pendingTotalPrice: totalPrice,
+        pendingFinalPrice: finalPrice,
+        pendingBefTaxDiscountAmount: 0,
+        pendingAfTaxDiscountAmount: 0,
+
+        totalPrice,
+        finalPrice,
+        expiryDate: null,
+        hsnCode: fullItem?.hsnCode || prItem.hsnCode || "",
+        poPhoto: null,
+        status: "",
+        randomId: fullItem?.randomId || prItem.itemCode || "",
+        availableStock: fullItem?.availableStock || 0,
+        locationId: fullItem?.locationId || prItem.warehouseId || purchaseOrderData.locationId || "",
+
+        prRandomId: prItem.prRandomId,
+      };
+    })
+  );
+
+  dispatch(
+    setPurchaseOrderData({
+      ...purchaseOrderData,
+      items: prItems,
+    })
+  );
+
+  dispatch(setSnackbarMessage(`${prItems.length} PR items added with tax. Please select vendor.`));
+  dispatch(setSnackbarOpen(true));
+  return;
+}
+
+      // SINGLE PR: keep your old behavior, vendor + item autofill
+      if (prData.vendorName && vendors.length > 0) {
+        const matchedVendor = vendors.find(
+          (v: VendorSummary) =>
+            v.vendorId === prData.vendorId || v.vendorName === prData.vendorName
         );
 
-        // Set input fields directly
-        setCountInput("1");
-        setQuantityInput(String(prData.suggestedQty));
-        setNewPriceTypeInput(String(prData.unitPrice || 0));
+        if (matchedVendor) {
+          setVendorSearch(matchedVendor);
 
-        dispatch(setSnackbarMessage(
-          `Auto-filled from PR: ${prData.itemName} | Vendor: ${prData.vendorName || "—"}`
-        ));
-        dispatch(setSnackbarOpen(true));
-      }, 300); // 300ms delay ensures mount effects finish first
+          let vendorData = matchedVendor;
+          try {
+            const freshRes = await purchaseApi.get(
+              `/vendors/vendor-names/?vendor_name=${encodeURIComponent(matchedVendor.vendorName)}&limit=1`
+            );
+            if (freshRes.data && freshRes.data.length > 0) {
+              vendorData = { ...matchedVendor, ...freshRes.data[0] };
+            }
+          } catch {}
 
-      return () => clearTimeout(timer);
-    } catch (e) {
-      console.error("Failed to parse prToPO", e);
-    }
-  }, [vendors, isEditMode]); // Re-run when vendors load
+          dispatch(
+            setPurchaseOrderData({
+              ...purchaseOrderData,
+              vendorName: vendorData.vendorName,
+              vendorCode: vendorData.randomId,
+              vendorId: vendorData.vendorId,
+              vendorContact: vendorData.contactpersonPhone,
+              contactpersonEmail: vendorData.contactpersonEmail,
+              address: vendorData.address,
+              country: vendorData.country,
+              paymentTerms: vendorData.paymentTerms || matchedVendor.paymentTerms || "",
+              creditLimit: vendorData.creditLimit ?? matchedVendor.creditLimit ?? 0,
+              state: vendorData.state,
+              city: vendorData.city,
+              postalCode: vendorData.postalCode,
+              gstNumber: vendorData.gstNumber,
+            })
+          );
+        }
+      }
+
+      const syntheticItem: PurchaseItemSearchAdd = {
+        purchaseitemId: prData.itemCode || "",
+        itemName: prData.itemName,
+        itemCode: prData.itemCode || "",
+        randomId: prData.itemCode || "",
+        purchasePrice: prData.unitPrice || 0,
+        purchasetaxName: 18,
+        uom: prData.uom || "",
+        purchasecategoryName: "",
+        purchasesubcategoryName: "",
+        hsnCode: "",
+        availableStock: 0,
+        locationId: prData.locationId || prData.warehouseId || purchaseOrderData.locationId || "",
+      };
+
+      setNewItemsearch(syntheticItem);
+
+      dispatch(
+        setNewItemData({
+          itemId: prData.itemCode || "",
+          itemName: prData.itemName,
+          itemCode: prData.itemCode,
+          randomId: prData.itemCode,
+          newPrice: prData.unitPrice || 0,
+          existingPrice: prData.unitPrice || 0,
+          uom: prData.uom,
+          taxPercentage: 18,
+          pendingCount: 1,
+          pendingQuantity: prData.suggestedQty,
+          pendingTotalQuantity: prData.suggestedQty,
+          poQuantity: prData.suggestedQty,
+          taxType: "cgst_sgst",
+          befTaxDiscountType: "percentage",
+          afTaxDiscountType: "percentage",
+          priceVariance: 0,
+          befTaxDiscount: 0,
+          afTaxDiscount: 0,
+          befTaxDiscountAmount: 0,
+          afTaxDiscountAmount: 0,
+          pendingTotalPrice: 0,
+          availableStock: 0,
+          locationId: prData.locationId || prData.warehouseId || purchaseOrderData.locationId || "",
+          prRandomId: prData.prRandomId,
+        } as any)
+      );
+
+      setCountInput("1");
+      setQuantityInput(String(prData.suggestedQty));
+      setNewPriceTypeInput(String(prData.unitPrice || 0));
+
+      dispatch(setSnackbarMessage(`Auto-filled from PR: ${prData.itemName}`));
+      dispatch(setSnackbarOpen(true));
+    }, 300);
+
+    return () => clearTimeout(timer);
+  } catch (e) {
+    console.error("Failed to parse prToPO", e);
+  }
+}, [vendors, isEditMode]);
   // Replace the existing useEffect for location
   useEffect(() => {
     // In edit mode, set location from purchaseOrderData
@@ -1792,22 +1904,41 @@ const CreatePurchasePage: React.FC = () => {
       if (prDataRaw && !isEditMode) {
         try {
           const prData = JSON.parse(prDataRaw);
-          if (prData.fromPR && prData.prRandomId && result?.randomId) {
+        if (prData.fromPR && result?.randomId) {
+  if (prData.isMultiPR && Array.isArray(prData.prItems)) {
+    const prItemsFromPO = dataToSubmit.items
+      .filter((item: any) => item.prRandomId)
+      .map((item: any) => ({
+        prRandomId: item.prRandomId,
+        orderedQty: Number(item.poQuantity || item.pendingTotalQuantity || item.quantity || 0),
+         locationId: item.locationId || purchaseOrderData.locationId || "",
+      }));
 
-            // Call backend to update PR status + handle partial split
-            await purchaseApi.post("/inventory-agent/pr-convert-po", {
-              prRandomId: prData.prRandomId,
-              orderedQty:  prData.suggestedQty,   // the qty user ordered
-              poRandomId:  result.randomId,
-            });
+    await purchaseApi.post("/inventory-agent/pr-convert-po/bulk", {
+      poRandomId: result.randomId,
+      items: prItemsFromPO,
+    });
 
-            // Store for PR page snackbar
-            sessionStorage.setItem("prToPO_created", JSON.stringify({
-              prRandomId: prData.prRandomId,
-              poRandomId: result.randomId,
-            }));
-            sessionStorage.removeItem("prToPO");
-          }
+    sessionStorage.setItem("prToPO_created", JSON.stringify({
+      prRandomIds: prItemsFromPO.map((i: any) => i.prRandomId),
+      poRandomId: result.randomId,
+    }));
+  } else if (prData.prRandomId) {
+    await purchaseApi.post("/inventory-agent/pr-convert-po", {
+      prRandomId: prData.prRandomId,
+      orderedQty: prData.suggestedQty,
+      poRandomId: result.randomId,
+       locationId: prData.locationId || prData.warehouseId || purchaseOrderData.locationId || "",
+    });
+
+    sessionStorage.setItem("prToPO_created", JSON.stringify({
+      prRandomId: prData.prRandomId,
+      poRandomId: result.randomId,
+    }));
+  }
+
+  sessionStorage.removeItem("prToPO");
+}
         } catch (e) {
           console.error("Failed to update PR after PO creation", e);
         }

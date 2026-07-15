@@ -2,6 +2,7 @@
 import React, { ChangeEvent, useEffect, MouseEvent, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
+import purchaseApi from "@/utils/api";
 import {
   Box, TextField, Button, Grid, Paper,
   TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
@@ -226,7 +227,7 @@ const [collapsedPoGroups, setCollapsedPoGroups] = useState<Record<string, boolea
   const grnsReturnPermission = useSelector(
     (state: RootState) => state.auth.permissions?.yenerp?.grns_return,
   );
-
+const [expandedPoRows, setExpandedPoRows] = useState<Record<string, boolean>>({});
   const canRead = grnsPermission?.read ?? false;
   const canEdit = grnsPermission?.edit ?? false;
 
@@ -1528,41 +1529,64 @@ const result = await dispatch(
     });
     return totalAmount;
   };
-  const handlePoClick = async (poId: string) => {
-    try {
-      const result = await dispatch(fetchPoById(poId)).unwrap();
-      if (result) {
-        const transformedPo: PoResponse = {
-          purchaseOrderId: result.purchaseOrderId,
-          randomId: result.randomId,
-          vendorName: result.vendorName,
-          orderDate: typeof result.orderDate === 'string' ? result.orderDate : result.orderDate?.toISOString() || null, // Ensure orderDate is a string
-          itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
-            itemId: item.itemId ?? 'N/A',
-            itemName: item.itemName ?? 'Unknown',
-            receivedQuantity: Number(item.receivedQuantity) || 0,
-            poQuantity: Number(item.poQuantity) || 0,
-            newPrice: Number(item.newPrice) || 0,
-            totalPrice: Number(item.totalPrice) || 0,
-            purchasetaxName: Number(item.purchasetaxName) || 0,
-            taxPercentage: Number(item.taxPercentage) || 0,
-            taxAmount: Number(item.taxAmount) || 0,
-            discountAmount: Number(item.discountAmount) || 0,
-            finalPrice: Number(item.finalPrice) || 0,
-          })) as ItemDetailResponsePO[],
-        };
-        dispatch(setSelectedPo(transformedPo));
-        setPoDialogOpen(true); // Open PODialog
-      } else {
-        dispatch(setOutgoingSnackbarMessage('Purchase Order not found.'));
-        dispatch(setOutgoingSnackbarOpen(true));
-      }
-    } catch (error) {
-      dispatch(setOutgoingSnackbarMessage('Failed to fetch PO details.'));
-      dispatch(setOutgoingSnackbarOpen(true));
-      console.error('Failed to fetch PO details:', error);
+const handlePoClick = async (poId: string, poRandomId?: string, allPoIds: string[] = []) => {
+  try {
+    dispatch(setPoDialogOpen(false));
+    dispatch(setSelectedPo(null as any));
+
+    let result: any = null;
+
+    if (poRandomId && allPoIds.length > 0) {
+      // Plain API calls — redux state touch பண்ணாது, so no flicker
+      const results = await Promise.all(
+        allPoIds.map((id) =>
+          purchaseApi.get(`/poimport/getOutgoing/${id}`).then((res) => res.data)
+        )
+      );
+      result = results.find((po) => po?.randomId === poRandomId);
+    } else {
+      result = await dispatch(fetchPoById(poId)).unwrap();
     }
-  };
+
+    if (!result) {
+      dispatch(setOutgoingSnackbarMessage("Purchase Order not found."));
+      dispatch(setOutgoingSnackbarOpen(true));
+      return;
+    }
+
+    const transformedPo: PoResponse = {
+      purchaseOrderId: result.purchaseOrderId,
+      randomId: result.randomId,
+      vendorName: result.vendorName,
+      orderDate:
+        typeof result.orderDate === "string"
+          ? result.orderDate
+          : result.orderDate?.toISOString() || null,
+      itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
+        itemId: item.itemId ?? "N/A",
+        itemName: item.itemName ?? "Unknown",
+        receivedQuantity: Number(item.receivedQuantity) || 0,
+        poQuantity: Number(item.poQuantity) || 0,
+        newPrice: Number(item.newPrice) || 0,
+        totalPrice: Number(item.totalPrice) || 0,
+        purchasetaxName: Number(item.purchasetaxName) || 0,
+        taxPercentage: Number(item.taxPercentage) || 0,
+        taxAmount: Number(item.taxAmount) || 0,
+        discountAmount: Number(item.discountAmount) || 0,
+        finalPrice: Number(item.finalPrice) || 0,
+      })) as ItemDetailResponsePO[],
+    };
+
+    // ONLY correct write, happens exactly once
+    dispatch(setSelectedPo(transformedPo));
+    dispatch(setPoDialogOpen(true));
+  } catch (error) {
+    dispatch(setPoDialogOpen(false));
+    dispatch(setSelectedPo(null as any));
+    dispatch(setOutgoingSnackbarMessage("Failed to fetch PO details."));
+    dispatch(setOutgoingSnackbarOpen(true));
+  }
+};
   const calculateTaxDetails = () => {
     // Initialize taxDetails object with separate tracking for different rates
     let taxDetails: {
@@ -1955,10 +1979,16 @@ const handleFilterClose = () => {
 </TableCell>
 <TableCell>
   {grn.grnSource === "Multi" ? (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
       <Typography
         component="span"
-        onClick={() => handlePoClick(grn.purchaseOrderIds?.[0] || '')}
+        onClick={() =>
+          handlePoClick(
+            grn.purchaseOrderIds?.[0] || "",
+            grn.poRandomIds?.[0],
+            grn.purchaseOrderIds || []
+          )
+        }
         sx={{
           color: "#8e24aa",
           textDecoration: "underline",
@@ -1969,66 +1999,50 @@ const handleFilterClose = () => {
         {grn.poRandomIds?.[0] || grn.poRandomID}
       </Typography>
 
-     {(grn.poCount || grn.poRandomIds?.length || 0) > 1 && (
-  <Typography
-    component="span"
-    onClick={async () => {
-      // Fetch all POs and show in PODialog
-      const allPoIds = grn.purchaseOrderIds || [];
-      if (allPoIds.length > 0) {
-        try {
-          const results = await Promise.all(
-            allPoIds.map((id) => dispatch(fetchPoById(id)).unwrap())
-          );
-          const transformedPos = results.filter(Boolean).map((result) => ({
-            purchaseOrderId: result.purchaseOrderId,
-            randomId: result.randomId,
-            vendorName: result.vendorName,
-            orderDate: typeof result.orderDate === 'string'
-              ? result.orderDate
-              : result.orderDate?.toISOString() || null,
-            itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
-              itemId: item.itemId ?? 'N/A',
-              itemName: item.itemName ?? 'Unknown',
-              receivedQuantity: Number(item.receivedQuantity) || 0,
-              poQuantity: Number(item.poQuantity) || 0,
-              newPrice: Number(item.newPrice) || 0,
-              totalPrice: Number(item.totalPrice) || 0,
-              purchasetaxName: Number(item.purchasetaxName) || 0,
-              taxPercentage: Number(item.taxPercentage) || 0,
-              taxAmount: Number(item.taxAmount) || 0,
-              discountAmount: Number(item.discountAmount) || 0,
-              finalPrice: Number(item.finalPrice) || 0,
-            })) as ItemDetailResponsePO[],
-          }));
-          // Store in local state for PODialog
-          setSelectedPoList({
-            poIds: grn.purchaseOrderIds || [],
-            poRandomIds: grn.poRandomIds || [],
-          });
-          dispatch(setSelectedPo(transformedPos[0]));
-          // Need a multiPos state — use existing poListDialog approach or add new state
-          setPoListDialogOpen(true); // Keep list dialog for now — Fix 1 handles the click
-        } catch (error) {
-          console.error('Failed to fetch POs:', error);
-        }
-      }
-    }}
-    sx={{
-      color: "#8e24aa",
-      textDecoration: "underline",
-      cursor: "pointer",
-      fontWeight: 500,
-    }}
-  >
-    +{Number(grn.poCount || grn.poRandomIds?.length || 1) - 1}
-  </Typography>
-)}
+      {(grn.poCount || grn.poRandomIds?.length || 0) > 1 && !expandedPoRows[grn.grnId] && (
+        <Typography
+          component="span"
+          onClick={() =>
+            setExpandedPoRows((prev) => ({
+              ...prev,
+              [grn.grnId]: true,
+            }))
+          }
+          sx={{
+            color: "#8e24aa",
+            textDecoration: "underline",
+            cursor: "pointer",
+            fontWeight: 500,
+          }}
+        >
+          +{Number(grn.poCount || grn.poRandomIds?.length || 1) - 1}
+        </Typography>
+      )}
+
+      {expandedPoRows[grn.grnId] &&
+        grn.poRandomIds?.slice(1).map((poRandomId) => (
+          <Typography
+            key={poRandomId}
+            component="span"
+            onClick={() =>
+              handlePoClick("", poRandomId, grn.purchaseOrderIds || [])
+            }
+            sx={{
+              color: "#8e24aa",
+              textDecoration: "underline",
+              cursor: "pointer",
+              fontWeight: 500,
+              ml: 1,
+            }}
+          >
+            {poRandomId}
+          </Typography>
+        ))}
     </Box>
   ) : (
     <Typography
       component="span"
-      onClick={() => handlePoClick(grn.purchaseOrderId || '')}
+      onClick={() => handlePoClick(grn.purchaseOrderId || "")}
       sx={{
         color: "#1976d2",
         textDecoration: "underline",
@@ -3052,7 +3066,7 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
           autoHideDuration={3000}
           onClose={() => setSnackbarOpen(false)} // Automatically close the Snackbar
         />
-        {/* ADD HERE */}
+   
 <Dialog
   open={poListDialogOpen}
   onClose={() => setPoListDialogOpen(false)}

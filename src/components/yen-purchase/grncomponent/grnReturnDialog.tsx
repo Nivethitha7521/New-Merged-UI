@@ -69,7 +69,7 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
   onCancel,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { returnReasons, snackbarMessageGRN, snackbarOpenGRN, loading } = useSelector((state: RootState) => state.grn);
+  const { returnReasons, snackbarMessageGRN, snackbarOpenGRN, loading,grns } = useSelector((state: RootState) => state.grn);
   const { username } = useSelector((state: RootState) => state.auth);
   const [dialogOpen, setDialogOpen] = useState(true);
   const [dialogReturnOpen, setDialogReturnOpen] = useState(false);
@@ -90,13 +90,34 @@ const hasFetchedRef = useRef(false);
 
   // Filter out "Other" option - only use dropdown reasons
   const dropdownReasons = returnReasons.filter(r => r.reason !== 'Other');
+const selectedGrn = useMemo(() => {
+  return Array.isArray(grns)
+    ? grns.find((g: any) => g.grnId === selectedGrnId)
+    : null;
+}, [grns, selectedGrnId]);
 
+const headerPoRandomId =
+  selectedGrn?.poRandomID ||
+  selectedGrn?.poRandomIds?.[0] ||
+  "Single PO";
   const groupedDialogItems = useMemo(() => {
   const groups: Record<string, { poRandomId: string; items: ItemDetail[] }> = {};
 
   dialogItems.forEach((item: any) => {
-    const poId = item.sourcePurchaseOrderId || item.purchaseOrderId || "single-po";
-    const poRandomId = item.sourcePoRandomId || item.poRandomID || item.poRandomId || "Single PO";
+const poRandomId =
+  item.sourcePoRandomId ||
+  item.poRandomID ||
+  item.poRandomId ||
+  item.purchaseOrderRandomId ||
+  item.purchaseOrderNo ||
+  item.poNo ||
+  item.poId ||
+ headerPoRandomId;
+
+const poId =
+  item.sourcePurchaseOrderId ||
+  item.purchaseOrderId ||
+  poRandomId;
 
     if (!groups[poId]) {
       groups[poId] = { poRandomId, items: [] };
@@ -106,7 +127,7 @@ const hasFetchedRef = useRef(false);
   });
 
   return groups;
-}, [dialogItems]);
+}, [dialogItems, headerPoRandomId]);
 
   const customRound = (value: number): number => {
     return Math.round(value * 100) / 100;
