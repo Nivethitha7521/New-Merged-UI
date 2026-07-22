@@ -6,6 +6,7 @@ import store from '../redux/store';
 import ClientLayout from './ClientLayout';
 import '../app/globals.css';
 import { ToastContainer } from 'react-toastify';
+import { DisplaySettingsProvider } from '@/contexts/DisplaySettingsContext';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         /> */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap"
           rel="stylesheet"
         />
 
@@ -24,8 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Provider store={store}>
-          <ClientLayout>{children}</ClientLayout>
-          <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
+          <DisplaySettingsProvider>
+            <ClientLayout>{children}</ClientLayout>
+            <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
+          </DisplaySettingsProvider>
         </Provider>
       </body>
     </html>

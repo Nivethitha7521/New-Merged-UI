@@ -39,7 +39,7 @@ export const fetchPermissions = createAsyncThunk(
   'permissions/fetchPermissions',
   async (): Promise<PermissionRecord[]> => {
     const token = sessionStorage.getItem('accessToken');
-    const response = await fetch('http://127.0.0.1:8000/purchasetestapi/permissions', {
+    const response = await fetch('http://127.0.0.1:8000/yenerpapi/permissions', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     return await response.json();
@@ -50,7 +50,7 @@ export const updatePermissions = createAsyncThunk(
   'permissions/updatePermissions',
   async ({ roleName, permissions }: UpdatePermissionsPayload): Promise<PermissionRecord> => {
     const token = sessionStorage.getItem('accessToken');
-    const response = await fetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${roleName}`, {
+    const response = await fetch(`http://127.0.0.1:8000/yenerpapi/permissions/${roleName}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

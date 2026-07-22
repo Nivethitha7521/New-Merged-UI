@@ -1,16 +1,12 @@
 "use client";
-import dynamic from 'next/dynamic';
-import Link from 'next/link';
+
 import { usePathname, useRouter } from 'next/navigation';
-import { useMemo, useCallback } from 'react';
-import { Button } from '@mui/material';
+import { useMemo } from 'react';
 import React from 'react';
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
-const SideMenu = dynamic(() => import('../../components/SideMenu'), {
-  ssr: false,
-});
+
 
 const YenPurchasePage = () => {
   const pathname = usePathname();
@@ -29,12 +25,7 @@ const YenPurchasePage = () => {
     return m.read === true || m.read === 1;
   };
 
-  const yenBookKeys = [
-    "outgoingpayment", "advancepayment", "partialpayment",
-    "paymentdone", "paymenthistory", "ledger", "purchasereturn",
-    "expensecategory", "expensesubcategory", "expensename",
-  ];
-  const hideBookMenu = !yenBookKeys.some((k) => isModuleVisible(k));
+
 
   const purchaseMasterKeys = [
     "purchasecategory", "purchasesubcategory", "itemgroup",
@@ -100,34 +91,6 @@ const YenPurchasePage = () => {
     [permissions],
   );
 
-  const purchaseKeys: string[] = [
-    ...purchaseMasterKeys,
-    ...vendorKeys,
-    ...purchaseitemKeys,
-    ...purchaseOrderKeys,
-    ...serviceOrderKeys,
-    ...grnKeys,
-    ...apInvoiceKeys,
-  ];
-
-  const INVENTORY_KEYS = [
-    "physicalstockmodification", "physicalstockvariancemodification",
-    "stockledger", "warehousephysicalstockmodification",
-    "warehousephysicalstockvariancemodification", "warehousestockledger",
-  ];
-  const showInventoryMenu = INVENTORY_KEYS.some((k) => isModuleVisible(k));
-  const showReportsMenu   = isModuleVisible("posreport") || isModuleVisible("purchaseorderreport");
-
-  const normalizedPath = useMemo(() => {
-    if (!pathname) return "";
-    const parts = pathname.split("/").filter(Boolean);
-    if (parts.length > 1) return "/" + parts.slice(1).join("/");
-    return pathname;
-  }, [pathname]);
-
-  const hidePurchaseMenu =
-    permissionsLoaded &&
-    !purchaseKeys.some((key: string) => isModuleVisible(key));
 
   React.useEffect(() => {
     const isExactYenPurchase =
@@ -137,54 +100,9 @@ const YenPurchasePage = () => {
     }
   }, [pathname, permissionsLoaded, subItems, router]);
 
-  const isActiveRoute = (itemPath: string) => pathname?.startsWith(itemPath ?? "");
 
-  const handleMenuClick = useCallback((menuItem: { path: string }) => {
-    router.push(menuItem.path);
-  }, [router]);
 
-  return (
-    <div>
-      <SideMenu
-        onMenuClick={handleMenuClick}
-        activePath={pathname || "/"}
-        showPurchaseMenu={!hidePurchaseMenu}
-        showBookMenu={!hideBookMenu}
-        showInventoryMenu={showInventoryMenu}
-        showReportsMenu={showReportsMenu}
-      />
-      <div className="flex flex-wrap gap-2 ml-4 items-center justify-start">
-        {subItems.map((item) => {
-          const isActive = isActiveRoute(item.path);
-          return (
-            <Link key={item.label} href={item.path} className="no-underline">
-              <Button
-                variant={isActive ? 'contained' : 'outlined'}
-                color="primary"
-                size="medium"
-                sx={{
-                  textTransform: 'none',
-                  fontWeight:    isActive ? 'bold' : 'normal',
-                  fontSize:      isActive ? '16px' : '15px',
-                  borderRadius:  '4px',
-                  padding:       '8px 16px',
-                  width:         isActive ? '200px' : '150px',
-                  height:        isActive ? '40px' : '30px',
-                  display:       'flex',
-                  justifyContent:'center',
-                  alignItems:    'center',
-                  transition:    'all 0.2s ease',
-                  boxShadow:     isActive ? '0px 0px 10px rgba(0, 0, 0, 0.1)' : 'none',
-                }}
-              >
-                {item.label}
-              </Button>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
+return null;
 };
 
 export default YenPurchasePage;

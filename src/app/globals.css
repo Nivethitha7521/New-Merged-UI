@@ -585,3 +585,2594 @@ table.MuiTable-root td:nth-child(1) {
 .filter-icon-btn .MuiSvgIcon-root {
   font-size: 18px !important;
 }
+/* =========================================================
+   YEN ERP 2026 visual system — shared across every screen
+   ========================================================= */
+:root {
+  --erp-bg: #f3f6fa;
+  --erp-surface: #ffffff;
+  --erp-text: #101828;
+  --erp-muted: #667085;
+  --erp-border: #dfe5ec;
+  --erp-border-strong: #c5ced8;
+  --erp-primary: #0b1220;
+  --erp-blue: #155eef;
+  --erp-blue-soft: #dcecff;
+  --erp-success: #0b7a42;
+  --erp-success-soft: #dcfce7;
+  --erp-danger: #d92d20;
+  --erp-radius-sm: 9px;
+  --erp-radius-md: 13px;
+  --erp-radius-lg: 17px;
+  --erp-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 1px 3px rgba(16, 24, 40, .05);
+}
+
+html, body { background: var(--erp-bg) !important; color: var(--erp-text); }
+body { margin: 0; }
+* { box-sizing: border-box; }
+
+.erp-app-shell {
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: stretch;
+
+  background: var(--erp-bg);
+
+  overflow: hidden;
+}
+.erp-app-main {
+  width: 0;
+  min-width: 0;
+  height: 100vh;
+  min-height: 100vh;
+
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-left: 0 !important;
+
+  overflow: hidden;
+
+  transition:
+    width 0.24s ease,
+    flex-basis 0.24s ease;
+}
+.erp-page-viewport { flex: 1; min-height: 0; overflow: auto; padding: 28px 34px 40px; background: var(--erp-bg); }
+
+/* Standard page containers */
+.erp-page-viewport > div,
+.erp-page-viewport > section,
+.erp-page-viewport > main { max-width: 1600px; margin-left: auto; margin-right: auto; }
+
+/* Typography */
+h1, .MuiTypography-h1 { font-size: 30px !important; line-height: 1.2 !important; font-weight: 750 !important; letter-spacing: -.035em !important; color: var(--erp-text) !important; }
+h2, .MuiTypography-h2 { font-size: 25px !important; line-height: 1.25 !important; font-weight: 720 !important; letter-spacing: -.025em !important; color: var(--erp-text) !important; }
+h3, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5 { color: var(--erp-text) !important; font-weight: 700 !important; }
+p { color: var(--erp-muted); }
+
+/* Cards and surfaces */
+.MuiPaper-root:not(.MuiDrawer-paper):not(.MuiMenu-paper):not(.MuiPopover-paper),
+.MuiCard-root,
+.card,
+.dashboard-card,
+.summary-card,
+.content-card,
+.table-container {
+  background: var(--erp-surface) !important;
+  border: 1px solid var(--erp-border) !important;
+  border-radius: var(--erp-radius-lg) !important;
+  box-shadow: var(--erp-shadow) !important;
+  background-image: none !important;
+}
+
+/* Buttons */
+.MuiButton-root {
+  min-height: 40px !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease !important;
+}
+.MuiButton-containedPrimary, .MuiButton-contained, button.primary, .primary-button {
+  background: var(--erp-primary) !important;
+  color: #fff !important;
+}
+.MuiButton-containedPrimary:hover, .MuiButton-contained:hover, button.primary:hover, .primary-button:hover {
+  background: #172033 !important;
+  box-shadow: 0 5px 14px rgba(16,24,40,.14) !important;
+  transform: translateY(-1px);
+}
+.MuiButton-outlined {
+  border-color: var(--erp-border) !important;
+  color: var(--erp-text) !important;
+  background: #fff !important;
+}
+.MuiButton-outlined:hover { border-color: var(--erp-border-strong) !important; background: #f8fafc !important; }
+.MuiIconButton-root { border-radius: 10px !important; }
+
+/* Inputs, search and filters */
+.MuiOutlinedInput-root, .MuiInputBase-root.MuiOutlinedInput-root {
+  min-height: 42px !important;
+  height: auto !important;
+  padding: 0 !important;
+  background: #fff !important;
+  border-radius: 13px !important;
+  transition: box-shadow .15s ease, border-color .15s ease !important;
+}
+.MuiOutlinedInput-notchedOutline { border-color: var(--erp-border-strong) !important; }
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline { border-color: #98a2b3 !important; }
+.MuiOutlinedInput-root.Mui-focused { box-shadow: 0 0 0 3px rgba(21,94,239,.11) !important; }
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color: var(--erp-blue) !important; border-width: 1px !important; }
+.MuiInputBase-input, .MuiOutlinedInput-input {
+  height: auto !important;
+  min-height: 20px !important;
+  padding: 10px 13px !important;
+  font-size: 13px !important;
+  line-height: 20px !important;
+}
+input::placeholder { text-align: left !important; line-height: normal !important; font-size: 13px !important; color: #98a2b3 !important; opacity: 1 !important; }
+.MuiInputAdornment-root { color: #667085 !important; }
+.MuiFormLabel-root { font-size: 13px !important; transform: translate(14px, 11px) scale(1) !important; }
+.MuiInputLabel-shrink { transform: translate(14px, -7px) scale(.78) !important; }
+.MuiSelect-select { justify-content: flex-start !important; min-height: 20px !important; padding: 10px 34px 10px 13px !important; font-size: 13px !important; }
+
+/* Tabs */
+.MuiTabs-root { min-height: 42px !important; }
+.MuiTabs-flexContainer { gap: 8px; flex-wrap: wrap; }
+.MuiTab-root {
+  min-height: 36px !important;
+  min-width: auto !important;
+  padding: 8px 15px !important;
+  border-radius: 11px !important;
+  text-transform: none !important;
+  color: #475467 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+.MuiTab-root.Mui-selected { background: var(--erp-primary) !important; color: #fff !important; font-weight: 650 !important; }
+.MuiTabs-indicator { display: none !important; }
+
+/* Tables */
+.MuiTableContainer-root { border: 1px solid var(--erp-border) !important; border-radius: 17px !important; overflow: auto !important; box-shadow: none !important; background: #fff !important; }
+table, .MuiTable-root { border-collapse: separate !important; border-spacing: 0 !important; }
+table thead, .MuiTableHead-root { display: table-header-group !important; }
+table tbody, .MuiTableBody-root { display: table-row-group !important; max-height: none !important; overflow: visible !important; }
+table tr, .MuiTableRow-root { display: table-row !important; }
+table td, table th, .MuiTableCell-root { display: table-cell !important; }
+table th.MuiTableCell-head, .MuiTableCell-head {
+  height: 42px !important;
+  padding: 11px 16px !important;
+  border-bottom: 1px solid var(--erp-border) !important;
+  background: #f8fafc !important;
+  color: #667085 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  position: static !important;
+}
+table td.MuiTableCell-root, .MuiTableCell-body {
+  min-height: 58px !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #e9edf2 !important;
+  color: #101828 !important;
+  font-size: 13px !important;
+  vertical-align: middle !important;
+}
+.MuiTableRow-root:last-child .MuiTableCell-body { border-bottom: 0 !important; }
+.MuiTableRow-root:hover .MuiTableCell-body { background: #fbfdff !important; }
+
+/* Chips / status badges */
+.MuiChip-root { height: 25px !important; border-radius: 999px !important; font-size: 11px !important; font-weight: 650 !important; }
+.MuiChip-colorSuccess, .status-active, .active-badge { color: var(--erp-success) !important; background: var(--erp-success-soft) !important; border: 0 !important; }
+.MuiChip-colorError, .status-inactive, .inactive-badge { color: #b42318 !important; background: #fee4e2 !important; border: 0 !important; }
+
+/* Dialogs */
+.MuiDialog-paper { border-radius: 18px !important; border: 1px solid var(--erp-border) !important; box-shadow: 0 24px 70px rgba(16,24,40,.18) !important; }
+.MuiDialogTitle-root { padding: 20px 22px 12px !important; font-size: 19px !important; font-weight: 720 !important; color: var(--erp-text) !important; }
+.MuiDialogContent-root { padding: 12px 22px 20px !important; }
+.MuiDialogActions-root { padding: 14px 22px 20px !important; border-top: 1px solid #eef1f5; }
+
+/* Pagination */
+.MuiPagination-root .MuiPaginationItem-root { min-width: 32px; height: 32px; border-radius: 9px; font-size: 12px; color: #475467; }
+.MuiPagination-root .Mui-selected { background: var(--erp-primary) !important; color: #fff !important; }
+.MuiTablePagination-root { border-top: 1px solid var(--erp-border); }
+.MuiTablePagination-toolbar { min-height: 54px !important; }
+
+/* Menus and tooltips */
+.MuiMenu-paper, .MuiPopover-paper { border: 1px solid var(--erp-border) !important; border-radius: 12px !important; box-shadow: 0 12px 32px rgba(16,24,40,.13) !important; }
+.MuiMenuItem-root { min-height: 38px !important; padding: 8px 13px !important; font-size: 13px !important; border-radius: 8px !important; margin: 2px 5px !important; }
+.MuiTooltip-tooltip { background: #101828 !important; border-radius: 7px !important; font-size: 11px !important; }
+.MuiTooltip-arrow { color: #101828 !important; }
+
+/* Common toolbar visual normalization */
+.MuiToolbar-root { min-height: 56px !important; }
+.MuiDivider-root { border-color: var(--erp-border) !important; }
+
+/* Scrollbars */
+* { scrollbar-width: thin; scrollbar-color: #b8c1cc transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #b8c1cc; border-radius: 999px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+@media (max-width: 900px) {
+  .erp-app-main {
+    margin-left: 0 !important;
+  }
+
+  .erp-page-viewport {
+    padding: 22px 18px 32px;
+  }
+}
+@media (max-width: 720px) {
+  .erp-app-main { margin-left: 0; }
+
+  .erp-page-viewport { padding: 18px 12px 28px; }
+}
+
+/* =========================================================
+   Purchase workspace — reference-matched shared UI
+   Scoped to /yen-purchase so business behavior is untouched.
+   ========================================================= */
+.erp-purchase-viewport {
+  --purchase-control-height: 42px;
+  --purchase-gap: 12px;
+
+  padding: 20px 34px 42px !important;
+
+  background: #f4f7fb !important;
+}
+.erp-purchase-viewport > * { max-width: 1500px !important; }
+
+/* Page heading hierarchy */
+.erp-purchase-viewport h1,
+.erp-purchase-viewport .MuiTypography-h4,
+.erp-purchase-viewport .MuiTypography-h5 {
+  margin-bottom: 4px !important;
+  font-size: 27px !important;
+  line-height: 1.18 !important;
+  font-weight: 760 !important;
+  letter-spacing: -.035em !important;
+}
+.erp-purchase-viewport h1 + p,
+.erp-purchase-viewport .MuiTypography-h4 + .MuiTypography-root,
+.erp-purchase-viewport .MuiTypography-h5 + .MuiTypography-root {
+  color: #667085 !important;
+  font-size: 13px !important;
+}
+
+/* Page/module tabs */
+.erp-purchase-viewport .MuiTabs-root { margin-top: 14px; margin-bottom: 10px; }
+.erp-purchase-viewport .MuiTabs-flexContainer { gap: 8px !important; }
+.erp-purchase-viewport .MuiTab-root {
+  min-height: 36px !important;
+  padding: 7px 15px !important;
+  border: 1px solid transparent !important;
+  border-radius: 11px !important;
+}
+.erp-purchase-viewport .MuiTab-root:not(.Mui-selected):hover {
+  background: #fff !important;
+  border-color: #dfe5ec !important;
+}
+
+/* Shared action rows and controls */
+.erp-purchase-viewport .MuiStack-root:has(> .MuiButton-root),
+.erp-purchase-viewport .MuiBox-root:has(> .MuiButton-root) {
+  gap: 9px;
+}
+.erp-purchase-viewport .MuiButton-root {
+  min-height: var(--purchase-control-height) !important;
+  padding: 9px 16px !important;
+  border-radius: 13px !important;
+  border-color: #dbe2ea !important;
+  background: #fff;
+  color: #101828;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,.06) !important;
+}
+.erp-purchase-viewport .MuiButton-root .MuiSvgIcon-root,
+.erp-purchase-viewport .MuiButton-root svg { font-size: 17px !important; }
+.erp-purchase-viewport .MuiButton-root:hover {
+  border-color: #c5ced8 !important;
+  background: #f9fbfd !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16,24,40,.08) !important;
+}
+.erp-purchase-viewport .MuiButton-contained,
+.erp-purchase-viewport .MuiButton-containedPrimary {
+  border-color: #0b1220 !important;
+  background: #0b1220 !important;
+  color: #fff !important;
+}
+.erp-purchase-viewport .MuiButton-contained:hover,
+.erp-purchase-viewport .MuiButton-containedPrimary:hover { background: #182235 !important; }
+
+/* Search / filter controls */
+.erp-purchase-viewport .MuiTextField-root,
+.erp-purchase-viewport .MuiFormControl-root { margin-top: 0 !important; }
+.erp-purchase-viewport .MuiOutlinedInput-root {
+  min-height: var(--purchase-control-height) !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,.04);
+}
+.erp-purchase-viewport .MuiOutlinedInput-notchedOutline { border-color: #cbd5e1 !important; }
+.erp-purchase-viewport .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline { border-color: #98a2b3 !important; }
+/* .erp-purchase-viewport .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 3px rgba(21,94,239,.10) !important;
+} */
+.erp-purchase-viewport .MuiInputBase-input,
+.erp-purchase-viewport .MuiOutlinedInput-input { font-size: 13px !important; }
+.erp-purchase-viewport .MuiInputAdornment-root svg { font-size: 18px !important; }
+
+/* Summary cards */
+.erp-purchase-viewport .MuiCard-root,
+.erp-purchase-viewport .summary-card,
+.erp-purchase-viewport .dashboard-card,
+.erp-purchase-viewport [class*="stat-card"],
+.erp-purchase-viewport [class*="summary-card"] {
+  min-height: 96px;
+  border: 1px solid #dfe5ec !important;
+  border-radius: 17px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.erp-purchase-viewport .MuiCard-root:hover,
+.erp-purchase-viewport .summary-card:hover,
+.erp-purchase-viewport .dashboard-card:hover {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 5px 15px rgba(16,24,40,.055) !important;
+  transform: translateY(-1px);
+}
+.erp-purchase-viewport .MuiCardContent-root { padding: 18px 20px !important; }
+
+/* Reference-style data tables */
+.erp-purchase-viewport .MuiTableContainer-root {
+  margin-top: 14px;
+  border: 1px solid #dbe2ea !important;
+  border-radius: 17px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.erp-purchase-viewport .MuiTable-root { width: 100% !important; table-layout: auto; }
+.erp-purchase-viewport .MuiTableCell-head {
+  height: 39px !important;
+  padding: 10px 18px !important;
+  background: #f8fafc !important;
+  color: #667085 !important;
+  border-bottom: 1px solid #dfe5ec !important;
+  white-space: nowrap;
+  font-size: 9.5px !important;
+  font-weight: 750 !important;
+  letter-spacing: .17em !important;
+  text-transform: uppercase !important;
+}
+.erp-purchase-viewport .MuiTableCell-body {
+  height: 58px !important;
+  padding: 12px 18px !important;
+  color: #101828 !important;
+  border-bottom: 1px solid #e7ecf1 !important;
+  background: #fff;
+  font-size: 12.5px !important;
+  line-height: 1.35 !important;
+}
+.erp-purchase-viewport .MuiTableRow-root:last-child .MuiTableCell-body { border-bottom: 0 !important; }
+.erp-purchase-viewport .MuiTableBody-root .MuiTableRow-root { transition: background-color .14s ease; }
+.erp-purchase-viewport .MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-body { background: #fbfdff !important; }
+.erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root {
+  width: 31px !important;
+  height: 31px !important;
+  color: #667085 !important;
+}
+.erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root:hover { background: #edf3f8 !important; color: #101828 !important; }
+
+/* Status and count pills */
+.erp-purchase-viewport .MuiChip-root {
+  height: 23px !important;
+  padding: 0 3px !important;
+  border-radius: 999px !important;
+  font-size: 10.5px !important;
+  font-weight: 680 !important;
+}
+.erp-purchase-viewport .MuiChip-colorSuccess,
+.erp-purchase-viewport .status-active,
+.erp-purchase-viewport .active-badge {
+  color: #087a3e !important;
+  background: #d9f8e5 !important;
+}
+.erp-purchase-viewport .MuiChip-colorError,
+.erp-purchase-viewport .status-inactive,
+.erp-purchase-viewport .inactive-badge {
+  color: #b42318 !important;
+  background: #fee4e2 !important;
+}
+.erp-purchase-viewport .MuiChip-colorInfo,
+.erp-purchase-viewport .status-info {
+  color: #175cd3 !important;
+  background: #dcecff !important;
+}
+
+/* Switch used by Show Active Only */
+.erp-purchase-viewport .MuiSwitch-root {
+  width: 42px !important;
+  height: 25px !important;
+  padding: 3px !important;
+}
+
+.erp-purchase-viewport .MuiSwitch-switchBase {
+  padding: 5px !important;
+}
+
+.erp-purchase-viewport .MuiSwitch-thumb {
+  width: 15px !important;
+  height: 15px !important;
+
+  background: #ffffff !important;
+
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.22) !important;
+}
+
+.erp-purchase-viewport .MuiSwitch-track {
+  border-radius: 999px !important;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 25%,
+      #98a2b3
+    ) !important;
+
+  opacity: 1 !important;
+}
+
+.erp-purchase-viewport .MuiSwitch-switchBase.Mui-checked {
+  transform: translateX(17px) !important;
+  color: var(--erp-accent) !important;
+}
+
+.erp-purchase-viewport
+  .MuiSwitch-switchBase.Mui-checked
+  + .MuiSwitch-track {
+  background: var(--erp-accent) !important;
+  opacity: 1 !important;
+}
+
+.erp-purchase-viewport
+  .MuiSwitch-switchBase.Mui-checked
+  .MuiSwitch-thumb {
+  background: var(--erp-accent-contrast) !important;
+}
+
+.erp-purchase-viewport
+  .MuiSwitch-switchBase.Mui-focusVisible
+  .MuiSwitch-thumb {
+  box-shadow:
+    0 0 0 5px var(--erp-accent-ring) !important;
+}
+/* Pagination */
+.erp-purchase-viewport .MuiTablePagination-root {
+  min-height: 54px;
+  background: #fff;
+  border-top: 1px solid #e7ecf1 !important;
+  color: #667085 !important;
+}
+.erp-purchase-viewport .MuiTablePagination-toolbar { min-height: 54px !important; padding: 0 16px !important; }
+.erp-purchase-viewport .MuiPagination-root { margin-top: 14px; }
+.erp-purchase-viewport .MuiPaginationItem-root {
+  min-width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  border-color: #dfe5ec !important;
+  font-size: 12px !important;
+}
+.erp-purchase-viewport .MuiPaginationItem-root.Mui-selected { background: #0b1220 !important; color: #fff !important; }
+
+/* Menus, filters and popovers */
+.erp-purchase-viewport .MuiAccordion-root {
+  border: 1px solid #dfe5ec !important;
+  border-radius: 13px !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.erp-purchase-viewport .MuiAccordionSummary-root { min-height: 44px !important; }
+.erp-purchase-viewport .MuiAlert-root { border-radius: 12px !important; }
+
+@media (max-width: 1100px) {
+  .erp-purchase-viewport { padding: 24px 22px 36px !important; }
+  .erp-purchase-viewport .MuiTableCell-head,
+  .erp-purchase-viewport .MuiTableCell-body { padding-left: 13px !important; padding-right: 13px !important; }
+}
+.erp-module-layout {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.erp-module-layout > .erp-page-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.erp-purchase-viewport {
+  background: #f4f7fa;
+}
+
+@media (max-width: 900px) {
+  .purchase-module-sidebar {
+    position: absolute;
+    left: 0;
+    top: 68px;
+    bottom: 0;
+    z-index: 1100;
+    box-shadow: 8px 0 24px rgba(16, 24, 40, 0.12);
+  }
+}
+
+
+/* =========================================================
+   Purchase module page shell and submodule navigation
+   ========================================================= */
+
+.purchase-page-shell {
+  width: 100%;
+  max-width: 100% !important;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.purchase-page-header {
+  margin-bottom: 18px;
+}
+
+.purchase-page-title {
+  color: #101828 !important;
+  font-size: 27px !important;
+  font-weight: 750 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.purchase-page-description {
+  margin-top: 4px !important;
+  color: #667085 !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+.purchase-submodule-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.purchase-submodule-tab {
+  width: auto !important;
+  min-width: unset !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 6px 15px !important;
+
+  color: #475467 !important;
+  background: #ffffff !important;
+
+  border: 1px solid #dfe5ec !important;
+  border-radius: 11px !important;
+
+  box-shadow: none !important;
+  text-transform: none !important;
+
+  font-size: 11.5px !important;
+  font-weight: 550 !important;
+  line-height: 1 !important;
+
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease !important;
+}
+
+.purchase-submodule-tab:hover {
+  color: #101828 !important;
+  background: #f8fafc !important;
+  border-color: #c5ced8 !important;
+  box-shadow: 0 2px 5px rgba(16, 24, 40, 0.06) !important;
+  transform: translateY(-1px);
+}
+
+.purchase-submodule-tab.is-active {
+  color: #ffffff !important;
+  background: #0b1220 !important;
+  border-color: #0b1220 !important;
+  font-weight: 650 !important;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.08),
+    0 5px 12px rgba(16, 24, 40, 0.12) !important;
+}
+
+.purchase-submodule-tab.is-active:hover {
+  color: #ffffff !important;
+  background: #172033 !important;
+  border-color: #172033 !important;
+}
+
+.purchase-module-content {
+  width: 100%;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 900px) {
+  .purchase-page-header {
+    margin-bottom: 15px;
+  }
+
+  .purchase-page-title {
+    font-size: 23px !important;
+  }
+
+  .purchase-submodule-tabs {
+    gap: 6px;
+    margin-bottom: 15px;
+  }
+
+  .purchase-submodule-tab {
+    min-height: 31px !important;
+    height: 31px !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+}
+/* =========================================================
+   Purchase reference toolbar, summary cards and data tables
+   Shared visual language for every /yen-purchase module.
+   ========================================================= */
+.erp-purchase-viewport .purchase-page-header {
+  display: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-toolbar-shell,
+.erp-purchase-viewport .purchase-reference-toolbar-section {
+  width: 100%;
+  max-width: 100% !important;
+
+  margin: 18px 0 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.erp-purchase-viewport .purchase-reference-toolbar {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin: 0 0 20px !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-search {
+  width: min(420px, 100%) !important;
+  flex: 0 1 420px;
+}
+
+.erp-purchase-viewport .purchase-reference-search .MuiOutlinedInput-root {
+  min-height: 42px !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 2px 7px rgba(16, 24, 40, 0.08) !important;
+}
+
+.erp-purchase-viewport .purchase-reference-search-icon {
+  margin-left: 12px;
+  color: #667085;
+  font-size: 17px !important;
+}
+
+.erp-purchase-viewport .purchase-reference-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.erp-purchase-viewport .purchase-reference-action-button {
+  min-height: 40px !important;
+  padding: 8px 15px !important;
+
+  border: 2px solid var(--erp-accent) !important;
+  border-radius: 12px !important;
+
+  background: var(--erp-surface) !important;
+  color: var(--erp-text) !important;
+
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.06),
+    0 0 0 1px rgba(var(--erp-accent-rgb), 0.05) !important;
+
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.erp-purchase-viewport .purchase-reference-action-button:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring),
+    0 5px 14px rgba(var(--erp-accent-rgb), 0.14) !important;
+
+  transform: translateY(-1px);
+}
+
+.erp-purchase-viewport .purchase-reference-action-button:focus,
+.erp-purchase-viewport .purchase-reference-action-button:focus-visible {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent) !important;
+  box-shadow: 0 0 0 4px var(--erp-accent-ring) !important;
+  outline: none !important;
+}
+/* 
+.erp-purchase-viewport .purchase-reference-action-button:hover {
+  background: #f8fafc !important;
+  border-color: #bfc9d6 !important;
+} */
+
+.erp-purchase-viewport .purchase-reference-active-toggle {
+  min-height: 40px;
+  padding: 0 10px 0 15px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border: 2px solid var(--erp-accent) !important;
+  border-radius: 12px;
+
+  background: var(--erp-surface) !important;
+
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.05) !important;
+}
+
+.erp-purchase-viewport .purchase-reference-active-toggle:hover {
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+.erp-purchase-viewport .purchase-reference-active-toggle:focus-within {
+  border-color: var(--erp-accent) !important;
+  box-shadow: 0 0 0 4px var(--erp-accent-ring) !important;
+}
+
+.erp-purchase-viewport .purchase-reference-active-toggle .MuiTypography-root {
+  color: #475467 !important;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-grid {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+
+  margin: 0 0 22px !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-card {
+  width: 100%;
+  min-width: 0;
+  min-height: 94px;
+
+  padding: 18px 19px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  border: 1px solid #dfe5ec !important;
+  border-radius: 16px !important;
+
+  background: #ffffff !important;
+  background-image: none !important;
+
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-label {
+  color: #667085 !important;
+  font-size: 9px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-value {
+  margin-top: 7px !important;
+  color: #101828 !important;
+  font-size: 27px !important;
+  line-height: 1 !important;
+  font-weight: 760 !important;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-value.is-success {
+  color: #087a3e !important;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #f1f4f8;
+  color: #344054;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-icon.is-success {
+  background: #d9f8e5;
+  color: #087a3e;
+}
+
+.erp-purchase-viewport .purchase-reference-summary-icon svg {
+  width: 19px !important;
+  height: 19px !important;
+  font-size: 19px !important;
+}
+
+.erp-purchase-viewport .purchase-reference-table-shell {
+  width: 100%;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.erp-purchase-viewport .purchase-reference-table {
+  width: 100%;
+
+  margin: 0 !important;
+
+  border: 1px solid #dbe2ea !important;
+  border-radius: 16px !important;
+
+  background: #ffffff !important;
+  background-image: none !important;
+
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-table .MuiTableCell-head,
+.erp-purchase-viewport .MuiTableCell-head {
+  height: 39px !important;
+  padding: 10px 20px !important;
+  color: #667085 !important;
+  background: #f8fafc !important;
+  border-bottom: 1px solid #dfe5ec !important;
+  font-size: 9px !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.erp-purchase-viewport .purchase-reference-table .MuiTableCell-body,
+.erp-purchase-viewport .MuiTableCell-body {
+  height: 60px !important;
+  padding: 12px 20px !important;
+  color: #101828 !important;
+  background: #fff;
+  border-bottom: 1px solid #e5eaf0 !important;
+  font-size: 12px !important;
+}
+
+.erp-purchase-viewport .purchase-reference-id-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #f1f4f8;
+  color: #101828;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.erp-purchase-viewport .purchase-reference-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.erp-purchase-viewport .purchase-reference-avatar {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f1f4f8;
+  color: #101828;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.erp-purchase-viewport .purchase-reference-view-pill {
+  min-height: 24px !important;
+  height: 24px !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  background: #dcecff !important;
+  color: #175cd3 !important;
+  font-size: 10px !important;
+  font-weight: 680 !important;
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 23px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 680;
+  text-transform: capitalize;
+}
+
+.erp-purchase-viewport .purchase-reference-status-pill > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.erp-purchase-viewport .purchase-reference-status-pill.is-active {
+  color: #087a3e;
+  background: #d9f8e5;
+}
+
+.erp-purchase-viewport .purchase-reference-status-pill.is-inactive {
+  color: #b42318;
+  background: #fee4e2;
+}
+
+/* Normalize legacy purchase action areas across remaining modules. */
+.erp-purchase-viewport .icon-button-outline {
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid #d7dee8 !important;
+  border-radius: 10px !important;
+  color: #344054 !important;
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06) !important;
+}
+
+.erp-purchase-viewport .icon-button-outline:hover {
+  color: #155eef !important;
+  background: #f8fafc !important;
+  border-color: #bfc9d6 !important;
+}
+
+@media (max-width: 1000px) {
+  .erp-purchase-viewport .purchase-reference-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search {
+    width: 100% !important;
+    flex-basis: auto;
+  }
+
+  .erp-purchase-viewport .purchase-reference-actions {
+    justify-content: flex-start;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================================
+   Final Purchase Category layout separation override
+   ========================================================= */
+
+.erp-purchase-viewport
+  .purchase-module-content.MuiPaper-root {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-toolbar-shell.MuiBox-root,
+.erp-purchase-viewport
+  .purchase-reference-toolbar-section.MuiBox-root {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-toolbar.MuiBox-root {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-summary-grid.MuiBox-root {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-table-shell.MuiBox-root {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+
+/* =========================================================
+   Main sidebar Drawer alignment safeguard
+   ========================================================= */
+
+.erp-app-shell > .erp-sidebar {
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.erp-app-shell
+  > .erp-sidebar
+  > .MuiDrawer-paper {
+  box-sizing: border-box !important;
+}
+
+.erp-app-shell
+  .erp-sidebar
+  .MuiList-root {
+  width: 100%;
+}
+
+.erp-app-shell
+  .erp-sidebar
+  .MuiListItem-root {
+  box-sizing: border-box;
+}
+
+.erp-app-shell
+  .erp-sidebar
+  .MuiListItemIcon-root {
+  margin: 0 !important;
+}
+
+.erp-app-shell
+  .erp-sidebar
+  .MuiListItemText-root {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   Sidebar and page vertical alignment correction
+   ========================================================= */
+
+.erp-app-shell {
+  align-items: stretch !important;
+}
+
+.erp-app-shell > .erp-sidebar {
+  align-self: flex-start;
+}
+
+.erp-app-main {
+  height: 100vh;
+  min-height: 100vh;
+}
+
+.erp-navbar {
+  flex: 0 0 auto;
+}
+
+.erp-module-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.erp-module-layout > .erp-page-viewport {
+  height: 100%;
+  min-height: 0;
+}
+
+.erp-app-shell
+  > .erp-sidebar
+  > .MuiDrawer-paper {
+  box-sizing: border-box !important;
+}
+
+/* Sidebar must begin at the same top edge as navbar */
+
+.erp-app-shell {
+  align-items: stretch !important;
+}
+
+.erp-app-shell > .erp-sidebar {
+  height: 100vh;
+  align-self: stretch !important;
+}
+
+.erp-app-shell
+  > .erp-sidebar
+  > .MuiDrawer-paper {
+  top: 0 !important;
+  height: 100vh !important;
+  margin-top: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.erp-navbar {
+  height: 64px;
+  min-height: 64px;
+  flex: 0 0 64px;
+}
+/* =========================================================
+   Global Display Settings provider variables and modes
+   ========================================================= */
+:root {
+  --erp-accent: #155eef;
+  --erp-font-family: Inter, Arial, sans-serif;
+  --erp-font-scale: 1;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+.MuiTypography-root,
+.MuiButton-root,
+.MuiInputBase-root,
+.MuiMenuItem-root {
+  font-family: var(--erp-font-family) !important;
+}
+
+html { font-size: calc(16px * var(--erp-font-scale)); }
+
+/* Accent color: interactive states only, no behavior changes. */
+a,
+.erp-sidebar-item.is-active,
+.erp-sidebar-item.is-active .erp-sidebar-icon,
+.erp-sidebar-item.is-active .erp-sidebar-label,
+.erp-sidebar-item.is-active .erp-sidebar-icon-label,
+.MuiLink-root,
+.MuiRadio-root.Mui-checked,
+.MuiCheckbox-root.Mui-checked,
+.MuiSwitch-switchBase.Mui-checked,
+.MuiCircularProgress-root,
+.MuiLinearProgress-bar {
+  color: var(--erp-accent) !important;
+}
+
+.MuiButton-containedPrimary,
+.MuiButton-contained,
+.primary-button,
+button.primary,
+.MuiTab-root.Mui-selected,
+.MuiPagination-root .Mui-selected,
+.erp-purchase-viewport .MuiButton-contained,
+.erp-purchase-viewport .MuiButton-containedPrimary,
+.purchase-submodule-tab.is-active {
+  background-color: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiCheckbox-root.Mui-checked,
+.MuiRadio-root.Mui-checked {
+  border-color: var(--erp-accent) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--erp-accent) 14%, transparent) !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background-color: var(--erp-accent) !important;
+}
+
+.erp-sidebar-item.is-active {
+  background: color-mix(in srgb, var(--erp-accent) 15%, white) !important;
+  border-color: color-mix(in srgb, var(--erp-accent) 38%, white) !important;
+}
+
+/* =========================================================
+   Dark mode — deep, high-contrast palette
+   ========================================================= */
+html[data-erp-theme='dark'] {
+  --erp-bg: #0a0f1c;
+  --erp-surface: #111a2c;
+  --erp-surface-2: #182338;
+  --erp-text: #f1f5fb;
+  --erp-muted: #94a3b8;
+  --erp-border: #263447;
+  --erp-border-strong: #3a4a63;
+  --erp-primary: var(--erp-accent);
+  --erp-shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.35);
+}
+
+/* Base surfaces */
+html[data-erp-theme='dark'] body,
+html[data-erp-theme='dark'] .erp-app-shell,
+html[data-erp-theme='dark'] .erp-page-viewport,
+html[data-erp-theme='dark'] .erp-purchase-viewport {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(var(--erp-accent-rgb), .07), transparent 40%),
+    radial-gradient(circle at 90% 85%, rgba(168, 85, 247, .05), transparent 45%),
+    var(--erp-bg) !important;
+  color: var(--erp-text) !important;
+}
+
+/* Cards, papers, containers */
+html[data-erp-theme='dark'] .erp-navbar,
+html[data-erp-theme='dark'] .erp-sidebar-paper,
+html[data-erp-theme='dark'] .erp-sidebar-brand,
+html[data-erp-theme='dark'] .MuiPaper-root:not(.MuiMenu-paper):not(.MuiPopover-paper):not(.MuiTooltip-tooltip),
+html[data-erp-theme='dark'] .MuiCard-root,
+html[data-erp-theme='dark'] .MuiTableContainer-root,
+html[data-erp-theme='dark'] .purchase-reference-summary-card,
+html[data-erp-theme='dark'] .purchase-reference-table {
+  background: var(--erp-surface) !important;
+  color: var(--erp-text) !important;
+  border-color: var(--erp-border) !important;
+  box-shadow: var(--erp-shadow) !important;
+}
+
+/* Tables */
+html[data-erp-theme='dark'] .MuiTableCell-head,
+html[data-erp-theme='dark'] table th.MuiTableCell-head,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-head,
+html[data-erp-theme='dark'] .erp-purchase-viewport .purchase-reference-table .MuiTableCell-head {
+  background: #16223a !important;
+  color: #a8b3c5 !important;
+  border-bottom-color: var(--erp-border) !important;
+}
+html[data-erp-theme='dark'] .MuiTableCell-body,
+html[data-erp-theme='dark'] table td.MuiTableCell-root,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-body {
+  background: var(--erp-surface) !important;
+  color: var(--erp-text) !important;
+  border-bottom-color: #1e2a42 !important;
+}
+html[data-erp-theme='dark'] .MuiTableRow-root:hover .MuiTableCell-body,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-body {
+  background: #17223a !important;
+}
+
+/* Inputs */
+html[data-erp-theme='dark'] .MuiOutlinedInput-root,
+html[data-erp-theme='dark'] .MuiInputBase-root.MuiOutlinedInput-root,
+html[data-erp-theme='dark'] .purchase-reference-search .MuiOutlinedInput-root {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+}
+html[data-erp-theme='dark'] .MuiOutlinedInput-notchedOutline {
+  border-color: var(--erp-border-strong) !important;
+}
+html[data-erp-theme='dark'] .MuiInputBase-input,
+html[data-erp-theme='dark'] .MuiOutlinedInput-input,
+html[data-erp-theme='dark'] .MuiSelect-select {
+  color: var(--erp-text) !important;
+}
+html[data-erp-theme='dark'] input::placeholder {
+  color: #64748b !important;
+}
+html[data-erp-theme='dark'] .MuiFormLabel-root,
+html[data-erp-theme='dark'] .MuiInputLabel-root {
+  color: var(--erp-muted) !important;
+}
+
+/* Buttons */
+html[data-erp-theme='dark'] .MuiButton-outlined,
+html[data-erp-theme='dark'] .purchase-reference-action-button,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiButton-root {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border-color: var(--erp-border-strong) !important;
+}
+html[data-erp-theme='dark'] .MuiButton-outlined:hover,
+html[data-erp-theme='dark'] .purchase-reference-action-button:hover {
+  background: color-mix(in srgb, var(--erp-accent) 18%, var(--erp-surface-2)) !important;
+  border-color: var(--erp-accent) !important;
+  color: var(--erp-text) !important;
+}
+
+/* Menus, popovers, dialogs */
+html[data-erp-theme='dark'] .MuiMenu-paper,
+html[data-erp-theme='dark'] .MuiPopover-paper,
+html[data-erp-theme='dark'] .MuiDialog-paper,
+html[data-erp-theme='dark'] .MuiAccordion-root {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border-color: var(--erp-border) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.55) !important;
+}
+html[data-erp-theme='dark'] .MuiMenuItem-root { color: var(--erp-text) !important; }
+html[data-erp-theme='dark'] .MuiMenuItem-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 20%, transparent) !important;
+}
+html[data-erp-theme='dark'] .MuiDialogActions-root { border-top-color: var(--erp-border) !important; }
+
+/* Typography */
+html[data-erp-theme='dark'] h1,
+html[data-erp-theme='dark'] h2,
+html[data-erp-theme='dark'] h3,
+html[data-erp-theme='dark'] .MuiTypography-root,
+html[data-erp-theme='dark'] .erp-breadcrumb-current,
+html[data-erp-theme='dark'] .erp-navbar-company-name,
+html[data-erp-theme='dark'] .MuiDialogTitle-root { color: var(--erp-text) !important; }
+
+html[data-erp-theme='dark'] p,
+html[data-erp-theme='dark'] .erp-breadcrumb-item,
+html[data-erp-theme='dark'] .purchase-reference-summary-label,
+html[data-erp-theme='dark'] .MuiTablePagination-root { color: var(--erp-muted) !important; }
+
+/* Chips (status pills) */
+html[data-erp-theme='dark'] .MuiChip-colorSuccess,
+html[data-erp-theme='dark'] .status-active,
+html[data-erp-theme='dark'] .purchase-reference-status-pill.is-active {
+  background: rgba(16,185,129,.16) !important;
+  color: #34d399 !important;
+}
+html[data-erp-theme='dark'] .MuiChip-colorError,
+html[data-erp-theme='dark'] .status-inactive,
+html[data-erp-theme='dark'] .purchase-reference-status-pill.is-inactive {
+  background: rgba(239,68,68,.16) !important;
+  color: #fca5a5 !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-id-pill,
+html[data-erp-theme='dark'] .purchase-reference-avatar,
+html[data-erp-theme='dark'] .purchase-reference-summary-icon {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+}
+
+/* Scrollbars */
+html[data-erp-theme='dark'] * { scrollbar-color: #334155 transparent; }
+html[data-erp-theme='dark'] *::-webkit-scrollbar-thumb { background: #334155 !important; }
+
+/* Dividers */
+html[data-erp-theme='dark'] .MuiDivider-root { border-color: var(--erp-border) !important; }
+
+/* Display Settings preview area in dark */
+html[data-erp-theme='dark'] .display-preview-surface { background: var(--erp-bg) !important; }
+html[data-erp-theme='dark'] .display-preview-sidebar span { background: var(--erp-surface-2) !important; }
+html[data-erp-theme='dark'] .display-style-swatch { background: var(--erp-surface-2) !important; }
+html[data-erp-theme='dark'] .display-style-swatch i { background: var(--erp-surface) !important; border-color: var(--erp-border) !important; }
+
+/* Classic style */
+html[data-erp-style='classic'] .MuiPaper-root:not(.MuiMenu-paper):not(.MuiPopover-paper),
+html[data-erp-style='classic'] .MuiCard-root,
+html[data-erp-style='classic'] .MuiTableContainer-root,
+html[data-erp-style='classic'] .MuiButton-root,
+html[data-erp-style='classic'] .MuiOutlinedInput-root,
+html[data-erp-style='classic'] .erp-sidebar-paper,
+html[data-erp-style='classic'] .erp-navbar {
+  border-radius: 3px !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   Glassmorphism — premium frosted surfaces
+   ========================================================= */
+html[data-erp-style='glass'] {
+  --glass-bg: color-mix(in srgb, var(--erp-surface) 55%, transparent);
+  --glass-border: color-mix(in srgb, #ffffff 22%, transparent);
+  --glass-highlight: color-mix(in srgb, #ffffff 30%, transparent);
+  --glass-blur: 22px;
+}
+
+html[data-erp-style='glass'] body,
+html[data-erp-style='glass'] .erp-app-shell,
+html[data-erp-style='glass'] .erp-page-viewport,
+html[data-erp-style='glass'] .erp-purchase-viewport {
+  background:
+    radial-gradient(1000px 500px at 8% -8%, rgba(var(--erp-accent-rgb), .22), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(168, 85, 247, .18), transparent 55%),
+    radial-gradient(700px 500px at 50% 110%, rgba(14, 165, 233, .14), transparent 55%),
+    var(--erp-bg) !important;
+  background-attachment: fixed !important;
+}
+
+/* Frosted cards */
+html[data-erp-style='glass'] .MuiPaper-root:not(.MuiMenu-paper):not(.MuiPopover-paper):not(.MuiTooltip-tooltip),
+html[data-erp-style='glass'] .MuiCard-root,
+html[data-erp-style='glass'] .MuiTableContainer-root,
+html[data-erp-style='glass'] .purchase-reference-summary-card,
+html[data-erp-style='glass'] .purchase-reference-table,
+html[data-erp-style='glass'] .erp-sidebar-paper,
+html[data-erp-style='glass'] .erp-navbar {
+  position: relative;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    0 1px 0 var(--glass-highlight) inset,
+    0 20px 40px rgba(15, 23, 42, .18),
+    0 6px 14px rgba(15, 23, 42, .10) !important;
+  overflow: hidden;
+}
+
+/* Subtle inner light streak on top edge of glass cards */
+html[data-erp-style='glass'] .MuiPaper-root:not(.MuiMenu-paper):not(.MuiPopover-paper):not(.MuiTooltip-tooltip)::before,
+html[data-erp-style='glass'] .MuiCard-root::before,
+html[data-erp-style='glass'] .purchase-reference-summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  pointer-events: none;
+}
+
+/* Hover lift for glass cards */
+html[data-erp-style='glass'] .MuiCard-root:hover,
+html[data-erp-style='glass'] .purchase-reference-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 var(--glass-highlight) inset,
+    0 28px 55px rgba(var(--erp-accent-rgb), .18),
+    0 10px 20px rgba(15, 23, 42, .14) !important;
+  border-color: color-mix(in srgb, var(--erp-accent) 45%, var(--glass-border)) !important;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+/* Inputs on glass */
+html[data-erp-style='glass'] .MuiOutlinedInput-root,
+html[data-erp-style='glass'] .MuiButton-outlined,
+html[data-erp-style='glass'] .purchase-reference-action-button,
+html[data-erp-style='glass'] .purchase-reference-active-toggle {
+  background: color-mix(in srgb, var(--erp-surface) 45%, transparent) !important;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid var(--glass-border) !important;
+}
+
+/* Contained buttons stand out with glow */
+html[data-erp-style='glass'] .MuiButton-contained,
+html[data-erp-style='glass'] .MuiButton-containedPrimary {
+  background: linear-gradient(135deg, var(--erp-accent), color-mix(in srgb, var(--erp-accent) 70%, #7c3aed)) !important;
+  border: 1px solid color-mix(in srgb, var(--erp-accent) 60%, #ffffff) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.35) inset,
+    0 8px 22px rgba(var(--erp-accent-rgb), .35) !important;
+}
+
+/* Table body cells transparent so blur shows through */
+html[data-erp-style='glass'] .MuiTableCell-body,
+html[data-erp-style='glass'] .erp-purchase-viewport .MuiTableCell-body {
+  background: transparent !important;
+}
+html[data-erp-style='glass'] .MuiTableCell-head,
+html[data-erp-style='glass'] .erp-purchase-viewport .MuiTableCell-head {
+  background: color-mix(in srgb, var(--erp-surface) 40%, transparent) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Dialogs, menus */
+html[data-erp-style='glass'] .MuiDialog-paper,
+html[data-erp-style='glass'] .MuiMenu-paper,
+html[data-erp-style='glass'] .MuiPopover-paper {
+  background: color-mix(in srgb, var(--erp-surface) 70%, transparent) !important;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, .25) !important;
+}
+
+/* DARK + GLASS combo — deeper tints */
+html[data-erp-theme='dark'][data-erp-style='glass'] {
+  --glass-bg: color-mix(in srgb, var(--erp-surface) 60%, transparent);
+  --glass-border: color-mix(in srgb, #ffffff 10%, transparent);
+  --glass-highlight: color-mix(in srgb, #ffffff 14%, transparent);
+}
+html[data-erp-theme='dark'][data-erp-style='glass'] body {
+  background:
+    radial-gradient(1000px 500px at 8% -8%, rgba(var(--erp-accent-rgb), .28), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(168, 85, 247, .22), transparent 55%),
+    radial-gradient(700px 500px at 50% 110%, rgba(14, 165, 233, .18), transparent 55%),
+    var(--erp-bg) !important;
+}
+
+/* Selected rows can opt in using aria-selected without touching table logic. */
+.MuiTableRow-root[aria-selected='true'] .MuiTableCell-body {
+  background: color-mix(in srgb, var(--erp-accent) 10%, var(--erp-surface)) !important;
+}
+/* =========================================================
+   FINAL GLOBAL ACCENT OVERRIDE
+   Must remain at the absolute bottom of globals.css
+   ========================================================= */
+
+:root {
+  --erp-accent: #155eef;
+  --erp-accent-rgb: 21, 94, 239;
+  --erp-accent-contrast: #ffffff;
+
+  --erp-accent-hover:
+    color-mix(in srgb, var(--erp-accent) 84%, #000000);
+
+  --erp-accent-soft:
+    color-mix(in srgb, var(--erp-accent) 12%, #ffffff);
+
+  --erp-accent-soft-hover:
+    color-mix(in srgb, var(--erp-accent) 20%, #ffffff);
+
+  --erp-accent-border:
+    color-mix(in srgb, var(--erp-accent) 42%, #ffffff);
+
+  --erp-accent-ring:
+    rgba(var(--erp-accent-rgb), 0.17);
+}
+
+/* =========================================================
+   Text selection and keyboard focus
+   ========================================================= */
+
+::selection {
+  color: var(--erp-accent-contrast);
+  background: var(--erp-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--erp-accent) !important;
+  outline-offset: 2px;
+}
+
+/* Do not show the browser outline inside styled MUI inputs */
+.MuiInputBase-root:focus-visible,
+.MuiButtonBase-root:focus-visible {
+  outline: none !important;
+}
+
+/* =========================================================
+   All outlined inputs, search fields and dropdowns
+   ========================================================= */
+
+.MuiOutlinedInput-root,
+.MuiInputBase-root.MuiOutlinedInput-root,
+.purchase-reference-search .MuiOutlinedInput-root {
+  border-color: var(--erp-accent-border);
+}
+
+.MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline,
+.MuiInputBase-root.MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline,
+.purchase-reference-search
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--erp-accent-border) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline,
+.MuiInputBase-root.MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline,
+.purchase-reference-search
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-color: var(--erp-accent) !important;
+  border-width: 1px !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused,
+.MuiInputBase-root.MuiOutlinedInput-root.Mui-focused,
+.purchase-reference-search
+  .MuiOutlinedInput-root.Mui-focused {
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+.MuiFormLabel-root.Mui-focused,
+.MuiInputLabel-root.Mui-focused {
+  color: var(--erp-accent) !important;
+}
+
+/* Search icon */
+
+.purchase-reference-search-icon,
+.MuiInputAdornment-root:has(svg) {
+  transition: color 0.18s ease;
+}
+
+.MuiOutlinedInput-root.Mui-focused
+  .purchase-reference-search-icon,
+.MuiOutlinedInput-root.Mui-focused
+  .MuiInputAdornment-root,
+.purchase-reference-search
+  .MuiOutlinedInput-root.Mui-focused
+  svg {
+  color: var(--erp-accent) !important;
+}
+
+/* Native inputs and selects */
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--erp-accent) !important;
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+  outline: none !important;
+}
+
+/* =========================================================
+   Add New, Import, Export and outlined action buttons
+   ========================================================= */
+
+.purchase-reference-action-button,
+.erp-purchase-viewport
+  .purchase-reference-action-button,
+.MuiButton-outlined,
+button.MuiButton-outlined {
+  color: var(--erp-text) !important;
+  background: var(--erp-surface) !important;
+  border-color: var(--erp-accent-border) !important;
+
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease !important;
+}
+
+.purchase-reference-action-button:hover,
+.erp-purchase-viewport
+  .purchase-reference-action-button:hover,
+.MuiButton-outlined:hover,
+button.MuiButton-outlined:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 4px 12px rgba(
+      var(--erp-accent-rgb),
+      0.12
+    ) !important;
+}
+
+.purchase-reference-action-button:focus-visible,
+.erp-purchase-viewport
+  .purchase-reference-action-button:focus-visible,
+.MuiButton-outlined:focus-visible,
+button.MuiButton-outlined:focus-visible {
+  color: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+
+  outline: none !important;
+}
+
+.purchase-reference-action-button
+  .MuiButton-startIcon,
+.purchase-reference-action-button
+  .MuiButton-endIcon {
+  color: inherit !important;
+}
+
+/* =========================================================
+   Contained primary buttons
+   ========================================================= */
+
+.MuiButton-contained,
+.MuiButton-containedPrimary,
+.MuiButton-containedSecondary,
+.primary-button,
+button.primary,
+.MuiFab-primary,
+.MuiSpeedDial-fab {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+.MuiButton-contained:hover,
+.MuiButton-containedPrimary:hover,
+.MuiButton-containedSecondary:hover,
+.primary-button:hover,
+button.primary:hover,
+.MuiFab-primary:hover,
+.MuiSpeedDial-fab:hover {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent-hover) !important;
+  border-color: var(--erp-accent-hover) !important;
+
+  box-shadow:
+    0 5px 14px rgba(
+      var(--erp-accent-rgb),
+      0.20
+    ) !important;
+}
+
+.MuiButton-contained:focus-visible,
+.MuiButton-containedPrimary:focus-visible,
+.MuiButton-containedSecondary:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+
+  outline: none !important;
+}
+
+/* =========================================================
+   Show Active Only container
+   ========================================================= */
+
+.purchase-reference-active-toggle,
+.erp-purchase-viewport
+  .purchase-reference-active-toggle {
+  border-color: var(--erp-accent-border) !important;
+  background: var(--erp-surface) !important;
+
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease !important;
+}
+
+.purchase-reference-active-toggle:hover,
+.erp-purchase-viewport
+  .purchase-reference-active-toggle:hover {
+  border-color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+}
+
+.purchase-reference-active-toggle:focus-within,
+.erp-purchase-viewport
+  .purchase-reference-active-toggle:focus-within {
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+.purchase-reference-active-toggle
+  .MuiTypography-root {
+  color: var(--erp-text) !important;
+}
+
+/* =========================================================
+   Switch
+   ========================================================= */
+
+.MuiSwitch-root .MuiSwitch-track {
+  background-color:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 28%,
+      #98a2b3
+    ) !important;
+
+  opacity: 1 !important;
+}
+
+.MuiSwitch-switchBase
+  .MuiSwitch-thumb {
+  background-color: #ffffff !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked {
+  color: var(--erp-accent) !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked
+  .MuiSwitch-thumb {
+  background-color:
+    var(--erp-accent-contrast) !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked
+  + .MuiSwitch-track {
+  background-color: var(--erp-accent) !important;
+  opacity: 1 !important;
+}
+
+.MuiSwitch-switchBase.Mui-focusVisible
+  .MuiSwitch-thumb {
+  box-shadow:
+    0 0 0 4px var(--erp-accent-ring) !important;
+}
+
+/* =========================================================
+   Checkbox and radio
+   ========================================================= */
+
+.MuiCheckbox-root.Mui-checked,
+.MuiCheckbox-root.MuiCheckbox-indeterminate,
+.MuiRadio-root.Mui-checked {
+  color: var(--erp-accent) !important;
+}
+
+.MuiCheckbox-root:hover,
+.MuiRadio-root:hover {
+  background-color:
+    var(--erp-accent-soft) !important;
+}
+
+.MuiCheckbox-root.Mui-focusVisible,
+.MuiRadio-root.Mui-focusVisible {
+  background-color:
+    var(--erp-accent-soft-hover) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+/* =========================================================
+   Tabs and Purchase Master submodule buttons
+   ========================================================= */
+
+.MuiTabs-indicator {
+  background-color: var(--erp-accent) !important;
+}
+
+.MuiTab-root.Mui-selected,
+.purchase-submodule-tab.is-active {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 5px 13px rgba(
+      var(--erp-accent-rgb),
+      0.17
+    ) !important;
+}
+
+.MuiTab-root.Mui-selected:hover,
+.purchase-submodule-tab.is-active:hover {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent-hover) !important;
+  border-color: var(--erp-accent-hover) !important;
+}
+
+.MuiTab-root:not(.Mui-selected):hover,
+.purchase-submodule-tab:not(.is-active):hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent-border) !important;
+}
+
+.MuiTab-root:focus-visible,
+.purchase-submodule-tab:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+
+  outline: none !important;
+}
+
+/* =========================================================
+   Main sidebar active and hover states
+   ========================================================= */
+
+.erp-sidebar-item.is-active {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent-border) !important;
+
+  box-shadow:
+    0 5px 14px rgba(
+      var(--erp-accent-rgb),
+      0.12
+    ) !important;
+}
+
+.erp-sidebar-item.is-active
+  .erp-sidebar-icon,
+.erp-sidebar-item.is-active
+  .erp-sidebar-label,
+.erp-sidebar-item.is-active
+  .erp-sidebar-icon-label {
+  color: var(--erp-accent) !important;
+}
+
+.erp-sidebar-item:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft-hover) !important;
+  border-color: var(--erp-accent-border) !important;
+}
+
+.erp-sidebar-item:hover
+  .erp-sidebar-icon,
+.erp-sidebar-item:hover
+  .erp-sidebar-label,
+.erp-sidebar-item:hover
+  .erp-sidebar-icon-label {
+  color: var(--erp-accent) !important;
+}
+
+.erp-sidebar-item:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+/* Sidebar expand/collapse button */
+
+.erp-sidebar-toggle:hover,
+.erp-sidebar-toggle:focus-visible {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+/* =========================================================
+   Purchase and Book secondary side menus
+   ========================================================= */
+
+.purchase-module-item.is-active,
+.book-module-item.is-active {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 5px 14px rgba(
+      var(--erp-accent-rgb),
+      0.18
+    ) !important;
+}
+
+.purchase-module-item.is-active
+  .purchase-module-icon,
+.purchase-module-item.is-active
+  .purchase-module-label,
+.book-module-item.is-active
+  .book-module-icon,
+.book-module-item.is-active
+  .book-module-label {
+  color: var(--erp-accent-contrast) !important;
+}
+
+.purchase-module-item:hover,
+.book-module-item:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+}
+
+.purchase-module-item:focus-visible,
+.book-module-item:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+/* =========================================================
+   Menus, dropdown options and selected list items
+   ========================================================= */
+
+.MuiMenuItem-root:hover,
+.MuiListItemButton-root:hover,
+.MuiAutocomplete-option:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+}
+
+.MuiMenuItem-root.Mui-selected,
+.MuiListItemButton-root.Mui-selected,
+.MuiAutocomplete-option[aria-selected='true'] {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+}
+
+.MuiMenuItem-root.Mui-selected:hover,
+.MuiListItemButton-root.Mui-selected:hover,
+.MuiAutocomplete-option[aria-selected='true']:hover {
+  background:
+    var(--erp-accent-soft-hover) !important;
+}
+
+/* =========================================================
+   Icon buttons
+   ========================================================= */
+
+.MuiIconButton-colorPrimary,
+.icon-button-outline {
+  color: var(--erp-accent) !important;
+  border-color: var(--erp-accent-border) !important;
+}
+
+.MuiIconButton-colorPrimary:hover,
+.icon-button-outline:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+.MuiIconButton-root:focus-visible,
+.icon-button-outline:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+
+  outline: none !important;
+}
+
+/* =========================================================
+   Pagination
+   ========================================================= */
+
+.MuiPaginationItem-root.Mui-selected,
+.MuiPagination-root
+  .Mui-selected {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+.MuiPaginationItem-root.Mui-selected:hover {
+  background: var(--erp-accent-hover) !important;
+}
+
+.MuiPaginationItem-root:hover {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+}
+
+/* =========================================================
+   Progress, sliders and ratings
+   ========================================================= */
+
+.MuiCircularProgress-root,
+.MuiRating-iconFilled,
+.MuiSlider-thumb {
+  color: var(--erp-accent) !important;
+}
+
+.MuiLinearProgress-bar,
+.MuiSlider-track {
+  background-color: var(--erp-accent) !important;
+}
+
+.MuiLinearProgress-root,
+.MuiSlider-rail {
+  background-color: var(--erp-accent-soft) !important;
+}
+
+/* =========================================================
+   Info and view pills
+   ========================================================= */
+
+.purchase-reference-view-pill,
+.erp-purchase-viewport
+  .purchase-reference-view-pill,
+.MuiChip-colorInfo,
+.status-info {
+  color: var(--erp-accent) !important;
+  background: var(--erp-accent-soft) !important;
+}
+
+.purchase-reference-view-pill:hover,
+.erp-purchase-viewport
+  .purchase-reference-view-pill:hover {
+  color: var(--erp-accent-hover) !important;
+  background:
+    var(--erp-accent-soft-hover) !important;
+}
+
+/* =========================================================
+   Table selection
+   ========================================================= */
+
+.MuiTableRow-root.Mui-selected
+  .MuiTableCell-body,
+.MuiTableRow-root[aria-selected='true']
+  .MuiTableCell-body {
+  background: var(--erp-accent-soft) !important;
+}
+
+.MuiTableRow-root.Mui-selected:hover
+  .MuiTableCell-body,
+.MuiTableRow-root[aria-selected='true']:hover
+  .MuiTableCell-body {
+  background:
+    var(--erp-accent-soft-hover) !important;
+}
+
+/* =========================================================
+   Cards: accent only on interaction, not always
+   ========================================================= */
+
+.MuiCard-root,
+.purchase-reference-summary-card,
+.dashboard-card,
+.summary-card {
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease !important;
+}
+
+.MuiCard-root:hover,
+.purchase-reference-summary-card:hover,
+.dashboard-card:hover,
+.summary-card:hover {
+  border-color:
+    var(--erp-accent-border) !important;
+
+  box-shadow:
+    0 6px 18px rgba(
+      var(--erp-accent-rgb),
+      0.08
+    ) !important;
+}
+
+.MuiCard-root:focus-within,
+.purchase-reference-summary-card:focus-within,
+.dashboard-card:focus-within,
+.summary-card:focus-within {
+  border-color: var(--erp-accent) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring) !important;
+}
+
+/* =========================================================
+   Links
+   ========================================================= */
+
+a:not(.MuiButton-root),
+.MuiLink-root {
+  color: var(--erp-accent);
+}
+
+a:not(.MuiButton-root):hover,
+.MuiLink-root:hover {
+  color: var(--erp-accent-hover);
+}
+
+/* =========================================================
+   Tooltip
+   ========================================================= */
+
+.MuiTooltip-tooltip {
+  color: var(--erp-accent-contrast) !important;
+  background: var(--erp-accent) !important;
+}
+
+.MuiTooltip-arrow {
+  color: var(--erp-accent) !important;
+}
+
+/* =========================================================
+   DARK MODE — Missing element color fixes
+   ========================================================= */
+
+/* Sidebar labels, icons, brand text */
+html[data-erp-theme='dark'] .erp-sidebar-item,
+html[data-erp-theme='dark'] .erp-sidebar-label,
+html[data-erp-theme='dark'] .erp-sidebar-icon,
+html[data-erp-theme='dark'] .erp-sidebar-icon-label,
+html[data-erp-theme='dark'] .erp-sidebar-item .MuiListItemText-primary,
+html[data-erp-theme='dark'] .erp-sidebar-item .MuiListItemIcon-root,
+html[data-erp-theme='dark'] .erp-sidebar-brand,
+html[data-erp-theme='dark'] .erp-sidebar-brand * {
+  color: var(--erp-text) !important;
+}
+
+/* Sidebar active item — keep accent color */
+html[data-erp-theme='dark'] .erp-sidebar-item.is-active,
+html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-label,
+html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-icon,
+html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-icon-label {
+  color: var(--erp-accent) !important;
+  background: color-mix(in srgb, var(--erp-accent) 18%, transparent) !important;
+  border-color: color-mix(in srgb, var(--erp-accent) 40%, transparent) !important;
+}
+
+/* Sidebar hover in dark */
+html[data-erp-theme='dark'] .erp-sidebar-item:hover {
+  background: color-mix(in srgb, var(--erp-accent) 10%, transparent) !important;
+  color: var(--erp-accent) !important;
+}
+html[data-erp-theme='dark'] .erp-sidebar-item:hover .erp-sidebar-label,
+html[data-erp-theme='dark'] .erp-sidebar-item:hover .erp-sidebar-icon,
+html[data-erp-theme='dark'] .erp-sidebar-item:hover .erp-sidebar-icon-label {
+  color: var(--erp-accent) !important;
+}
+
+/* NavBar text, breadcrumbs, company name */
+html[data-erp-theme='dark'] .erp-navbar,
+html[data-erp-theme='dark'] .erp-navbar *,
+html[data-erp-theme='dark'] .erp-navbar-company-name,
+html[data-erp-theme='dark'] .erp-breadcrumb-item,
+html[data-erp-theme='dark'] .erp-breadcrumb-current,
+html[data-erp-theme='dark'] .erp-breadcrumb-separator {
+  color: var(--erp-text) !important;
+}
+html[data-erp-theme='dark'] .erp-breadcrumb-item {
+  color: var(--erp-muted) !important;
+}
+
+/* Purchase submodule tab buttons (Purchase Category, SubCategory, UOM…) */
+html[data-erp-theme='dark'] .purchase-submodule-tab {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border-color: var(--erp-border) !important;
+}
+html[data-erp-theme='dark'] .purchase-submodule-tab:hover {
+  background: color-mix(in srgb, var(--erp-accent) 15%, var(--erp-surface-2)) !important;
+  color: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+}
+html[data-erp-theme='dark'] .purchase-submodule-tab.is-active {
+  background: var(--erp-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--erp-accent) !important;
+}
+
+/* Avatar circles (S, P, C) and ID pills */
+html[data-erp-theme='dark'] .purchase-reference-avatar,
+html[data-erp-theme='dark'] .purchase-reference-id-pill {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border: 1px solid var(--erp-border) !important;
+}
+
+/* Summary card icons and values */
+html[data-erp-theme='dark'] .purchase-reference-summary-icon {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-summary-icon.is-success {
+  background: rgba(16,185,129,.18) !important;
+  color: #34d399 !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-summary-value {
+  color: var(--erp-text) !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-summary-value.is-success {
+  color: #34d399 !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-summary-label {
+  color: var(--erp-muted) !important;
+}
+
+/* Name cell text (Sweet, Purchase, cat) */
+html[data-erp-theme='dark'] .purchase-reference-name-cell,
+html[data-erp-theme='dark'] .purchase-reference-name-cell * {
+  color: var(--erp-text) !important;
+}
+
+/* Toolbar action buttons (Add New, Import, Export) — outlined variant already covered,
+   but the "Add New" contained blue button needs proper text */
+html[data-erp-theme='dark'] .purchase-reference-action-button {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border-color: var(--erp-border-strong) !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-action-button:hover {
+  color: var(--erp-accent) !important;
+  background: color-mix(in srgb, var(--erp-accent) 16%, var(--erp-surface-2)) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+/* "Show Active Only" container */
+html[data-erp-theme='dark'] .purchase-reference-active-toggle {
+  background: var(--erp-surface-2) !important;
+  border-color: var(--erp-border-strong) !important;
+}
+html[data-erp-theme='dark'] .purchase-reference-active-toggle .MuiTypography-root {
+  color: var(--erp-text) !important;
+}
+
+/* View (1) info pill — accent tinted */
+html[data-erp-theme='dark'] .purchase-reference-view-pill {
+  background: color-mix(in srgb, var(--erp-accent) 22%, transparent) !important;
+  color: #93c5fd !important;
+}
+
+/* Table icon buttons (edit, delete) */
+html[data-erp-theme='dark'] .MuiTableCell-body .MuiIconButton-root,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root {
+  color: var(--erp-muted) !important;
+}
+html[data-erp-theme='dark'] .MuiTableCell-body .MuiIconButton-root:hover,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 18%, transparent) !important;
+  color: var(--erp-accent) !important;
+}
+html[data-erp-theme='dark'] .icon-button-outline,
+html[data-erp-theme='dark'] .erp-purchase-viewport .icon-button-outline {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border-color: var(--erp-border-strong) !important;
+}
+
+/* Logout button + navbar buttons */
+html[data-erp-theme='dark'] .erp-navbar .MuiButton-root,
+html[data-erp-theme='dark'] .erp-navbar button {
+  color: var(--erp-text) !important;
+  background: var(--erp-surface-2) !important;
+  border-color: var(--erp-border-strong) !important;
+}
+html[data-erp-theme='dark'] .erp-navbar .MuiButton-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 18%, var(--erp-surface-2)) !important;
+  color: var(--erp-accent) !important;
+  border-color: var(--erp-accent) !important;
+}
+
+/* Ensure any generic table cell content text stays readable */
+html[data-erp-theme='dark'] .MuiTableCell-body,
+html[data-erp-theme='dark'] .MuiTableCell-body *,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-body,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-body strong,
+html[data-erp-theme='dark'] .erp-purchase-viewport .MuiTableCell-body span:not(.MuiChip-label):not([class*="pill"]):not([class*="status"]) {
+  color: var(--erp-text) !important;
+}
+
+/* Search input adornment icon */
+html[data-erp-theme='dark'] .purchase-reference-search-icon,
+html[data-erp-theme='dark'] .MuiInputAdornment-root {
+  color: var(--erp-muted) !important;
+}
+
+/* Global body-level text fallback (any un-styled Typography) */
+html[data-erp-theme='dark'] .MuiTypography-root:not(.purchase-reference-summary-label) {
+  color: var(--erp-text) !important;
+}
+
+
+
+/* =========================================================
+   DARK MODE — Secondary/module sidebar (Purchase, Book, Inventory)
+   ========================================================= */
+
+/* The panel/drawer itself */
+html[data-erp-theme='dark'] .purchase-module-sidebar,
+html[data-erp-theme='dark'] .book-module-sidebar,
+html[data-erp-theme='dark'] .inventory-module-sidebar,
+html[data-erp-theme='dark'] [class*="module-sidebar"],
+html[data-erp-theme='dark'] .purchase-module-sidebar .MuiDrawer-paper,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiDrawer-paper {
+  background: var(--erp-surface) !important;
+  color: var(--erp-text) !important;
+  border-right: 1px solid var(--erp-border) !important;
+  box-shadow: 4px 0 20px rgba(0,0,0,.35) !important;
+}
+
+/* "MODULE" header / section headers inside sidebar */
+html[data-erp-theme='dark'] .purchase-module-sidebar-header,
+html[data-erp-theme='dark'] .purchase-module-title,
+html[data-erp-theme='dark'] .purchase-module-subtitle,
+html[data-erp-theme='dark'] [class*="module-sidebar"] h1,
+html[data-erp-theme='dark'] [class*="module-sidebar"] h2,
+html[data-erp-theme='dark'] [class*="module-sidebar"] h3,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiTypography-root,
+html[data-erp-theme='dark'] [class*="module-sidebar"] label,
+html[data-erp-theme='dark'] [class*="module-sidebar"] small {
+  color: var(--erp-text) !important;
+}
+html[data-erp-theme='dark'] .purchase-module-subtitle,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiTypography-caption {
+  color: var(--erp-muted) !important;
+}
+
+/* Menu list items (Purchase Master, Vendor, Purchase Item…) */
+html[data-erp-theme='dark'] .purchase-module-item,
+html[data-erp-theme='dark'] .book-module-item,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItem-root {
+  background: transparent !important;
+  color: var(--erp-text) !important;
+  border-color: transparent !important;
+}
+
+/* Item labels and icons */
+html[data-erp-theme='dark'] .purchase-module-item .purchase-module-label,
+html[data-erp-theme='dark'] .purchase-module-item .purchase-module-icon,
+html[data-erp-theme='dark'] .book-module-item .book-module-label,
+html[data-erp-theme='dark'] .book-module-item .book-module-icon,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemText-primary,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemIcon-root,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiSvgIcon-root {
+  color: var(--erp-text) !important;
+}
+
+/* Hover state */
+html[data-erp-theme='dark'] .purchase-module-item:hover,
+html[data-erp-theme='dark'] .book-module-item:hover,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 14%, transparent) !important;
+  color: var(--erp-accent) !important;
+}
+html[data-erp-theme='dark'] .purchase-module-item:hover .purchase-module-label,
+html[data-erp-theme='dark'] .purchase-module-item:hover .purchase-module-icon,
+html[data-erp-theme='dark'] .book-module-item:hover .book-module-label,
+html[data-erp-theme='dark'] .book-module-item:hover .book-module-icon,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root:hover .MuiListItemText-primary,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root:hover .MuiSvgIcon-root {
+  color: var(--erp-accent) !important;
+}
+
+/* ACTIVE item — clean accent, no pink gradient */
+html[data-erp-theme='dark'] .purchase-module-item.is-active,
+html[data-erp-theme='dark'] .book-module-item.is-active,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root.Mui-selected,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItem-root.Mui-selected {
+  background: var(--erp-accent) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-color: var(--erp-accent) !important;
+  box-shadow: 0 6px 16px rgba(var(--erp-accent-rgb), .35) !important;
+}
+html[data-erp-theme='dark'] .purchase-module-item.is-active .purchase-module-label,
+html[data-erp-theme='dark'] .purchase-module-item.is-active .purchase-module-icon,
+html[data-erp-theme='dark'] .book-module-item.is-active .book-module-label,
+html[data-erp-theme='dark'] .book-module-item.is-active .book-module-icon,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .Mui-selected .MuiListItemText-primary,
+html[data-erp-theme='dark'] [class*="module-sidebar"] .Mui-selected .MuiSvgIcon-root {
+  color: #ffffff !important;
+}
+
+/* Kill any inline pink/red/gradient (defensive) */
+html[data-erp-theme='dark'] .purchase-module-item[style],
+html[data-erp-theme='dark'] [class*="module-sidebar"] [style*="gradient"] {
+  background-image: none !important;
+}
+
+/* Dividers inside module sidebar */
+html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiDivider-root,
+html[data-erp-theme='dark'] [class*="module-sidebar"] hr {
+  border-color: var(--erp-border) !important;
+}
+
+/* Collapse/expand toggle arrow button */
+html[data-erp-theme='dark'] .purchase-module-toggle,
+html[data-erp-theme='dark'] .purchase-module-sidebar .MuiIconButton-root {
+  background: var(--erp-surface-2) !important;
+  color: var(--erp-text) !important;
+  border: 1px solid var(--erp-border) !important;
+}
+html[data-erp-theme='dark'] .purchase-module-toggle:hover,
+html[data-erp-theme='dark'] .purchase-module-sidebar .MuiIconButton-root:hover {
+  background: var(--erp-accent) !important;
+  color: #fff !important;
+  border-color: var(--erp-accent) !important;
+}
+
+/* =========================================================
+   GLASS style — Secondary/module sidebar
+   ========================================================= */
+html[data-erp-style='glass'] .purchase-module-sidebar,
+html[data-erp-style='glass'] .book-module-sidebar,
+html[data-erp-style='glass'] [class*="module-sidebar"],
+html[data-erp-style='glass'] .purchase-module-sidebar .MuiDrawer-paper,
+html[data-erp-style='glass'] [class*="module-sidebar"] .MuiDrawer-paper {
+  background: color-mix(in srgb, var(--erp-surface) 55%, transparent) !important;
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-right: 1px solid color-mix(in srgb, #ffffff 18%, transparent) !important;
+  box-shadow:
+    1px 0 0 rgba(255,255,255,.10) inset,
+    12px 0 40px rgba(15, 23, 42, .18) !important;
+}
+
+/* Glass active item — gradient glow */
+html[data-erp-style='glass'] .purchase-module-item.is-active,
+html[data-erp-style='glass'] .book-module-item.is-active,
+html[data-erp-style='glass'] [class*="module-sidebar"] .Mui-selected {
+  background: linear-gradient(135deg,
+    var(--erp-accent),
+    color-mix(in srgb, var(--erp-accent) 65%, #7c3aed)) !important;
+  border: 1px solid color-mix(in srgb, var(--erp-accent) 55%, #ffffff) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.35) inset,
+    0 10px 24px rgba(var(--erp-accent-rgb), .35) !important;
+}
+
+/* Glass hover */
+html[data-erp-style='glass'] .purchase-module-item:hover:not(.is-active),
+html[data-erp-style='glass'] [class*="module-sidebar"] .MuiListItemButton-root:hover:not(.Mui-selected) {
+  background: color-mix(in srgb, #ffffff 8%, transparent) !important;
+  backdrop-filter: blur(8px);
+  color: var(--erp-accent) !important;
+}
+
+/* DARK + GLASS combo for module sidebar */
+html[data-erp-theme='dark'][data-erp-style='glass'] .purchase-module-sidebar,
+html[data-erp-theme='dark'][data-erp-style='glass'] [class*="module-sidebar"],
+html[data-erp-theme='dark'][data-erp-style='glass'] .purchase-module-sidebar .MuiDrawer-paper {
+  background: color-mix(in srgb, var(--erp-surface) 60%, transparent) !important;
+  border-right: 1px solid color-mix(in srgb, #ffffff 8%, transparent) !important;
+}
+

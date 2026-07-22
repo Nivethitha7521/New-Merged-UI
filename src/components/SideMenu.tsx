@@ -1,22 +1,36 @@
 // components/SideMenu.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Typography } from '@mui/material';
+import React from 'react';
 import {
-  Menu as MenuIcon,
-  Close as CloseIcon,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Box,
+} from '@mui/material';
+import {
   BookOnline as BookOnlineIcon,
   ShoppingCart as ShoppingCartIcon,
   Inventory2 as Inventory2Icon,
   AccountCircle as AccountCircleIcon,
   Settings as SettingsIcon,
   Assessment as AssessmentIcon,
+  
+  ReceiptLong as ReceiptLongIcon,
+  WhatsApp as WhatsAppIcon,
+  DashboardOutlined as DashboardOutlinedIcon,
+ BusinessOutlined as BusinessOutlinedIcon,
+ChevronRightRounded as ChevronRightRoundedIcon,
+ChevronLeftRounded as ChevronLeftRoundedIcon,
+  PaletteOutlined as PaletteOutlinedIcon,
+
 } from '@mui/icons-material';
 import Image from 'next/image';
 import './SideMenu.css';
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
-const drawerWidth = 240;
 
 export interface MenuItem {
   text: string;
@@ -26,204 +40,219 @@ export interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
+ {
+  text: 'MASTER-ADMIN',
+  icon: <DashboardOutlinedIcon />,
+  subItems: [],
+  path: '/master-admin',
+},
   {
-    text: 'YEN BOOK',
-    icon: <BookOnlineIcon />,
-    subItems: ['OutGoing Payment'],
-    path: '/yen-book',
+    text: 'YEN POS', icon: <ReceiptLongIcon />,
+    subItems: ['Cash Management', 'Table Master', 'Bill Receipts', 'EB Reading', 'POS Devices', 'Print Barcodes', 'Print Unique Barcodes'],
+    path: '/yen-pos',
   },
-  {
-    text: 'YEN PURCHASE',
-    icon: <ShoppingCartIcon />,
-    subItems: ['Vendor', 'Purchase Item', 'Purchase Order', 'Goods Receipt Note', 'AP Invoice'],
-    path: '/yen-purchase',
-  },
-  {
-    text: 'YEN INVENTORY',
-    icon: <Inventory2Icon />,
-    subItems: [
-      'Outlets Inventory Management',
-      'Warehouse Inventory Management',
-    ],
-    path: '/yen-inventory',
-  },
-  {
-    text: 'YEN REPORTS',
-    icon: <AssessmentIcon />,
-    subItems: [],
-    path: '/QlikReport',
-  },
-  {
-    text: 'ACCOUNT SETTINGS',
-    icon: <AccountCircleIcon />,
-    subItems: ['Business Details', 'Personal Details'],
-    path: '/account-settings',
-  },
-  {
-    text: 'SETTINGS',
-    icon: <SettingsIcon />,
-    subItems: ['Date Settings', 'Purchase Settings', 'General Settings'],
-    path: '/yen-settings',
-  },
+  { text: 'WHATSAPP', icon: <WhatsAppIcon />, subItems: ['WhatsAppAdmin', 'WhatsAppMaster'], path: '/WhatsApp' },
+  { text: 'YEN PURCHASE', icon: <ShoppingCartIcon />, subItems: ['Purchase Master', 'Vendor', 'Purchase Item', 'Purchase Order', 'Service Order', 'GRN Note', 'AP Invoice'], path: '/yen-purchase' },
+  { text: 'YEN INVENTORY', icon: <Inventory2Icon />, subItems: ['Outlets Inventory Management', 'Warehouse Inventory Management'], path: '/yen-inventory' },
+  { text: 'YEN BOOK', icon: <BookOnlineIcon />, subItems: ['OutGoing Payment'], path: '/yen-book' },
+  { text: 'YEN REPORTS', icon: <AssessmentIcon />, subItems: [], path: '/QlikReport' },
+  { text: 'ACCOUNT SETTINGS', icon: <AccountCircleIcon />, subItems: ['Business Details', 'Personal Details'], path: '/account-settings' },
+  { text: 'SETTINGS', icon: <SettingsIcon />, subItems: ['Date Settings', 'Purchase Settings', 'General Settings'], path: '/yen-settings' },
+  { text: 'DISPLAY SETTINGS', icon: <PaletteOutlinedIcon />, subItems: [], path: '/yen-settings/DisplaySettings' },
 ];
 
+
+
 interface SideMenuProps {
-  onMenuClick: (menuItem: { path: string; text: string }) => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+  onMenuClick: (menuItem: MenuItem) => void;
   activePath: string;
-  showPurchaseMenu?: boolean;
-  showBookMenu?: boolean;
-  showInventoryMenu?: boolean;
-  showReportsMenu?: boolean;
+  showPurchaseMenu: boolean;
+  showBookMenu: boolean;
+  showInventoryMenu: boolean;
+  showReportsMenu: boolean;
 }
 
 const SideMenu: React.FC<SideMenuProps> = ({
+  collapsed,
+  onToggleCollapse,
   onMenuClick,
+  activePath,
   showPurchaseMenu,
   showBookMenu,
   showInventoryMenu,
   showReportsMenu,
 }) => {
   const role = useSelector((state: RootState) => state.auth.role);
-  const isSuperAdmin = role === "Super Admin";
-const permissions = useSelector((state: RootState) => state.auth.permissions?.yenerp || {});
-const hasSettingsRead = (() => {
-  const m = permissions?.['settings'];
-  if (!m) return false;
-  if (m.hide === true) return false;
-  return m.read === true;
-})();
-  const [open, setOpen] = useState(false);
-  const [subMenuOpen, setSubMenuOpen] = useState<number | null>(null);
-  const drawerRef = useRef(null);
+  const isSuperAdmin = role === 'Super Admin';
+  const permissions = useSelector((state: RootState) => state.auth.permissions?.yenerp || {});
 
-  const handleDrawerOpen = () => setOpen(true);
-  const handleDrawerClose = () => setOpen(false);
 
-  const handleSubMenuToggle = (index: number) => {
-    setSubMenuOpen(subMenuOpen === index ? null : index);
-  };
+  const hasSettingsRead = (() => {
+    const modulePermission = permissions?.settings;
+    if (!modulePermission || modulePermission.hide === true) return false;
+    return modulePermission.read === true;
+  })();
 
-  const handleMenuItemClick = (menuItem: { path: string; text: string }) => {
-    onMenuClick(menuItem);
-    handleDrawerClose();
-  };
+  const isActive = (path: string) => activePath === path || activePath.startsWith(`${path}/`);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (drawerRef.current && !(drawerRef.current as HTMLElement).contains(event.target as Node)) {
-        handleDrawerClose();
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const visibleItems = menuItems.filter((menuItem) => {
+    if (menuItem.text === 'YEN PURCHASE' && !showPurchaseMenu) return false;
+    if (menuItem.text === 'YEN BOOK' && !showBookMenu) return false;
+    if (menuItem.text === 'YEN INVENTORY' && !showInventoryMenu) return false;
+    if (menuItem.text === 'YEN REPORTS' && !showReportsMenu) return false;
+    if (menuItem.text === 'ACCOUNT SETTINGS' && !isSuperAdmin) return false;
+    if (menuItem.text === 'SETTINGS') return hasSettingsRead;
+    if (menuItem.text === 'MASTER-ADMIN' && !isSuperAdmin) return false;
+    if (menuItem.text === 'YEN POS' && !isSuperAdmin) return false;
+    if (menuItem.text === 'WHATSAPP' && !isSuperAdmin) return false;
+    return true;
+  });
+
+  const mainItems = visibleItems.filter((item) => !['ACCOUNT SETTINGS', 'SETTINGS', 'DISPLAY SETTINGS'].includes(item.text));
+  const systemItems = visibleItems.filter((item) => ['ACCOUNT SETTINGS', 'SETTINGS', 'DISPLAY SETTINGS'].includes(item.text));
+
+const renderItem = (menuItem: MenuItem) => {
+  const displayText = menuItem.text
+    .replace('MASTER-ADMIN', 'Master Admin')
+    .replace('YEN PURCHASE', 'YEN Purchase')
+    .replace('YEN INVENTORY', 'YEN Inventory')
+    .replace('YEN BOOK', 'YEN Book')
+    .replace('YEN REPORTS', 'YEN Reports')
+    .replace('ACCOUNT SETTINGS', 'Account Settings')
+    .replace('DISPLAY SETTINGS', 'Display Settings')
+    .replace('SETTINGS', 'Settings')
+    .replace('WHATSAPP', 'Whatsapp');
 
   return (
-    <div style={{ display: 'flex' }}>
-      <Drawer
-        ref={drawerRef}
-        classes={{ paper: 'drawer-paper' }}
-        variant="permanent"
-        open={open}
-        PaperProps={{ style: { width: open ? drawerWidth : 70 } }}
-      >
-        <div className={`drawer-header ${open ? 'open' : ''}`}>
-          {open && (
-            <div className="logo-container">
-              <Image
-                src="/images/bluelogo.png"
-                alt="YEN ERP Logo"
-                width={100}
-                height={40}
-                className="logo"
-                priority
-              />
-            </div>
-          )}
-          <IconButton onClick={open ? handleDrawerClose : handleDrawerOpen}>
-            {open ? <CloseIcon /> : <MenuIcon className="menu-header" />}
-          </IconButton>
-        </div>
+    <ListItem
+      button
+      key={menuItem.path}
+      onClick={() => onMenuClick(menuItem)}
+      className={`erp-sidebar-item ${
+        isActive(menuItem.path) ? 'is-active' : ''
+      }`}
+      title={collapsed ? displayText : undefined}
+    >
+      <ListItemIcon className="erp-sidebar-icon">
+        {menuItem.icon}
+      </ListItemIcon>
 
-        <List>
-          {menuItems
-            .filter((menuItem) => {
-              if (menuItem.text === "YEN PURCHASE" && !showPurchaseMenu) return false;
-              if (menuItem.text === "YEN BOOK" && !showBookMenu) return false;
-              if (menuItem.text === "YEN INVENTORY" && !showInventoryMenu) return false; // ✅ FIX
-              if (menuItem.text === "YEN REPORTS" && !showReportsMenu) return false;
-              //if (menuItem.text === "ACCOUNT SETTINGS" && !isSuperAdmin) return false;
-              //if (menuItem.text === "SETTINGS") return isSuperAdmin;
-              if (menuItem.text === "ACCOUNT SETTINGS" && !isSuperAdmin) return false;
-if (menuItem.text === "SETTINGS") return hasSettingsRead;
-              return true;
-            })
-            .map((menuItem, index) => (
-              <React.Fragment key={index}>
-                <ListItem
-  button
-  onClick={() => handleMenuItemClick(menuItem)}
-  className="menu-item"
-  sx={{
-    justifyContent: open ? 'flex-start' : 'center',
-    px: open ? 2 : 0,
-  }}
->
- <ListItemIcon sx={{ minWidth: 0, justifyContent: 'center', width: 70 }}>
-  <div style={{
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: 70,
-    overflow: 'hidden',
-    textAlign: 'center'
-  }}>
-    <span>{menuItem.icon}</span>
-    {!open && (
-      <Typography
-        variant="caption"
-        className="menu-text-small"
-        style={{
-          fontSize: '8px',
-          lineHeight: '1.1',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          width: '60px',
-          display: 'block'
-        }}
-      >
-        {menuItem.text}
-      </Typography>
-    )}
-  </div>
-</ListItemIcon>
-  {open && <ListItemText primary={menuItem.text} />}
-</ListItem>
-
-                {open && subMenuOpen === index && menuItem.subItems && (
-                  <List component="div" disablePadding>
-                    {menuItem.subItems.map((subItem, subIndex) => (
-                      <ListItem
-                        button
-                        className="menu-sub-item"
-                        onClick={() => handleMenuItemClick({
-                          path: `${menuItem.path}/${subItem.replace(/\s+/g, '')}`,
-                          text: subItem
-                        })}
-                        key={subIndex}
-                      >
-                        <ListItemText inset primary={subItem} />
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-              </React.Fragment>
-            ))}
-        </List>
-      </Drawer>
-    </div>
+      {collapsed ? (
+        <Typography
+          component="span"
+          className="erp-sidebar-icon-label"
+        >
+          {displayText}
+        </Typography>
+      ) : (
+        <ListItemText
+          primary={displayText}
+          primaryTypographyProps={{
+            className: 'erp-sidebar-label',
+          }}
+        />
+      )}
+    </ListItem>
   );
+};
+
+return (
+  <Drawer
+    variant="permanent"
+    className={`erp-sidebar ${
+      collapsed ? 'is-collapsed' : 'is-expanded'
+    }`}
+    PaperProps={{
+      className: 'erp-sidebar-paper',
+    }}
+  >
+    <button
+      type="button"
+      className="erp-sidebar-toggle"
+      onClick={onToggleCollapse}
+      aria-label={
+        collapsed
+          ? 'Expand sidebar'
+          : 'Collapse sidebar'
+      }
+      title={
+        collapsed
+          ? 'Expand sidebar'
+          : 'Collapse sidebar'
+      }
+    >
+      {collapsed ? (
+        <ChevronRightRoundedIcon />
+      ) : (
+        <ChevronLeftRoundedIcon />
+      )}
+    </button>
+
+<Box className="erp-sidebar-brand">
+  <Box className="erp-brand-mark">
+    <Image
+      src="/images/vmasoftlogo.jpeg"
+      alt="YEN ERP"
+      width={38}
+      height={38}
+      priority
+    />
+  </Box>
+
+  {!collapsed && (
+    <Box className="erp-sidebar-brand-text">
+      <Typography className="erp-brand-title">
+        YENERP
+      </Typography>
+    </Box>
+  )}
+</Box>
+
+    <Box className="erp-sidebar-scroll">
+      {!collapsed && (
+        <Typography className="erp-sidebar-section">
+          MAIN
+        </Typography>
+      )}
+
+<List disablePadding>
+  {mainItems.map(renderItem)}
+</List>
+
+      {systemItems.length > 0 && (
+        <>
+          {!collapsed && (
+            <Typography
+              className="erp-sidebar-section erp-sidebar-system"
+            >
+              SYSTEM
+            </Typography>
+          )}
+
+          <List disablePadding>
+            {systemItems.map(renderItem)}
+          </List>
+        </>
+      )}
+    </Box>
+
+<Box className="erp-sidebar-footer">
+  <BusinessOutlinedIcon />
+
+  {collapsed ? (
+    <span className="erp-sidebar-footer-mini-label">
+      Workspace
+    </span>
+  ) : (
+    <span className="erp-sidebar-footer-text">
+      YEN ERP Workspace
+    </span>
+  )}
+</Box>
+  </Drawer>
+);
 };
 
 export default SideMenu;

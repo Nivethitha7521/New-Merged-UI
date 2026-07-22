@@ -80,7 +80,7 @@ console.log("LOGIN DEBUG", {
   passwordLength: loginPassword.length,
   passwordValue: JSON.stringify(loginPassword),
 });
- const response = await fetch('http://127.0.0.1:8000/purchasetestapi/login', {
+ const response = await fetch('http://127.0.0.1:8000/yenerpapi/login', {
   method: 'POST',
   headers: {
 'Authorization': `Basic ${btoa(`${trimmedUsername}:${loginPassword}`)}`,

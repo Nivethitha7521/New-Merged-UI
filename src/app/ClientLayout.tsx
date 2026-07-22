@@ -6,13 +6,14 @@ import { RootState, AppDispatch } from '../redux/store';
 import { setupAxios } from "@/lib/axiosSetup";
 import { forceLogout } from "../features/authSlice";
 import { initializeAuth, validateToken, clearSnackbar } from '../features/authSlice';
-import SideMenu from '@/components/SideMenu';
-import Navbar from '@/components/Navbar';
+import PurchaseModuleSideMenu from '@/components/PurchaseModuleSideMenu';
+import BookModuleSideMenu from '@/components/BookModuleSideMenu';
 import { Toaster } from "react-hot-toast";
 import { fetchBusinesses } from '@/features/account-setting/businessSlice';
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-
+import SideMenu from '@/components/SideMenu';
+import Navbar from '@/components/Navbar';
 const PROTECTED_ROUTES = [
   '/yen-purchase',
   '/yen-pos',
@@ -24,6 +25,7 @@ const PROTECTED_ROUTES = [
   '/master-admin',
   '/account-settings',
   '/QlikReport',
+  '/WhatsApp',
 ];
 
 const LoadingSpinner = () => (
@@ -50,11 +52,42 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const { isLoggedIn, isInitialized, permissionReady, username, snackbarOpen, snackbarMessage } =
     useSelector((state: RootState) => state.auth);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
+const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+const [isPurchaseSubMenuOpen, setIsPurchaseSubMenuOpen] = useState(false);
+const [isBookSubMenuOpen, setIsBookSubMenuOpen] = useState(false);
+const [pendingPurchasePath, setPendingPurchasePath] =
+  useState<string | null>(null);
+const [pendingBookPath, setPendingBookPath] =
+  useState<string | null>(null);
+  useEffect(() => {
+  if (!pendingPurchasePath) return;
 
-  const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
+  const routeOpened =
+    pathname === pendingPurchasePath ||
+    pathname?.startsWith(`${pendingPurchasePath}/`);
+
+  if (routeOpened) {
+    setIsPurchaseSubMenuOpen(false);
+    setPendingPurchasePath(null);
+  }
+}, [pathname, pendingPurchasePath]);
+
+useEffect(() => {
+  if (!pendingBookPath) return;
+
+  const routeOpened =
+    pathname === pendingBookPath ||
+    pathname?.startsWith(`${pendingBookPath}/`);
+
+  if (routeOpened) {
+    setIsBookSubMenuOpen(false);
+    setPendingBookPath(null);
+  }
+}, [pathname, pendingBookPath]);
+
+const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
 
   const isProtectedRoute = useMemo(() =>
     PROTECTED_ROUTES.some(route => pathname?.startsWith(route)),
@@ -141,7 +174,7 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
-        const res = await fetch(`${API_BASE}/purchasetestapi/ping`, {
+        const res = await fetch(`${API_BASE}/yenerpapi/ping`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -278,35 +311,131 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </MuiAlert>
     </Snackbar>
   );
+const isPurchaseRoute =
+  pathname === '/yen-purchase' ||
+  pathname?.startsWith('/yen-purchase/');
 
+const isBookRoute =
+  pathname === '/yen-book' ||
+  pathname?.startsWith('/yen-book/');
   if (isLoggedIn) {
     return (
       <>
         <Toaster position="top-right" />
-        <div className="flex h-screen overflow-hidden">
-          {isMenuOpen && (
-            <SideMenu
-              onMenuClick={(menuItem) => {
-                setSelectedModule(menuItem.text);
-                router.push(menuItem.path);
-              }}
-              activePath={pathname || '/yen-purchase'}
-              showPurchaseMenu={hasPurchaseAccess}
-              showBookMenu={hasBookAccess}
-              showInventoryMenu={hasInventoryAccess}
-              showReportsMenu={hasReportsAccess}
-            />
-          )}
-          <div className={`flex flex-col flex-1 overflow-hidden ${isMenuOpen ? 'pl-12' : 'pl-0'}`}>
-            <Navbar
-              moduleName={selectedModule}
-              username={username || 'User'}
-              onToggleMenu={() => setIsMenuOpen(!isMenuOpen)}
-            />
-            <main className="flex-1 overflow-hidden px-2 py-0.5">
-              {children}
-            </main>
-          </div>
+        <div className="erp-app-shell">
+<SideMenu
+  collapsed={!isMenuOpen}
+  onToggleCollapse={() =>
+    setIsMenuOpen((previousValue) => !previousValue)
+  }
+  onMenuClick={(
+    menuItem: {
+      text: string;
+      path: string;
+    },
+  ) => {
+    setSelectedModule(menuItem.text);
+
+    if (menuItem.path === '/yen-purchase') {
+      setIsPurchaseSubMenuOpen((previous) => !previous);
+      setIsBookSubMenuOpen(false);
+
+      if (!pathname?.startsWith('/yen-purchase')) {
+        router.push('/yen-purchase');
+      }
+
+      return;
+    }
+
+    if (menuItem.path === '/yen-book') {
+      setIsBookSubMenuOpen((previous) => !previous);
+      setIsPurchaseSubMenuOpen(false);
+
+      if (!pathname?.startsWith('/yen-book')) {
+        router.push('/yen-book');
+      }
+
+      return;
+    }
+
+    setIsPurchaseSubMenuOpen(false);
+    setIsBookSubMenuOpen(false);
+    router.push(menuItem.path);
+  }}
+  activePath={pathname || '/yen-purchase'}
+  showPurchaseMenu={hasPurchaseAccess}
+  showBookMenu={hasBookAccess}
+  showInventoryMenu={hasInventoryAccess}
+  showReportsMenu={hasReportsAccess}
+/>
+          <div className="erp-app-main">
+<Navbar
+  moduleName={selectedModule}
+  username={username || 'User'}
+/>
+
+  <div className="erp-module-layout">
+{isPurchaseRoute && isPurchaseSubMenuOpen && (
+<PurchaseModuleSideMenu
+  onNavigate={(
+    menuItem: {
+      text: string;
+      path: string;
+    },
+  ) => {
+    setSelectedModule(menuItem.text);
+
+    const pageAlreadyOpen =
+      pathname === menuItem.path ||
+      pathname?.startsWith(`${menuItem.path}/`);
+
+    if (pageAlreadyOpen) {
+      setIsPurchaseSubMenuOpen(false);
+      setPendingPurchasePath(null);
+      return;
+    }
+
+    setPendingPurchasePath(menuItem.path);
+    router.push(menuItem.path);
+  }}
+/>
+    )}
+
+{isBookRoute && isBookSubMenuOpen && (
+  <BookModuleSideMenu
+    onNavigate={(
+      menuItem: {
+        text: string;
+        path: string;
+      },
+    ) => {
+      setSelectedModule(menuItem.text);
+
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
+
+      if (pageAlreadyOpen) {
+        setIsBookSubMenuOpen(false);
+        setPendingBookPath(null);
+        return;
+      }
+
+      setPendingBookPath(menuItem.path);
+      router.push(menuItem.path);
+    }}
+  />
+)}
+
+    <main
+      className={`erp-page-viewport ${
+        isPurchaseRoute ? 'erp-purchase-viewport' : ''
+      }`}
+    >
+      {children}
+    </main>
+  </div>
+</div>
         </div>
         {snackbarElement}
       </>

@@ -43,7 +43,7 @@ export const createUser = createAsyncThunk(
   'users/createUser',
   async (userData: CreateUserPayload): Promise<User> => {
     const token = sessionStorage.getItem('accessToken');
-    const response = await fetch('http://127.0.0.1:8000/purchasetestapi/users', {
+    const response = await fetch('http://127.0.0.1:8000/yenerpapi/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const loginUser = createAsyncThunk(
   'users/loginUser',
   async (loginData: LoginPayload): Promise<User> => {
     // Note: this is employee-level login, no token exists yet — leave as-is
-    const response = await fetch('http://127.0.0.1:8000/purchasetestapi/users/login', {
+    const response = await fetch('http://127.0.0.1:8000/yenerpapi/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(loginData)

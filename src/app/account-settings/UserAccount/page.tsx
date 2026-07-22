@@ -25,7 +25,7 @@ import {
 } from "@/features/account-setting/userSlice";
 import { authFetch } from "@/utils/authFetch";
 
-const API_BASE = "http://127.0.0.1:8000/purchasetestapi";
+const API_BASE = "http://127.0.0.1:8000/yenerpapi";
 
 const PREDEFINED_ROLES = [
   "Admin",
