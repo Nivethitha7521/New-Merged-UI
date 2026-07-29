@@ -106,19 +106,23 @@ const DiscountDialog: React.FC<DiscountDialogProps> = ({
   }, [discountData.id]);
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        className: "dialog-paper-small"
-      }}
-      TransitionProps={{
-        onEntered: handleTransitionEntered
-      }}
-    >
-      <DialogTitle className='dialog-title'>{mode === 'edit' ? 'Edit' : 'Add'} Discount</DialogTitle>
+<Dialog
+  open={open}
+  onClose={handleClose}
+  maxWidth="sm"
+  fullWidth
+  className="ma-scope discount-form-dialog"
+  PaperProps={{
+    className: "dialog-paper-small",
+  }}
+  TransitionProps={{
+    onEntered: handleTransitionEntered,
+  }}
+>
+    <DialogTitle className="dialog-title">
+  {mode === "edit" ? "Edit Discount" : "Add Discount"}
+</DialogTitle>
+
       <DialogContent className='dialog-content'>
 
         <div className="form-section">

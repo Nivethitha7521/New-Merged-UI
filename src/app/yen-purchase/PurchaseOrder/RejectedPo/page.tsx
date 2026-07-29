@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from "next/navigation";
-
+import PurchaseOrderTabs from '@/components/yen-purchase/purchaseorder/PurchaseOrderTabs';
 import {
   Box, TextField, Button, Typography, Grid, Paper,
   TableContainer, Table, TableHead, TableRow, TableCell, TableBody,
@@ -1179,9 +1179,10 @@ const RejectedPo: React.FC = () => {
   }
 
   return (
-    <Box>
-      <YenPurchasePage />
-      <Box sx={{ px: 2, py: 1, backgroundColor: 'white' }}>
+<Box className="purchase-page-shell purchase-order-module-page">
+  <YenPurchasePage />
+
+  <Box className="purchase-order-content">
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {/* First Row: Purchase Order Links and Typography */}
           <Box
@@ -1193,57 +1194,14 @@ const RejectedPo: React.FC = () => {
             }}
           >
             {/* Purchase Order Links */}
-            {!isPendingHidden && (
-            <Link href={"/yen-purchase/PurchaseOrder"}>
-              <Button variant="contained" color="primary">
-                Pending
-              </Button>
-            </Link>
-            )}
-              {!isApprovedHidden && canViewApproved && (
-            <Link href={"/yen-purchase/PurchaseOrder/Approvedpo"}>
-              <Button variant="contained" color="primary">
-                Approved
-              </Button>
-            </Link>
-              )}
-               {!isRejectedHidden && canViewRejected && (
-            <Link href={"/yen-purchase/PurchaseOrder/RejectedPo"}>
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: 'white',
-                  color: 'black',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                  },
-                }}
-              >
-                Rejected
-              </Button>
-            </Link>
-               )}
-{isGrnConvertedVisible && (
-            <Link href={"/yen-purchase/PurchaseOrder/GRNConvertedPO"}>
-              <Button
-                variant="contained"
-                color="primary"
-              >
-                GRN Converted
-              </Button>
-            </Link>
-          )}
-          {isHoldGrnVisible && (
-  <Link href={"/yen-purchase/PurchaseOrder/HoldGrn"}>
-    <Button
-      variant="contained"
-      color="primary"
-      sx={{ ml: 1 }}
-    >
-      Hold GRN
-    </Button>
-  </Link>
-)}
+<PurchaseOrderTabs
+  activeTab="rejected"
+  showPending={!isPendingHidden}
+  showApproved={!isApprovedHidden && canViewApproved}
+  showRejected={!isRejectedHidden && canViewRejected}
+  showGrnConverted={Boolean(isGrnConvertedVisible)}
+  showHoldGrn={Boolean(isHoldGrnVisible)}
+/>
           </Box>
           
           <Box
@@ -1332,64 +1290,30 @@ const RejectedPo: React.FC = () => {
               </Grid>
               
               {/* Filter Icon */}
-              <Grid item>
-                <IconButton
-                  onClick={handleFilterClick}
-                  className="icon-button-outline"
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <FilterAltIcon fontSize="small" />
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 60,
-                    wordBreak: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Filter
-                </Typography>
-              </Grid>
+              <Grid item xs="auto">
+  <IconButton
+    type="button"
+    onClick={handleFilterClick}
+    className="purchase-order-toolbar-icon is-filter"
+    aria-label="Apply rejected PO filters"
+    title="Apply filters"
+  >
+    <FilterAltIcon fontSize="small" />
+  </IconButton>
+</Grid>
               
               {/* Filter Clear Icon */}
-              <Grid item>
-                <IconButton
-                  onClick={handleFilterClose}
-                  className="icon-button-outline"
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 60,
-                    wordBreak: 'break-word',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Clear
-                </Typography>
-              </Grid>
+              <Grid item xs="auto">
+  <IconButton
+    type="button"
+    onClick={handleFilterClose}
+    className="purchase-order-toolbar-icon is-clear"
+    aria-label="Clear rejected PO filters"
+    title="Clear filters"
+  >
+    <ClearIcon fontSize="small" />
+  </IconButton>
+</Grid> 
               
               {/* Spacer to push download to the end */}
               <Grid item sx={{ flexGrow: 1 }} />
@@ -1407,23 +1331,22 @@ const RejectedPo: React.FC = () => {
                   >
                     {loading ? <CircularProgress size={16} /> : <DownloadIcon fontSize="small" />}
                   </IconButton>
-                  <Typography
-                    variant="caption"
-                    align="center"
-                    sx={{
-                      maxWidth: 60,
-                      wordBreak: 'break-word',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      lineHeight: 1.1,
-                      mt: 0.2,
-                    }}
-                  >
-                    Download
-                  </Typography>
+                 <Button
+  type="button"
+  variant="outlined"
+  startIcon={
+    loading ? (
+      <CircularProgress size={15} />
+    ) : (
+      <DownloadIcon />
+    )
+  }
+  onClick={handleClick}
+  disabled={!filteredOrders || filteredOrders.length === 0}
+  className="purchase-reference-action-button purchase-order-toolbar-button"
+>
+  Download
+</Button>
                   <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
@@ -1440,7 +1363,9 @@ const RejectedPo: React.FC = () => {
           </Box>
         </Box>
         
-        <TableContainer component={Paper} sx={{
+        <TableContainer component={Paper} 
+          className="purchase-master-table purchase-order-table"
+sx={{
           maxHeight: 'calc(100vh - 230px)', // Dynamic height based on viewport
           overflowY: 'auto',
           width: '100%',
@@ -1475,47 +1400,53 @@ const RejectedPo: React.FC = () => {
                       <TableCell>{order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : ''}</TableCell> {/* Custom format */}
                       <TableCell className='table-number-right'>{totalQuantity}</TableCell>
                       <TableCell className='table-number-right'>{(order.pendingOrderAmount ?? 0).toFixed(2)}</TableCell>
-                      <TableCell>{order.poStatus}</TableCell>
-                      <TableCell>
-                        <Box display="flex" alignItems="center">
-                          {/* View Button with Eye Icon - RESTORED */}
-                         <Tooltip title="View Details">
-                            <IconButton
-                              onClick={() =>
-                                canViewRejected &&
-                                handleViewDetailsClick(order.purchaseOrderId)
-                              }
-                              color="primary"
-                              disabled={!canViewRejected}
-                            >
-                              <VisibilityIcon />
-                            </IconButton>
-                          </Tooltip>
+                    <span className="purchase-master-status-pill is-rejected">
+  {order.poStatus || 'Rejected'}
+</span>
+                     <TableCell>
+  <Box className="purchase-order-actions">
+    <Tooltip title="View Details">
+      <span>
+        <IconButton
+          onClick={() =>
+            canViewRejected &&
+            handleViewDetailsClick(order.purchaseOrderId)
+          }
+          disabled={!canViewRejected}
+          className="purchase-master-action-button is-view"
+          aria-label="View rejected purchase order"
+        >
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
 
-                          <Tooltip title="Download">
-                            <IconButton
-                              color="primary"
-                              onClick={() =>
-                                handleDownload(order.purchaseOrderId)
-                              }
-                              disabled={!canViewRejected}
-                              // Can download if can view
-                            >
-                              <PictureAsPdfIcon />
-                            </IconButton>
-                          </Tooltip>
-     <Tooltip title="View Stock & Price Update History">
-                            <IconButton
-                              onClick={() => handleViewStockLogs(order)}
-                              color="info"
-                              sx={{ mr: 0.5 }}
-                              size="small"
-                            >
-                              <InventoryIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      </TableCell>
+    <Tooltip title="Download">
+      <span>
+        <IconButton
+          onClick={() =>
+            handleDownload(order.purchaseOrderId)
+          }
+          disabled={!canViewRejected}
+          className="purchase-master-action-button is-download"
+          aria-label="Download rejected purchase order"
+        >
+          <PictureAsPdfIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+
+    <Tooltip title="View Stock & Price Update History">
+      <IconButton
+        onClick={() => handleViewStockLogs(order)}
+        className="purchase-master-action-button is-history"
+        aria-label="View stock update history"
+      >
+        <InventoryIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  </Box>
+</TableCell>
                     </TableRow>
                   );
                 })
@@ -1605,6 +1536,7 @@ const RejectedPo: React.FC = () => {
         }}>
           <TableContainer
             component={Paper}
+            className="purchase-master-table purchase-order-table"
             sx={{
               maxHeight: 'calc(100vh - 230px)', // Dynamic height based on viewport
               overflowY: 'auto',

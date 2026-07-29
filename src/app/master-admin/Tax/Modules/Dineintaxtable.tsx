@@ -6,7 +6,7 @@ import {
   Switch,
   FormControlLabel,
   Box,
-  Typography,
+  Typography,Button,Tooltip,
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -53,69 +53,45 @@ interface ToolbarProps {
   onAdd: () => void;
 }
 
-const Toolbar = React.memo<ToolbarProps>(({ showDeactivated, onToggle, onAdd }) => (
-  <Box
-    display="flex"
-    flexDirection={{ xs: 'column', sm: 'row' }}
-    alignItems={{ xs: 'flex-start', sm: 'center' }}
-    justifyContent="space-between"
-    my={1}
-    ml={1}
-    px={{ xs: 2, sm: 3 }}
-    sx={{ width: '99%', boxSizing: 'border-box', mt: 2 }}
-  >
-    <Typography
-      className="icon-action-label"
-      sx={{
-        fontFamily: "'Poppins', sans-serif",
-        fontWeight: 750,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        maxWidth: '100%',
-        margin: 0,
-      }}
-    >
-      {showDeactivated ? 'Deactivated DineIn Taxes' : 'Active DineIn Taxes'}
+const Toolbar = React.memo<ToolbarProps>(
+({ showDeactivated, onToggle, onAdd }) => (
+
+<Box className="tax-master-toolbar">
+
+    <Typography className="tax-master-toolbar-title">
+        {showDeactivated
+            ? "Deactivated DineIn Taxes"
+            : "Active DineIn Taxes"}
     </Typography>
 
-    <div className="flex items-center gap-4">
-      {!showDeactivated && (
-        <div className="icon-action-wrapper">
-          <IconButton
-            color="primary"
-            onClick={onAdd}
-            className="icon-action-button"
-            aria-label="Add DineIn Tax"
-            title="Add"
-          >
-            <AddIcon className="icon-action-svg" />
-          </IconButton>
-          <Typography className="icon-action-label">Add</Typography>
-        </div>
-      )}
+    <Box className="tax-master-toolbar-actions">
 
-      <FormControlLabel
-        control={
-          <Switch
-            checked={showDeactivated}
-            onChange={onToggle}
-            color="primary"
-            size="small"
-          />
-        }
-        label={showDeactivated ? 'Show Activated' : 'Show Deactivated'}
-        sx={{
-          marginLeft: 1,
-          marginRight: 1,
-          '& .MuiFormControlLabel-label': {
-            fontSize: '0.75rem',
-            fontFamily: "'Poppins', sans-serif",
-          },
-        }}
-      />
-    </div>
-  </Box>
+        {!showDeactivated && (
+            <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={onAdd}
+                className="purchase-reference-action-button"
+            >
+                Add New
+            </Button>
+        )}
+
+        <Box className="purchase-reference-active-toggle">
+            <Typography component="span">
+                Show Active Only
+            </Typography>
+
+            <Switch
+                checked={!showDeactivated}
+                onChange={onToggle}
+            />
+        </Box>
+
+    </Box>
+
+</Box>
+
 ));
 
 Toolbar.displayName = 'Toolbar';
@@ -133,10 +109,30 @@ const TableHeader = React.memo<TableHeaderProps>(({ maxCodes }) => {
   return (
     <thead>
       <tr>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>S.NO</th>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>DineIn Tax Name</th>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>DineIn Tax Percentage</th>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>DineIn HSN Code</th>
+<th rowSpan={rowSpan} className="tax-column-sno">
+  S.NO
+</th>
+
+<th
+  rowSpan={rowSpan}
+  className="dinein-tax-column-name"
+>
+  DineIn Tax Name
+</th>
+
+<th
+  rowSpan={rowSpan}
+  className="dinein-tax-column-percentage"
+>
+  DineIn Tax Percentage
+</th>
+
+<th
+  rowSpan={rowSpan}
+  className="dinein-tax-column-hsn"
+>
+  DineIn HSN Code
+</th>
 
         {hasCodeCols &&
           Array.from({ length: maxCodes }, (_, i) => (
@@ -204,39 +200,51 @@ const ActionCell = React.memo<ActionCellProps>(
     const handleActivate   = useCallback(() => onActivate(tax),   [tax, onActivate]);
     const handleDeactivate = useCallback(() => onDeactivate(tax), [tax, onDeactivate]);
 
-    return (
-      <td style={{ textAlign: 'center' }}>
-        {showDeactivated ? (
-          <button
+return (
+  <td className="tax-column-actions">
+    <Box className="purchase-master-actions">
+      {showDeactivated ? (
+        <Tooltip title="Activate DineIn tax" arrow>
+          <IconButton
+            type="button"
             onClick={handleActivate}
-            className="activate-btn"
-            title="Activate"
+            className="purchase-master-action-button is-activate"
             aria-label={`Activate ${tax.DineInTaxName}`}
           >
-            <RefreshIcon />
-          </button>
-        ) : (
-          <>
-            <button
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <>
+          <Tooltip title="Edit DineIn tax" arrow>
+            <IconButton
+              type="button"
               onClick={handleEdit}
-              className="edit-btn"
-              title="Edit"
+              className="purchase-master-action-button is-edit"
               aria-label={`Edit ${tax.DineInTaxName}`}
             >
-              <EditIcon />
-            </button>
-            <button
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip
+            title="Deactivate DineIn tax"
+            arrow
+          >
+            <IconButton
+              type="button"
               onClick={handleDeactivate}
-              className="deactivate-btn"
-              title="Deactivate"
+              className="purchase-master-action-button is-delete"
               aria-label={`Deactivate ${tax.DineInTaxName}`}
             >
-              <DeleteIcon />
-            </button>
-          </>
-        )}
-      </td>
-    );
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
+    </Box>
+  </td>
+);
   }
 );
 
@@ -257,10 +265,33 @@ interface TaxRowProps {
 const TaxRow = React.memo<TaxRowProps>(
   ({ tax, index, maxCodes, showDeactivated, onEdit, onActivate, onDeactivate }) => (
     <tr key={tax.id ?? index}>
-      <td style={{ textAlign: 'center' }}>{index + 1}</td>
-      <td style={{ textAlign: 'center' }}>{tax.DineInTaxName}</td>
-      <td style={{ textAlign: 'center' }}>{formatPercent(tax.DineInTaxPercentage)}</td>
-      <td style={{ textAlign: 'center' }}>{tax.DineInhsnCode}</td>
+    <td className="tax-column-sno">
+  {index + 1}
+</td>
+
+<td className="dinein-tax-column-name">
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(tax.DineInTaxName || "?")
+        .charAt(0)
+        .toUpperCase()}
+    </span>
+
+    <span>{tax.DineInTaxName}</span>
+  </Box>
+</td>
+
+<td className="dinein-tax-column-percentage">
+  <span className="purchase-master-value-pill">
+    {formatPercent(tax.DineInTaxPercentage)}
+  </span>
+</td>
+
+<td className="dinein-tax-column-hsn">
+  <span className="purchase-master-id-pill">
+    {tax.DineInhsnCode}
+  </span>
+</td>
 
       {maxCodes > 0 &&
         Array.from({ length: maxCodes }, (_, i) => {
@@ -355,15 +386,21 @@ const DineInTaxTableContainer: React.FC<DineInTaxTableContainerProps> = ({
         onAdd={handleOpen}
       />
 
-      <div
-        className="table-container my-1"
-        style={{ maxHeight: 'calc(55.5vh - 170px)', overflowX: 'auto' }}
-      >
+      <Box className="purchase-master-table-shell tax-table-shell">
+
+    <div className="purchase-native-table-wrapper">
+
         <table
-          className="custom-table"
-          aria-label={showDeactivated ? 'Deactivated DineIn Taxes' : 'Active DineIn Taxes'}
-          aria-busy={loading}
-          style={{ minWidth: tableMinWidth }}
+            className="purchase-native-table tax-native-table dinein-tax-native-table"
+            aria-label={
+                showDeactivated
+                    ? "Deactivated DineIn Taxes"
+                    : "Active DineIn Taxes"
+            }
+            aria-busy={loading}
+            style={{
+                minWidth: tableMinWidth,
+            }}
         >
           <TableHeader maxCodes={maxCodes} />
 
@@ -396,6 +433,7 @@ const DineInTaxTableContainer: React.FC<DineInTaxTableContainerProps> = ({
           </tbody>
         </table>
       </div>
+      </Box>
     </>
   );
 };

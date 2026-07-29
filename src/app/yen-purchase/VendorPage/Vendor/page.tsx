@@ -11,6 +11,7 @@ import {
 import { fetchVendorTypeItems }
 from '../../../../features/yen-purchase/PurchaseMaster/VendorTypeSlice';
 import { fetchBank } from '@/features/yen-purchase/Outgoing/outgoingPaymentSlice';
+// import MenuPage from '../page';'
 import MenuPage from '../page';
 import VendorToolbar from '../../../../components/yen-purchase/vendorcomponent/vendorToolbar';
 import VendorPagination from '../../../../components/yen-purchase/vendorcomponent/vendorPagination';
@@ -88,10 +89,11 @@ if (!isModuleVisible("yenerp", "vendors")) {
   return null;
 
 }
-  return (
-    <Box>
-      <MenuPage />
-      <Box sx={{ px: 2 }}>
+return (
+  <Box className="purchase-page-shell vendor-module-page">
+    <MenuPage />
+
+    <Box className="purchase-module-content">
         <VendorToolbar
           searchInputValue={searchInputValue}
           setSearchInputValue={setSearchInputValue}

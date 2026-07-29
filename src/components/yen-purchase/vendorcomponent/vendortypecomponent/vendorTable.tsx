@@ -4,8 +4,11 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton,
   Box
 } from '@mui/material';
-import { Refresh as RefreshIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
-import ConfirmationDialog from '../../../confirmationDialog';
+import {
+  RestoreRounded as RefreshIcon,
+  DeleteOutlineRounded as DeleteIcon,
+  EditOutlined as EditIcon,
+} from '@mui/icons-material';import ConfirmationDialog from '../../../confirmationDialog';
 
 interface VendorType {
   vendortypeId: string;
@@ -58,10 +61,11 @@ const VendorTable: React.FC<VendorTableProps> = ({
     handleConfirmClose();
   };
 
-  return (
-    <Box marginLeft={2}>
-  <TableContainer
-        component={Paper}
+return (
+  <Box className="purchase-master-table-shell vendor-type-table-shell">
+    <TableContainer
+      component={Paper}
+      className="purchase-master-table vendor-type-master-table"
         sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
           overflowY: 'auto',
@@ -81,62 +85,104 @@ const VendorTable: React.FC<VendorTableProps> = ({
           <TableBody>
             {vendorTypes.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align='center'>No Vendor Type Data</TableCell>
+              <TableCell
+  colSpan={5}
+  align="center"
+  className="purchase-master-empty-cell"
+>
+  No Vendor Type Data
+</TableCell>
               </TableRow>
             ) : (
               vendorTypes.map((vendorType, index) => (
-                <TableRow key={vendorType.randomId}>
-                  <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{vendorType.randomId}</TableCell>
-                  <TableCell>{vendorType.vendorType}</TableCell>
-                  <TableCell>{vendorType.status}</TableCell>
-                  <TableCell>
-                    {vendorType.status === 'active' ? (
-                      <>
-                         <IconButton 
-                          onClick={() => onEdit(vendorType.vendortypeId)}
-                          disabled={!canEdit}
-                          sx={{ 
-                            opacity: canEdit ? 1 : 0.5,
-                            '&.Mui-disabled': {
-                              opacity: 0.5,
-                              color: 'text.disabled'
-                            }
-                          }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                         <IconButton 
-                          onClick={() => handleConfirmOpen('deactivate', vendorType.vendortypeId)}
-                          disabled={!canDelete}
-                          sx={{ 
-                            opacity: canDelete ? 1 : 0.5,
-                            '&.Mui-disabled': {
-                              opacity: 0.5,
-                              color: 'text.disabled'
-                            }
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </>
-                    ) : (
-                      <IconButton 
-                        onClick={() => handleConfirmOpen('activate', vendorType.vendortypeId)}
-                        disabled={!canDelete}
-                        sx={{ 
-                          opacity: canDelete ? 1 : 0.5,
-                          '&.Mui-disabled': {
-                            opacity: 0.5,
-                            color: 'text.disabled'
-                          }
-                        }}
-                      >
-                        <RefreshIcon />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                </TableRow>
+<TableRow key={vendorType.randomId}>
+  <TableCell className="table-number-right">
+    {index + 1}
+  </TableCell>
+
+  <TableCell>
+    <span className="purchase-master-id-pill">
+      {vendorType.randomId || '-'}
+    </span>
+  </TableCell>
+
+  <TableCell>
+    <Box className="purchase-master-name-cell">
+      <span className="purchase-master-avatar">
+        {(vendorType.vendorType || '?')
+          .charAt(0)
+          .toUpperCase()}
+      </span>
+
+      <span>{vendorType.vendorType || '-'}</span>
+    </Box>
+  </TableCell>
+
+  <TableCell>
+    <span
+      className={`purchase-master-status-pill ${
+        vendorType.status === 'active'
+          ? 'is-active'
+          : 'is-inactive'
+      }`}
+    >
+      {vendorType.status}
+    </span>
+  </TableCell>
+
+  <TableCell>
+    <Box className="purchase-master-actions">
+      {vendorType.status === 'active' ? (
+        <>
+          <IconButton
+            type="button"
+            onClick={() =>
+              onEdit(vendorType.vendortypeId)
+            }
+            disabled={!canEdit}
+            className="purchase-master-action-button is-edit"
+            aria-label="Edit vendor type"
+            title="Edit vendor type"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+
+          <IconButton
+            type="button"
+            onClick={() =>
+              handleConfirmOpen(
+                'deactivate',
+                vendorType.vendortypeId,
+              )
+            }
+            disabled={!canDelete}
+            className="purchase-master-action-button is-delete"
+            aria-label="Deactivate vendor type"
+            title="Deactivate vendor type"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </>
+      ) : (
+        <IconButton
+          type="button"
+          onClick={() =>
+            handleConfirmOpen(
+              'activate',
+              vendorType.vendortypeId,
+            )
+          }
+          disabled={!canDelete}
+          className="purchase-master-action-button is-activate"
+          aria-label="Activate vendor type"
+          title="Activate vendor type"
+        >
+          <RefreshIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  </TableCell>
+</TableRow>
               ))
             )}
           </TableBody>

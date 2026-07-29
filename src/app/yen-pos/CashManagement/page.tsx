@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 
 
 const subItems = [
@@ -28,7 +28,7 @@ const CashManagementPage = () => {
     if (pathname === '/yen-pos/CashManagement' || pathname === '/yen-pos/CashManagement/') {
       return (
         <Box>
-          <MasterAdminMenu />
+          {/* <MasterAdminMenu /> */}
         </Box>
       );
     }
@@ -38,7 +38,7 @@ const CashManagementPage = () => {
 
   return (
     <Box>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 3, ml: 4.5, mt: 1 }}>
         {subItems.map((item) => {
           const isActive = isActiveRoute(item.path);

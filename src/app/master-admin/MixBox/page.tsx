@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Snackbar } from '@mui/material';
 import { AppDispatch, RootState } from '../../../redux/store';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   activateMixBox,
   addMixBox,
@@ -356,8 +356,8 @@ const MixBoxComponent: React.FC = () => {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <>
-      <MasterAdminMenu />
+    <div className="mixbox-master-page">
+      {/* <MasterAdminMenu /> */}
 
       <MixBoxTableContainer
         handleEdit={handleEdit}
@@ -429,7 +429,7 @@ const MixBoxComponent: React.FC = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </>
+    </div>
   );
 };
 

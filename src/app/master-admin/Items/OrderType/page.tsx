@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../redux/store';
 import { Snackbar, Alert } from '@mui/material';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   activateOrderType,
   addOrderType,
@@ -213,7 +213,7 @@ const OrderTypeComponent: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <OrderTypeTable
         handleOpen={handleOpen}

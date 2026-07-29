@@ -177,7 +177,7 @@ const DeliveryOrdersPage: React.FC = () => {
 
   return (
     <Box>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
 
       <Typography className='icon-action-label'

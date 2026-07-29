@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { Button, Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 
 const subItems = [
 
@@ -29,7 +29,7 @@ const MenuPage = () => {
   if (pathname === '/master-admin/KOTMaster' || pathname === '/master-admin/KOTMaster/') {
     return (
       <Box>
-        <MasterAdminMenu />
+        {/* <MasterAdminMenu /> */}
       </Box>
     );
   }
@@ -39,7 +39,7 @@ const MenuPage = () => {
 
   return (
     <Box>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 1, ml: 4.5, mt: 1 }}>
         {subItems.map((item) => {
           const isActive = isActiveRoute(item.path);

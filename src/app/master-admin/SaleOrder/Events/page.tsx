@@ -175,7 +175,7 @@ const EventTable: React.FC = () => {
 
   return (
     <>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
 
 

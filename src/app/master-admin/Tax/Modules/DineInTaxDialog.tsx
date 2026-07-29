@@ -9,7 +9,7 @@ import {
   TextField,
   CircularProgress,
   Tooltip,
-  IconButton,
+  IconButton,Box,Typography,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -356,20 +356,23 @@ const DineInTaxDialog: React.FC<DineInTaxDialogProps> = ({
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{ className: 'dialog-paper-small' }}
-    >
+<Dialog
+  open={open}
+  onClose={handleClose}
+  maxWidth="sm"
+  fullWidth
+  className="master-admin-form-dialog tax-form-dialog dinein-tax-form-dialog"
+  PaperProps={{
+    className:
+      "dialog-paper-small master-admin-form-dialog-paper tax-dialog-paper",
+  }}
+>
       <DialogTitle className="dialog-title">
         {isAddMode ? 'Add' : 'Edit'} DineIn Tax
       </DialogTitle>
 
-      <DialogContent className="dialog-content">
-        <div className="form-section">
-
+    <DialogContent className="dialog-content master-admin-form-content">
+  <div className="form-section tax-form-section">
           {/* Tax Name */}
           <TextField
             autoComplete="off"

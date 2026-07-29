@@ -187,14 +187,15 @@ const VehicleDialog: React.FC<VehicleDialogProps> = ({
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={DIALOG_PAPER_PROPS}
-      TransitionProps={{ onEntered: focusInput }}
-    >
+<Dialog
+  open={open}
+  onClose={onClose}
+  maxWidth="md"
+  fullWidth
+className="ma-scope vehicle-form-dialog"
+  PaperProps={DIALOG_PAPER_PROPS}
+  TransitionProps={{ onEntered: focusInput }}
+>
       <DialogTitle className="dialog-title">
         {mode === 'edit' ? 'Edit Vehicle' : 'Add New Vehicle'}
       </DialogTitle>

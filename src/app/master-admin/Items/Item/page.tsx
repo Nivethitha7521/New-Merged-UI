@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Box, Pagination, debounce } from '@mui/material';
 import { RootState, AppDispatch } from '../../../../redux/store';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import { fetchItems, setCurrentPage, fetchItemById, fetchDeactivatedItems } from '../../../master-admin/Items/Item/Features/itemSlice';
 import ItemActions from '../itemComponets/itemaction';
 import ItemsTable from '../itemComponets/itemteble';
@@ -179,7 +179,7 @@ function Items() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <Box>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, ml: 2 }}>
         <ItemActions

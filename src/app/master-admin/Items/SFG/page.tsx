@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert, SelectChangeEvent, debounce } from '@mui/material';
 
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   activateSfg,
   addSfg,
@@ -286,7 +286,7 @@ const SFGComponent: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <SfgTableContainer
         handleEdit={handleEdit}

@@ -10,7 +10,7 @@ import {
   TextField,
   CircularProgress,
   Tooltip,
-  IconButton,
+  IconButton,Box,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -312,18 +312,22 @@ const TaxDialog: React.FC<TaxDialogProps> = ({
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{ className: 'dialog-paper-small' }}
-    >
+  open={open}
+  onClose={handleClose}
+  maxWidth="sm"
+  fullWidth
+  className="master-admin-form-dialog tax-form-dialog"
+  PaperProps={{
+    className:
+      "dialog-paper-small master-admin-form-dialog-paper tax-dialog-paper",
+  }}
+>
       <DialogTitle className="dialog-title">
         {isEditMode ? 'Edit' : 'Add'} Tax
       </DialogTitle>
 
-      <DialogContent className="dialog-content">
-        <div className="form-section">
+<DialogContent className="dialog-content master-admin-form-content">
+  <div className="form-section tax-form-section">
 
           {/* Tax Name — editable in both add and edit modes */}
           <TextField
@@ -402,16 +406,23 @@ const TaxDialog: React.FC<TaxDialogProps> = ({
         </div>
       </DialogContent>
 
-      <DialogActions className="dialog-actions">
-        <button className="btn-secondary" onClick={handleClose} disabled={isSubmitting}>
-          Cancel
-        </button>
-        <button
-          className="btn-primary"
-          onClick={handleSubmit}
-          disabled={isSubmitDisabled}
-          aria-busy={isSubmitting}
-        >
+<DialogActions className="dialog-actions master-admin-form-actions">
+  <button
+    type="button"
+    className="btn-secondary master-admin-dialog-button is-secondary"
+    onClick={handleClose}
+    disabled={isSubmitting}
+  >
+    Cancel
+  </button>
+
+  <button
+    type="button"
+    className="btn-primary master-admin-dialog-button is-primary"
+    onClick={handleSubmit}
+    disabled={isSubmitDisabled}
+    aria-busy={isSubmitting}
+  >
           {isSubmitting ? (
             <CircularProgress size={24} color="inherit" />
           ) : isEditMode ? (

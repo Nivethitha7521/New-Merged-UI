@@ -5,14 +5,18 @@ import { usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import {
   Box,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   Typography,
 } from '@mui/material';
 
 import {
+  ChevronLeftRounded,
+  ChevronRightRounded,
   SpaceDashboardOutlined,
   StorefrontOutlined,
   Inventory2Outlined,
@@ -26,6 +30,8 @@ import { RootState } from '@/redux/store';
 import './PurchaseModuleSideMenu.css';
 
 interface PurchaseModuleSideMenuProps {
+  expanded: boolean;
+  onToggle: () => void;
   onNavigate: (item: { path: string; text: string }) => void;
 }
 
@@ -103,7 +109,11 @@ const purchaseModules: PurchaseModuleItem[] = [
 
 const PurchaseModuleSideMenu: React.FC<
   PurchaseModuleSideMenuProps
-> = ({ onNavigate }) => {
+> = ({
+  expanded,
+  onToggle,
+  onNavigate,
+}) => {
   const pathname = usePathname();
 
   const permissions = useSelector(
@@ -136,52 +146,104 @@ const PurchaseModuleSideMenu: React.FC<
   const isActive = (path: string) =>
     pathname === path || pathname?.startsWith(`${path}/`);
 
-  return (
-    <Box className="purchase-module-sidebar">
-      <Box className="purchase-module-sidebar-header">
-        <Typography className="purchase-module-sidebar-caption">
-          MODULE
-        </Typography>
+return (
+  <Box
+    className={`purchase-module-sidebar ${
+      expanded ? 'is-expanded' : 'is-collapsed'
+    }`}
+  >
+    <Box className="purchase-module-sidebar-header">
+      <Tooltip
+        title={!expanded ? 'YEN Purchase' : ''}
+        placement="right"
+        arrow
+      >
+        <Box className="purchase-module-brand">
+          <Box className="purchase-module-logo">
+            <ShoppingCartCheckoutOutlined />
+          </Box>
 
-        <Typography className="purchase-module-sidebar-title">
-          YEN Purchase
-        </Typography>
-
-        <Typography className="purchase-module-sidebar-description">
-          Purchase management
-        </Typography>
-      </Box>
-
-      <List disablePadding className="purchase-module-list">
-        {visibleModules.map((module) => (
-          <ListItem
-            button
-            key={module.path}
-            onClick={() =>
-              onNavigate({
-                path: module.path,
-                text: module.text,
-              })
-            }
-            className={`purchase-module-item ${
-              isActive(module.path) ? 'is-active' : ''
+          <Box
+            className={`purchase-module-brand-content ${
+              expanded ? 'is-visible' : ''
             }`}
           >
-            <ListItemIcon className="purchase-module-icon">
-              {module.icon}
-            </ListItemIcon>
+            <Typography className="purchase-module-sidebar-caption">
+              MODULE
+            </Typography>
 
-            <ListItemText
-              primary={module.text}
-              primaryTypographyProps={{
-                className: 'purchase-module-label',
-              }}
-            />
-          </ListItem>
-        ))}
-      </List>
+            <Typography className="purchase-module-sidebar-title">
+              YEN Purchase
+            </Typography>
+
+            <Typography className="purchase-module-sidebar-description">
+              Purchase management
+            </Typography>
+          </Box>
+        </Box>
+      </Tooltip>
+
+      <IconButton
+        type="button"
+        className="purchase-module-toggle"
+        onClick={onToggle}
+        aria-label={
+          expanded
+            ? 'Collapse purchase navigation'
+            : 'Expand purchase navigation'
+        }
+        aria-expanded={expanded}
+      >
+        {expanded ? (
+          <ChevronLeftRounded />
+        ) : (
+          <ChevronRightRounded />
+        )}
+      </IconButton>
     </Box>
-  );
+
+<List disablePadding className="purchase-module-list">
+  {visibleModules.map((module) => (
+    <Tooltip
+      key={module.path}
+      title={!expanded ? module.text : ''}
+      placement="right"
+      arrow
+    >
+      <ListItem
+        button
+        onClick={() =>
+          onNavigate({
+            path: module.path,
+            text: module.text,
+          })
+        }
+        className={`purchase-module-item ${
+          isActive(module.path) ? 'is-active' : ''
+        }`}
+      >
+        <ListItemIcon className="purchase-module-icon">
+          {module.icon}
+        </ListItemIcon>
+
+        <Box
+          className={`purchase-module-label-wrapper ${
+            expanded ? 'is-visible' : ''
+          }`}
+        >
+          <ListItemText
+            primary={module.text}
+            primaryTypographyProps={{
+              className: 'purchase-module-label',
+            }}
+          />
+        </Box>
+      </ListItem>
+    </Tooltip>
+  ))}
+</List>
+  </Box>
+);
 };
 
 export default PurchaseModuleSideMenu;

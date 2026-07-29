@@ -3,9 +3,9 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert,Box } from '@mui/material';
 
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 
 // ── Tax imports ──
 import {
@@ -562,8 +562,8 @@ const TaxComponent: React.FC = () => {
   // RENDER
   // ─────────────────────────────────────────────
   return (
-    <>
-      <MasterAdminMenu />
+    <Box className="master-admin-module-page tax-master-page">
+      {/* <MasterAdminMenu /> */}
 
       <TaxTableContainer
         handleOpen={handleTaxOpen}
@@ -682,7 +682,7 @@ const TaxComponent: React.FC = () => {
           {dineInSnackbarMessage}
         </Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 };
 

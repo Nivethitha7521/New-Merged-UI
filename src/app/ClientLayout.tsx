@@ -7,6 +7,7 @@ import { setupAxios } from "@/lib/axiosSetup";
 import { forceLogout } from "../features/authSlice";
 import { initializeAuth, validateToken, clearSnackbar } from '../features/authSlice';
 import PurchaseModuleSideMenu from '@/components/PurchaseModuleSideMenu';
+import MasterAdminModuleSideMenu from '@/components/MasterAdminModuleSideMenu';
 import BookModuleSideMenu from '@/components/BookModuleSideMenu';
 import { Toaster } from "react-hot-toast";
 import { fetchBusinesses } from '@/features/account-setting/businessSlice';
@@ -57,22 +58,13 @@ const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
 const [isPurchaseSubMenuOpen, setIsPurchaseSubMenuOpen] = useState(false);
 const [isBookSubMenuOpen, setIsBookSubMenuOpen] = useState(false);
-const [pendingPurchasePath, setPendingPurchasePath] =
-  useState<string | null>(null);
+const [
+  isMasterAdminSubMenuOpen,
+  setIsMasterAdminSubMenuOpen,
+] = useState(false);
 const [pendingBookPath, setPendingBookPath] =
   useState<string | null>(null);
-  useEffect(() => {
-  if (!pendingPurchasePath) return;
 
-  const routeOpened =
-    pathname === pendingPurchasePath ||
-    pathname?.startsWith(`${pendingPurchasePath}/`);
-
-  if (routeOpened) {
-    setIsPurchaseSubMenuOpen(false);
-    setPendingPurchasePath(null);
-  }
-}, [pathname, pendingPurchasePath]);
 
 useEffect(() => {
   if (!pendingBookPath) return;
@@ -314,7 +306,9 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
 const isPurchaseRoute =
   pathname === '/yen-purchase' ||
   pathname?.startsWith('/yen-purchase/');
-
+const isMasterAdminRoute =
+  pathname === '/master-admin' ||
+  pathname?.startsWith('/master-admin/');
 const isBookRoute =
   pathname === '/yen-book' ||
   pathname?.startsWith('/yen-book/');
@@ -336,30 +330,44 @@ const isBookRoute =
   ) => {
     setSelectedModule(menuItem.text);
 
-    if (menuItem.path === '/yen-purchase') {
-      setIsPurchaseSubMenuOpen((previous) => !previous);
-      setIsBookSubMenuOpen(false);
+if (menuItem.path === '/yen-purchase') {
+  setSelectedModule(menuItem.text);
+  setIsBookSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
 
-      if (!pathname?.startsWith('/yen-purchase')) {
-        router.push('/yen-purchase');
-      }
+  if (!pathname?.startsWith('/yen-purchase')) {
+    router.push('/yen-purchase');
+  }
 
-      return;
-    }
+  return;
+}
 
-    if (menuItem.path === '/yen-book') {
-      setIsBookSubMenuOpen((previous) => !previous);
-      setIsPurchaseSubMenuOpen(false);
+if (menuItem.path === '/yen-book') {
+  setIsBookSubMenuOpen((previous) => !previous);
+  setIsPurchaseSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
 
-      if (!pathname?.startsWith('/yen-book')) {
-        router.push('/yen-book');
-      }
+  if (!pathname?.startsWith('/yen-book')) {
+    router.push('/yen-book');
+  }
 
-      return;
-    }
+  return;
+}
+if (menuItem.path === '/master-admin') {
+  setSelectedModule(menuItem.text);
+  setIsPurchaseSubMenuOpen(false);
+  setIsBookSubMenuOpen(false);
 
+  if (!pathname?.startsWith('/master-admin')) {
+    router.push('/master-admin');
+  }
+
+  return;
+}
     setIsPurchaseSubMenuOpen(false);
     setIsBookSubMenuOpen(false);
+    setIsMasterAdminSubMenuOpen(false);
+    
     router.push(menuItem.path);
   }}
   activePath={pathname || '/yen-purchase'}
@@ -375,32 +383,48 @@ const isBookRoute =
 />
 
   <div className="erp-module-layout">
-{isPurchaseRoute && isPurchaseSubMenuOpen && (
-<PurchaseModuleSideMenu
-  onNavigate={(
-    menuItem: {
-      text: string;
-      path: string;
-    },
-  ) => {
-    setSelectedModule(menuItem.text);
-
-    const pageAlreadyOpen =
-      pathname === menuItem.path ||
-      pathname?.startsWith(`${menuItem.path}/`);
-
-    if (pageAlreadyOpen) {
-      setIsPurchaseSubMenuOpen(false);
-      setPendingPurchasePath(null);
-      return;
+{isPurchaseRoute && (
+  <PurchaseModuleSideMenu
+    expanded={isPurchaseSubMenuOpen}
+    onToggle={() =>
+      setIsPurchaseSubMenuOpen((previous) => !previous)
     }
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
 
-    setPendingPurchasePath(menuItem.path);
-    router.push(menuItem.path);
-  }}
-/>
-    )}
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
 
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
+{isMasterAdminRoute && (
+  <MasterAdminModuleSideMenu
+    expanded={isMasterAdminSubMenuOpen}
+    onToggle={() =>
+      setIsMasterAdminSubMenuOpen(
+        (previous) => !previous
+      )
+    }
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(
+          `${menuItem.path}/`
+        );
+
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
 {isBookRoute && isBookSubMenuOpen && (
   <BookModuleSideMenu
     onNavigate={(
@@ -427,11 +451,17 @@ const isBookRoute =
   />
 )}
 
-    <main
-      className={`erp-page-viewport ${
-        isPurchaseRoute ? 'erp-purchase-viewport' : ''
-      }`}
-    >
+<main
+  className={`erp-page-viewport ${
+    isPurchaseRoute
+      ? 'erp-purchase-viewport'
+      : ''
+  } ${
+    isMasterAdminRoute
+      ? 'erp-master-admin-viewport'
+      : ''
+  }`}
+>
       {children}
     </main>
   </div>

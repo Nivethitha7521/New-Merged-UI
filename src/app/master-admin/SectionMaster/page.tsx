@@ -19,7 +19,7 @@ import {
   setSectionsData,
   updateSection,
 } from '../SectionMaster/Features/sectionsSlice';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import SectionsTable from './Modules/sectionsTable';
 import SectionsDialog from './Modules/sectionsDialog';
 import ActivateDeactivateConfirmationDialog from '@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog';
@@ -306,8 +306,8 @@ const SectionsPage: React.FC = () => {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <>
-      <MasterAdminMenu />
+<div className="section-master-page">
+      {/* <MasterAdminMenu /> */}
 
       <SectionsTable
         handleEdit={handleEdit}
@@ -365,7 +365,7 @@ const SectionsPage: React.FC = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </>
+    </div>
   );
 };
 

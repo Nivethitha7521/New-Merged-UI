@@ -2,9 +2,9 @@
 
 "use client";
 import React from "react";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import EditIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
+import RefreshIcon from "@mui/icons-material/RestoreRounded";
 import {
   Dialog,
   DialogTitle,
@@ -17,6 +17,8 @@ import {
   ListItem,
   ListItemText,
   Pagination,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { Location } from "../Models/locationModels";
 import { useAppSelector, useAppDispatch } from "@/redux/store";
@@ -83,7 +85,32 @@ const columnLabels: Record<string, string> = {
   lastUpdatedDate: "Last Updated Date",
   createdBy: "Created By",
 };
-
+const LOCATION_COLUMN_KEYS: (keyof Location | "sNo")[] = [
+  "sNo",
+  "locationId",
+  "branchName",
+  "aliasName",
+  "type",
+  "status",
+  "address",
+  "country",
+  "state",
+  "city",
+  "postalCode",
+  "phoneNumber",
+  "email",
+  "salesTypes",
+  "latitude",
+  "longitude",
+  "description",
+  "openingHours",
+  "closingHours",
+  "managerName",
+  "managerContact",
+  "createdDate",
+  "lastUpdatedDate",
+  "createdBy",
+];
 const LocationTableComponent: React.FC<LocationTableProps> = ({
   filteredTypes,
   showDeactivatedTable,
@@ -105,140 +132,216 @@ const LocationTableComponent: React.FC<LocationTableProps> = ({
     showDeactivatedTable ? type.status === "inactive" : type.status === "active"
   );
 
-  const visibleColumnKeys = Object.keys(visibleColumns).filter(
-    (key) => visibleColumns[key]
-  );
+const visibleColumnKeys = LOCATION_COLUMN_KEYS.filter(
+  (key) => visibleColumns[key]
+);
+const renderLocationValue = (
+  location: Location,
+  key: keyof Location
+): React.ReactNode => {
+  const value = location[key];
 
+  if (key === "status") {
+    return (
+      <span
+        className={`purchase-master-status-pill ${
+          location.status === "active"
+            ? "is-active"
+            : "is-inactive"
+        }`}
+      >
+        {location.status === "active"
+          ? "Active"
+          : "Inactive"}
+      </span>
+    );
+  }
+
+  if (
+    key === "country" ||
+    key === "state" ||
+    key === "city" ||
+    key === "salesTypes"
+  ) {
+    if (Array.isArray(value)) {
+      return value.join(", ") || "-";
+    }
+  }
+
+  return value !== null &&
+    value !== undefined &&
+    value !== ""
+    ? String(value)
+    : "-";
+};
   return (
     <>
-      <div className="table-container" style={{ maxHeight: 'calc(90vh - 170px)', }}>
-        <table className="custom-table">
-          <thead>
-            <tr>
-              {visibleColumnKeys.map((key) => (
-                <th key={key}>
-                  {columnLabels[key] ||
-                    key.replace(/([A-Z])/g, " $1").trim().toUpperCase()}
-                </th>
-              ))}
-              <th className="text-center">Actions</th>
-            </tr>
-          </thead>
+<Box className="purchase-master-table-shell">
+  <div className="purchase-native-table-wrapper">
+    <table className="purchase-native-table location-native-table">
+      <thead>
+        <tr>
+          {visibleColumnKeys.map((key) => (
+            <th
+              key={String(key)}
+              className={`location-column-${String(key)}`}
+            >
+              {columnLabels[String(key)] ||
+                String(key)
+                  .replace(/([A-Z])/g, " $1")
+                  .trim()
+                  .toUpperCase()}
+            </th>
+          ))}
 
-          <tbody>
-            {displayedData.length > 0 ? (
-              displayedData.map((type, index) => (
-                <tr key={type.branchId}>
-                  {/* {visibleColumns.sNo && <td>{index + 1}</td>} */}
-                  {visibleColumns.sNo && <td style={{ textAlign: "center" }}>{(page - 1) * 15 + index + 1}</td>}
-                  
-                  {visibleColumns.locationId && <td style={{ textAlign: "center" }}>{type.locationId}</td>}
-                  {visibleColumns.branchName && <td style={{ textAlign: "center" }}>{type.branchName}</td>}
-                  {visibleColumns.aliasName && <td style={{ textAlign: "center" }}>{type.aliasName || "-"}</td>}
-                  {visibleColumns.type && <td style={{ textAlign: "center" }}>{type.type || "-"}</td>}
+          <th className="location-column-actions">
+            Actions
+          </th>
+        </tr>
+      </thead>
 
-                  {visibleColumns.status && (
-                    <td style={{ textAlign: "center" }}>
-                      <span
-                        className={
-                          type.status === "active" ? "status-active" : "status-inactive"
-                        }
-                      >
-                        {type.status === "active" ? "Active" : "Inactive"}
+      <tbody>
+        {displayedData.length > 0 ? (
+          displayedData.map((location, index) => (
+            <tr key={location.branchId}>
+              {visibleColumnKeys.map((key) => {
+                if (key === "sNo") {
+                  return (
+                    <td
+                      key={key}
+                      className="location-column-sNo"
+                    >
+                      {(page - 1) * 15 + index + 1}
+                    </td>
+                  );
+                }
+
+                if (key === "locationId") {
+                  return (
+                    <td
+                      key={key}
+                      className="location-column-locationId"
+                    >
+                      <span className="purchase-master-id-pill">
+                        {location.locationId || "-"}
                       </span>
                     </td>
-                  )}
+                  );
+                }
 
-                  {visibleColumns.address && <td style={{ textAlign: "center" }}>{type.address || "-"}</td>}
-                  {visibleColumns.country && (
-                    <td style={{ textAlign: "center" }}>
-                      {Array.isArray(type.country)
-                        ? type.country.join(", ")
-                        : type.country || "-"}
-                    </td>
-                  )}
-                  {visibleColumns.state && (
-                    <td style={{ textAlign: "center" }}>
-                      {Array.isArray(type.state)
-                        ? type.state.join(", ")
-                        : type.state || "-"}
-                    </td>
-                  )}
-                  {visibleColumns.city && (
-                    <td style={{ textAlign: "center" }}>
-                      {Array.isArray(type.city)
-                        ? type.city.join(", ")
-                        : type.city || "-"}
-                    </td>
-                  )}
-                  {visibleColumns.postalCode && <td style={{ textAlign: "center" }}>{type.postalCode || "-"}</td>}
-                  {visibleColumns.phoneNumber && <td style={{ textAlign: "center" }}>{type.phoneNumber || "-"}</td>}
-                  {visibleColumns.email && <td style={{ textAlign: "center" }}>{type.email || "-"}</td>}
-                  {visibleColumns.salesTypes && (
-                    <td style={{ textAlign: "center" }}>
-                      {type.salesTypes && type.salesTypes.length > 0
-                        ? type.salesTypes.join(", ")
-                        : "-"}
-                    </td>
-                  )}
-                  {visibleColumns.latitude && <td style={{ textAlign: "center" }}>{type.latitude || "-"}</td>}
-                  {visibleColumns.longitude && <td style={{ textAlign: "center" }}>{type.longitude || "-"}</td>}
-                  {visibleColumns.description && <td style={{ textAlign: "center" }}>{type.description || "-"}</td>}
-                  {visibleColumns.openingHours && <td style={{ textAlign: "center" }}>{type.openingHours || "-"}</td>}
-                  {visibleColumns.closingHours && <td style={{ textAlign: "center" }}>{type.closingHours || "-"}</td>}
-                  {visibleColumns.managerName && <td style={{ textAlign: "center" }}>{type.managerName || "-"}</td>}
-                  {visibleColumns.managerContact && <td style={{ textAlign: "center" }}>{type.managerContact || "-"}</td>}
-                  {visibleColumns.createdDate && <td style={{ textAlign: "center" }}>{type.createdDate || "-"}</td>}
-                  {visibleColumns.lastUpdatedDate && <td style={{ textAlign: "center" }}>{type.lastUpdatedDate || "-"}</td>}
-                  {visibleColumns.createdBy && <td style={{ textAlign: "center" }}>{type.createdBy || "-"}</td>}
+                if (key === "branchName") {
+                  return (
+                    <td
+                      key={key}
+                      className="location-column-branchName"
+                    >
+                      <Box className="purchase-master-name-cell">
+                        <span className="purchase-master-avatar">
+                          {(location.branchName || "?")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
 
-                  <td>
-                    <div className="flex justify-center gap-4">
-                      {!showDeactivatedTable && type.status === "active" && (
-                        <>
-                          <button
-                            onClick={() => onOpenEdit(type)}
-                            className="edit-btn"
-                            title="Edit"
+                        <span>
+                          {location.branchName || "-"}
+                        </span>
+                      </Box>
+                    </td>
+                  );
+                }
+
+                return (
+                  <td
+                    key={String(key)}
+                    className={`location-column-${String(key)}`}
+                  >
+                    {renderLocationValue(
+                      location,
+                      key as keyof Location
+                    )}
+                  </td>
+                );
+              })}
+
+              <td className="location-column-actions">
+                <Box className="purchase-master-actions">
+                  {!showDeactivatedTable &&
+                    location.status === "active" && (
+                      <>
+                        <Tooltip title="Edit location" arrow>
+                          <IconButton
+                            type="button"
+                            onClick={() =>
+                              onOpenEdit(location)
+                            }
+                            className="purchase-master-action-button is-edit"
+                            aria-label="Edit location"
                           >
                             <EditIcon fontSize="small" />
-                          </button>
-                          <button
-                            onClick={() => onDeactivate(type)}
-                            className="deactivate-btn"
-                            title="Deactivate"
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip
+                          title="Deactivate location"
+                          arrow
+                        >
+                          <IconButton
+                            type="button"
+                            onClick={() =>
+                              onDeactivate(location)
+                            }
+                            className="purchase-master-action-button is-delete"
+                            aria-label="Deactivate location"
                           >
                             <DeleteIcon fontSize="small" />
-                          </button>
-                        </>
-                      )}
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
 
-                      {showDeactivatedTable && type.status === "inactive" && (
-                        <button
-                          onClick={() => onActivate(type)}
-                          className="activate-btn"
-                          title="Activate"
+                  {showDeactivatedTable &&
+                    location.status === "inactive" && (
+                      <Tooltip
+                        title="Activate location"
+                        arrow
+                      >
+                        <IconButton
+                          type="button"
+                          onClick={() =>
+                            onActivate(location)
+                          }
+                          className="purchase-master-action-button is-activate"
+                          aria-label="Activate location"
                         >
                           <RefreshIcon fontSize="small" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={visibleColumnKeys.length + 1} className="empty-state">
-                  No {showDeactivatedTable ? "Deactivated" : "Active"} Locations Found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                </Box>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td
+              colSpan={visibleColumnKeys.length + 1}
+              className="empty-state"
+            >
+              No{" "}
+              {showDeactivatedTable
+                ? "Deactivated"
+                : "Active"}{" "}
+              Locations Found
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</Box>
 
       {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={0.5}>
+       <Box className="master-admin-pagination">
           <Pagination
             count={totalPages}
             page={page}

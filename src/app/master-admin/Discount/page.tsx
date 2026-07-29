@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert } from '@mui/material';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 
 import {
   activateDiscount,
@@ -314,7 +314,7 @@ const DiscountComponent: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <DiscountTableContainer
         handleEdit={handleEdit}

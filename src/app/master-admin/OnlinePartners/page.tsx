@@ -139,7 +139,7 @@ const MenuPage: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <Box sx={{ px: 3, pt: 2 }}>
         {/* Top Buttons */}

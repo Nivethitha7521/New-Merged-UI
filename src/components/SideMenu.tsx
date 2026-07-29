@@ -139,21 +139,14 @@ const renderItem = (menuItem: MenuItem) => {
         {menuItem.icon}
       </ListItemIcon>
 
-      {collapsed ? (
-        <Typography
-          component="span"
-          className="erp-sidebar-icon-label"
-        >
-          {displayText}
-        </Typography>
-      ) : (
-        <ListItemText
-          primary={displayText}
-          primaryTypographyProps={{
-            className: 'erp-sidebar-label',
-          }}
-        />
-      )}
+{!collapsed && (
+  <ListItemText
+    primary={displayText}
+    primaryTypographyProps={{
+      className: 'erp-sidebar-label',
+    }}
+  />
+)}
     </ListItem>
   );
 };
@@ -192,13 +185,13 @@ return (
 
 <Box className="erp-sidebar-brand">
   <Box className="erp-brand-mark">
-    <Image
-      src="/images/vmasoftlogo.jpeg"
-      alt="YEN ERP"
-      width={38}
-      height={38}
-      priority
-    />
+<Image
+  src="/images/vmasoftlogo.jpeg"
+  alt="YEN ERP"
+  width={52}
+  height={52}
+  priority
+/>
   </Box>
 
   {!collapsed && (
@@ -241,11 +234,7 @@ return (
 <Box className="erp-sidebar-footer">
   <BusinessOutlinedIcon />
 
-  {collapsed ? (
-    <span className="erp-sidebar-footer-mini-label">
-      Workspace
-    </span>
-  ) : (
+  {!collapsed && (
     <span className="erp-sidebar-footer-text">
       YEN ERP Workspace
     </span>

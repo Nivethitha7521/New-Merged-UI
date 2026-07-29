@@ -1,0 +1,1028 @@
+/* =========================================================
+   YEN ERP — Purchase Master shared premium table system
+   File: src/styles/purchase/purchaseTable.css
+
+   Used by:
+   Purchase Category, Purchase SubCategory, Purchase UOM,
+   Group Item, Purchase Tax, Storage Location, Item Type,
+   Freight and Service.
+
+   Import this file once AFTER globals.css in src/app/layout.tsx.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1. Table shell and container
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-reference-table-shell,
+.erp-purchase-viewport .purchase-master-table-shell {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  background-image: none !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.erp-purchase-viewport .purchase-reference-table-shell.MuiBox-root,
+.erp-purchase-viewport .purchase-master-table-shell.MuiBox-root {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/*
+   The generic Purchase viewport selector keeps existing Purchase tables
+   visually consistent while components are migrated to the explicit
+   purchase-reference-table / purchase-master-table classes.
+*/
+.erp-purchase-viewport .purchase-reference-table,
+.erp-purchase-viewport .purchase-master-table {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+  background-image: none !important;
+
+  border: 1px solid var(--erp-border, #dbe2ea) !important;
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 4px 12px rgba(16, 24, 40, 0.03) !important;
+
+  overflow: auto !important;
+}
+
+.erp-purchase-viewport .purchase-reference-table .MuiTable-root,
+.erp-purchase-viewport .purchase-master-table .MuiTable-root {
+  width: 100% !important;
+  min-width: 680px;
+  table-layout: auto;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+/* ---------------------------------------------------------
+   2. Header and body cells
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport
+  .purchase-reference-table
+  .MuiTableCell-head,
+.erp-purchase-viewport
+  .purchase-master-table
+  .MuiTableCell-head {
+  height: 42px !important;
+  padding: 11px 20px !important;
+
+  color: var(--erp-muted, #667085) !important;
+  background: #f8fafc !important;
+
+  border-bottom: 1px solid var(--erp-border, #dfe5ec) !important;
+
+  font-size: 9px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+
+  white-space: nowrap;
+  vertical-align: middle !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-table
+  .MuiTableCell-body,
+.erp-purchase-viewport
+  .purchase-master-table
+  .MuiTableCell-body {
+  height: 60px !important;
+  min-height: 60px !important;
+  padding: 12px 20px !important;
+
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-bottom: 1px solid #e7ecf1 !important;
+
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
+}
+
+.erp-purchase-viewport
+  .MuiTableRow-root:last-child
+  .MuiTableCell-body {
+  border-bottom: 0 !important;
+}
+
+.erp-purchase-viewport .MuiTableBody-root .MuiTableRow-root {
+  transition:
+    background-color 0.16s ease,
+    box-shadow 0.16s ease !important;
+}
+
+.erp-purchase-viewport
+  .MuiTableBody-root
+  .MuiTableRow-root:hover
+  .MuiTableCell-body {
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-accent, #155eef) 3%,
+      var(--erp-surface, #ffffff)
+    ) !important;
+}
+
+/* Keep number columns aligned */
+.erp-purchase-viewport .table-number-right {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.erp-purchase-viewport .table-text-left {
+  text-align: left !important;
+}
+
+/* ---------------------------------------------------------
+   3. ID, value and name cells
+   Supports both existing "purchase-reference-*" classes and
+   new reusable "purchase-master-*" classes.
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-reference-id-pill,
+.erp-purchase-viewport .purchase-master-id-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 23px;
+  padding: 3px 9px;
+
+  color: var(--erp-text, #101828);
+  background: #f1f4f8;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace !important;
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.erp-purchase-viewport .purchase-master-value-pill,
+.erp-purchase-viewport .purchase-reference-value-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 23px;
+  padding: 3px 9px;
+
+  color: #344054;
+  background: #f2f4f7;
+
+  border-radius: 8px;
+
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.erp-purchase-viewport .purchase-reference-name-cell,
+.erp-purchase-viewport .purchase-master-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+
+  color: var(--erp-text, #101828);
+  font-weight: 600;
+}
+
+.erp-purchase-viewport .purchase-reference-name-cell > span:last-child,
+.erp-purchase-viewport .purchase-master-name-cell > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.erp-purchase-viewport .purchase-reference-avatar,
+.erp-purchase-viewport .purchase-master-avatar {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+
+  display: inline-grid;
+  place-items: center;
+
+  color: var(--erp-accent, #155eef);
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-accent, #155eef) 10%,
+      #ffffff
+    );
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--erp-accent, #155eef) 16%,
+      transparent
+    );
+
+  border-radius: 10px;
+
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------
+   4. Status and view pills
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-reference-status-pill,
+.erp-purchase-viewport .purchase-master-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  min-height: 23px;
+  padding: 3px 10px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 680;
+  line-height: 1.2;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+/* Existing Category table supplies an inner span for the dot. */
+.erp-purchase-viewport .purchase-reference-status-pill > span {
+  width: 5px;
+  min-width: 5px;
+  height: 5px;
+
+  display: inline-block;
+
+  background: currentColor;
+  border-radius: 50%;
+}
+
+/* New Purchase Master tables can use the pill without extra markup. */
+.erp-purchase-viewport .purchase-master-status-pill::before {
+  content: "";
+
+  width: 5px;
+  min-width: 5px;
+  height: 5px;
+
+  display: inline-block;
+
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.erp-purchase-viewport .purchase-reference-status-pill.is-active,
+.erp-purchase-viewport .purchase-master-status-pill.is-active,
+.erp-purchase-viewport .MuiChip-colorSuccess,
+.erp-purchase-viewport .status-active,
+.erp-purchase-viewport .active-badge {
+  color: #087a3e !important;
+  background: #d9f8e5 !important;
+  border-color: transparent !important;
+}
+
+.erp-purchase-viewport .purchase-reference-status-pill.is-inactive,
+.erp-purchase-viewport .purchase-master-status-pill.is-inactive,
+.erp-purchase-viewport .MuiChip-colorError,
+.erp-purchase-viewport .status-inactive,
+.erp-purchase-viewport .inactive-badge {
+  color: #b42318 !important;
+  background: #fee4e2 !important;
+  border-color: transparent !important;
+}
+
+.erp-purchase-viewport .purchase-reference-view-pill,
+.erp-purchase-viewport .purchase-master-view-pill,
+.erp-purchase-viewport .MuiChip-colorInfo,
+.erp-purchase-viewport .status-info {
+  min-height: 24px !important;
+  height: 24px !important;
+  padding: 3px 10px !important;
+
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #dcecff) !important;
+
+  border: 0 !important;
+  border-radius: 999px !important;
+
+  font-size: 10px !important;
+  font-weight: 680 !important;
+  line-height: 1.2 !important;
+
+  box-shadow: none !important;
+  text-transform: none !important;
+}
+
+.erp-purchase-viewport .purchase-reference-view-pill:hover,
+.erp-purchase-viewport .purchase-master-view-pill:hover {
+  color: var(--erp-accent-hover, #124bc0) !important;
+  background: var(--erp-accent-soft-hover, #cfe0ff) !important;
+  transform: none !important;
+}
+
+/* ---------------------------------------------------------
+   5. Premium edit, delete and activate actions
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-master-actions,
+.erp-purchase-viewport .purchase-reference-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/*
+   Neutral fallback for existing table IconButtons.
+   Add the explicit classes below for edit/delete/activate colours.
+*/
+.erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root,
+.erp-purchase-viewport .purchase-reference-table .MuiIconButton-root,
+.erp-purchase-viewport .purchase-master-table .MuiIconButton-root,
+.erp-purchase-viewport .purchase-master-action-button {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+
+  padding: 0 !important;
+
+  color: #667085 !important;
+  background: transparent !important;
+
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+
+  box-shadow: none !important;
+
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease !important;
+}
+
+.erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root svg,
+.erp-purchase-viewport .purchase-reference-table .MuiIconButton-root svg,
+.erp-purchase-viewport .purchase-master-table .MuiIconButton-root svg,
+.erp-purchase-viewport .purchase-master-action-button svg {
+  width: 17px !important;
+  height: 17px !important;
+  font-size: 17px !important;
+}
+
+/* Generic fallback hover */
+.erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root:hover,
+.erp-purchase-viewport .purchase-reference-table .MuiIconButton-root:hover,
+.erp-purchase-viewport .purchase-master-table .MuiIconButton-root:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+  transform: translateY(-1px);
+}
+
+/* Edit */
+.erp-purchase-viewport .purchase-master-action-button.is-edit:hover,
+.erp-purchase-viewport .purchase-reference-action-button-cell.is-edit:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+
+  box-shadow:
+    0 3px 9px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.13) !important;
+
+  transform: translateY(-1px);
+}
+
+/* Delete / deactivate */
+.erp-purchase-viewport .purchase-master-action-button.is-delete:hover,
+.erp-purchase-viewport .purchase-reference-action-button-cell.is-delete:hover {
+  color: #d92d20 !important;
+  background: #fff1f0 !important;
+  border-color: #fecaca !important;
+
+  box-shadow: 0 3px 9px rgba(217, 45, 32, 0.10) !important;
+
+  transform: translateY(-1px);
+}
+
+/* Activate / restore */
+.erp-purchase-viewport .purchase-master-action-button.is-activate:hover,
+.erp-purchase-viewport .purchase-reference-action-button-cell.is-activate:hover {
+  color: #087a3e !important;
+  background: #ecfdf3 !important;
+  border-color: #abefc6 !important;
+
+  box-shadow: 0 3px 9px rgba(8, 122, 62, 0.10) !important;
+
+  transform: translateY(-1px);
+}
+
+.erp-purchase-viewport .purchase-master-action-button:focus-visible,
+.erp-purchase-viewport .purchase-reference-action-button-cell:focus-visible {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.17)) !important;
+  outline: none !important;
+}
+
+.erp-purchase-viewport .purchase-master-action-button.Mui-disabled,
+.erp-purchase-viewport .purchase-reference-action-button-cell.Mui-disabled,
+.erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root.Mui-disabled {
+  color: #b5bdc9 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+
+  opacity: 0.55 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Legacy icon buttons still used by a few Purchase screens */
+.erp-purchase-viewport
+  .MuiTableCell-body
+  .icon-button-outline {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+
+  padding: 0 !important;
+
+  color: #667085 !important;
+  background: transparent !important;
+
+  border: 1px solid transparent !important;
+  border-radius: 9px !important;
+
+  box-shadow: none !important;
+}
+
+/* ---------------------------------------------------------
+   6. Empty and loading states
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-master-empty-cell,
+.erp-purchase-viewport .purchase-reference-empty-cell,
+.erp-purchase-viewport
+  .MuiTableBody-root
+  .MuiTableRow-root:only-child
+  .MuiTableCell-body[colspan] {
+  height: 110px !important;
+
+  color: var(--erp-muted, #667085) !important;
+  text-align: center !important;
+
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+/* ---------------------------------------------------------
+   7. Native table support for Purchase SubCategory
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-native-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+
+  background: var(--erp-surface, #ffffff);
+
+  border: 1px solid var(--erp-border, #dbe2ea);
+  border-radius: 16px;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 4px 12px rgba(16, 24, 40, 0.03);
+
+  overflow: auto;
+}
+
+.erp-purchase-viewport .purchase-native-table {
+  width: 100%;
+  min-width: 680px;
+
+  margin: 0;
+  padding: 0;
+
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+.erp-purchase-viewport .purchase-native-table thead {
+  display: table-header-group !important;
+}
+
+.erp-purchase-viewport .purchase-native-table tbody {
+  display: table-row-group !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.erp-purchase-viewport .purchase-native-table tr {
+  display: table-row !important;
+}
+
+.erp-purchase-viewport .purchase-native-table th,
+.erp-purchase-viewport .purchase-native-table td {
+  display: table-cell !important;
+}
+
+.erp-purchase-viewport .purchase-native-table thead th {
+  height: 42px;
+  padding: 11px 20px;
+
+  color: var(--erp-muted, #667085);
+  background: #f8fafc;
+
+  border-bottom: 1px solid var(--erp-border, #dfe5ec);
+
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  text-align: left;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+.erp-purchase-viewport .purchase-native-table tbody td {
+  height: 60px;
+  padding: 12px 20px;
+
+  color: var(--erp-text, #101828);
+  background: var(--erp-surface, #ffffff);
+
+  border-bottom: 1px solid #e7ecf1;
+
+  font-size: 12px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+
+.erp-purchase-viewport
+  .purchase-native-table
+  tbody
+  tr:last-child
+  td {
+  border-bottom: 0;
+}
+
+.erp-purchase-viewport
+  .purchase-native-table
+  tbody
+  tr:hover
+  td {
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-accent, #155eef) 3%,
+      var(--erp-surface, #ffffff)
+    );
+}
+
+.erp-purchase-viewport .purchase-native-table .purchase-master-actions {
+  justify-content: center;
+}
+
+/* Native buttons can reuse the same premium action classes */
+.erp-purchase-viewport
+  .purchase-native-table
+  button.purchase-master-action-button {
+  appearance: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+}
+
+.erp-purchase-viewport
+  .purchase-native-table
+  button.purchase-master-action-button:disabled {
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------
+   8. Pagination
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport .MuiTablePagination-root {
+  min-height: 54px;
+
+  color: var(--erp-muted, #667085) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-top: 1px solid #e7ecf1 !important;
+}
+
+.erp-purchase-viewport .MuiTablePagination-toolbar {
+  min-height: 54px !important;
+  padding: 0 16px !important;
+}
+
+.erp-purchase-viewport .MuiPagination-root,
+.erp-purchase-viewport .purchase-table-pagination {
+  margin-top: 14px;
+}
+
+.erp-purchase-viewport .MuiPaginationItem-root {
+  min-width: 32px !important;
+  height: 32px !important;
+
+  color: var(--erp-muted, #475467) !important;
+
+  border-color: var(--erp-border, #dfe5ec) !important;
+  border-radius: 9px !important;
+
+  font-size: 12px !important;
+}
+
+.erp-purchase-viewport .MuiPaginationItem-root:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.erp-purchase-viewport .MuiPaginationItem-root.Mui-selected {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+.erp-purchase-viewport .MuiPaginationItem-root.Mui-selected:hover {
+  background: var(--erp-accent-hover, #124bc0) !important;
+}
+
+/* ---------------------------------------------------------
+   9. Selected rows
+   --------------------------------------------------------- */
+
+.erp-purchase-viewport
+  .MuiTableRow-root.Mui-selected
+  .MuiTableCell-body,
+.erp-purchase-viewport
+  .MuiTableRow-root[aria-selected='true']
+  .MuiTableCell-body {
+  background: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.erp-purchase-viewport
+  .MuiTableRow-root.Mui-selected:hover
+  .MuiTableCell-body,
+.erp-purchase-viewport
+  .MuiTableRow-root[aria-selected='true']:hover
+  .MuiTableCell-body {
+  background: var(--erp-accent-soft-hover, #dce8ff) !important;
+}
+
+/* ---------------------------------------------------------
+   10. Dark theme
+   --------------------------------------------------------- */
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-table,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-table,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTableContainer-root,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-native-table-wrapper {
+  color: var(--erp-text) !important;
+  background: var(--erp-surface) !important;
+
+  border-color: var(--erp-border) !important;
+
+  box-shadow: var(--erp-shadow) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTableCell-head,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-native-table
+  thead
+  th {
+  color: #a8b3c5 !important;
+  background: #16223a !important;
+
+  border-bottom-color: var(--erp-border) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTableCell-body,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-native-table
+  tbody
+  td {
+  color: var(--erp-text) !important;
+  background: var(--erp-surface) !important;
+
+  border-bottom-color: #1e2a42 !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTableBody-root
+  .MuiTableRow-root:hover
+  .MuiTableCell-body,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-native-table
+  tbody
+  tr:hover
+  td {
+  background: #17223a !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-id-pill,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-id-pill,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-avatar,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-avatar,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-value-pill,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-value-pill {
+  color: var(--erp-text) !important;
+  background: var(--erp-surface-2) !important;
+
+  border-color: var(--erp-border) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-name-cell,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-name-cell *,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-name-cell,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-name-cell * {
+  color: var(--erp-text) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-status-pill.is-active,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-status-pill.is-active {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.16) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-status-pill.is-inactive,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-status-pill.is-inactive {
+  color: #fca5a5 !important;
+  background: rgba(239, 68, 68, 0.16) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-view-pill,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-view-pill {
+  color: #93c5fd !important;
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-accent, #155eef) 22%,
+      transparent
+    ) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTableCell-body
+  .MuiIconButton-root,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-action-button {
+  color: var(--erp-muted) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTableCell-body
+  .MuiIconButton-root:hover,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-action-button.is-edit:hover {
+  color: var(--erp-accent) !important;
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 18%,
+      transparent
+    ) !important;
+  border-color:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 38%,
+      transparent
+    ) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-action-button.is-delete:hover {
+  color: #fca5a5 !important;
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: rgba(239, 68, 68, 0.30) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-master-action-button.is-activate:hover {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.14) !important;
+  border-color: rgba(16, 185, 129, 0.30) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .MuiTablePagination-root {
+  color: var(--erp-muted) !important;
+  background: var(--erp-surface) !important;
+
+  border-top-color: var(--erp-border) !important;
+}
+
+/* ---------------------------------------------------------
+   11. Glass style
+   --------------------------------------------------------- */
+
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .purchase-reference-table,
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .purchase-master-table,
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .MuiTableContainer-root,
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .purchase-native-table-wrapper {
+  position: relative;
+
+  background: var(--glass-bg) !important;
+
+  backdrop-filter: blur(var(--glass-blur, 22px)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 22px)) saturate(160%);
+
+  border-color: var(--glass-border) !important;
+
+  box-shadow:
+    0 1px 0 var(--glass-highlight) inset,
+    0 20px 40px rgba(15, 23, 42, 0.18),
+    0 6px 14px rgba(15, 23, 42, 0.10) !important;
+}
+
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .MuiTableCell-body,
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .purchase-native-table
+  tbody
+  td {
+  background: transparent !important;
+}
+
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .MuiTableCell-head,
+html[data-erp-style='glass']
+  .erp-purchase-viewport
+  .purchase-native-table
+  thead
+  th {
+  background:
+    color-mix(
+      in srgb,
+      var(--erp-surface) 40%,
+      transparent
+    ) !important;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ---------------------------------------------------------
+   12. Responsive behaviour
+   --------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .erp-purchase-viewport .MuiTableCell-head,
+  .erp-purchase-viewport .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-native-table th,
+  .erp-purchase-viewport .purchase-native-table td {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .erp-purchase-viewport .MuiTable-root,
+  .erp-purchase-viewport .purchase-native-table {
+    min-width: 640px;
+  }
+
+  .erp-purchase-viewport .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-native-table thead th {
+    font-size: 8.5px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .erp-purchase-viewport .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-native-table tbody td {
+    height: 54px !important;
+    min-height: 54px !important;
+    font-size: 11.5px !important;
+  }
+}
+.erp-purchase-viewport .purchase-item-pagination {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 8px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  box-sizing: border-box;
+}
+
+.erp-purchase-viewport .purchase-item-pagination-label {
+  color: var(--erp-muted, #667085);
+
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+@media (max-width: 600px) {
+  .erp-purchase-viewport .purchase-item-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

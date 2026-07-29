@@ -7,11 +7,12 @@ import {
   Switch,
   FormControlLabel,
   Box,
-  Typography,
+  Typography,Button,Tooltip,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon } from '@mui/icons-material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
+import RefreshIcon from "@mui/icons-material/RestoreRounded";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 
@@ -68,70 +69,47 @@ interface ToolbarProps {
   onAdd: () => void;
 }
 
-const Toolbar = React.memo<ToolbarProps>(({ showDeactivated, onToggle, onAdd }) => (
-  <Box
-    display="flex"
-    flexDirection={{ xs: 'column', sm: 'row' }}
-    alignItems={{ xs: 'flex-start', sm: 'center' }}
-    justifyContent="space-between"
-    my={1}
-    ml={1}
-    px={{ xs: 2, sm: 3 }}
-    sx={{ width: '99%', boxSizing: 'border-box', mt: 2 }}
-  >
-    <Typography
-      className="icon-action-label"
-      sx={{
-        fontFamily: "'Poppins', sans-serif",
-        fontWeight: 750,
-        margin: 0,
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        maxWidth: '100%',
-      }}
-    >
-      {showDeactivated ? 'Deactivated Taxes' : 'Active Taxes'}
-    </Typography>
+const Toolbar = React.memo<ToolbarProps>(
+  ({ showDeactivated, onToggle, onAdd }) => (
+    <Box className="tax-master-toolbar">
+      <Typography className="tax-master-toolbar-title">
+        {showDeactivated
+          ? "Deactivated Taxes"
+          : "Active Taxes"}
+      </Typography>
 
-    <div className="flex items-center gap-4">
-      {!showDeactivated && (
-        <div className="icon-action-wrapper">
-          <IconButton
-            color="primary"
+      <Box className="tax-master-toolbar-actions">
+        {!showDeactivated && (
+          <Button
+            type="button"
+            variant="outlined"
+            startIcon={<AddIcon />}
             onClick={onAdd}
-            className="icon-action-button"
-            title="Add"
-            aria-label="Add Tax"
+            className="purchase-reference-action-button"
           >
-            <AddIcon className="icon-action-svg" />
-          </IconButton>
-          <Typography className="icon-action-label">Add</Typography>
-        </div>
-      )}
+            Add New
+          </Button>
+        )}
 
-      <FormControlLabel
-        control={
+        <Box className="purchase-reference-active-toggle">
+          <Typography component="span">
+            Show Active Only
+          </Typography>
+
           <Switch
-            checked={showDeactivated}
+            checked={!showDeactivated}
             onChange={onToggle}
             color="primary"
             size="small"
+            inputProps={{
+              "aria-label": "Show active taxes only",
+            }}
           />
-        }
-        label={showDeactivated ? 'Show Activated' : 'Show Deactivated'}
-        sx={{
-          marginLeft: 1,
-          marginRight: 1,
-          '& .MuiFormControlLabel-label': {
-            fontSize: '0.75rem',
-            fontFamily: "'Poppins', sans-serif",
-          },
-        }}
-      />
-    </div>
-  </Box>
-));
+        </Box>
+      </Box>
+    </Box>
+  )
+);
 
 Toolbar.displayName = 'Toolbar';
 
@@ -149,51 +127,44 @@ const TableHeader = React.memo<TableHeaderProps>(({ maxCodes }) => {
   return (
     <thead>
       <tr>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>S.NO</th>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>Tax Id</th>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>Tax Name</th>
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>Tax Percentage</th>
+       <th rowSpan={rowSpan} className="tax-column-sno">
+  S.NO
+</th>
+
+<th rowSpan={rowSpan} className="tax-column-id">
+  Tax ID
+</th>
+
+<th rowSpan={rowSpan} className="tax-column-name">
+  Tax Name
+</th>
+
+<th rowSpan={rowSpan} className="tax-column-percentage">
+  Tax Percentage
+</th>
 
         {hasCodeCols &&
           Array.from({ length: maxCodes }, (_, i) => (
-            <th
-              key={i}
-              colSpan={COLS_PER_CODE}
-              style={{
-                textAlign: 'center',
-                backgroundColor: 'var(--color-background-info, #e6f1fb)',
-                fontSize: '0.7rem',
-              }}
-            >
-              Tax Code {i + 1}
-            </th>
+           <th
+  key={i}
+  colSpan={COLS_PER_CODE}
+  className="tax-column-code-group"
+>
+  Tax Code {i + 1}
+</th>
           ))}
 
-        <th rowSpan={rowSpan} style={{ textAlign: 'center' }}>Actions</th>
+      <th rowSpan={rowSpan} className="tax-column-actions">
+  Actions
+</th>
       </tr>
 
       {hasCodeCols && (
         <tr>
           {Array.from({ length: maxCodes }, (_, i) => (
             <React.Fragment key={i}>
-              <th
-                style={{
-                  textAlign: 'center',
-                  fontSize: '0.65rem',
-                  backgroundColor: 'var(--color-background-tertiary, #f5f5f5)',
-                }}
-              >
-                Name
-              </th>
-              <th
-                style={{
-                  textAlign: 'center',
-                  fontSize: '0.65rem',
-                  backgroundColor: 'var(--color-background-tertiary, #f5f5f5)',
-                }}
-              >
-                %
-              </th>
+            <th className="tax-column-code-name">Name</th>
+<th className="tax-column-code-percentage">%</th>
             </React.Fragment>
           ))}
         </tr>
@@ -222,39 +193,48 @@ const ActionCell = React.memo<ActionCellProps>(
     const handleActivate   = useCallback(() => onActivate(tax),   [tax, onActivate]);
     const handleDeactivate = useCallback(() => onDeactivate(tax), [tax, onDeactivate]);
 
-    return (
-      <td style={{ textAlign: 'center' }}>
-        {showDeactivated ? (
-          <button
+return (
+  <td className="tax-column-actions">
+    <Box className="purchase-master-actions">
+      {showDeactivated ? (
+        <Tooltip title="Activate tax" arrow>
+          <IconButton
+            type="button"
             onClick={handleActivate}
-            className="activate-btn"
-            title="Activate"
+            className="purchase-master-action-button is-activate"
             aria-label={`Activate ${tax.taxName}`}
           >
-            <RefreshIcon />
-          </button>
-        ) : (
-          <>
-            <button
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <>
+          <Tooltip title="Edit tax" arrow>
+            <IconButton
+              type="button"
               onClick={handleEdit}
-              className="edit-btn"
-              title="Edit"
+              className="purchase-master-action-button is-edit"
               aria-label={`Edit ${tax.taxName}`}
             >
-              <EditIcon />
-            </button>
-            <button
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip title="Deactivate tax" arrow>
+            <IconButton
+              type="button"
               onClick={handleDeactivate}
-              className="deactivate-btn"
-              title="Deactivate"
+              className="purchase-master-action-button is-delete"
               aria-label={`Deactivate ${tax.taxName}`}
             >
-              <DeleteIcon />
-            </button>
-          </>
-        )}
-      </td>
-    );
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
+    </Box>
+  </td>
+);
   }
 );
 
@@ -276,22 +256,48 @@ interface TaxRowProps {
 const TaxRow = React.memo<TaxRowProps>(
   ({ tax, index, maxCodes, showDeactivated, onEdit, onActivate, onDeactivate }) => (
     <tr>
-      <td style={{ textAlign: 'center' }}>{index + 1}</td>
-      <td style={{ textAlign: 'center' }}>{tax.taxId}</td>
-      <td style={{ textAlign: 'center' }}>{tax.taxName}</td>
-      <td style={{ textAlign: 'center' }}>{formatPercent(tax.taxPercentage)}</td>
+<td className="tax-column-sno">
+  {index + 1}
+</td>
+
+<td className="tax-column-id">
+  <span className="purchase-master-id-pill">
+    {tax.taxId}
+  </span>
+</td>
+
+<td className="tax-column-name">
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(tax.taxName || "?")
+        .charAt(0)
+        .toUpperCase()}
+    </span>
+
+    <span>{tax.taxName}</span>
+  </Box>
+</td>
+
+<td className="tax-column-percentage">
+  <span className="purchase-master-value-pill">
+    {formatPercent(tax.taxPercentage)}
+  </span>
+</td>
 
       {maxCodes > 0 &&
         Array.from({ length: maxCodes }, (_, i) => {
           const code = tax.taxSplitup?.[i];
           return (
             <React.Fragment key={i}>
-              <td style={{ textAlign: 'center', fontWeight: 500 }}>
-                {code?.taxcodeName ?? '—'}
-              </td>
-              <td style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-                {code != null ? formatPercent(code.taxcodePercentage) : '—'}
-              </td>
+             <td className="tax-column-code-name">
+  {code?.taxcodeName ?? "—"}
+</td>
+
+<td className="tax-column-code-percentage">
+  {code != null
+    ? formatPercent(code.taxcodePercentage)
+    : "—"}
+</td>
             </React.Fragment>
           );
         })}
@@ -318,17 +324,12 @@ interface StatusRowProps {
 
 const StatusRow = React.memo<StatusRowProps>(({ colSpan, message }) => (
   <tr>
-    <td
-      colSpan={colSpan}
-      style={{
-        textAlign: 'center',
-        padding: '24px 0',
-        color: 'var(--color-text-secondary)',
-        fontSize: '0.9rem',
-      }}
-    >
-      {message}
-    </td>
+<td
+  colSpan={colSpan}
+  className="empty-state"
+>
+  {message}
+</td>
   </tr>
 ));
 
@@ -380,15 +381,15 @@ const TaxTableContainer: React.FC<TaxTableContainerProps> = ({
         onAdd={handleOpen}
       />
 
-      <div
-        className="table-container my-1"
-        style={{ maxHeight: 'calc(55.5vh - 170px)', overflowX: 'auto' }}
-      >
-        <table
-          className="custom-table"
+      <Box className="purchase-master-table-shell tax-table-shell">
+  <div className="purchase-native-table-wrapper">
+    <table
+      className="purchase-native-table tax-native-table"
           aria-label={showDeactivated ? 'Deactivated Taxes' : 'Active Taxes'}
           aria-busy={loading}
-          style={{ minWidth: tableMinWidth }}
+        style={{
+  minWidth: tableMinWidth,
+}}
         >
           <TableHeader maxCodes={maxCodes} />
 
@@ -421,6 +422,7 @@ const TaxTableContainer: React.FC<TaxTableContainerProps> = ({
           </tbody>
         </table>
       </div>
+      </Box>
     </>
   );
 };

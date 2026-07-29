@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert, debounce, } from '@mui/material';
 
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   activateSubCategory,
   addSubCategory,
@@ -255,7 +255,7 @@ const SubCategoryComponent: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <SubcategoryTableContainer
         handleEdit={handleEdit}

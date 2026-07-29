@@ -268,7 +268,7 @@ const DeliveryTypePage: React.FC = () => {
 
   return (
     <div>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
       <Box
         display="flex"

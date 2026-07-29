@@ -17,9 +17,9 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Refresh as RefreshIcon,
+  EditOutlined as EditIcon,
+  DeleteOutlineRounded as DeleteIcon,
+  RestoreRounded as RefreshIcon,
   VisibilityOutlined as ViewIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
@@ -137,10 +137,10 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   const subcategoryPopoverId = subcategoryPopoverOpen ? 'subcategory-popover' : undefined;
 
   return (
-    <Box className="purchase-reference-table-shell">
+    <Box className="purchase-master-table-shell">
        <TableContainer
         component={Paper}
-        className="purchase-reference-table"
+        className="purchase-master-table"
        sx={{
   maxHeight: 'calc(100vh - 360px)',
   overflowY: 'auto',

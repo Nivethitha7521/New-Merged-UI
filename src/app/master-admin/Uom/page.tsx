@@ -11,12 +11,12 @@ import {
   Switch,
   Snackbar,
   Alert,
-  Typography,
+  Typography,Button,
   SelectChangeEvent,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
-import YenbirthdaycakeappPage from '../page';
+// import YenbirthdaycakeappPage from '../page';
 import ActivateDeactivateConfirmationDialog from '@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog';
 import EditConfirmationDialog from '@/app/Components/Dialogs/EditConfirmationDialog';
 import CloseConfirmationDialog from '@/app/Components/Dialogs/CloseConfirmationDialog';
@@ -94,7 +94,7 @@ const Uom: React.FC = () => {
     snackbarMessage,
     showDeactivated,
     loading,
-  } = useSelector((state: RootState) => state.uoms);
+  } = useSelector((state: RootState) => state.maUoms);
 
   // Local UI state
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
@@ -339,53 +339,41 @@ const Uom: React.FC = () => {
 
   return (
     <Box sx={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-      <YenbirthdaycakeappPage />
+      {/* <YenbirthdaycakeappPage /> */}
 
-      {/* Toolbar */}
-      <Box
-        display="flex"
-        flexDirection={{ xs: 'column', sm: 'row' }}
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: '99%', boxSizing: 'border-box', mt: 2 }}
+    <Box className="uom-master-toolbar">
+  <Typography className="uom-master-toolbar-title">
+    {showDeactivated
+      ? "Deactivated UOMs"
+      : "Active UOMs"}
+  </Typography>
+
+  <Box className="uom-master-toolbar-actions">
+    {!showDeactivated && (
+      <Button
+        type="button"
+        variant="outlined"
+        startIcon={<AddIcon />}
+        onClick={handleOpenAdd}
+        className="purchase-reference-action-button"
       >
-        <Typography className="icon-action-label" sx={LABEL_SX}>
-          {tableTitle}
-        </Typography>
+        Add New
+      </Button>
+    )}
 
-        <div className="flex items-center gap-4">
-          {!showDeactivated && (
-            <div className="icon-action-wrapper">
-              <IconButton
-                color="primary"
-                onClick={handleOpenAdd}
-                className="icon-action-button"
-                title="Add"
-              >
-                <AddIcon className="icon-action-svg" />
-              </IconButton>
-              <Typography className="icon-action-label">Add</Typography>
-            </div>
-          )}
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={handleToggleDeactivated}
-                color="primary"
-                size="small"
-              />
-            }
-            label={toggleLabel}
-            sx={SWITCH_LABEL_SX}
-          />
-        </div>
-      </Box>
+      <Switch
+        checked={!showDeactivated}
+       onChange={handleToggleDeactivated}
+        size="small"
+      />
+    </Box>
+  </Box>
+</Box>
 
       {/* Table */}
       <UomTable

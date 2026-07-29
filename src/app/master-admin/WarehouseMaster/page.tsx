@@ -35,7 +35,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Divider,
+  Divider,Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -45,7 +45,6 @@ import UndoIcon from "@mui/icons-material/Undo";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { AxiosError } from "axios";
 import ConfirmationDialog from "../WarehouseMaster/Modules/confirmationaction";
-import MasterAdminMenu from "../page";
 import WareHouseDialog from "../WarehouseMaster/Modules/wareHouseDialog";
 import WareHouseTableComponent from "../WarehouseMaster/Modules/wareHouseTable";
 import ImportResultDialog, {
@@ -497,122 +496,110 @@ const WareHouseMaster: React.FC = () => {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <Box marginLeft={1}>
-      <MasterAdminMenu />
+   <Box className="master-admin-module-page">
+    
+<Box className="purchase-reference-toolbar">
+  <Box className="purchase-reference-toolbar-spacer" />
 
-      {/* ── Top bar ────────────────────────────────────────────────────────── */}
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={2}
-        my={2}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "100%", boxSizing: "border-box" }}
-      >
-        <Typography
-          className="icon-action-label"
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+  <Box className="purchase-reference-actions">
+    {!showDeactivated && (
+      <>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleAddNew}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
         >
-          {showDeactivated ? "Deactivated WareHouse" : "Active WareHouse"}
-        </Typography>
+          Add New
+        </Button>
 
-        {/* Action buttons */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: { xs: 1.5, sm: 2, md: 1.5 },
-            flexWrap: "nowrap",
-            overflowX: "auto",
-            paddingBottom: "4px",
-            scrollbarWidth: "thin",
-            "&::-webkit-scrollbar": { height: "6px" },
-            "&::-webkit-scrollbar-track": { background: "transparent" },
-            "&::-webkit-scrollbar-thumb": {
-              background: "#c1c1c1",
-              borderRadius: "3px",
-            },
-          }}
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={
+            isImporting ? (
+              <CircularProgress size={16} />
+            ) : (
+              <GetAppIcon />
+            )
+          }
+          onClick={handleImportClick}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
         >
-          {!showDeactivated && (
-            <>
-              {(
-                [
-                  { label: "Add", icon: <AddIcon className="icon-action-svg" />, onClick: handleAddNew, color: "primary" },
-                  {
-                    label: isImporting ? "Importing..." : "Import",
-                    icon: isImporting
-                      ? <CircularProgress size={20} className="icon-action-svg" />
-                      : <GetAppIcon className="icon-action-svg" />,
-                    onClick: handleImportClick,
-                    color: "primary",
-                  },
-                  { label: "Export", icon: <UploadIcon className="icon-action-svg" />, onClick: handleExportCSV, color: "primary" },
-                  { label: "Sample", icon: <DescriptionIcon className="icon-action-svg" />, onClick: handleDownloadSampleCSV, color: "primary" },
-                  { label: "Rollback", icon: <UndoIcon className="icon-action-svg" />, onClick: handleRollback, color: "secondary" },
-                ] as const
-              ).map(({ label, icon, onClick, color }) => (
-                <div key={label} className="icon-action-wrapper">
-                  <IconButton
-                    color={color}
-                    onClick={onClick}
-                    className="icon-action-button"
-                    size="small"
-                    disabled={isImporting}
-                  >
-                    {icon}
-                  </IconButton>
-                  <Typography className="icon-action-label">{label}</Typography>
-                </div>
-              ))}
-            </>
-          )}
+          {isImporting ? "Importing..." : "Import"}
+        </Button>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated((prev) => !prev)}
-                color="primary"
-                size="small"
-                disabled={isImporting}
-              />
-            }
-            label={toggleLabel}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UploadIcon />}
+          onClick={handleExportCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Export
+        </Button>
 
-          <div className="icon-action-wrapper">
-            <IconButton
-              onClick={handleFilterClick}
-              className="icon-action-button"
-              size="small"
-              sx={{ borderColor: "#6b7280" }}
-              disabled={isImporting}
-            >
-              <FilterListIcon className="icon-action-svg" />
-            </IconButton>
-            <Typography className="icon-action-label">Filter</Typography>
-          </div>
-        </Box>
-      </Box>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<DescriptionIcon />}
+          onClick={handleDownloadSampleCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Sample
+        </Button>
+
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UndoIcon />}
+          onClick={handleRollback}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Rollback
+        </Button>
+      </>
+    )}
+
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
+
+      <Switch
+        checked={!showDeactivated}
+        onChange={() =>
+          setShowDeactivated((previous) => !previous)
+        }
+        size="small"
+        disabled={isImporting}
+        inputProps={{
+          "aria-label": "Show active warehouses only",
+        }}
+      />
+    </Box>
+
+    <Tooltip title="Choose visible columns" arrow>
+      <span>
+        <IconButton
+          type="button"
+          onClick={handleFilterClick}
+          disabled={isImporting}
+          className="purchase-reference-filter-button"
+          aria-label="Choose visible warehouse columns"
+        >
+          <FilterListIcon />
+        </IconButton>
+      </span>
+    </Tooltip>
+  </Box>
+</Box>
 
       {/* Hidden file input */}
       <input
@@ -814,19 +801,25 @@ const WareHouseMaster: React.FC = () => {
         moduleName="Warehouse"
       />
 
-      {/* ── Table ────────────────────────────────────────────────────────── */}
-      <WareHouseTableComponent
-        filteredTypes={wareHouse}
-        showDeactivatedTable={showDeactivated}
-        onOpenEdit={handleEdit}
-        onAddNew={handleAddNew}
-        onActivate={(item: WareHouse) => confirmStatusChange(item, true)}
-        onDeactivate={(item: WareHouse) => confirmStatusChange(item, false)}
-        visibleColumns={visibleColumns}
-        columnLabels={columnLabels}
-        resultDialogOpen={false}
-        onCloseResultDialog={() => {}}
-      />
+      {/* Warehouse table */}
+<Box className="master-admin-table-area">
+  <WareHouseTableComponent
+    filteredTypes={wareHouse}
+    showDeactivatedTable={showDeactivated}
+    onOpenEdit={handleEdit}
+    onAddNew={handleAddNew}
+    onActivate={(item: WareHouse) =>
+      confirmStatusChange(item, true)
+    }
+    onDeactivate={(item: WareHouse) =>
+      confirmStatusChange(item, false)
+    }
+    visibleColumns={visibleColumns}
+    columnLabels={columnLabels}
+    resultDialogOpen={false}
+    onCloseResultDialog={() => {}}
+  />
+</Box>
 
       {/* ── Column filter popover ─────────────────────────────────────────── */}
       <Popover

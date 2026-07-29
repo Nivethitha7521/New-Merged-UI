@@ -6,6 +6,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import { Checkbox } from "@mui/material";
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import DraftsIcon from "@mui/icons-material/Drafts";
+import PurchaseOrderTabs from '@/components/yen-purchase/purchaseorder/PurchaseOrderTabs';
 import {
   Box,
   TextField,
@@ -3018,79 +3019,20 @@ const handleOpenDraft = async (draftId: string) => {
     );
   }
   return (
-    <Box sx={{ pl: 0, py: 1 }}>
-      <YenPurchasePage />
-      <Box sx={{ display: "flex", flexDirection: "column", px: 2 }}>
+<Box className="purchase-page-shell purchase-order-module-page">
+  <YenPurchasePage />
+
+  <Box className="purchase-order-content">
         <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1, mb: 1, mt: 1 }}>
-          {!hidePending && (
-            <Link href={"/yen-purchase/PurchaseOrder"}>
-              <Button variant="contained" color="primary">
-                Pending
-              </Button>
-            </Link>
-          )}
-
-          <Link href={"/yen-purchase/PurchaseOrder/Approvedpo"}>
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: "white",
-                color: "black",
-                "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.8)" },
-              }}
-            >
-              Approved
-            </Button>
-          </Link>
-
-          {!hideRejected && canViewRejected && (
-            <Link href={"/yen-purchase/PurchaseOrder/RejectedPo"}>
-              <Button variant="contained" color="primary">
-                Rejected
-              </Button>
-            </Link>
-          )}
-          {isGrnConvertedVisible && (
-            <Link href={"/yen-purchase/PurchaseOrder/GRNConvertedPO"}>
-              <Button
-                variant="contained"
-                color="primary"
-              >
-                GRN Converted
-              </Button>
-            </Link>
-
-          )}
-{isHoldGrnVisible && (
-  <Link href={"/yen-purchase/PurchaseOrder/HoldGrn"}>
-    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-      <Button variant="contained" color="primary" sx={{ ml: 1 }}>
-        Hold GRN
-      </Button>
-      {holdGrnCount > 0 && (
-        <Box sx={{
-          position: 'absolute',
-          top: -6,
-          right: -6,
-          backgroundColor: 'red',
-          color: 'white',
-          borderRadius: '50%',
-          width: 20,
-          height: 20,
-          fontSize: 11,
-          fontWeight: 'bold',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1,
-          pointerEvents: 'none',
-        }}>
-          {holdGrnCount}
-        </Box>
-      )}
-    </Box>
-  </Link>
-)}
+         <PurchaseOrderTabs
+  activeTab="approved"
+  showPending={!hidePending}
+  showApproved={hasApprovedAccess}
+  showRejected={!hideRejected && canViewRejected}
+  showGrnConverted={Boolean(isGrnConvertedVisible)}
+  showHoldGrn={Boolean(isHoldGrnVisible)}
+  holdGrnCount={holdGrnCount}
+/>
         </Box>
         {/* Filter and search UI - keep as is */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap", width: "100%", mb: 1 }}>
@@ -3112,97 +3054,110 @@ const handleOpenDraft = async (draftId: string) => {
             <Grid item xs={6} sm={4} md={1}>
               <PurchaseOrderRandomIdSearch value={selectedRandomId} onChange={handleRandomIdChange} label="PO ID" />
             </Grid>
+           <Grid item>
+  <IconButton
+    type="button"
+    onClick={handleFilterClick}
+    className="purchase-order-toolbar-icon is-filter"
+    aria-label="Apply approved PO filters"
+    title="Apply filters"
+  >
+    <FilterAltIcon fontSize="small" />
+  </IconButton>
+</Grid>
             <Grid item>
-              <IconButton className="icon-button-outline" onClick={handleFilterClick} color="primary" size="small" sx={{ p: 0.3 }}>
-                <FilterAltIcon fontSize="small" />
-              </IconButton>
-              <Typography variant="caption" align="center" sx={{ maxWidth: 60, wordBreak: "break-word", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, mt: 0.2 }}>
-                Filter
-              </Typography>
-            </Grid>
-            <Grid item>
-              <IconButton className="icon-button-outline" onClick={handleFilterClose} color="primary" size="small" sx={{ p: 0.3 }}>
-                <ClearIcon fontSize="small" />
-              </IconButton>
-              <Typography variant="caption" align="center" sx={{ maxWidth: 60, wordBreak: "break-word", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, mt: 0.2 }}>
-                Clear
-              </Typography>
-            </Grid>
+  <IconButton
+    type="button"
+    onClick={handleFilterClose}
+    className="purchase-order-toolbar-icon is-clear"
+    aria-label="Clear approved PO filters"
+    title="Clear filters"
+  >
+    <ClearIcon fontSize="small" />
+  </IconButton>
+</Grid>
             <Grid item sx={{ flexGrow: 1 }} />
-            <Grid item xs="auto">
-  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <Tooltip title="Multi PO Drafts">
-      <IconButton
-        color="primary"
-        size="small"
-        onClick={() => setDraftDialogOpen(true)}
-      >
-        <Badge badgeContent={multiPoDraftCount} color="error">
-          <DraftsIcon fontSize="small" />
-        </Badge>
-      </IconButton>
-    </Tooltip>
-
-    <Typography variant="caption">
-      Drafts
-    </Typography>
-  </Box>
+          <Grid item xs="auto">
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={
+      <Badge badgeContent={multiPoDraftCount} color="error">
+        <DraftsIcon fontSize="small" />
+      </Badge>
+    }
+    onClick={() => setDraftDialogOpen(true)}
+    className="purchase-reference-action-button purchase-order-toolbar-button"
+  >
+    Drafts
+  </Button>
 </Grid>
-            <Grid item xs="auto">
-  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <Tooltip title={
+          <Grid item xs="auto">
+  <Tooltip
+    title={
       selectedPoIds.size < 2
-        ? "Select 2 or more POs to convert together"
+        ? 'Select 2 or more POs to convert together'
         : `Convert ${selectedPoIds.size} selected POs to GRN`
-    }>
-      <span>
-        <IconButton
-          onClick={handleMultiPoConvert}
-          color="success"
-          size="small"
-          sx={{ p: 0.3 }}
-          className="icon-button-outline"
-          disabled={selectedPoIds.size < 2}
-        >
-          <SwapHorizIcon fontSize="small" />
-        </IconButton>
-      </span>
-    </Tooltip>
-    <Typography variant="caption" align="center" sx={{ maxWidth: 60, wordBreak: "break-word", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, mt: 0.2 }}>
-      Multi GRN
-    </Typography>
-  </Box>
+    }
+  >
+    <span>
+      <Button
+        type="button"
+        variant="outlined"
+        startIcon={<SwapHorizIcon />}
+        onClick={handleMultiPoConvert}
+        disabled={selectedPoIds.size < 2}
+        className="purchase-reference-action-button purchase-order-toolbar-button"
+      >
+        Multi GRN
+      </Button>
+    </span>
+  </Tooltip>
 </Grid>
             <Grid item xs="auto">
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <IconButton
-                  onClick={(e) => setAnchorEl(e.currentTarget)}
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                  className="icon-button-outline"
-                  disabled={!filteredOrders || filteredOrders.length === 0}
-                >
-                  {loading ? <CircularProgress size={16} /> : <DownloadIcon fontSize="small" />}
-                </IconButton>
-                <Typography variant="caption" align="center" sx={{ maxWidth: 60, wordBreak: "break-word", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", lineHeight: 1.1, mt: 0.2 }}>
-                  Download
-                </Typography>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={() => setAnchorEl(null)}
-                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                  transformOrigin={{ vertical: "top", horizontal: "right" }}
-                >
-                  <MenuItem onClick={() => setDialogDownloadOpen(true)}>Vendorwise</MenuItem>
-                  <MenuItem onClick={() => setDialogSummaryOpen(true)}>Itemwise</MenuItem>
-                </Menu>
-              </Box>
-            </Grid>
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={
+      loading ? (
+        <CircularProgress size={15} />
+      ) : (
+        <DownloadIcon />
+      )
+    }
+    onClick={(event) => setAnchorEl(event.currentTarget)}
+    disabled={!filteredOrders || filteredOrders.length === 0}
+    className="purchase-reference-action-button purchase-order-toolbar-button"
+  >
+    Download
+  </Button>
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={() => setAnchorEl(null)}
+    anchorOrigin={{
+      vertical: 'bottom',
+      horizontal: 'right',
+    }}
+    transformOrigin={{
+      vertical: 'top',
+      horizontal: 'right',
+    }}
+  >
+    <MenuItem onClick={() => setDialogDownloadOpen(true)}>
+      Vendorwise
+    </MenuItem>
+
+    <MenuItem onClick={() => setDialogSummaryOpen(true)}>
+      Itemwise
+    </MenuItem>
+  </Menu>
+</Grid>
           </Grid>
         </Box>
-        <TableContainer component={Paper} sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto", width: "100%", marginLeft: 2 }}>
+        <TableContainer component={Paper}
+        className="purchase-master-table purchase-order-table" sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto", width: "100%", marginLeft: 2 }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -3245,8 +3200,20 @@ const handleOpenDraft = async (draftId: string) => {
     />
   </TableCell>
   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                    <TableCell>{order.randomId}</TableCell>
-                    <TableCell>{order.vendorName}</TableCell>
+                    <TableCell>
+  <span className="purchase-master-id-pill">
+    {order.randomId || '-'}
+  </span>
+</TableCell>
+                   <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(order.vendorName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{order.vendorName || '-'}</span>
+  </Box>
+</TableCell>
                     <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
                     <TableCell>{order.approvedDate ? format(new Date(order.approvedDate), "dd-MM-yyyy") : ""}</TableCell>
                     <TableCell className='table-number-right'>
@@ -3256,39 +3223,59 @@ const handleOpenDraft = async (draftId: string) => {
                       })()}
                     </TableCell>
                     <TableCell className='table-number-right'>{(order.pendingOrderAmount || 0).toFixed(2)}</TableCell>
-                    <TableCell>{order.poStatus}</TableCell>
-                    <TableCell>
-                      <Tooltip title={isMultiSelectMode ? "Deselect all to view individual PO" : "View Details"}>
-  <IconButton
-    onClick={() => !isMultiSelectMode && handleViewDetailsClick(order.purchaseOrderId)}
-    disabled={!canViewApproved || isMultiSelectMode}
-    sx={{
-      color: (canViewApproved && !isMultiSelectMode) ? "primary.main" : "gray",
-      opacity: (canViewApproved && !isMultiSelectMode) ? 1 : 0.4
-    }}
-  >
-    <VisibilityIcon />
-  </IconButton>
-</Tooltip>
-                      <Tooltip title="Download">
-                        <IconButton
-                          color="primary"
-                          onClick={() => handleDownload(order.purchaseOrderId)}
-                        >
-                          <PictureAsPdfIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="View Stock & Price Update History">
-                        <IconButton
-                          onClick={() => handleViewStockLogs(order)}
-                          color="info"
-                          sx={{ mr: 0.5 }}
-                          size="small"
-                        >
-                          <InventoryIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+                 <TableCell>
+  <span className="purchase-master-status-pill is-approved">
+    {order.poStatus || 'Approved'}
+  </span>
+</TableCell>
+                   <TableCell>
+  <Box className="purchase-order-actions">
+    <Tooltip
+      title={
+        isMultiSelectMode
+          ? 'Deselect all to view individual PO'
+          : 'View Details'
+      }
+    >
+      <span>
+        <IconButton
+          type="button"
+          onClick={() =>
+            !isMultiSelectMode &&
+            handleViewDetailsClick(order.purchaseOrderId)
+          }
+          disabled={!canViewApproved || isMultiSelectMode}
+          className="purchase-master-action-button is-view"
+          aria-label="View approved purchase order"
+        >
+          <VisibilityIcon fontSize="small" />
+        </IconButton>
+      </span>
+    </Tooltip>
+
+    <Tooltip title="Download">
+      <IconButton
+        type="button"
+        onClick={() => handleDownload(order.purchaseOrderId)}
+        className="purchase-master-action-button is-download"
+        aria-label="Download approved purchase order"
+      >
+        <PictureAsPdfIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <Tooltip title="View Stock & Price Update History">
+      <IconButton
+        type="button"
+        onClick={() => handleViewStockLogs(order)}
+        className="purchase-master-action-button is-history"
+        aria-label="View stock update history"
+      >
+        <InventoryIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  </Box>
+</TableCell>
                   </TableRow>
                 ))
               )}

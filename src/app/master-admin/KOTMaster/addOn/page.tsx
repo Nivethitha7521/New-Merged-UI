@@ -6,7 +6,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert } from '@mui/material';
 import { AppDispatch, RootState } from '../../../../redux/store';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   activateaddOn,
   addaddOn,
@@ -335,7 +335,7 @@ const AddOnComponent: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <AddOnTableContainer
         handleEdit={handleEdit}

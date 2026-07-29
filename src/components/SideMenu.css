@@ -183,14 +183,14 @@
 }
 
 .erp-brand-mark {
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
 
   display: grid;
   place-items: center;
 
-  padding: 3px;
+  padding: 0px;
 
   overflow: hidden;
 
@@ -210,6 +210,11 @@
   display: block;
 
   object-fit: contain;
+  object-position: center;
+
+  transform: scale(1.5);
+  transform-origin: center;
+
   border-radius: 9px;
 }
 
@@ -453,9 +458,9 @@
 }
 
 .erp-sidebar.is-collapsed .erp-brand-mark {
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
 }
 
 .erp-sidebar.is-collapsed .erp-sidebar-scroll {

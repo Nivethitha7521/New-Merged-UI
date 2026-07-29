@@ -4,7 +4,13 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 export type DisplayTheme = 'light' | 'dark';
 export type DisplayStyle = 'classic' | 'modern' | 'glass';
-export type DisplayFont = 'Inter' | 'Poppins' | 'Roboto';
+export type DisplayFont =
+  | 'Inter'
+  | 'Poppins'
+  | 'Roboto'
+  | 'Source Sans 3'
+  | 'IBM Plex Sans'
+  | 'Open Sans';
 export type DisplayFontSize = 'small' | 'medium' | 'large';
 export type DisplayLanguage = 'en';
 export type DisplayCurrency = 'INR' | 'USD' | 'EUR' | 'GBP';
@@ -43,6 +49,9 @@ const FONT_STACKS: Record<DisplayFont, string> = {
   Inter: 'Inter, Arial, sans-serif',
   Poppins: 'Poppins, Arial, sans-serif',
   Roboto: 'Roboto, Arial, sans-serif',
+  'Source Sans 3': '"Source Sans 3", Arial, sans-serif',
+  'IBM Plex Sans': '"IBM Plex Sans", Arial, sans-serif',
+  'Open Sans': '"Open Sans", Arial, sans-serif',
 };
 
 const FONT_SCALES: Record<DisplayFontSize, string> = {

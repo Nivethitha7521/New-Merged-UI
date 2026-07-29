@@ -24,7 +24,7 @@ import ActivateDeactivateConfirmationDialog from '../../Components/Dialogs/Activ
 import VehicleDialog from '../Vehicle/Modules/VehicleDialog';
 import VehicleTableContainer from '../Vehicle/Modules/VehicleTable';
 import { Alert, Snackbar, SelectChangeEvent, debounce } from '@mui/material';
-import MenuPage from '../page';
+// import MenuPage from '../page';
 import { validateLettersOnly, validateMaxLength } from '@/app/Components/validation';
 import { Vehicle } from '../Vehicle/Models/vehicleModel';
 
@@ -357,7 +357,7 @@ const VehiclePage: React.FC = () => {
 
   return (
     <>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
       <VehicleTableContainer
         handleEdit={handleEdit}

@@ -2053,7 +2053,15 @@ useEffect(() => {
   const isBefDiscountActive = newItem.befTaxDiscount > 0 || newItem.befTaxDiscountAmount > 0;
   const isAfDiscountActive = newItem.afTaxDiscount > 0 || newItem.afTaxDiscountAmount > 0;
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#ffffff' }}>
+   <Box
+  className="purchase-order-form-page"
+  sx={{
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    bgcolor: '#ffffff',
+  }}
+>
       {/* Main Content */}
       <Box sx={{ flex: 1, p: 3, overflowY: 'auto', maxHeight: 'calc(100vh - 64px)' }}>
         <Box sx={{
@@ -2069,12 +2077,17 @@ useEffect(() => {
           px: { xs: 2, sm: 3, md: 4 },  // Generous side padding on big screens
           py: 3,
         }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box className="purchase-order-form-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography fontWeight={'bold'} sx={{ textDecoration: 'underline' }}>
               {isEditMode ? `Edit Purchase Order - ${purchaseOrderData.randomId || editId}` : 'Create New Purchase Order'}
             </Typography>
-            <Button variant="contained" color="primary" onClick={handleBackToPO}>Back to PO</Button>
-          </Box>
+<Button
+  variant="outlined"
+  onClick={handleBackToPO}
+  className="purchase-reference-action-button"
+>
+  Back to PO
+</Button>          </Box>
           <Grid container spacing={2}>
             {/* Form Fields */}
             <Grid item xs={12} sm={3} md={2}>
@@ -2507,15 +2520,21 @@ useEffect(() => {
                   size="small"
                   disabled={loading || (newItem.befTaxDiscount > 0 && newItem.afTaxDiscount > 0) || (newItem.befTaxDiscountAmount > 0 && newItem.afTaxDiscountAmount > 0)}
                   startIcon={loading ? <CircularProgress size={20} /> : null}
-                  sx={{ mr: 3.5 }}
+                  className="purchase-reference-action-button"
                 >
                   {loading ? 'Adding...' : 'Add Item'}
                 </Button>
               </Grid>
             </Grid>
             {/* Items Table */}
-            <TableContainer sx={{ maxHeight: '500px', overflowY: 'auto', marginBottom: '10px' }}>
-              <Table stickyHeader>
+<TableContainer
+  className="purchase-master-table purchase-order-table"
+  sx={{
+    maxHeight: '500px',
+    overflowY: 'auto',
+    marginBottom: '10px',
+  }}
+>              <Table stickyHeader>
                 <TableHead
                   sx={{
                     position: 'sticky',
@@ -2576,8 +2595,23 @@ useEffect(() => {
                         <TableCell className='table-number-right'>{(item.pendingTotalPrice || 0).toFixed(2)}</TableCell>
                         <TableCell className='table-number-right'>{(item.pendingFinalPrice || 0).toFixed(2)}</TableCell>
                         <TableCell className='table-number-right'>
-                          <IconButton onClick={() => handleEdit(item)} size="small"><EditIcon /></IconButton>
-                          <IconButton onClick={() => handleDelete(item.itemId)} size="small"><DeleteIcon /></IconButton>
+<Box className="purchase-order-actions">
+  <IconButton
+    onClick={() => handleEdit(item)}
+    className="purchase-master-action-button is-edit"
+    aria-label="Edit purchase order item"
+  >
+    <EditIcon fontSize="small" />
+  </IconButton>
+
+  <IconButton
+    onClick={() => handleDelete(item.itemId)}
+    className="purchase-master-action-button is-delete"
+    aria-label="Delete purchase order item"
+  >
+    <DeleteIcon fontSize="small" />
+  </IconButton>
+</Box>
                         </TableCell>
                       </TableRow>
                     ))
@@ -2984,7 +3018,14 @@ useEffect(() => {
                   variant="outlined"
                   InputProps={{
                     endAdornment: (
-                      <IconButton onClick={() => handleRemoveTerm(index)} size="small"><RemoveIcon /></IconButton>
+                    <IconButton
+  type="button"
+  onClick={() => handleRemoveTerm(index)}
+  className="purchase-master-action-button is-delete"
+  aria-label={`Remove term ${index + 1}`}
+>
+  <RemoveIcon fontSize="small" />
+</IconButton>
                     ),
                   }}
                 />
@@ -2992,14 +3033,15 @@ useEffect(() => {
             ))}
             <Grid item xs={3}>
               <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleAddTerm}
-                disabled={purchaseOrderData.termsandConditions.length >= 3}
-                startIcon={<AddIcon />}
-              >
-                Add Term
-              </Button>
+  variant="outlined"
+  color="primary"
+  onClick={handleAddTerm}
+  disabled={purchaseOrderData.termsandConditions.length >= 3}
+  startIcon={<AddIcon />}
+  className="purchase-reference-action-button"
+>
+  Add Term
+</Button>
               {purchaseOrderData.termsandConditions.length >= 3 && (
                 <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
                   Maximum of 3 terms reached
@@ -3010,22 +3052,38 @@ useEffect(() => {
         </Box>
       </Box>
       {/* Footer Actions */}
-      <Box sx={{ p: 0.5, bgcolor: 'white', position: 'sticky', bottom: 0, zIndex: 10 }}>
+      <Box
+  className="purchase-order-form-actions"
+  sx={{
+    bgcolor: 'white',
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 10,
+  }}
+>
         <Grid container spacing={2} justifyContent="flex-end">
           <Grid item>
-            <Button variant="outlined" color="primary" onClick={handleClear}>
-              {isEditMode ? 'Cancel Edit' : 'Clear All'}
-            </Button>
+            <Button
+  variant="outlined"
+  color="primary"
+  onClick={handleClear}
+  className="purchase-reference-action-button"
+>
+  {isEditMode ? 'Cancel Edit' : 'Clear All'}
+</Button>
           </Grid>
           <Grid item>
             <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenDialog}
-              disabled={submitLoading || loading}
-            >
-              {isEditMode ? "Update Purchase Order" : "Submit Purchase Order"}
-            </Button>
+  variant="contained"
+  color="primary"
+  onClick={handleOpenDialog}
+  disabled={submitLoading || loading}
+  className="purchase-reference-primary-button"
+>
+  {isEditMode
+    ? 'Update Purchase Order'
+    : 'Submit Purchase Order'}
+</Button>
           </Grid>
         </Grid>
       </Box>

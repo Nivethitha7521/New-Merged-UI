@@ -3,13 +3,13 @@
 
 
 "use client";
-import Link from 'next/link';
+// import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMemo, useCallback } from 'react';
-import { Button } from '@mui/material';
+// import { Button } from '@mui/material';
 import React from 'react';
 // import SideMenu from '../Components/SideMenu';
-import SideMenu from '@/components/SideMenu';
+// import SideMenu from '@/components/SideMenu';
 
 
 const MasterAdminPage = () => {
@@ -65,17 +65,17 @@ const MasterAdminPage = () => {
      
 
       {/* SideMenu */}
-    <SideMenu
+    {/* <SideMenu
   onMenuClick={handleMenuClick}
   activePath={pathname || '/'}
   showPurchaseMenu={true}
   showBookMenu={true}
   showInventoryMenu={true}
   showReportsMenu={true}
-/>
+/> */}
 
       {/* <div className=" flex-wrap gap-2 ml-7.5 mt-2 "> */}
-      <div className="ml-8 mt-6 flex flex-wrap gap-4" >
+      {/* <div className="ml-8 mt-6 flex flex-wrap gap-4" >
         {subItems.map((item) => {
           const isActive = isActiveRoute(item.path);
 
@@ -103,7 +103,7 @@ const MasterAdminPage = () => {
             </Link>
           );
         })}
-      </div>
+      </div> */}
     </div>
   );
 };

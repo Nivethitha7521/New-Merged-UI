@@ -2,22 +2,22 @@
 'use client';
 import React, { useCallback, useMemo, useRef } from 'react';
 import {
-  IconButton,
-  Switch,
-  FormControlLabel,
   Alert,
   Box,
-  Typography,
+  Button,
+  IconButton,
   Snackbar,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-} from '@mui/icons-material';
+  Switch,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
+import RefreshIcon from "@mui/icons-material/RestoreRounded";
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../../redux/store';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import { discountImport, setSnackbarOpen } from '../Features/discountSlice';
 
 interface Discount {
@@ -85,155 +85,223 @@ const DiscountTableContainer: React.FC<DiscountTableContainerProps> = ({
     setShowDeactivated(!showDeactivated);
   }, [showDeactivated, setShowDeactivated]);
 
-  const label = showDeactivated ? 'Show Activated' : 'Show Deactivated';
 
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 2 }}
-      >
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+
+  {/* Toolbar */}
+  <Box className="discount-master-toolbar">
+    <Typography className="discount-master-toolbar-title">
+      {showDeactivated
+        ? "Deactivated Discounts"
+        : "Active Discounts"}
+    </Typography>
+
+    <Box className="discount-master-toolbar-actions">
+      {!showDeactivated && (
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          className="purchase-reference-action-button"
         >
-          {showDeactivated ? "Deactivated Discounts" : "Active Discounts"}
+          Add New
+        </Button>
+      )}
+
+      <Box className="purchase-reference-active-toggle">
+        <Typography component="span">
+          Show Active Only
         </Typography>
 
-        <div className="flex items-center gap-4">
-          {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
-
-              <input
-                accept=".csv"
-                style={{ display: 'none' }}
-                id="import-file"
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-              />
-            </>
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={handleToggle}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+        <Switch
+          checked={!showDeactivated}
+          onChange={handleToggle}
+          color="primary"
+          size="small"
+          inputProps={{
+            "aria-label": "Show active discounts only",
+          }}
+        />
       </Box>
+    </Box>
+  </Box>
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(90.5vh - 170px)' }}>
-        <table className="custom-table">
-          <thead>
+  {/* Existing import input is preserved */}
+  <input
+    accept=".csv"
+    style={{ display: "none" }}
+    id="import-file"
+    type="file"
+    ref={fileInputRef}
+    onChange={handleFileChange}
+  />
+
+  {/* Discount table */}
+  <Box className="purchase-master-table-shell">
+    <div className="purchase-native-table-wrapper">
+      <table className="purchase-native-table discount-native-table">
+        <thead>
+          <tr>
+            <th className="discount-column-sno">
+              S.NO
+            </th>
+
+            <th className="discount-column-id">
+              Discount ID
+            </th>
+
+            <th className="discount-column-sale-type">
+              SaleType Discount Name
+            </th>
+
+            <th className="discount-column-name">
+              Discount Name
+            </th>
+
+            <th className="discount-column-percentage">
+              Discount Percentage
+            </th>
+
+            <th className="discount-column-actions">
+              Actions
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {loading ? (
             <tr>
-              <th>S.NO</th>
-              <th>Discount Id</th>
-              <th>SaleType Discount name</th>
-              <th>Discount Name</th>
-              <th>Discount Percentage</th>
-              <th>Actions</th>
+              <td
+                colSpan={6}
+                className="empty-state"
+              >
+                Loading...
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={5} style={{ textAlign: 'center' }}>
-                  <h3 style={{ fontWeight: 'bold' }}>Loading...</h3>
-                </td>
-              </tr>
-            ) : (
-              <>
-                {displayedDiscounts.map((discount, index) => (
-                  <tr key={discount.id || index}>
-                    <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                    <td style={{ textAlign: 'center' }}>{discount.discountId}</td>
-                    <td style={{ textAlign: 'center' }}>{discount.saleTypeDiscount}</td>
-                    <td style={{ textAlign: 'center' }}>{discount.discountName}</td>
-                    <td style={{ textAlign: 'center' }}>{`${discount.discountPercentage}%`}</td>
-                    <td style={{ textAlign: 'center' }}>
+          ) : displayedDiscounts.length === 0 ? (
+            <tr>
+              <td
+                colSpan={6}
+                className="empty-state"
+              >
+                {showDeactivated
+                  ? "No deactivated discounts found"
+                  : "No active discounts found"}
+              </td>
+            </tr>
+          ) : (
+            displayedDiscounts.map(
+              (discount, index) => (
+                <tr key={discount.id || index}>
+                  {/* Serial number */}
+                  <td className="discount-column-sno">
+                    {index + 1}
+                  </td>
+
+                  {/* Discount ID */}
+                  <td className="discount-column-id">
+                    <span className="purchase-master-id-pill">
+                      {discount.discountId}
+                    </span>
+                  </td>
+
+                  {/* Sale type discount */}
+                  <td className="discount-column-sale-type">
+                    <span className="purchase-master-value-pill">
+                      {discount.saleTypeDiscount}
+                    </span>
+                  </td>
+
+                  {/* Discount name */}
+                  <td className="discount-column-name">
+                    <Box className="purchase-master-name-cell">
+                      <span className="purchase-master-avatar">
+                        {(discount.discountName || "?")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </span>
+
+                      <span>
+                        {discount.discountName}
+                      </span>
+                    </Box>
+                  </td>
+
+                  {/* Percentage */}
+                  <td className="discount-column-percentage">
+                    <span className="purchase-master-value-pill">
+                      {`${discount.discountPercentage}%`}
+                    </span>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="discount-column-actions">
+                    <Box className="purchase-master-actions">
                       {showDeactivated ? (
-                        <button
-                          color="primary"
-                          onClick={() => handleActivate(discount)}
-                          className="activate-btn"
-                          title="Activate"
+                        <Tooltip
+                          title="Activate discount"
+                          arrow
                         >
-                          <RefreshIcon />
-                        </button>
+                          <IconButton
+                            type="button"
+                            onClick={() =>
+                              handleActivate(discount)
+                            }
+                            className="purchase-master-action-button is-activate"
+                            aria-label={`Activate ${discount.discountName}`}
+                          >
+                            <RefreshIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       ) : (
                         <>
-                          <button
-                            onClick={() => handleEdit(discount)}
-                            className="edit-btn"
-                            title="Edit"
+                          <Tooltip
+                            title="Edit discount"
+                            arrow
                           >
-                            <EditIcon />
-                          </button>
-                          <button
-                            onClick={() => handleDeactivate(discount)}
-                            className="deactivate-btn"
-                            title="Deactivate"
+                            <IconButton
+                              type="button"
+                              onClick={() =>
+                                handleEdit(discount)
+                              }
+                              className="purchase-master-action-button is-edit"
+                              aria-label={`Edit ${discount.discountName}`}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip
+                            title="Deactivate discount"
+                            arrow
                           >
-                            <DeleteIcon />
-                          </button>
+                            <IconButton
+                              type="button"
+                              onClick={() =>
+                                handleDeactivate(discount)
+                              }
+                              className="purchase-master-action-button is-delete"
+                              aria-label={`Deactivate ${discount.discountName}`}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         </>
                       )}
-                    </td>
-                  </tr>
-                ))}
-                {displayedDiscounts.length === 0 && (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center' }}>
-                      <h2>
-                        {showDeactivated ? 'No deactivated discounts found' : 'No active discounts found'}
-                      </h2>
-                    </td>
-                  </tr>
-                )}
-              </>
-            )}
-          </tbody>
-        </table>
-      </div>
+                    </Box>
+                  </td>
+                </tr>
+              ),
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
+  </Box>
+
+
 
       <Snackbar
         open={snackbarOpen}

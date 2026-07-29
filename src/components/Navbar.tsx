@@ -126,17 +126,17 @@ const companyLogo = currentBusiness?.imageUrl;
     >
       <Box className="erp-navbar-business-logo">
         {companyLogo ? (
-          <Image
-            src={companyLogo}
-            alt={companyName}
-            width={38}
-            height={38}
-            className="erp-navbar-business-image"
-            unoptimized={
-              companyLogo.startsWith('http') ||
-              companyLogo.startsWith('data:')
-            }
-          />
+<Image
+  src={companyLogo}
+  alt={companyName}
+  width={52}
+  height={52}
+  className="erp-navbar-business-image"
+  unoptimized={
+    companyLogo.startsWith('http') ||
+    companyLogo.startsWith('data:')
+  }
+/>
         ) : (
           <span>
             {companyName.charAt(0).toUpperCase()}

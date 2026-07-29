@@ -659,9 +659,9 @@ if (!moduleVisible) {
 }
 
   return (
-    <Box>
-      <YenPurchasePage />
-      <Box sx={{ pt: 1, pl: 2, pr: 1 }}>
+  <Box className="purchase-item-page">
+    <YenPurchasePage />
+    <Box className="purchase-item-page-content">
         <PurchaseControls
           handleDialogOpen={canAdd ? handleDialogOpen : undefined}
           itemName={itemName}
@@ -681,6 +681,8 @@ if (!moduleVisible) {
           exportStatus={exportStatus}
           canAdd={canAdd}
             handleRefresh={handleRefresh} // Add this line
+            totalItems={totalItems}
+visibleItems={paginatedItems.length}
 
         />
 

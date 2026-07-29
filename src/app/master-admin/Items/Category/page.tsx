@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert } from '@mui/material';
 import { AppDispatch, RootState } from '../../../../redux/store';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   activateCategory,
   addCategory,
@@ -343,7 +343,7 @@ const CategoryComponent: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       <CategoryTableContainer
         handleEdit={handleEdit}

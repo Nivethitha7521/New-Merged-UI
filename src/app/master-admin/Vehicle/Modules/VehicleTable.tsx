@@ -5,31 +5,35 @@
 
 import React, { useRef, useState, useCallback, useMemo, memo } from 'react';
 import {
-  IconButton,
-  Switch,
-  FormControlLabel,
-  CircularProgress,
   Box,
-  Typography,
-  DialogContent,
+  Button,
+  CircularProgress,
   Dialog,
   DialogActions,
+  DialogContent,
   DialogTitle,
-  Button,
   Divider,
+  IconButton,
+  InputAdornment,
   Pagination,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography,
 } from '@mui/material';
+
 import {
   Add as AddIcon,
-  Edit as EditIcon,
-  Refresh as RefreshIcon,
-  Delete as DeleteIcon,
-  GetApp as GetAppIcon,
-  Upload as UploadIcon,
-  Undo as UndoIcon,
   Description as DescriptionIcon,
+  GetApp as GetAppIcon,
   Search as SearchIcon,
+  Undo as UndoIcon,
+  Upload as UploadIcon,
 } from '@mui/icons-material';
+
+import EditIcon from '@mui/icons-material/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RefreshIcon from '@mui/icons-material/RestoreRounded';
 import { useSelector } from 'react-redux';
 import { RootState, useAppDispatch } from '../../../../redux/store';
 import {
@@ -422,124 +426,110 @@ const VehicleTableContainer: React.FC<VehicleTableContainerProps> = ({
 
   return (
     <>
-      {/* ── Toolbar ── */}
-      <Box
-        display="flex"
-        flexDirection={{ xs: 'column', sm: 'row' }}
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={TOOLBAR_BOX_SX}
-      >
-        <Typography className="icon-action-label" sx={TITLE_TYPOGRAPHY_SX}>
-          {tableTitle}
-        </Typography>
+<Box className="location-master-toolbar vehicle-master-toolbar"> 
+   <Typography className="location-master-toolbar-title">
+    {tableTitle}
+  </Typography>
 
-        <Box sx={SEARCH_BOX_SX}>
-          <SearchIcon sx={SEARCH_ICON_SX} />
-          <input
-            type="text"
-            placeholder="Search Vehicles ..."
-            value={searchValue}
-            onChange={handleSearchChange}
-            style={SEARCH_INPUT_STYLE}
-          />
-        </Box>
+  <TextField
+    type="search"
+    value={searchValue}
+    onChange={handleSearchChange}
+    placeholder="Search Vehicles..."
+className="purchase-reference-search location-master-search vehicle-master-search"
+    inputProps={{
+      'aria-label': 'Search vehicles',
+    }}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon className="purchase-reference-search-icon" />
+        </InputAdornment>
+      ),
+    }}
+  />
 
-        <div className="flex items-center gap-4">
-          {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
+<Box className="purchase-reference-actions location-master-actions vehicle-master-actions">
+      {!showDeactivated && (
+      <>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Add New
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleImportClick}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  {isImporting ? (
-                    <CircularProgress size={20} className="icon-action-svg" />
-                  ) : (
-                    <GetAppIcon className="icon-action-svg" />
-                  )}
-                </IconButton>
-                <Typography className="icon-action-label">
-                  {isImporting ? 'Importing...' : 'Import'}
-                </Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={
+            isImporting
+              ? <CircularProgress size={16} />
+              : <GetAppIcon />
+          }
+          onClick={handleImportClick}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          {isImporting ? 'Importing...' : 'Import'}
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleExportCSV}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UploadIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Export</Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UploadIcon />}
+          onClick={handleExportCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Export
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleDownloadSampleCSV}
-                  disabled={isImporting}
-                  className="icon-action-button"
-                  size="small"
-                >
-                  <DescriptionIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Sample</Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<DescriptionIcon />}
+          onClick={handleDownloadSampleCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Sample
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="secondary"
-                  onClick={handleRollback}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UndoIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Rollback</Typography>
-              </div>
-            </>
-          )}
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UndoIcon />}
+          onClick={handleRollback}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Rollback
+        </Button>
+      </>
+    )}
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={handleToggleDeactivated}
-                color="primary"
-                size="small"
-                disabled={isImporting}
-              />
-            }
-            label={toggleLabel}
-            sx={SWITCH_LABEL_SX}
-          />
-        </div>
-      </Box>
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
+
+      <Switch
+        checked={!showDeactivated}
+        onChange={handleToggleDeactivated}
+        size="small"
+        disabled={isImporting}
+        inputProps={{
+          'aria-label': 'Show active vehicles only',
+        }}
+      />
+    </Box>
+  </Box>
+</Box>
 
       {/* ── Hidden file input ── */}
       <input
@@ -661,8 +651,9 @@ const VehicleTableContainer: React.FC<VehicleTableContainerProps> = ({
       </Dialog>
 
       {/* ── Table ── */}
-      <div className="table-container my-1" style={TABLE_CONTAINER_STYLE}>
-        <table className="custom-table">
+<Box className="purchase-master-table-shell">
+  <div className="purchase-native-table-wrapper">
+    <table className="purchase-native-table">
           <thead>
             <tr>
               <th style={TH_STYLE}>S.NO</th>
@@ -678,7 +669,8 @@ const VehicleTableContainer: React.FC<VehicleTableContainerProps> = ({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} style={TD_STYLE}>
+               <td colSpan={8} className="empty-state">
+
                   <h3 style={{ fontWeight: 'bold' }}>Loading...</h3>
                 </td>
               </tr>
@@ -696,50 +688,74 @@ const VehicleTableContainer: React.FC<VehicleTableContainerProps> = ({
               displayedVehicles.map((vehicle, index) => (
                 <tr key={vehicle.id || index}>
                   <td style={TD_STYLE}>{(page - 1) * limit + index + 1}</td>
-                  <td style={TD_STYLE}>{vehicle.vehicleId}</td>
-                  <td style={TD_STYLE}>{vehicle.vehicleName}</td>
+                <td>
+  <span className="purchase-master-id-pill">
+    {vehicle.vehicleId || '-'}
+  </span>
+</td>
+                 <td>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(vehicle.vehicleName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{vehicle.vehicleName || '-'}</span>
+  </Box>
+</td>
                   <td style={TD_STYLE}>{vehicle.vehicleModel}</td>
                   <td style={TD_STYLE}>{vehicle.vehicleNo}</td>
                   <td style={TD_STYLE}>{vehicle.fuelType}</td>
                   <td style={TD_STYLE}>{vehicle.branchName}</td>
-                  <td style={TD_STYLE}>
-                    {showDeactivated ? (
-                      <button
-                        onClick={() => handleActivate(vehicle)}
-                        className="activate-btn"
-                        title="Activate"
-                      >
-                        <RefreshIcon />
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleEdit(vehicle)}
-                          className="edit-btn"
-                          title="Edit"
-                        >
-                          <EditIcon />
-                        </button>
-                        <button
-                          onClick={() => handleDeactivate(vehicle)}
-                          className="deactivate-btn"
-                          title="Deactivate"
-                        >
-                          <DeleteIcon />
-                        </button>
-                      </>
-                    )}
-                  </td>
+                 <td style={{ textAlign: 'center' }}>
+  <Box className="purchase-master-actions">
+    {showDeactivated ? (
+      <Tooltip title="Activate vehicle" arrow>
+        <IconButton
+          type="button"
+          onClick={() => handleActivate(vehicle)}
+          className="purchase-master-action-button is-activate"
+          aria-label="Activate vehicle"
+        >
+          <RefreshIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    ) : (
+      <>
+        <Tooltip title="Edit vehicle" arrow>
+          <IconButton
+            type="button"
+            onClick={() => handleEdit(vehicle)}
+            className="purchase-master-action-button is-edit"
+            aria-label="Edit vehicle"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Deactivate vehicle" arrow>
+          <IconButton
+            type="button"
+            onClick={() => handleDeactivate(vehicle)}
+            className="purchase-master-action-button is-delete"
+            aria-label="Deactivate vehicle"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </>
+    )}
+  </Box>
+</td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
-
+</Box>
       {/* ── Pagination ── */}
       {totalPages > 1 && (
-        <Box sx={PAGINATION_BOX_SX}>
+       <Box className="master-admin-pagination">
           <Pagination
             count={totalPages}
             page={page}

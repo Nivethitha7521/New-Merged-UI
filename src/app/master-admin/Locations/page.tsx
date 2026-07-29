@@ -26,7 +26,6 @@ import {
   Box,
   Typography,
   IconButton,
-  FormControlLabel,
   Switch,
   Checkbox,
   Popover,
@@ -39,6 +38,10 @@ import {
   DialogActions,
   Divider,
   debounce,
+  Button,
+  Tooltip,
+  TextField,
+  InputAdornment,FormControlLabel,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -50,7 +53,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import LocationTableComponent from "../Locations/Modules/locationTable";
 import ConfirmationDialog from "../Locations/Modules/confirmationAction";
 import LocationDialog from "../Locations/Modules/locationDialog";
-import MasterAdminMenu from "../page";
 import { AxiosError } from "axios";
 
 // ── Import the global result dialog ──────────────────────────────────────────
@@ -491,191 +493,140 @@ const LocationMaster: React.FC = () => {
 
   // ── Render ──────────────────────────────────────────────────────────────
   return (
-    <Box marginLeft={1}>
-      <MasterAdminMenu />
+     <Box className="master-admin-module-page location-master-page">
+   
 
-      {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={2}
-        my={2}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "100%", boxSizing: "border-box" }}
-      >
-        <Typography
-          className="icon-action-label"
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+
+{/* Original Location toolbar with Purchase Master button design */}
+<Box className="location-master-toolbar">
+  {/* Existing active/deactivated title restored */}
+  <Typography className="location-master-toolbar-title">
+    {showDeactivated
+      ? "Deactivated Locations"
+      : "Active Locations"}
+  </Typography>
+
+  {/* Existing search logic preserved */}
+  <TextField
+    type="search"
+    value={searchValue}
+    onChange={(event) =>
+      setSearchValue(event.target.value)
+    }
+    placeholder="Search section..."
+    className="purchase-reference-search location-master-search"
+    inputProps={{
+      "aria-label": "Search locations",
+    }}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon className="purchase-reference-search-icon" />
+        </InputAdornment>
+      ),
+    }}
+  />
+
+  {/* All existing actions preserved */}
+  <Box className="purchase-reference-actions location-master-actions">
+    {!showDeactivated && (
+      <>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleAddNew}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
         >
-          {showDeactivated ? "Deactivated Locations" : "Active Locations"}
-        </Typography>
+          Add New
+        </Button>
 
-        {/* Search */}
-        <Box sx={{ position: "relative", width: "280px" }}>
-          <SearchIcon
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "10px",
-              transform: "translateY(-50%)",
-              color: "text.secondary",
-              fontSize: "1.2rem",
-              pointerEvents: "none",
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search section..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            style={{
-              padding: "6px 10px 6px 38px",
-              fontSize: "0.8rem",
-              borderRadius: "6px",
-              border: "1px solid #ccc",
-              fontFamily: "Poppins, sans-serif",
-              width: "280px",
-            }}
-          />
-        </Box>
-
-        {/* Action buttons */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: { xs: 1.5, sm: 2, md: 1.5 },
-            flexWrap: "nowrap",
-            overflowX: "auto",
-            paddingBottom: "4px",
-            scrollbarWidth: "thin",
-            "&::-webkit-scrollbar": { height: "6px" },
-            "&::-webkit-scrollbar-track": { background: "transparent" },
-            "&::-webkit-scrollbar-thumb": {
-              background: "#c1c1c1",
-              borderRadius: "3px",
-            },
-          }}
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={
+            isImporting ? (
+              <CircularProgress size={16} />
+            ) : (
+              <GetAppIcon />
+            )
+          }
+          onClick={handleImportClick}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
         >
-          {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleAddNew}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
+          {isImporting ? "Importing..." : "Import"}
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleImportClick}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  {isImporting ? (
-                    <CircularProgress size={20} className="icon-action-svg" />
-                  ) : (
-                    <GetAppIcon className="icon-action-svg" />
-                  )}
-                </IconButton>
-                <Typography className="icon-action-label">
-                  {isImporting ? "Importing..." : "Import"}
-                </Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UploadIcon />}
+          onClick={handleExportCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Export
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleExportCSV}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UploadIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Export</Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<DescriptionIcon />}
+          onClick={handleDownloadSampleCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Sample
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleDownloadSampleCSV}
-                  disabled={isImporting}
-                  className="icon-action-button"
-                >
-                  <DescriptionIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Sample</Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UndoIcon />}
+          onClick={handleRollback}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Rollback
+        </Button>
+      </>
+    )}
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="secondary"
-                  onClick={handleRollback}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UndoIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Rollback</Typography>
-              </div>
-            </>
-          )}
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated(!showDeactivated)}
-                color="primary"
-                size="small"
-                disabled={isImporting}
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
+      <Switch
+        checked={!showDeactivated}
+        onChange={() =>
+          setShowDeactivated((previous) => !previous)
+        }
+        size="small"
+        disabled={isImporting}
+        inputProps={{
+          "aria-label": "Show active locations only",
+        }}
+      />
+    </Box>
 
-          <div className="icon-action-wrapper">
-            <IconButton
-              onClick={handleFilterClick}
-              className="icon-action-button"
-              size="small"
-              sx={{ borderColor: "#6b7280" }}
-              disabled={isImporting}
-            >
-              <FilterListIcon className="icon-action-svg" />
-            </IconButton>
-            <Typography className="icon-action-label">Filter</Typography>
-          </div>
-        </Box>
-      </Box>
+    <Tooltip title="Choose visible columns" arrow>
+      <span className="location-master-filter-wrapper">
+        <IconButton
+          type="button"
+          onClick={handleFilterClick}
+          disabled={isImporting}
+          className="purchase-reference-filter-button"
+          aria-label="Choose visible location columns"
+        >
+          <FilterListIcon />
+        </IconButton>
+      </span>
+    </Tooltip>
+  </Box>
+</Box>
 
       {/* Hidden file input */}
       <input
@@ -932,21 +883,26 @@ const LocationMaster: React.FC = () => {
         moduleName="Location"
       />
 
-      {/* ── Table ──────────────────────────────────────────────────────── */}
-      <LocationTableComponent
-        filteredTypes={locations}
-        showDeactivatedTable={showDeactivated}
-        onOpenEdit={handleEdit}
-        onAddNew={handleAddNew}
-        onActivate={(location) => confirmStatusChange(location, true)}
-        onDeactivate={(location) => confirmStatusChange(location, false)}
-        visibleColumns={visibleColumns}
-        resultDialogOpen={false}
-        onCloseResultDialog={() => { }}
-        importResult={null}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-      />
+<Box className="master-admin-table-area">
+  <LocationTableComponent
+    filteredTypes={locations}
+    showDeactivatedTable={showDeactivated}
+    onOpenEdit={handleEdit}
+    onAddNew={handleAddNew}
+    onDeactivate={(location: Location) =>
+      confirmStatusChange(location, false)
+    }
+    onActivate={(location: Location) =>
+      confirmStatusChange(location, true)
+    }
+    visibleColumns={visibleColumns}
+    importResult={null}
+    resultDialogOpen={false}
+    onCloseResultDialog={() => {}}
+    searchValue={searchValue}
+    setSearchValue={setSearchValue}
+  />
+</Box>
 
       {/* ── Column filter popover ───────────────────────────────────────── */}
       <Popover

@@ -40,7 +40,7 @@ import CloseConfirmationDialog from '../../../Components/Dialogs/CloseConfirmati
 import EditConfirmationDialog from '../../../Components/Dialogs/EditConfirmationDialog';
 //import ActivateDeactivateConfirmationDialog from "../../../Components/Dialogs/ActivateDeactivateConfirmationDialog";
 import { AxiosError } from 'axios';
-import MenuPage from '../page';
+// import MenuPage from '../page';
 
 const AdvanceAmountPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -303,7 +303,7 @@ const AdvanceAmountPage: React.FC = () => {
 
   return (
     <>
-      <MenuPage />
+      {/* <MenuPage /> */}
       <Box
         display="flex"
         flexDirection={{ xs: "column", sm: "row" }}

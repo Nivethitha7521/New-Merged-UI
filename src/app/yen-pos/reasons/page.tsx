@@ -183,7 +183,7 @@ const ReasonPage: React.FC = () => {
 
   return (
     <>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
       <ReasonTableComponent
         items={reasons}

@@ -50,11 +50,33 @@ const ACCENT_COLORS = [
   { name: 'Indigo', value: '#444ce7' },
   { name: 'Gray', value: '#667085' },
 ];
+const FONT_OPTIONS: DisplayFont[] = [
+  'Inter',
+  'Poppins',
+  'Roboto',
+  'Source Sans 3',
+  'IBM Plex Sans',
+  'Open Sans',
+];
 
+const FONT_PREVIEW_STACKS: Record<DisplayFont, string> = {
+  Inter: 'Inter, Arial, sans-serif',
+  Poppins: 'Poppins, Arial, sans-serif',
+  Roboto: 'Roboto, Arial, sans-serif',
+  'Source Sans 3': '"Source Sans 3", Arial, sans-serif',
+  'IBM Plex Sans': '"IBM Plex Sans", Arial, sans-serif',
+  'Open Sans': '"Open Sans", Arial, sans-serif',
+};
+
+const FONT_SIZE_PREVIEWS: Record<DisplayFontSize, string> = {
+  small: '13px',
+  medium: '15px',
+  large: '17px',
+};
 const optionClass = (active: boolean) => `display-option ${active ? 'is-active' : ''}`;
 
 export default function DisplaySettingsPage() {
-  const { settings, previewSettings, saveSettings, resetSettings, formatCurrency } = useDisplaySettings();
+  const { settings, previewSettings, saveSettings, resetSettings } = useDisplaySettings();
   const [draft, setDraft] = useState<DisplaySettings>(settings);
   const [saved, setSaved] = useState(false);
 
@@ -140,24 +162,97 @@ export default function DisplaySettingsPage() {
         </Card>
 
         <Card className="display-settings-card">
-          <CardContent>
-            <Box className="display-section-title"><TextFieldsOutlined /><Box><Typography>Font Family</Typography><span>Used throughout the ERP.</span></Box></Box>
-            <FormControl fullWidth>
-              <RadioGroup value={draft.fontFamily} onChange={(event) => update('fontFamily', event.target.value as DisplayFont)}>
-                {(['Inter', 'Poppins', 'Roboto'] as DisplayFont[]).map((font) => <FormControlLabel key={font} value={font} control={<Radio />} label={font} />)}
-              </RadioGroup>
-            </FormControl>
-          </CardContent>
-        </Card>
+  <CardContent>
+    <Box className="display-section-title">
+      <TextFieldsOutlined />
+
+      <Box>
+        <Typography>Font Family</Typography>
+        <span>Used throughout the ERP.</span>
+      </Box>
+    </Box>
+
+    <FormControl fullWidth>
+      <RadioGroup
+        value={draft.fontFamily}
+        onChange={(event) =>
+          update('fontFamily', event.target.value as DisplayFont)
+        }
+      >
+        {FONT_OPTIONS.map((font) => (
+          <FormControlLabel
+            key={font}
+            value={font}
+            control={<Radio />}
+            label={font}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
+
+    <Box
+      className="display-contextual-preview"
+      style={{
+        fontFamily: FONT_PREVIEW_STACKS[draft.fontFamily],
+      }}
+    >
+      <span>Font preview</span>
+
+      <strong>
+        Enterprise Resource Planning
+      </strong>
+
+      <p>
+        Sales, inventory, purchase and financial operations.
+      </p>
+    </Box>
+  </CardContent>
+</Card>
 
         <Card className="display-settings-card">
-          <CardContent>
-            <Box className="display-section-title"><TextFieldsOutlined /><Box><Typography>Font Size</Typography><span>Scale text across every page.</span></Box></Box>
-            <Box className="display-three-options">
-              {(['small', 'medium', 'large'] as DisplayFontSize[]).map((size) => <button key={size} className={optionClass(draft.fontSize === size)} onClick={() => update('fontSize', size)}>{size[0].toUpperCase() + size.slice(1)}</button>)}
-            </Box>
-          </CardContent>
-        </Card>
+  <CardContent>
+    <Box className="display-section-title">
+      <TextFieldsOutlined />
+
+      <Box>
+        <Typography>Font Size</Typography>
+        <span>Scale text across every page.</span>
+      </Box>
+    </Box>
+
+    <Box className="display-three-options">
+      {(['small', 'medium', 'large'] as DisplayFontSize[]).map((size) => (
+        <button
+          key={size}
+          className={optionClass(draft.fontSize === size)}
+          onClick={() => update('fontSize', size)}
+        >
+          {size[0].toUpperCase() + size.slice(1)}
+        </button>
+      ))}
+    </Box>
+
+    <Box className="display-contextual-preview">
+      <span>Size preview</span>
+
+      <strong
+        style={{
+          fontSize: FONT_SIZE_PREVIEWS[draft.fontSize],
+        }}
+      >
+        Enterprise application sample text
+      </strong>
+
+      <p
+        style={{
+          fontSize: FONT_SIZE_PREVIEWS[draft.fontSize],
+        }}
+      >
+        This text changes immediately when you select a size.
+      </p>
+    </Box>
+  </CardContent>
+</Card>
 
         <Card className="display-settings-card">
           <CardContent>
@@ -175,19 +270,7 @@ export default function DisplaySettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="display-preview-card display-settings-card-wide">
-          <CardContent>
-            <Box className="display-section-title"><PaletteOutlined /><Box><Typography>Live Preview</Typography><span>Review changes before saving.</span></Box></Box>
-            <Box className="display-preview-surface">
-              <Box className="display-preview-sidebar"><span className="is-active" /><span /><span /><span /></Box>
-              <Box className="display-preview-content">
-                <Box className="display-preview-header"><strong>ERP Preview</strong><button>Primary Action</button></Box>
-                <Box className="display-preview-cards"><article><small>Total Value</small><b>{formatCurrency(125430.75)}</b></article><article><small>Status</small><em>Active</em></article></Box>
-                <Box className="display-preview-table"><span /><span /><span /></Box>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+        
       </Box>
     </Box>
   );

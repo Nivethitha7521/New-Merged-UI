@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import StockUpdateDialog from "@/app/yen-purchase/PurchaseOrder/Component/StockUpdateDialog";
-
+import PurchaseOrderTabs from '@/components/yen-purchase/purchaseorder/PurchaseOrderTabs';
 import {
   fetchHoldGrns,
   approveHoldGrn,
@@ -497,36 +497,13 @@ const handleDownloadPDF = async (grn: any) => {
     );
   }
 
-  return (
-    <Box>
-      <YenPurchasePage />
-      <Box sx={{ px: 1, backgroundColor: "white" }}>
+return (
+  <Box className="purchase-page-shell purchase-order-module-page">
+    <YenPurchasePage />
+
+    <Box className="purchase-order-content">
         {/* Tab Buttons */}
-      <Box display="flex" alignItems="center" mb={1} mt={1} ml={1}>
-  <Link href={"/yen-purchase/PurchaseOrder"}>
-    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-      Pending
-    </Button>
-  </Link>
-  <Link href={"/yen-purchase/PurchaseOrder/Approvedpo"}>
-    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-      Approved
-    </Button>
-  </Link>
-  <Link href={"/yen-purchase/PurchaseOrder/RejectedPo"}>
-    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-      Rejected
-    </Button>
-  </Link>
-  <Link href={"/yen-purchase/PurchaseOrder/GRNConvertedPO"}>
-    <Button variant="contained" color="primary" sx={{ mr: 1 }}>
-      GRN Converted
-    </Button>
-  </Link>
-  <Button variant="contained" sx={{ backgroundColor: "white", color: "black", mr: 1 }}>
-    Hold GRN
-  </Button>
-</Box>
+<PurchaseOrderTabs activeTab="hold-grn" />
 
         {/* Filters */}
         <Grid container alignItems="center" spacing={0.5} wrap="nowrap" ml={0.5} mb={1}>
@@ -546,37 +523,29 @@ const handleDownloadPDF = async (grn: any) => {
   >
     <Box display="flex" alignItems="center">
 <Box display="flex" alignItems="center" gap={1}>
-  <Box display="flex" flexDirection="column" alignItems="center">
-    <IconButton
-      color="primary"
-      onClick={handleFilter}
-      sx={{
-        border: "1px solid #1976d2",
-      }}
-    >
-      <FilterAltIcon />
-    </IconButton>
+<Grid item xs="auto">
+  <IconButton
+    type="button"
+    onClick={handleFilter}
+    className="purchase-order-toolbar-icon is-filter"
+    aria-label="Apply hold GRN filters"
+    title="Apply filters"
+  >
+    <FilterAltIcon fontSize="small" />
+  </IconButton>
+</Grid>
 
-    <Typography fontSize="12px">
-      Filter
-    </Typography>
-  </Box>
-
-  <Box display="flex" flexDirection="column" alignItems="center">
-    <IconButton
-      color="primary"
-      onClick={handleClear}
-      sx={{
-        border: "1px solid #1976d2",
-      }}
-    >
-      <ClearIcon />
-    </IconButton>
-
-    <Typography fontSize="12px">
-      Clear
-    </Typography>
-  </Box>
+<Grid item xs="auto">
+  <IconButton
+    type="button"
+    onClick={handleClear}
+    className="purchase-order-toolbar-icon is-clear"
+    aria-label="Clear hold GRN filters"
+    title="Clear filters"
+  >
+    <ClearIcon fontSize="small" />
+  </IconButton>
+</Grid>
 </Box>
     </Box>
 
@@ -585,7 +554,15 @@ const handleDownloadPDF = async (grn: any) => {
         </Grid>
 
         {/* Table */}
-        <TableContainer component={Paper} sx={{ maxHeight: "calc(100vh - 250px)", overflowY: "auto", width: "100%", ml: 1 }}>
+        <TableContainer
+  component={Paper}
+  className="purchase-master-table purchase-order-table"
+  sx={{
+    maxHeight: "calc(100vh - 250px)",
+    overflowY: "auto",
+    width: "100%",
+  }}
+>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -631,40 +608,52 @@ const handleDownloadPDF = async (grn: any) => {
   ) || 0}
 </TableCell>
                     <TableCell className="table-number-right">{customRoundDigit(grn.grnAmount || 0).toFixed(2)}</TableCell>
-                    <TableCell>HOLD GRN</TableCell>
+                  <TableCell>
+  <span className="purchase-master-status-pill is-hold">
+    Hold GRN
+  </span>
+</TableCell>
                     <TableCell>
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                      <Tooltip title="View Details">
-  <IconButton
-    onClick={() => {
-      if (grn.grnSource === "Multi") {
-        router.push(`/yen-purchase/PurchaseOrder/Hold/MultiHoldGrn?grnId=${grn.grnId}`);
-      } else {
-        handleViewDetails(grn);
-      }
-    }}
-    color="primary"
-    size="small"
-  >
-    <VisibilityIcon fontSize="small" />
-  </IconButton>
-</Tooltip>
-                        <Tooltip title="Download">
-  <IconButton
-    onClick={() => handleDownloadPDF(grn)}
-    color="primary"
-    size="small"
-  >
-    <PictureAsPdfIcon fontSize="small" />
-  </IconButton>
-</Tooltip>
-                        <Tooltip title="View Stock & Price Update History">
-                          <IconButton onClick={() => handleViewStockLogs(grn)} color="info" size="small">
-                            <InventoryIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </TableCell>
+  <Box className="purchase-order-actions">
+    <Tooltip title="View Details">
+      <IconButton
+        onClick={() => {
+          if (grn.grnSource === 'Multi') {
+            router.push(
+              `/yen-purchase/PurchaseOrder/Hold/MultiHoldGrn?grnId=${grn.grnId}`,
+            );
+          } else {
+            handleViewDetails(grn);
+          }
+        }}
+        className="purchase-master-action-button is-view"
+        aria-label="View hold GRN"
+      >
+        <VisibilityIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <Tooltip title="Download">
+      <IconButton
+        onClick={() => handleDownloadPDF(grn)}
+        className="purchase-master-action-button is-download"
+        aria-label="Download hold GRN"
+      >
+        <PictureAsPdfIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <Tooltip title="View Stock & Price Update History">
+      <IconButton
+        onClick={() => handleViewStockLogs(grn)}
+        className="purchase-master-action-button is-history"
+        aria-label="View stock update history"
+      >
+        <InventoryIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  </Box>
+</TableCell>
                   </TableRow>
                 ))
               )}
@@ -779,7 +768,9 @@ const handleDownloadPDF = async (grn: any) => {
             </Box>
 
             {/* ── Items + Summary Table (inline rows — same as Approved PO) ── */}
-            <TableContainer component={Paper} sx={{ flex: 1, overflow: 'auto' }}>
+            <TableContainer component={Paper}
+            className="purchase-master-table purchase-order-table"
+             sx={{ flex: 1, overflow: 'auto' }}>
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>

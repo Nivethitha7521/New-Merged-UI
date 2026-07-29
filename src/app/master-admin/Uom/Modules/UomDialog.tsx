@@ -45,8 +45,10 @@ const MENU_ITEM_SX = {
 const UOM_INPUT_PROPS = { maxLength: 30 } as const;
 const INPUT_LABEL_PROPS = { className: 'custom-label' } as const;
 const INPUT_PROPS_CLASS = { className: 'custom-input' } as const;
-const DIALOG_PAPER_PROPS = { className: 'dialog-paper-small' } as const;
-
+const DIALOG_PAPER_PROPS = {
+  className:
+    "dialog-paper-small master-admin-form-dialog-paper uom-dialog-paper",
+} as const;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const UomDialog: React.FC<UomDialogProps> = ({
@@ -106,21 +108,41 @@ const UomDialog: React.FC<UomDialogProps> = ({
     uomData.precision === null;
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={DIALOG_PAPER_PROPS}
-      TransitionProps={{ onEntered: focusInput }}
+  <Dialog
+  open={open}
+  onClose={onClose}
+  maxWidth="sm"
+  fullWidth
+  className="master-admin-form-dialog uom-form-dialog"
+  PaperProps={DIALOG_PAPER_PROPS}
+  TransitionProps={{ onEntered: focusInput }}
+>
+     <DialogTitle className="dialog-title master-admin-form-dialog-title">
+  <Box>
+    <Box
+      component="span"
+      className="master-admin-dialog-eyebrow"
     >
-      <DialogTitle className="dialog-title">
-        {editid ? 'Edit UOM' : 'Add UOM'}
-      </DialogTitle>
+      MASTER ADMIN
+    </Box>
 
-      <DialogContent className="dialog-content">
-        <div className="form-section">
+    <Box
+      component="h2"
+      className="master-admin-dialog-title-text"
+    >
+      {editid ? "Edit UOM" : "Add UOM"}
+    </Box>
 
+    <Box className="master-admin-dialog-description">
+      {editid
+        ? "Update measurement type, UOM and precision"
+        : "Create a new unit of measurement"}
+    </Box>
+  </Box>
+</DialogTitle>
+
+     <DialogContent className="dialog-content master-admin-form-content">
+       <div className="form-section uom-form-section">
           {/* Measurement Type */}
           <div className="form-field">
             <FormControl
@@ -198,15 +220,22 @@ const UomDialog: React.FC<UomDialogProps> = ({
         </div>
       </DialogContent>
 
-      <DialogActions className="dialog-actions">
-        <button onClick={onClose} disabled={isSubmitting} className="btn-secondary">
-          Cancel
-        </button>
-        <button
-          onClick={handleAddOrUpdate}
-          disabled={isAddOrUpdateDisabled}
-          className="btn-primary"
-        >
+      <DialogActions className="dialog-actions master-admin-form-actions">
+  <button
+    type="button"
+    onClick={onClose}
+    disabled={isSubmitting}
+    className="btn-secondary master-admin-dialog-button is-secondary"
+  >
+    Cancel
+  </button>
+
+  <button
+    type="button"
+    onClick={handleAddOrUpdate}
+    disabled={isAddOrUpdateDisabled}
+    className="btn-primary master-admin-dialog-button is-primary"
+  >
           {isSubmitting ? (
             <CircularProgress size={24} />
           ) : editid ? (

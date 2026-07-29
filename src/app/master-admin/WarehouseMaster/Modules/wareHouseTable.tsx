@@ -2,9 +2,14 @@
 
 "use client";
 import React, { useMemo } from "react";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import {
+  Box,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
+import RefreshIcon from "@mui/icons-material/RestoreRounded";
 import { WareHouse } from "../Models/warehouseModels";
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -67,17 +72,21 @@ function renderCellValue(
 ): React.ReactNode {
   const value = row[key];
 
-  if (key === "status") {
-    return (
-      <span
-        className={
-          value === STATUS.ACTIVE ? "status-active" : "status-inactive"
-        }
-      >
-        {value === STATUS.ACTIVE ? "Active" : "Inactive"}
-      </span>
-    );
-  }
+if (key === "status") {
+  return (
+    <span
+      className={`purchase-master-status-pill ${
+        value === STATUS.ACTIVE
+          ? "is-active"
+          : "is-inactive"
+      }`}
+    >
+      {value === STATUS.ACTIVE
+        ? "Active"
+        : "Inactive"}
+    </span>
+  );
+}
 
   if (ARRAY_COLUMNS.has(key) && Array.isArray(value)) {
     return value.join(", ") || "-";
@@ -120,22 +129,25 @@ const WareHouseTableComponent: React.FC<WareHouseTableProps> = ({
   const emptyLabel = showDeactivatedTable ? "Deactivated" : "Active";
 
   return (
-    <div className="table-container" style={{ maxHeight: "calc(96vh - 170px)" }}>
-      <table className="custom-table">
+   <Box className="purchase-master-table-shell">
+  <div className="purchase-native-table-wrapper">
+    <table className="purchase-native-table">
         {/* ── Head ── */}
-        <thead>
-          <tr>
-            {visibleColumns.sNo && (
-              <th>{columnLabels["sNo"] || "S.NO"}</th>
-            )}
-            {visibleDataColumns.map((key) => (
-              <th key={key}>
-                {columnLabels[key] || formatLabel(key)}
-              </th>
-            ))}
-            <th className="text-center">Actions</th>
-          </tr>
-        </thead>
+<thead>
+  <tr>
+    {visibleColumns.sNo && (
+      <th>{columnLabels["sNo"] || "S.NO"}</th>
+    )}
+
+    {visibleDataColumns.map((key) => (
+      <th key={key}>
+        {columnLabels[key] || formatLabel(String(key))}
+      </th>
+    ))}
+
+    <th className="text-center">Actions</th>
+  </tr>
+</thead>
 
         {/* ── Body ── */}
         <tbody>
@@ -146,43 +158,91 @@ const WareHouseTableComponent: React.FC<WareHouseTableProps> = ({
                 {visibleColumns.sNo && <td style={{ textAlign: "center" }}>{index + 1}</td>}
 
                 {/* Dynamic data columns */}
-                {visibleDataColumns.map((key) => (
-                  <td style={{ textAlign: "center" }} key={key}>{renderCellValue(row, key)}</td>
-                ))}
+               {visibleDataColumns.map((key) => {
+  if (key === "warehouseId") {
+    return (
+      <td key={key}>
+        <span className="purchase-master-id-pill">
+          {row.warehouseId || "-"}
+        </span>
+      </td>
+    );
+  }
+
+  if (key === "warehouseName") {
+    return (
+      <td key={key}>
+        <Box className="purchase-master-name-cell">
+          <span className="purchase-master-avatar">
+            {(row.warehouseName || "?")
+              .charAt(0)
+              .toUpperCase()}
+          </span>
+
+          <span>{row.warehouseName || "-"}</span>
+        </Box>
+      </td>
+    );
+  }
+
+  return (
+    <td key={key}>
+      {renderCellValue(row, key)}
+    </td>
+  );
+})}
 
                 {/* Action buttons */}
-                <td>
-                  <div className="flex justify-center gap-4">
-                    {!showDeactivatedTable && row.status === STATUS.ACTIVE && (
-                      <>
-                        <button
-                          onClick={() => onOpenEdit(row)}
-                          className="edit-btn"
-                          title="Edit"
-                        >
-                          <EditIcon fontSize="small" />
-                        </button>
-                        <button
-                          onClick={() => onDeactivate(row)}
-                          className="deactivate-btn"
-                          title="Deactivate"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </button>
-                      </>
-                    )}
+<td>
+  <Box className="purchase-master-actions">
+    {!showDeactivatedTable &&
+      row.status === STATUS.ACTIVE && (
+        <>
+          <Tooltip title="Edit warehouse" arrow>
+            <IconButton
+              type="button"
+              onClick={() => onOpenEdit(row)}
+              className="purchase-master-action-button is-edit"
+              aria-label="Edit warehouse"
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
 
-                    {showDeactivatedTable && row.status === STATUS.INACTIVE && (
-                      <button
-                        onClick={() => onActivate(row)}
-                        className="activate-btn"
-                      >
-                        <RefreshIcon fontSize="small" />
-                        <span>Activate</span>
-                      </button>
-                    )}
-                  </div>
-                </td>
+          <Tooltip
+            title="Deactivate warehouse"
+            arrow
+          >
+            <IconButton
+              type="button"
+              onClick={() => onDeactivate(row)}
+              className="purchase-master-action-button is-delete"
+              aria-label="Deactivate warehouse"
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </>
+      )}
+
+    {showDeactivatedTable &&
+      row.status === STATUS.INACTIVE && (
+        <Tooltip
+          title="Activate warehouse"
+          arrow
+        >
+          <IconButton
+            type="button"
+            onClick={() => onActivate(row)}
+            className="purchase-master-action-button is-activate"
+            aria-label="Activate warehouse"
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
+  </Box>
+</td>
               </tr>
             ))
           ) : (
@@ -195,6 +255,7 @@ const WareHouseTableComponent: React.FC<WareHouseTableProps> = ({
         </tbody>
       </table>
     </div>
+    </Box>
   );
 };
 

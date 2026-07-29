@@ -32,7 +32,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Search as SearchIcon, } from '@mui/icons-material';
 import { AppDispatch, RootState } from '../../../../redux/store';
-import MasterAdminMenu from '../page';
+// import MasterAdminMenu from '../page';
 import {
   addTable,
   setCurrentTableField,
@@ -723,7 +723,7 @@ const TableMaster: React.FC = () => {
 
   return (
     <>
-      <MasterAdminMenu />
+      {/* <MasterAdminMenu /> */}
 
       {layoutViewOpen && selectedAreaForLayout && (
         <TableLayoutEditorPage

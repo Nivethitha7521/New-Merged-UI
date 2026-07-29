@@ -19,7 +19,7 @@ import {
   FormGroup,
   Typography,
   Radio,
-  Tooltip,
+  Tooltip,Box,
 } from "@mui/material";
 import { Formik, Form, Field, FormikHelpers, FormikProps } from "formik";
 import * as Yup from "yup";
@@ -350,11 +350,15 @@ const LocationDialog: React.FC<LocationDialogProps> = ({
   return (
     <>
       <Dialog
-        open={open}
-        onClose={handleCloseRequest}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{ className: "dialog-paper" }}
+ open={open}
+  onClose={handleCloseRequest}
+  maxWidth="md"
+  fullWidth
+  className="master-admin-form-dialog location-form-dialog"
+  PaperProps={{
+    className:
+      "dialog-paper master-admin-form-dialog-paper",
+  }}
         TransitionProps={{
           onEntered: () => {
             if (inputRef.current) {
@@ -364,9 +368,29 @@ const LocationDialog: React.FC<LocationDialogProps> = ({
           },
         }}
       >
-        <DialogTitle className="dialog-title">
-          {editMode ? "Edit Location" : "Add Location"}
-        </DialogTitle>
+<DialogTitle className="dialog-title master-admin-form-dialog-title">
+  <Box>
+    <Typography
+      component="span"
+      className="master-admin-dialog-eyebrow"
+    >
+      MASTER ADMIN
+    </Typography>
+
+    <Typography
+      component="h2"
+      className="master-admin-dialog-title-text"
+    >
+      {editMode ? "Edit Location" : "Add Location"}
+    </Typography>
+
+    <Typography className="master-admin-dialog-description">
+      {editMode
+        ? "Update the selected location information"
+        : "Create a new branch or office location"}
+    </Typography>
+  </Box>
+</DialogTitle>
 
         <Formik
           initialValues={prepareInitialValues()}
@@ -383,8 +407,13 @@ const LocationDialog: React.FC<LocationDialogProps> = ({
           }}
         >
           {(formikProps) => (
-            <Form>
-              <DialogContent dividers className="dialog-content">
+             <>
+              <Form>
+           <DialogContent
+  dividers
+  className="dialog-content master-admin-form-content"
+>
+              {/* <DialogContent dividers className="dialog-content"> */}
 
                 {/* ── Section 1: Basic Info ── */}
                 <div className="form-section">
@@ -935,15 +964,25 @@ const LocationDialog: React.FC<LocationDialogProps> = ({
                 )}
               </DialogContent>
 
-              <DialogActions className="dialog-actions">
-                <button type="button" onClick={handleCloseRequest} className="btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary">
-                  {editMode ? "Update" : "Create"}
-                </button>
-              </DialogActions>
+             <DialogActions className="dialog-actions master-admin-form-actions">
+  <button
+    type="button"
+    onClick={handleCloseRequest}
+    className="btn-secondary master-admin-dialog-button is-secondary"
+  >
+    Cancel
+  </button>
+
+  <button
+    type="submit"
+    className="btn-primary master-admin-dialog-button is-primary"
+  >
+    {editMode ? "Update" : "Create"}
+  </button>
+</DialogActions>
             </Form>
+            </>
+            
           )}
         </Formik>
       </Dialog>

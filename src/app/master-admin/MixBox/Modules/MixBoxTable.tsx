@@ -5,23 +5,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../../../redux/store';
 import {
   Alert,
-  Box,
+  Box,Button,
   CircularProgress,
   FormControlLabel,
   IconButton,
   Snackbar,
   Switch,
-  Typography,
+  Typography,Tooltip,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
   ExpandLess,
   ExpandMore,
-  GetApp as GetAppIcon,
-  Refresh as RefreshIcon,
-  Upload as UploadIcon,
+  EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon,
 } from '@mui/icons-material';
 import { Item } from '../Models/mixboxModels';
 import { fetchMixBoxes } from '../Features/mixBoxSlice';
@@ -189,185 +187,230 @@ const MixBoxTableContainer: React.FC<MixBoxTableContainerProps> = ({
 
   return (
     <>
-      {/* Header */}
-      <Box
-        display="flex"
-        flexDirection={{ xs: 'column', sm: 'row' }}
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        justifyContent="space-between"
-        gap={2}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: '99%', boxSizing: 'border-box', mt: 1.5 }}
+{/* Header */}
+<Box className="mixbox-master-toolbar">
+  <Typography className="mixbox-master-toolbar-title">
+    {tableTitle}
+  </Typography>
+
+  <Box className="purchase-reference-actions mixbox-master-toolbar-actions">
+    {!showDeactivated && (
+      <Button
+        type="button"
+        variant="outlined"
+        startIcon={<AddIcon />}
+        onClick={handleOpen}
+        className="purchase-reference-action-button"
       >
-        <Typography
-          className="icon-action-label"
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '100%',
-          }}
-        >
-          {tableTitle}
-        </Typography>
+        Add New
+      </Button>
+    )}
 
-        <div className="flex items-center gap-4">
-          {!showDeactivated && (
-            <div className="icon-action-wrapper">
-              <IconButton
-                color="primary"
-                onClick={handleOpen}
-                className="icon-action-button"
-                title="Add"
-              >
-                <AddIcon className="icon-action-svg" />
-              </IconButton>
-              <Typography className="icon-action-label">Add</Typography>
-            </div>
-          )}
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated(!showDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={showDeactivated ? 'Show Activated' : 'Show Deactivated'}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              '& .MuiFormControlLabel-label': {
-                fontSize: '0.75rem',
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
-      </Box>
+      <Switch
+        checked={!showDeactivated}
+        onChange={() => setShowDeactivated(!showDeactivated)}
+        color="primary"
+        size="small"
+        inputProps={{
+          'aria-label': 'Show active Mix Boxes only',
+        }}
+      />
+    </Box>
+  </Box>
+</Box>
 
       {/* Table */}
-      <div
-        className="table-container my-1"
-        style={{ maxHeight: 'calc(90.5vh - 170px)', overflow: 'auto' }}
-      >
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>S.NO</th>
-              <th>Mix Box Name</th>
-              <th>Consolidated Grams</th>
-              <th>Expand</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredMixBoxes.length === 0 ? (
+{/* Table */}
+<Box className="purchase-master-table-shell">
+  <div className="purchase-native-table-wrapper">
+    <table className="purchase-native-table mixbox-native-table">
+      <thead>
+        <tr>
+          <th>S.NO</th>
+          <th>Mix Box Name</th>
+          <th>Consolidated Grams</th>
+          <th>Expand</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {filteredMixBoxes.length === 0 ? (
+          <tr>
+            <td colSpan={5} className="empty-state">
+              <h2>{emptyMessage}</h2>
+            </td>
+          </tr>
+        ) : (
+          filteredMixBoxes.map((mixBox, index) => (
+            <React.Fragment key={mixBox.id}>
+              {/* Main row */}
               <tr>
-                <td colSpan={5} className="empty-state">
-                  <h2>{emptyMessage}</h2>
+                <td style={{ textAlign: 'center' }}>
+                  {index + 1}
+                </td>
+
+                <td style={{ textAlign: 'center' }}>
+                  {mixBox.mixboxName}
+                </td>
+
+                <td style={{ textAlign: 'center' }}>
+                  {mixBox.items.reduce(
+                    (sum, item) => sum + Number(item.grams || 0),
+                    0,
+                  )}
+                  g
+                </td>
+
+                <td style={{ textAlign: 'center' }}>
+                  <Tooltip
+                    title={
+                      expandedRows.includes(mixBox.id)
+                        ? 'Collapse items'
+                        : 'Expand items'
+                    }
+                    arrow
+                  >
+                    <IconButton
+                      type="button"
+                      size="small"
+                      onClick={() => handleExpandRow(mixBox.id)}
+                      aria-label={
+                        expandedRows.includes(mixBox.id)
+                          ? 'Collapse Mix Box items'
+                          : 'Expand Mix Box items'
+                      }
+                    >
+                      {expandedRows.includes(mixBox.id) ? (
+                        <ExpandLess />
+                      ) : (
+                        <ExpandMore />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </td>
+
+                <td style={{ textAlign: 'center' }}>
+                  <Box className="purchase-master-actions">
+                    {showDeactivated ? (
+                      <Tooltip title="Activate Mix Box" arrow>
+                        <IconButton
+                          type="button"
+                          onClick={() => handleActivate(mixBox)}
+                          className="purchase-master-action-button is-activate"
+                          aria-label="Activate Mix Box"
+                        >
+                          <RefreshIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <>
+                        <Tooltip title="Edit Mix Box" arrow>
+                          <IconButton
+                            type="button"
+                            onClick={() => handleEdit(mixBox)}
+                            className="purchase-master-action-button is-edit"
+                            aria-label="Edit Mix Box"
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Deactivate Mix Box" arrow>
+                          <IconButton
+                            type="button"
+                            onClick={() => handleDeactivate(mixBox)}
+                            className="purchase-master-action-button is-delete"
+                            aria-label="Deactivate Mix Box"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                  </Box>
                 </td>
               </tr>
-            ) : (
-              filteredMixBoxes.map((mixBox, index) => (
-                <React.Fragment key={mixBox.id}>
-                  {/* Main row */}
-                  <tr>
-                    <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                    <td style={{ textAlign: 'center' }}>{mixBox.mixboxName}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      {mixBox.items.reduce((sum, item) => sum + Number(item.grams || 0), 0)}g
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <IconButton size="small" onClick={() => handleExpandRow(mixBox.id)}>
-                        {expandedRows.includes(mixBox.id) ? <ExpandLess /> : <ExpandMore />}
-                      </IconButton>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div className="flex justify-center gap-1">
-                        {showDeactivated ? (
-                          <button
-                            onClick={() => handleActivate(mixBox)}
-                            className="activate-btn"
-                            title="Activate"
-                          >
-                            <RefreshIcon fontSize="small" />
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleEdit(mixBox)}
-                              className="edit-btn"
-                              title="Edit"
-                            >
-                              <EditIcon fontSize="small" />
-                            </button>
-                            <button
-                              onClick={() => handleDeactivate(mixBox)}
-                              className="deactivate-btn"
-                              title="Deactivate"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
 
-                  {/* Expanded nested items */}
-                  {expandedRows.includes(mixBox.id) && (
-                    <tr>
-                      <td colSpan={5} style={{ padding: 0, backgroundColor: '#f9f9f9' }}>
-                        <div style={{ margin: '8px 16px' }}>
-                          <table
-                            className="custom-tables"
-                            style={{ width: '100%', backgroundColor: '#fff' }}
-                          >
-                            <thead>
-                              <tr>
-                                <th>Mix Box</th>
-                                <th>Item Name</th>
-                                <th>UOM</th>
-                                <th>Grams</th>
+              {/* Expanded nested items */}
+              {expandedRows.includes(mixBox.id) && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    style={{
+                      padding: 0,
+                      backgroundColor: '#f9f9f9',
+                    }}
+                  >
+                    <div style={{ margin: '8px 16px' }}>
+                      <table
+                        className="custom-tables"
+                        style={{
+                          width: '100%',
+                          backgroundColor: '#fff',
+                        }}
+                      >
+                        <thead>
+                          <tr>
+                            <th>Mix Box</th>
+                            <th>Item Name</th>
+                            <th>UOM</th>
+                            <th>Grams</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {mixBox.items.length > 0 ? (
+                            mixBox.items.map((item, itemIndex) => (
+                              <tr key={itemIndex}>
+                                <td style={{ textAlign: 'center' }}>
+                                  {mixBox.mixboxName}
+                                </td>
+
+                                <td style={{ textAlign: 'center' }}>
+                                  {item.item_name}
+                                </td>
+
+                                <td style={{ textAlign: 'center' }}>
+                                  {item.uom || '-'}
+                                </td>
+
+                                <td style={{ textAlign: 'center' }}>
+                                  {item.grams}
+                                </td>
                               </tr>
-                            </thead>
-                            <tbody>
-                              {mixBox.items.length > 0 ? (
-                                mixBox.items.map((item, idx) => (
-                                  <tr key={idx}>
-                                    <td style={{ textAlign: 'center' }}>{mixBox.mixboxName}</td>
-                                    <td style={{ textAlign: 'center' }}>{item.item_name}</td>
-                                    <td style={{ textAlign: 'center' }}>{item.uom || '-'}</td>
-                                    <td style={{ textAlign: 'center' }}>{item.grams}</td>
-                                  </tr>
-                                ))
-                              ) : (
-                                <tr>
-                                  <td colSpan={4} style={{ textAlign: 'center', padding: '16px' }}>
-                                    No items in this mix box
-                                  </td>
-                                </tr>
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={4}
+                                style={{
+                                  textAlign: 'center',
+                                  padding: '16px',
+                                }}
+                              >
+                                No items in this Mix Box
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</Box>
 
       {/* Snackbar */}
       <Snackbar

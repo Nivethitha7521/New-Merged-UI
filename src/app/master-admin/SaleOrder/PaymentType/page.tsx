@@ -189,7 +189,7 @@ const PaymentPage: React.FC = () => {
   };
   return (
     <>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
 
       <PaymentTable

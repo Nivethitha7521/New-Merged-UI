@@ -12,22 +12,24 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControlLabel,
   IconButton,
+  InputAdornment,
   Pagination,
   Switch,
+  TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Delete as DeleteIcon,
   Description as DescriptionIcon,
-  Edit as EditIcon,
   GetApp as GetAppIcon,
-  Refresh as RefreshIcon,
   Search as SearchIcon,
   Undo as UndoIcon,
   Upload as UploadIcon,
+  EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../../../redux/store';
 import { Sections } from '../Models/sectionsModels';
@@ -247,161 +249,114 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
 
   return (
     <>
-      {/* ── Top bar ─────────────────────────────────────────────────────── */}
-      <Box
-        display="flex"
-        flexDirection={{ xs: 'column', sm: 'row' }}
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: '99%', boxSizing: 'border-box', mt: 2 }}
-      >
-        <Typography
-          className="icon-action-label"
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '100%',
-          }}
+{/* ── Top bar ───────────────────────────────────────────── */}
+<Box className="section-master-toolbar">
+  <Typography className="section-master-toolbar-title">
+    {showDeactivated ? 'Deactivated Sections' : 'Active Sections'}
+  </Typography>
+
+  <TextField
+    type="search"
+    value={searchValue}
+    onChange={(event) => setSearchValue(event.target.value)}
+    placeholder="Search section..."
+    className="purchase-reference-search section-master-search"
+    inputProps={{
+      'aria-label': 'Search sections',
+    }}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon className="purchase-reference-search-icon" />
+        </InputAdornment>
+      ),
+    }}
+  />
+
+  <Box className="purchase-reference-actions section-master-actions">
+    {!showDeactivated && (
+      <>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
         >
-          {showDeactivated ? 'Deactivated Sections' : 'Active Sections'}
-        </Typography>
+          Add New
+        </Button>
 
-        {/* Search */}
-        <Box sx={{ position: 'relative', width: '280px' }}>
-          <SearchIcon
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '10px',
-              transform: 'translateY(-50%)',
-              color: 'text.secondary',
-              fontSize: '1.2rem',
-              pointerEvents: 'none',
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search section..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            style={{
-              padding: '6px 10px 6px 38px',
-              fontSize: '0.8rem',
-              borderRadius: '6px',
-              border: '1px solid #ccc',
-              fontFamily: 'Poppins, sans-serif',
-              width: '280px',
-            }}
-          />
-        </Box>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={
+            isImporting ? (
+              <CircularProgress size={16} />
+            ) : (
+              <GetAppIcon />
+            )
+          }
+          onClick={handleImportClick}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          {isImporting ? 'Importing...' : 'Import'}
+        </Button>
 
-        {/* Action buttons */}
-        <Box sx={scrollbarSx}>
-          {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UploadIcon />}
+          onClick={handleExportCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Export
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleImportClick}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  {isImporting ? (
-                    <CircularProgress size={20} className="icon-action-svg" />
-                  ) : (
-                    <GetAppIcon className="icon-action-svg" />
-                  )}
-                </IconButton>
-                <Typography className="icon-action-label">
-                  {isImporting ? 'Importing...' : 'Import'}
-                </Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<DescriptionIcon />}
+          onClick={handleDownloadSampleCSV}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Sample
+        </Button>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleExportCSV}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UploadIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Export</Typography>
-              </div>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<UndoIcon />}
+          onClick={handleRollback}
+          disabled={isImporting}
+          className="purchase-reference-action-button"
+        >
+          Rollback
+        </Button>
+      </>
+    )}
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleDownloadSampleCSV}
-                  disabled={isImporting}
-                  className="icon-action-button"
-                  size="small"
-                >
-                  <DescriptionIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Sample</Typography>
-              </div>
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
 
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="secondary"
-                  onClick={handleRollback}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UndoIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Rollback</Typography>
-              </div>
-            </>
-          )}
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated(!showDeactivated)}
-                color="primary"
-                size="small"
-                disabled={isImporting}
-              />
-            }
-            label={showDeactivated ? 'Show Activated' : 'Show Deactivated'}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              '& .MuiFormControlLabel-label': {
-                fontSize: '0.75rem',
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </Box>
-      </Box>
+      <Switch
+        checked={!showDeactivated}
+        onChange={() => setShowDeactivated(!showDeactivated)}
+        color="primary"
+        size="small"
+        disabled={isImporting}
+        inputProps={{
+          'aria-label': 'Show active sections only',
+        }}
+      />
+    </Box>
+  </Box>
+</Box>
 
       {/* Hidden file input */}
       <input
@@ -618,78 +573,121 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
         </DialogActions>
       </Dialog>
 
-      {/* ── Table ──────────────────────────────────────────────────────── */}
-      <div className="table-container" style={{ maxHeight: 'calc(91.7vh - 170px)' }}>
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Sections Id</th>
-              <th>Section Name</th>
-              <th>Code</th>
-              <th>Location</th>
-              <th>Address</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedSections.length === 0 ? (
-              <tr>
-                <td colSpan={7} style={{ textAlign: 'center' }}>
-                  <h2>
-                    {showDeactivated
-                      ? 'No deactivated sections found'
-                      : 'No active sections found'}
-                  </h2>
-                </td>
-              </tr>
-            ) : (
-              displayedSections.map((section, index) => (
-                <tr key={section.id || `temp-${index}`}>
-                  <td style={{ textAlign: 'center' }}>{(page - 1) * 30 + index + 1}</td>
-                  <td style={{ textAlign: 'center' }}>{section.sectionsId || 'N/A'}</td>
-                  <td style={{ textAlign: 'center' }}>{section.sectionsName || 'N/A'}</td>
-                  <td style={{ textAlign: 'center' }}>{section.code || 'N/A'}</td>
-                  <td style={{ textAlign: 'center' }}>{section.location || 'N/A'}</td>
-                  <td style={{ textAlign: 'center' }}>{section.address || 'N/A'}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    {showDeactivated ? (
-                      <button
+{/* ── Table ─────────────────────────────────────────────── */}
+<Box className="purchase-master-table-shell">
+  <div className="purchase-native-table-wrapper">
+    <table className="purchase-native-table section-native-table">
+      <thead>
+        <tr>
+          <th>S.NO</th>
+          <th>Sections ID</th>
+          <th>Section Name</th>
+          <th>Code</th>
+          <th>Location</th>
+          <th>Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {displayedSections.length === 0 ? (
+          <tr>
+            <td colSpan={7} className="empty-state">
+              <h2>
+                {showDeactivated
+                  ? 'No deactivated sections found'
+                  : 'No active sections found'}
+              </h2>
+            </td>
+          </tr>
+        ) : (
+          displayedSections.map((section, index) => (
+            <tr key={section.id || `temp-${index}`}>
+              <td style={{ textAlign: 'center' }}>
+                {(page - 1) * 30 + index + 1}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                <span className="purchase-master-id-pill">
+                  {section.sectionsId || 'N/A'}
+                </span>
+              </td>
+
+              <td>
+                <Box className="purchase-master-name-cell">
+                  <span className="purchase-master-avatar">
+                    {(section.sectionsName || '?')
+                      .charAt(0)
+                      .toUpperCase()}
+                  </span>
+
+                  <span>{section.sectionsName || 'N/A'}</span>
+                </Box>
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                {section.code || 'N/A'}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                {section.location || 'N/A'}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                {section.address || 'N/A'}
+              </td>
+
+              <td style={{ textAlign: 'center' }}>
+                <Box className="purchase-master-actions">
+                  {showDeactivated ? (
+                    <Tooltip title="Activate section" arrow>
+                      <IconButton
+                        type="button"
                         onClick={() => handleActivate(section)}
-                        className="activate-btn"
-                        title="Activate"
+                        className="purchase-master-action-button is-activate"
+                        aria-label="Activate section"
                       >
-                        <RefreshIcon />
-                      </button>
-                    ) : (
-                      <>
-                        <button
+                        <RefreshIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <>
+                      <Tooltip title="Edit section" arrow>
+                        <IconButton
+                          type="button"
                           onClick={() => handleEdit(section)}
-                          className="edit-btn"
-                          title="Edit"
+                          className="purchase-master-action-button is-edit"
+                          aria-label="Edit section"
                         >
-                          <EditIcon />
-                        </button>
-                        <button
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Deactivate section" arrow>
+                        <IconButton
+                          type="button"
                           onClick={() => handleDeactivate(section)}
-                          className="deactivate-btn"
-                          title="Deactivate"
+                          className="purchase-master-action-button is-delete"
+                          aria-label="Deactivate section"
                         >
-                          <DeleteIcon />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </>
+                  )}
+                </Box>
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</Box>
 
       {/* ── Pagination ─────────────────────────────────────────────────── */}
       {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={0.5}>
+      <Box className="master-admin-pagination">
           <Pagination
             count={totalPages}
             page={page}
@@ -704,4 +702,4 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
   );
 };
 
-export default SectionsTable; ` `
+export default SectionsTable; 

@@ -173,12 +173,15 @@ const MixBoxDialog: React.FC<MixBoxDialogProps> = ({
     hasLetterError(mixBoxData.mixboxName);
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{ className: 'dialog-paper-medium' }}
+<Dialog
+  open={open}
+  onClose={handleClose}
+  maxWidth="lg"
+  fullWidth
+  className="mixbox-form-dialog"
+  PaperProps={{
+    className: 'dialog-paper-medium mixbox-dialog-paper',
+  }}
       TransitionProps={{
         onEntered: () => {
           inputRef.current?.focus();
@@ -192,8 +195,8 @@ const MixBoxDialog: React.FC<MixBoxDialogProps> = ({
 
       <DialogContent dividers className="dialog-content">
         {/* ── Row 1: Mix Box Name · Total Grams · Select Items ── */}
-        <div className="form-section">
-          <Grid container spacing={2} alignItems="flex-start">
+<div className="form-section mixbox-dialog-fields-section">
+  <Grid container spacing={2} alignItems="flex-start">
             {/* Mix Box Name */}
             <Grid item xs={12} sm={4}>
               <div className="form-field">
@@ -326,7 +329,7 @@ const MixBoxDialog: React.FC<MixBoxDialogProps> = ({
         </div>
 
         {/* ── Row 2: Items & Grams Table ── */}
-        <div className="form-section" style={{ marginTop: '1rem' }}>
+       <div className="form-section mixbox-dialog-items-section">
           <Typography variant="subtitle2" className="form-section-title">
             Items &amp; Grams
           </Typography>
@@ -337,8 +340,9 @@ const MixBoxDialog: React.FC<MixBoxDialogProps> = ({
             </Typography>
           )}
 
-          <TableContainer
-            sx={{
+         <TableContainer
+  className="mixbox-dialog-items-table"
+  sx={{
               maxHeight: 280,
               border: '1px solid #e5e7eb',
               borderRadius: '0.375rem',

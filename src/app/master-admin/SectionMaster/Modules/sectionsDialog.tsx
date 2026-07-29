@@ -102,21 +102,24 @@ const SectionsDialog: React.FC<SectionsDialogProps> = ({
     !sectionsData.aliasName;
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{ className: 'dialog-paper-medium' }}
-    >
+<Dialog
+  open={open}
+  onClose={handleClose}
+  maxWidth="md"
+  fullWidth
+  className="section-form-dialog"
+  PaperProps={{
+    className: 'dialog-paper-medium section-dialog-paper',
+  }}
+>
       <DialogTitle className="dialog-title">
         {mode === 'edit' ? 'Edit Section' : 'Add Section'}
       </DialogTitle>
 
       <DialogContent className="dialog-content">
         {/* ── Row 1: Section Name · Alias Name · Code ── */}
-        <div className="form-section">
-          <div className="form-grid">
+      <div className="form-section section-dialog-primary-fields">
+  <div className="form-grid">
 
             {/* Section Name — no special chars, max 30, min 1 letter */}
             <div className="form-field">
@@ -131,7 +134,7 @@ const SectionsDialog: React.FC<SectionsDialogProps> = ({
                 error={!!validationErrors.sectionsName || hasLetterError(sectionsData.sectionsName)}
                 helperText={getHelperText(sectionsData.sectionsName, validationErrors.sectionsName)}
                 disabled={loading}
-                style={{ marginLeft: 10, width: 200 }}
+             
               />
             </div>
 
@@ -148,7 +151,7 @@ const SectionsDialog: React.FC<SectionsDialogProps> = ({
                 error={!!validationErrors.aliasName || hasLetterError(sectionsData.aliasName)}
                 helperText={getHelperText(sectionsData.aliasName, validationErrors.aliasName)}
                 disabled={loading}
-                style={{ width: 200, marginLeft: 10 }}
+              
               />
             </div>
 
@@ -163,18 +166,17 @@ const SectionsDialog: React.FC<SectionsDialogProps> = ({
                 error={!!validationErrors.code || hasLetterError(sectionsData.code)}
                 helperText={getHelperText(sectionsData.code, validationErrors.code)}
                 disabled={loading}
-                style={{ width: 200, marginLeft: 10 }}
+               
               />
             </div>
           </div>
         </div>
 
         {/* ── Row 2: Location · Address ── */}
-        <div className="form-section">
-          <div className="form-grid">
-
+      <div className="form-section section-dialog-secondary-fields">
+  <div className="form-grid">
             {/* Location */}
-            <div className="form-field form-field-span-2">
+            <div className="form-field">
               <TextField
                 {...SHARED_TEXT_FIELD_PROPS}
                 label="Location"
@@ -184,12 +186,12 @@ const SectionsDialog: React.FC<SectionsDialogProps> = ({
                 error={!!validationErrors.location || hasLetterError(sectionsData.location)}
                 helperText={getHelperText(sectionsData.location, validationErrors.location)}
                 disabled={loading}
-                style={{ marginLeft: 10, width: 315 }}
+              
               />
             </div>
 
             {/* Address */}
-            <div className="form-field form-field-span-2">
+          <div className="form-field">
               <TextField
                 {...SHARED_TEXT_FIELD_PROPS}
                 label="Address"
@@ -199,7 +201,7 @@ const SectionsDialog: React.FC<SectionsDialogProps> = ({
                 error={!!validationErrors.address || hasLetterError(sectionsData.address)}
                 helperText={getHelperText(sectionsData.address, validationErrors.address)}
                 disabled={loading}
-                style={{ width: 315, marginLeft: 70 }}
+             
               />
             </div>
           </div>

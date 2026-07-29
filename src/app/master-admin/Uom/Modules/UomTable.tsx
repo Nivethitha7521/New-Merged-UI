@@ -1,19 +1,23 @@
+"use client";
 
-
-'use client';
-
-import React, { memo } from 'react';
-import { CircularProgress } from '@mui/material';
+import React, { memo } from "react";
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
-import { RootState } from '@/redux/store';
-import { useSelector } from 'react-redux';
-import { UomState, getDisplayFormat } from '../Modules/Uomtypes';
+  Box,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import EditIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
+import RefreshIcon from "@mui/icons-material/RestoreRounded";
+
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import {
+  UomState,
+  getDisplayFormat,
+} from "../Modules/Uomtypes";
 
 interface UomTableProps {
   displayedUoms: UomState[];
@@ -24,9 +28,6 @@ interface UomTableProps {
   handleActivate: (id: string) => void;
 }
 
-// ─── Sub-components (stable, defined outside parent) ──────────────────────────
-
-/** Renders the action cell for a single row — memoised to avoid re-renders. */
 const RowActions = memo(
   ({
     id,
@@ -45,47 +46,52 @@ const RowActions = memo(
   }) => {
     if (showDeactivated) {
       return (
-        <button onClick={() => handleActivate(id)} className="activate-btn" title="Activate">
-          <RefreshIcon />
-        </button>
+        <Tooltip title="Activate UOM" arrow>
+          <IconButton
+            type="button"
+            onClick={() => handleActivate(id)}
+            className="purchase-master-action-button is-activate"
+            aria-label="Activate UOM"
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       );
     }
-    // editStatus === true → editable; original code had `!uom.editStatus === false`
-    // which is always true. Correct logic: show buttons only when editStatus is true.
-    if (!canEdit) return null;
+
+    if (!canEdit) {
+      return null;
+    }
+
     return (
       <>
-        <button onClick={() => handleEdit(id)} className="edit-btn" title="Edit">
-          <EditIcon />
-        </button>
-        <button onClick={() => handleDeactivate(id)} className="deactivate-btns" title="Deactivate">
-          <DeleteIcon />
-        </button>
+        <Tooltip title="Edit UOM" arrow>
+          <IconButton
+            type="button"
+            onClick={() => handleEdit(id)}
+            className="purchase-master-action-button is-edit"
+            aria-label="Edit UOM"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Deactivate UOM" arrow>
+          <IconButton
+            type="button"
+            onClick={() => handleDeactivate(id)}
+            className="purchase-master-action-button is-delete"
+            aria-label="Deactivate UOM"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </>
     );
-  },
-);
-RowActions.displayName = 'RowActions';
-
-// ─── Empty state messages (constant — no JSX allocation per render) ───────────
-
-const EMPTY_ACTIVE = (
-  <tr>
-    <td colSpan={7} style={{ textAlign: 'center' }}>
-      <h2>No active UOMs found</h2>
-    </td>
-  </tr>
+  }
 );
 
-const EMPTY_DEACTIVATED = (
-  <tr>
-    <td colSpan={7} style={{ textAlign: 'center' }}>
-      <h2>No deactivated UOMs found</h2>
-    </td>
-  </tr>
-);
-
-// ─── Component ────────────────────────────────────────────────────────────────
+RowActions.displayName = "RowActions";
 
 const UomTable: React.FC<UomTableProps> = ({
   displayedUoms,
@@ -95,65 +101,128 @@ const UomTable: React.FC<UomTableProps> = ({
   handleDeactivate,
   handleActivate,
 }) => {
-  const { loading } = useSelector((state: RootState) => state.uoms);
+  /*
+   * Keep the selector exactly as used by your working page/store.
+   * Do not change this to another reducer key unless your page already
+   * uses the Master Admin reducer key.
+   */
+  const { loading } = useSelector(
+    (state: RootState) => state.mauoms
+  );
 
   if (isSubmitting) {
     return (
-      <div className="flex justify-center mt-4">
-        <CircularProgress />
-      </div>
+      <Box className="master-admin-table-loading">
+        <CircularProgress size={28} />
+      </Box>
     );
   }
 
   return (
-    <div className="table-container" style={{ maxHeight: 'calc(95vh - 170px)' }}>
-      <table className="custom-tables">
-        <thead>
-          <tr>
-            <th>S.NO</th>
-            <th>UOM ID</th>
-            <th>Measurement Type</th>
-            <th>UOM</th>
-            <th>Precision</th>
-            <th>Display Format</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {loading ? (
+    <Box className="purchase-master-table-shell">
+      <div className="purchase-native-table-wrapper">
+        <table className="purchase-native-table uom-native-table">
+          <thead>
             <tr>
-              <td colSpan={7} style={{ textAlign: 'center' }}>
-                <h3 style={{ fontWeight: 'bold' }}>Loading...</h3>
-              </td>
+              <th className="uom-column-sno">S.NO</th>
+              <th className="uom-column-id">UOM ID</th>
+              <th className="uom-column-measurement">
+                Measurement Type
+              </th>
+              <th className="uom-column-name">UOM</th>
+              <th className="uom-column-precision">
+                Precision
+              </th>
+              <th className="uom-column-display">
+                Display Format
+              </th>
+              <th className="uom-column-actions">
+                Actions
+              </th>
             </tr>
-          ) : displayedUoms.length === 0 ? (
-            showDeactivated ? EMPTY_DEACTIVATED : EMPTY_ACTIVE
-          ) : (
-            displayedUoms.map((uom, index) => (
-              <tr key={uom.id ?? index}>
-                <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                <td style={{ textAlign: 'center' }}>{uom.uomId ?? 'N/A'}</td>
-                <td style={{ textAlign: 'center' }}>{uom.measurementType ?? 'N/A'}</td>
-                <td style={{ textAlign: 'center' }}>{uom.uom ?? 'N/A'}</td>
-                <td style={{ textAlign: 'center' }}>{uom.precision ?? 'N/A'}</td>
-                <td style={{ textAlign: 'center' }}>{getDisplayFormat(uom.precision)}</td>
-                <td style={{ textAlign: 'center' }}>
-                  <RowActions
-                    id={uom.id!}
-                    showDeactivated={showDeactivated}
-                    handleEdit={handleEdit}
-                    handleDeactivate={handleDeactivate}
-                    handleActivate={handleActivate}
-                    canEdit={uom.editStatus}
-                  />
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="empty-state"
+                >
+                  Loading...
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+            ) : displayedUoms.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="empty-state"
+                >
+                  No{" "}
+                  {showDeactivated
+                    ? "deactivated"
+                    : "active"}{" "}
+                  UOMs found
+                </td>
+              </tr>
+            ) : (
+              displayedUoms.map((uom, index) => (
+                <tr key={uom.id ?? index}>
+                  <td className="uom-column-sno">
+                    {index + 1}
+                  </td>
+
+                  <td className="uom-column-id">
+                    <span className="purchase-master-id-pill">
+                      {uom.uomId ?? "N/A"}
+                    </span>
+                  </td>
+
+                  <td className="uom-column-measurement">
+                    <span className="purchase-master-value-pill">
+                      {uom.measurementType ?? "N/A"}
+                    </span>
+                  </td>
+
+                  <td className="uom-column-name">
+                    <Box className="purchase-master-name-cell">
+                      <span className="purchase-master-avatar">
+                        {(uom.uom || "?")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </span>
+
+                      <span>{uom.uom ?? "N/A"}</span>
+                    </Box>
+                  </td>
+
+                  <td className="uom-column-precision">
+                    {uom.precision ?? "N/A"}
+                  </td>
+
+                  <td className="uom-column-display">
+                    {getDisplayFormat(uom.precision)}
+                  </td>
+
+                  <td className="uom-column-actions">
+                    <Box className="purchase-master-actions">
+                      <RowActions
+                        id={uom.id!}
+                        showDeactivated={showDeactivated}
+                        handleEdit={handleEdit}
+                        handleDeactivate={handleDeactivate}
+                        handleActivate={handleActivate}
+                        canEdit={uom.editStatus}
+                      />
+                    </Box>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </Box>
   );
 };
 

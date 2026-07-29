@@ -179,7 +179,7 @@ const ChargeTable: React.FC = () => {
 
   return (
     <>
-      <MenuPage />
+      {/* <MenuPage /> */}
 
 
 
