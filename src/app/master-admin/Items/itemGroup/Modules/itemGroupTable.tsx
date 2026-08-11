@@ -1,8 +1,8 @@
 
 
-import React, { useRef } from "react";
-import { RootState, AppDispatch } from "../../../../../redux/store";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { RootState, AppDispatch } from '../../../../../redux/store';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   Alert,
   Box,
@@ -17,16 +17,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
+  Typography,Pagination,TextField,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import GetAppIcon from "@mui/icons-material/GetApp";
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import UploadIcon from "@mui/icons-material/Upload";
-import { Exportitemgroup, Importitemgroup } from "../Features/itemgroupSlice";
-import { TrackChanges } from "@mui/icons-material";
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RefreshIcon from '@mui/icons-material/RestoreRounded';
+import SearchIcon from '@mui/icons-material/Search';
+import { Importitemgroup } from '../Features/itemgroupSlice';
 
 interface itemGroup {
   id: string;
@@ -43,14 +41,14 @@ interface ItemGroupTableProbs {
   showDeactivated: boolean;
   setShowDeactivated: (value: boolean) => void;
 }
-
+const PAGE_SIZE = 15;
 const ItemGroupTable: React.FC<ItemGroupTableProbs> = ({
   handleOpen,
   handleEdit,
   handleActivate,
   handleDeactivate,
   showDeactivated,
-  setShowDeactivated
+  setShowDeactivated,
 }) => {
   const {
     items: itemGroups,
@@ -59,21 +57,43 @@ const ItemGroupTable: React.FC<ItemGroupTableProbs> = ({
     error
   } = useSelector((state: RootState) => state.itemGroup);
 
-  const displayeditemGroups = showDeactivated ? deactivatedItems : itemGroups;
+const dispatch = useDispatch<AppDispatch>();
+const fileInputRef = useRef<HTMLInputElement>(null);
+const [searchValue, setSearchValue] = useState('');
+const [page, setPage] = useState(1);
+ const displayedItemGroups = showDeactivated ? deactivatedItems : itemGroups;
 
-  const dispatch = useDispatch<AppDispatch>();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const filteredItemGroups = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+    if (!query) return displayedItemGroups;
 
-  const handleExportCSV = () => {
-    dispatch(Exportitemgroup());
-  };
+    return displayedItemGroups.filter((itemGroup) =>
+      itemGroup.itemGroupName?.toLowerCase().includes(query) ||
+      itemGroup.itemGroupId?.toLowerCase().includes(query)
+    );
+  }, [displayedItemGroups, searchValue]);
 
-  const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const totalPages = Math.max(1, Math.ceil(filteredItemGroups.length / PAGE_SIZE));
+
+  const paginatedItemGroups = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredItemGroups.slice(start, start + PAGE_SIZE);
+  }, [filteredItemGroups, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue, showDeactivated]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+ const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       dispatch(Importitemgroup(file));
       if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Reset file input
+       fileInputRef.current.value = '';
       }
     }
   };
@@ -83,116 +103,77 @@ const ItemGroupTable: React.FC<ItemGroupTableProbs> = ({
 
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt:-2 }}
-      >
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+     <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          className="purchase-reference-toolbar item-master-toolbar"
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}
         >
-          {showDeactivated ? "Deactivated ItemGroup" : "Active ItemGroup"}
-        </Typography>
+         <Box className="item-master-toolbar-spacer" sx={{ flex: 1 }} />
 
-        <div className="flex items-center gap-4">
-          {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
+          <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              size="small"
+              variant="outlined"
+              autoComplete="off"
+              placeholder="Search Item Group..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="custom-textfield purchase-reference-search item-master-search"
+              sx={{ width: '300px' }}
+              InputProps={{ startAdornment: <SearchIcon className="purchase-reference-search-icon" /> }}
+            />
+          </Box>
+
+          <Box
+            className="purchase-reference-actions item-master-actions"
+            sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}
+          >
+            {!showDeactivated && (
+              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
                   <AddIcon className="icon-action-svg" />
                 </IconButton>
                 <Typography className="icon-action-label">Add</Typography>
               </div>
-
-              {/* <div className="icon-action-wrapper">
-                <IconButton
+)}
+              <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={showDeactivated}
+                  onChange={() => setShowDeactivated(!showDeactivated)}
                   color="primary"
-                  component="label"
-                  htmlFor="import-file"
-                  className="icon-action-button cursor-pointer"
-                  title="Import"
-                >
-                  <GetAppIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Import</Typography>
-              </div>
-
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color='primary'
-                  onClick={handleExportCSV}
-                  className="icon-action-button"
-                  title="Export"
-                >
-                  <UploadIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Export</Typography>
-              </div> */}
-
-              <input
-                accept=".csv"
-                style={{ display: 'none' }}
-                id="import-file"
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImportCSV}
-              />
-            </>
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated(!showDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+                     size="small"
+                />
+              }
+              label={label}
+            />
+          </Box>
+        </Box>
       </Box>
 
 
-        <div className="table-container my-1" style={{ maxHeight: 'calc(86.5vh - 170px)' }}>
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>S.NO</th>
-                <th>ItemGroup Id</th>
-                <th>Item Group Name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-               {loading ? (
+      <input
+        accept=".csv"
+        style={{ display: 'none' }}
+        id="import-file"
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImportCSV}
+      />
+
+      <div className="item-master-table-container">
+       <table className="item-master-table item-master-lookup-table item-master-lookup-table--4">
+          <thead>
+            <tr>
+              <th>S.NO</th>
+              <th>ItemGroup Id</th>
+              <th>Item Group Name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: 'center' }}>
                   <h3 style={{ fontWeight: 'bold' }}>Loading...</h3>
@@ -200,60 +181,73 @@ const ItemGroupTable: React.FC<ItemGroupTableProbs> = ({
               </tr>
             ) : (
               <>
-              {displayeditemGroups.map((itemGroup, index) => (
-                <tr key={itemGroup.itemGroupId || index}>
-                  <td style={{ textAlign: "center" }}>{index + 1}</td>
-                  <td style={{ textAlign: 'center' }}>{itemGroup.itemGroupId}</td>
-                  <td style={{ textAlign: "center" }}>{itemGroup.itemGroupName}</td>
-                  <td style={{ textAlign: "center" }}>
-                    {showDeactivated ? (
-                      <button
-                        color="primary"
-                        onClick={() => handleActivate(itemGroup)}
-                        className="activate-btn"
-                        title="Activate"
-                      >
-                        <RefreshIcon fontSize="small" />
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          color="primary"
-                          onClick={() => handleEdit(itemGroup)}
-                          className="edit-btn"
-                          title="Edit"
-                        >
-                          <EditIcon fontSize="small" />
-                        </button>
-                        <button
-                          color="primary"
-                          onClick={() => handleDeactivate(itemGroup)}
-                          style={{ marginLeft: "10px" }}
-                          className="deactivate-btn"
-                          title="Deactivate"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {displayeditemGroups.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: "center" }}>
-                    <h2 >
-                      {showDeactivated ? "No deactivated item groups found" : "No active item groups found"}
-                    </h2>
-                  </td>
-                </tr>
-              )}
+  {paginatedItemGroups.map((itemGroup, index) => (
+                  <tr key={itemGroup.itemGroupId || index} className="item-master-data-row">
+                    <td style={{ textAlign: 'center' }}>{(page - 1) * PAGE_SIZE + index + 1}</td>
+                    <td style={{ textAlign: 'center' }}>{itemGroup.itemGroupId}</td>
+                    <td style={{ textAlign: 'center' }}>{itemGroup.itemGroupName}</td>
+                    <td className="item-master-actions-cell">
+                      <div className="flex justify-center gap-1">
+                        {showDeactivated ? (
+                          <IconButton
+                            onClick={() => handleActivate(itemGroup)}
+                           className="purchase-master-action-button is-activate"
+                            title="Activate"
+                          >
+                           <RefreshIcon />
+                          </IconButton>
+                        ) : (
+                          <>
+                            <IconButton
+                              onClick={() => handleEdit(itemGroup)}
+                              className="purchase-master-action-button is-edit"
+                              title="Edit"
+                              size="small"
+                            >
+                               <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => handleDeactivate(itemGroup)}
+                              className="purchase-master-action-button is-delete"
+                              title="Deactivate"
+                              size="small"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredItemGroups.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="empty-state">
+                      <h2>
+                        {showDeactivated ? 'No deactivated item groups found' : 'No active item groups found'}
+                      </h2>
+                    </td>
+                  </tr>
+                )}
               </>
             )}
-            </tbody>
-          </table>
-        </div>
-      
+             </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={0.5}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            color="primary"
+            onChange={(_event, value) => setPage(value)}
+            className="item-master-pagination"
+          />
+        </Box>
+      )}
+     
     </>
   );
 };

@@ -1,0 +1,249 @@
+.kot-master-submenu-sidebar {
+  position: relative;
+  width: 184px;
+  min-width: 184px;
+  height: calc(100vh - 68px);
+  display: flex;
+  flex-direction: column;
+  background: var(--erp-surface, #ffffff);
+  border-right: 1px solid var(--erp-border, #e1e7ef);
+}
+
+.kot-master-submenu-header {
+  min-height: 72px;
+  padding: 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--erp-border, #edf0f4);
+}
+
+.kot-master-submenu-logo {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: var(--erp-accent-contrast, #ffffff);
+  background: var(--erp-accent, #155eef);
+  box-shadow: 0 5px 14px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.16);
+}
+
+.kot-master-submenu-logo svg {
+  font-size: 19px;
+}
+
+.kot-master-submenu-heading {
+  min-width: 0;
+}
+
+.kot-master-submenu-caption {
+  margin: 0 0 2px !important;
+  color: var(--erp-muted, #98a2b3) !important;
+  font-size: 8.5px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .12em !important;
+}
+
+.kot-master-submenu-title {
+  color: var(--erp-text, #344054) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.kot-master-submenu-list {
+  padding: 10px !important;
+}
+
+.kot-master-submenu-item {
+  min-height: 42px !important;
+  margin-bottom: 6px !important;
+  padding: 0 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: var(--erp-text-secondary, #475467) !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.kot-master-submenu-item:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  transform: translateX(2px);
+}
+
+.kot-master-submenu-item.is-active {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 5px 14px rgba(var(--erp-accent-rgb, 21, 94, 239), .14);
+}
+
+.kot-master-submenu-icon {
+  width: 34px;
+  min-width: 34px !important;
+  height: 34px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: inherit !important;
+}
+
+.kot-master-submenu-icon svg {
+  width: 18px;
+  height: 18px;
+  font-size: 18px !important;
+}
+
+.kot-master-submenu-label {
+  color: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+}
+
+@media (min-width: 561px) {
+  .kot-master-submenu-sidebar {
+    width: calc(var(--erp-ui) * 23) !important;
+    min-width: calc(var(--erp-ui) * 23) !important;
+    height: calc(100vh - (var(--erp-ui) * 8)) !important;
+  }
+
+  .kot-master-submenu-header {
+    min-height: calc(var(--erp-ui) * 9) !important;
+    padding: calc(var(--erp-ui) * 1.75) !important;
+    gap: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .kot-master-submenu-logo {
+    width: calc(var(--erp-ui) * 4.5) !important;
+    min-width: calc(var(--erp-ui) * 4.5) !important;
+    height: calc(var(--erp-ui) * 4.5) !important;
+    border-radius: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .kot-master-submenu-logo svg {
+    font-size: calc(var(--erp-ui) * 2.375) !important;
+  }
+
+  .kot-master-submenu-caption {
+    font-size: calc(var(--erp-ui) * 1.06 * var(--erp-type-scale)) !important;
+  }
+
+  .kot-master-submenu-title {
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .kot-master-submenu-list {
+    padding: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .kot-master-submenu-item {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    margin-bottom: calc(var(--erp-ui) * .75) !important;
+    padding: 0 calc(var(--erp-ui) * 1.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .kot-master-submenu-icon {
+    width: calc(var(--erp-ui) * 4.25) !important;
+    min-width: calc(var(--erp-ui) * 4.25) !important;
+    height: calc(var(--erp-ui) * 4.25) !important;
+  }
+
+  .kot-master-submenu-icon svg {
+    width: calc(var(--erp-ui) * 2.25) !important;
+    height: calc(var(--erp-ui) * 2.25) !important;
+    font-size: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .kot-master-submenu-label {
+    font-size: calc(var(--erp-ui) * 1.44 * var(--erp-type-scale)) !important;
+  }
+}
+
+[data-theme='dark'] .kot-master-submenu-sidebar {
+  background: var(--erp-surface);
+  border-right-color: var(--erp-border);
+}
+
+.erp-module-layout.is-tab-navigation.has-kot-submenu {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.erp-module-layout.is-tab-navigation.has-kot-submenu > .erp-module-tabs {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.erp-module-layout.is-tab-navigation.has-kot-submenu > .kot-master-submenu-sidebar {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+}
+
+.erp-module-layout.is-tab-navigation.has-kot-submenu > .erp-page-viewport {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (max-width: 760px) {
+  .erp-module-layout.is-tab-navigation.has-kot-submenu {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .erp-module-layout.is-tab-navigation.has-kot-submenu > .erp-module-tabs,
+  .erp-module-layout.is-tab-navigation.has-kot-submenu > .kot-master-submenu-sidebar,
+  .erp-module-layout.is-tab-navigation.has-kot-submenu > .erp-page-viewport {
+    grid-column: 1;
+  }
+
+  .erp-module-layout.is-tab-navigation.has-kot-submenu > .erp-module-tabs {
+    grid-row: 1;
+  }
+
+  .erp-module-layout.is-tab-navigation.has-kot-submenu > .kot-master-submenu-sidebar {
+    grid-row: 2;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    flex-direction: row;
+    align-items: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--erp-border, #e1e7ef);
+  }
+
+  .kot-master-submenu-header {
+    display: none;
+  }
+
+  .kot-master-submenu-list {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+  }
+
+  .kot-master-submenu-item {
+    min-width: max-content;
+    margin-bottom: 0 !important;
+  }
+
+  .erp-module-layout.is-tab-navigation.has-kot-submenu > .erp-page-viewport {
+    grid-row: 3;
+  }
+}
+
+.erp-module-layout.is-tab-navigation.has-kot-submenu > .kot-master-submenu-sidebar {
+  height: 100% !important;
+  max-height: 100% !important;
+}

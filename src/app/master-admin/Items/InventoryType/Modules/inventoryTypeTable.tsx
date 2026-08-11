@@ -1,21 +1,21 @@
 
 
-import React, { useCallback } from "react";
-import { RootState } from "../../../../../redux/store";
-import { useSelector } from "react-redux";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { RootState } from '../../../../../redux/store';
+import { useSelector } from 'react-redux';
 import {
   Box,
   FormControlLabel,
   IconButton,
   Switch,
-  Typography,
+  Typography,Pagination,TextField,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { Inventory } from "../Models/inventoryTypeModels";
-
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/EditOutlined';
+import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RefreshIcon from '@mui/icons-material/RestoreRounded';
+import SearchIcon from '@mui/icons-material/Search';
+import { Inventory } from '../Models/inventoryTypeModels';
 interface InventoryTableProps {
   handleOpen: () => void;
   handleEdit: (inventory: Inventory) => void;
@@ -40,7 +40,7 @@ interface InventoryRowProps {
   onDeactivate: (inventory: Inventory) => void;
   onToggleDirectSale: (inventory: Inventory) => void;
 }
-
+const PAGE_SIZE = 15;
 const InventoryRow = React.memo(function InventoryRow({
   inventory,
   rowNumber,
@@ -67,11 +67,11 @@ const InventoryRow = React.memo(function InventoryRow({
   }, [onDeactivate, inventory]);
 
   return (
-    <tr>
-      <td style={{ textAlign: "center" }}>{rowNumber}</td>
+    <tr className="item-master-data-row">
+      <td style={{ textAlign: 'center' }}>{rowNumber}</td>
       <td style={{ textAlign: 'center' }}>{inventory.inventoryId}</td>
-      <td style={{ textAlign: "center" }}>{inventory.inventoryType}</td>
-      <td style={{ textAlign: "center" }}>
+ <td style={{ textAlign: 'center' }}>{inventory.inventoryType}</td>
+      <td style={{ textAlign: 'center' }}>
         <Switch
           checked={inventory.directSale}
           onChange={handleToggle}
@@ -80,37 +80,38 @@ const InventoryRow = React.memo(function InventoryRow({
           title="Toggle Direct Sale"
         />
       </td>
-      <td style={{ textAlign: "center" }}>
-        {showDeactivated ? (
-          <button
-            color="primary"
-            onClick={handleActivateClick}
-            className="activate-btn"
-            title="Activate"
-          >
-            <RefreshIcon />
-          </button>
-        ) : (
-          <>
-            <button
-              color="primary"
-              onClick={handleEditClick}
-              className="edit-btn"
-              title="Edit"
+  <td className="item-master-actions-cell">
+        <div className="flex justify-center gap-1">
+          {showDeactivated ? (
+           <IconButton
+              onClick={handleActivateClick}
+              className="purchase-master-action-button is-activate"
+              title="Activate"
+              size="small"
             >
-              <EditIcon />
-            </button>
-            <button
-              color="primary"
-              onClick={handleDeactivateClick}
-              style={{ marginLeft: "10px" }}
-              className="deactivate-btn"
-              title="Deactivate"
-            >
-              <DeleteIcon />
-            </button>
-          </>
-        )}
+              <RefreshIcon />
+            </IconButton>
+         ) : (
+            <>
+             <IconButton
+                onClick={handleEditClick}
+                className="purchase-master-action-button is-edit"
+                title="Edit"
+                size="small"
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                onClick={handleDeactivateClick}
+                className="purchase-master-action-button is-delete"
+                title="Deactivate"
+                size="small"
+              >
+                <DeleteIcon />
+              </IconButton>
+            </>
+          )}
+        </div>
       </td>
     </tr>
   );
@@ -130,9 +131,33 @@ const InventoryTable: React.FC<InventoryTableProps> = ({
     deactivatedItems,
     loading,
   } = useSelector((state: RootState) => state.inventoryType);
-
+const [searchValue, setSearchValue] = useState('');
+  const [page, setPage] = useState(1);
   const displayedInventories = showDeactivated ? deactivatedItems : inventories;
+const filteredInventories = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+    if (!query) return displayedInventories;
 
+    return displayedInventories.filter((inventory) =>
+      inventory.inventoryType?.toLowerCase().includes(query) ||
+      inventory.inventoryId?.toLowerCase().includes(query)
+    );
+  }, [displayedInventories, searchValue]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredInventories.length / PAGE_SIZE));
+
+  const paginatedInventories = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredInventories.slice(start, start + PAGE_SIZE);
+  }, [filteredInventories, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchValue, showDeactivated]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
   const label = showDeactivated ? 'Show Activated' : 'Show Deactivated';
 
   const handleToggleShowDeactivated = useCallback(() => {
@@ -141,79 +166,60 @@ const InventoryTable: React.FC<InventoryTableProps> = ({
 
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: -2 }}
-      >
-
-        {/* LEFT SIDE — TITLE */}
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
-        >
-          {showDeactivated ? "Deactivated Inventory Types" : "Active Inventory Types"}
-        </Typography>
-
-        {/* RIGHT SIDE — ALL ACTIONS */}
+       <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Box
-          display="flex"
-          alignItems="center"
-          gap={4}
-          sx={{ whiteSpace: "nowrap" }}
+           className="purchase-reference-toolbar item-master-toolbar"
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}
         >
-          {/* ADD BUTTON (only when active mode) */}
-          {!showDeactivated && (
-            <div className="icon-action-wrapper">
-              <IconButton
-                color="primary"
-                onClick={handleOpen}
-                className="icon-action-button"
-                title="Add"
-              >
-                <AddIcon className="icon-action-svg" />
-              </IconButton>
-              <Typography className="icon-action-label">Add</Typography>
-            </div>
-          )}
+        <Box className="item-master-toolbar-spacer" sx={{ flex: 1 }} />
 
-          {/* SWITCH + LABEL */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={handleToggleShowDeactivated}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
+          <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              size="small"
+              variant="outlined"
+              autoComplete="off"
+              placeholder="Search Inventory Type..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="custom-textfield purchase-reference-search item-master-search"
+              sx={{ width: '300px' }}
+              InputProps={{ startAdornment: <SearchIcon className="purchase-reference-search-icon" /> }}
+            />
+          </Box>
+ 
+          <Box
+            className="purchase-reference-actions item-master-actions"
+            sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}
+          >
+            {!showDeactivated && (
+              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
+                  <AddIcon className="icon-action-svg" />
+                </IconButton>
+                <Typography className="icon-action-label">Add</Typography>
+              </div>
+            )}
+ 
+            <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={showDeactivated}
+                  onChange={handleToggleShowDeactivated}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={label}
+            />
+          </Box>
         </Box>
       </Box>
 
 
 
-      <div className="table-container" style={{ maxHeight: 'calc(86.5vh - 170px)' }}>
-        <table className="custom-table">
+      <div className="item-master-table-container">
+        <table className="item-master-table item-master-lookup-table item-master-lookup-table--5">
           <thead>
             <tr>
               <th>S.NO</th>
@@ -232,11 +238,11 @@ const InventoryTable: React.FC<InventoryTableProps> = ({
               </tr>
             ) : (
               <>
-                {displayedInventories.map((inventory, index) => (
+               {paginatedInventories.map((inventory, index) => (
                   <InventoryRow
                     key={inventory.inventoryId || inventory.id}
                     inventory={inventory}
-                    rowNumber={index + 1}
+                     rowNumber={(page - 1) * PAGE_SIZE + index + 1}
                     showDeactivated={showDeactivated}
                     onEdit={handleEdit}
                     onActivate={handleActivate}
@@ -244,11 +250,11 @@ const InventoryTable: React.FC<InventoryTableProps> = ({
                     onToggleDirectSale={handleToggleDirectSale}
                   />
                 ))}
-                {displayedInventories.length === 0 && (
+               {filteredInventories.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: "center" }}>
-                      <h2 >
-                        {showDeactivated ? "No deactivated inventory types found" : "No active inventory types found"}
+                    <td colSpan={5} className="empty-state">
+                      <h2>
+                        {showDeactivated ? 'No deactivated inventory types found' : 'No active inventory types found'}
                       </h2>
                     </td>
                   </tr>
@@ -258,6 +264,17 @@ const InventoryTable: React.FC<InventoryTableProps> = ({
           </tbody>
         </table>
       </div>
+            {totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={0.5}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            color="primary"
+            onChange={(_event, value) => setPage(value)}
+            className="item-master-pagination"
+          />
+        </Box>
+      )}
     </>
   );
 };

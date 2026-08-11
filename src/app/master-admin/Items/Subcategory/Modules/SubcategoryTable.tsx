@@ -25,13 +25,13 @@ import {
   DialogTitle,
   Button,
   Divider,
-  Pagination,
+  Pagination,TextField,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
-  Refresh as RefreshIcon,
-  Delete as DeleteIcon,
+  EditOutlined as EditIcon,
+  RefreshRounded as RefreshIcon,
+  DeleteOutlineRounded as DeleteIcon,
   GetApp as GetAppIcon,
   Upload as UploadIcon,
   Undo as UndoIcon,
@@ -84,38 +84,40 @@ const SubCategoryRow = React.memo(function SubCategoryRow({
   onDeactivate,
   onActivate,
 }: SubCategoryRowProps) {
-  return (
-    <tr>
+return (
+    <tr className="item-master-data-row">
       <td style={{ textAlign: 'center' }}>{rowNumber}</td>
       <td style={{ textAlign: 'center' }}>{subCategory.subCategoryId}</td>
       <td style={{ textAlign: 'center' }}>{subCategory.subCategoryName}</td>
-      <td style={{ textAlign: 'center' }}>
+      <td className="item-master-actions-cell">
         <div className="flex justify-center gap-1">
           {showDeactivated ? (
-            <button
+            <IconButton
               onClick={() => onActivate(subCategory)}
-              className="activate-btn"
+               className="purchase-master-action-button is-activate"
               title="Activate"
+              size="small"
             >
-              <RefreshIcon fontSize="small" />
-            </button>
+             <RefreshIcon />
+           </IconButton>
           ) : (
             <>
-              <button
+              <IconButton
                 onClick={() => onEdit(subCategory)}
-                className="edit-btn"
+                className="purchase-master-action-button is-edit"
                 title="Edit"
-                style={{ fontSize: '16px' }}
+                size="small"
               >
-                <EditIcon fontSize="small" />
-              </button>
-              <button
+                 <EditIcon />
+              </IconButton>
+              <IconButton
                 onClick={() => onDeactivate(subCategory)}
-                className="deactivate-btn"
+               className="purchase-master-action-button is-delete"
                 title="Deactivate"
+                size="small"
               >
-                <DeleteIcon fontSize="small" />
-              </button>
+               <DeleteIcon />
+              </IconButton>
             </>
           )}
         </div>
@@ -316,159 +318,130 @@ const SubcategoryTableContainer: React.FC<SubcategoryTableContainerProps> = ({
 
   const label = showDeactivated ? 'Show Activated' : 'Show Deactivated';
 
-  return (
+return (
     <>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: -2 }}
-      >
-        <Typography className='icon-action-label'
+      <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          className="purchase-reference-toolbar item-master-toolbar"
           sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+            gap: 2,
           }}
         >
-          {showDeactivated ? "Deactivated SubCategory" : "Active SubCategory"}
-        </Typography>
+          <Box className="item-master-toolbar-spacer" sx={{ flex: 1 }} />
 
+          <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              size="small"
+              variant="outlined"
+              autoComplete="off"
+              placeholder="Search SubCategory..."
+              value={searchValue}
+              onChange={handleSearchChange}
+              className="custom-textfield purchase-reference-search item-master-search"
+              sx={{ width: '300px' }}
+              InputProps={{
+                startAdornment: <SearchIcon className="purchase-reference-search-icon" />,
+              }}
+            />
+          </Box>
 
-        <Box sx={{ position: "relative", width: "280px" }}>
-          <SearchIcon
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "10px",
-              transform: "translateY(-50%)",
-              color: "text.secondary",
-              fontSize: "1.2rem",
-              pointerEvents: "none", // prevents blocking typing
-            }}
-          />
+          <Box
+            className="purchase-reference-actions item-master-actions"
+            sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}
+          >
+            {!showDeactivated && (
+              <>
+                <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                  <IconButton
+                    color="primary"
+                    onClick={handleOpen}
+                    className="icon-action-button"
+                    title="Add"
+                    disabled={isImporting}
+                  >
+                    <AddIcon className="icon-action-svg" />
+                  </IconButton>
+                  <Typography className="icon-action-label">Add</Typography>
+                </div>
 
-          <input
-            type="text"
-            placeholder="Search SubCategory ..."
-            value={searchValue}
-            onChange={handleSearchChange}
-            style={{
-              padding: '6px 10px 6px 38px',
-              fontSize: '0.8rem',
-              borderRadius: '6px',
-              border: '1px solid #ccc',
-              fontFamily: 'Poppins, sans-serif',
-              width: '280px',
-            }}
-          />
+                <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                  <IconButton
+                    color="primary"
+                    onClick={handleImportClick}
+                    className="icon-action-button"
+                    size="small"
+                    disabled={isImporting}
+                  >
+                    {isImporting ? (
+                      <CircularProgress size={20} className="icon-action-svg" />
+                    ) : (
+                      <GetAppIcon className="icon-action-svg" />
+                    )}
+                  </IconButton>
+                  <Typography className="icon-action-label">
+                    {isImporting ? 'Importing...' : 'Import'}
+                  </Typography>
+                </div>
+
+                <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                  <IconButton
+                    color="primary"
+                    onClick={handleExportCSV}
+                    className="icon-action-button"
+                    size="small"
+                    disabled={isImporting}
+                  >
+                    <UploadIcon className="icon-action-svg" />
+                  </IconButton>
+                  <Typography className="icon-action-label">Export</Typography>
+                </div>
+
+                <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                  <IconButton
+                    color="primary"
+                    onClick={handleDownloadSampleCSV}
+                    disabled={isImporting}
+                    className="icon-action-button"
+                    size="small"
+                  >
+                    <DescriptionIcon className="icon-action-svg" />
+                  </IconButton>
+                  <Typography className="icon-action-label">Sample</Typography>
+                </div>
+
+                <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                  <IconButton
+                    color="secondary"
+                    onClick={handleRollback}
+                    className="icon-action-button"
+                    size="small"
+                    disabled={isImporting}
+                  >
+                    <UndoIcon className="icon-action-svg" />
+                  </IconButton>
+                  <Typography className="icon-action-label">Rollback</Typography>
+                </div>
+              </>
+            )}
+            <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={showDeactivated}
+                  onChange={handleToggleShowDeactivated}
+                  color="primary"
+                  size="small"
+                  disabled={isImporting}
+                />
+              }
+              label={label}
+            />
+          </Box>
         </Box>
-
-        <div className="flex items-center gap-2.5">
-          {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                  disabled={isImporting}
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
-
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleImportClick}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  {isImporting ? (
-                    <CircularProgress size={20} className="icon-action-svg" />
-                  ) : (
-                    <GetAppIcon className="icon-action-svg" />
-                  )}
-                </IconButton>
-                <Typography className="icon-action-label">
-                  {isImporting ? 'Importing...' : 'Import'}
-                </Typography>
-              </div>
-
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleExportCSV}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UploadIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Export</Typography>
-              </div>
-
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleDownloadSampleCSV}
-                  disabled={isImporting}
-                  className="icon-action-button"
-                  size="small"
-                >
-                  <DescriptionIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Sample</Typography>
-              </div>
-
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="secondary"
-                  onClick={handleRollback}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  <UndoIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Rollback</Typography>
-              </div>
-            </>
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={handleToggleShowDeactivated}
-                color="primary"
-                size="small"
-                disabled={isImporting}
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
       </Box>
 
       {/* Hidden file input */}
@@ -719,8 +692,8 @@ const SubcategoryTableContainer: React.FC<SubcategoryTableContainerProps> = ({
 
 
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(85.5vh - 170px)' }}>
-        <table className="custom-table">
+    <div className="item-master-table-container">
+        <table className="item-master-table item-master-lookup-table item-master-lookup-table--4">
           <thead>
             <tr>
               <th>S.NO</th>
@@ -764,13 +737,14 @@ const SubcategoryTableContainer: React.FC<SubcategoryTableContainerProps> = ({
         </table>
       </div>
 
-      {totalPages > 1 && (
+     {totalPages > 1 && (
         <Box display="flex" justifyContent="center" mt={0.5}>
           <Pagination
             count={totalPages}
             page={page}
             color="primary"
             onChange={handlePaginationChange}
+            className="item-master-pagination"
           />
         </Box>
       )}

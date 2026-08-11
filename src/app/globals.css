@@ -975,7 +975,9 @@ table td.MuiTableCell-root, .MuiTableCell-body {
   min-height: 0;
   overflow: hidden;
 }
-
+.erp-module-layout.is-tab-navigation {
+  flex-direction: column;
+}
 .erp-module-layout > .erp-page-viewport {
   flex: 1;
   min-width: 0;

@@ -7,15 +7,15 @@ import { RootState } from '../../../../../redux/store';
 import {
   Box,
   IconButton,
-  Popover,
+  Popover,Button,
   Switch,
   Typography,
   FormControlLabel,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 
 interface AddOn {
   id: string;
@@ -65,81 +65,52 @@ const AddOnTableContainer: React.FC<AddOnTableContainerProps> = ({
   const id = open ? 'variances-popover' : undefined;
 
   const label = showDeactivated ? 'Show Activated' : 'Show Deactivated';
-
+const visibleAddOns = showDeactivated ? deactivatedItems : addOns;
 
   return (
-    <Box>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 1 }}
-      >
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
-        >
-          {showDeactivated ? "Deactivated Addons" : "Active Addons"}
+    <Box className="kot-master-page kot-master-addon-page">
+      <Box className="kot-master-toolbar">
+        <Typography className="kot-master-toolbar-title">
+          {showDeactivated ? 'Deactivated Addons' : 'Active Addons'}
         </Typography>
 
 
-        <div className="flex items-center gap-4">
+       <Box className="kot-master-toolbar-actions">
           {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
-            </>
+            <Button
+              type="button"
+              variant="outlined"
+              startIcon={<AddRoundedIcon />}
+              onClick={handleOpen}
+              className="purchase-reference-action-button kot-master-action-button"
+            >
+              Add
+            </Button>
           )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated(!showDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+ <Box className="purchase-reference-active-toggle kot-master-status-toggle">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showDeactivated}
+                  onChange={() => setShowDeactivated(!showDeactivated)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={label}
+              className="kot-master-toggle-label"
+            />
+          </Box>
+        </Box>
       </Box>
 
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(90.5vh - 170px)' }}>
-        <table className="custom-table">
+     <div className="kot-master-table-container">
+        <table className="custom-table kot-master-table">
           <thead>
             <tr>
               <th>S.NO</th>
-              <th>AddOn Id</th>
+              <th>AddOn ID</th>
               <th>AddOn Name</th>
               <th>Value</th>
               <th>Variances</th>
@@ -148,80 +119,69 @@ const AddOnTableContainer: React.FC<AddOnTableContainerProps> = ({
           </thead>
           <tbody>
            
-              <>
-                {(showDeactivated ? deactivatedItems : addOns).map((addOn, index) => (
-                  <tr key={addOn.addOnId || index}>
-                    <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                    <td style={{ textAlign: 'center' }}>{addOn.addOnId}</td>
-                    <td style={{ textAlign: 'center' }}>{addOn.addOn}</td>
-                    <td style={{ textAlign: 'center' }}>{addOn.value}</td>
-                    <td style={{ textAlign: 'center' }}>
+              {visibleAddOns.map((addOn, index) => (
+              <tr key={addOn.addOnId || index}>
+                <td>{index + 1}</td>
+                <td>{addOn.addOnId}</td>
+                <td>{addOn.addOn}</td>
+                <td>{addOn.value}</td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={(event) => handleClickVariances(event, addOn.addOnItems || [])}
+                    disabled={!addOn.addOnItems || addOn.addOnItems.length === 0}
+                    className="kot-master-variance-pill"
+                  >
+                    {addOn.addOnItems?.length || 0} SELECTED
+                  </button>
+                </td>
+                <td className="kot-master-actions-cell">
+                  {showDeactivated ? (
+                    <button
+                      type="button"
+                      onClick={() => handleActivate(addOn)}
+                      className="activate-btn kot-master-row-action"
+                      title="Activate"
+                      aria-label={`Activate ${addOn.addOn}`}
+                    >
+                      <RefreshRoundedIcon />
+                    </button>
+                  ) : (
+                    <>
 
                       <button
-                        onClick={(e) => handleClickVariances(e, addOn.addOnItems || [])}
-                        disabled={!addOn.addOnItems || addOn.addOnItems.length === 0}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: addOn.addOnItems?.length ? "#030303ff" : "#056eb4ff",   // Blue when clickable, gray when disabled
-                          fontWeight: "500",
-                          cursor: addOn.addOnItems?.length ? "pointer" : "default",
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (addOn.addOnItems?.length) {
-                            e.currentTarget.style.textDecoration = "underline";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (addOn.addOnItems?.length) {
-                            e.currentTarget.style.textDecoration = "none";
-                          }
-                        }}
+type="button"
+                        onClick={() => handleEdit(addOn)}
+                        className="edit-btn kot-master-row-action"
+                        title="Edit"
+                        aria-label={`Edit ${addOn.addOn}`}
                       >
-                        {addOn.addOnItems?.length || 0} SELECTED
+                       <EditOutlinedIcon />
                       </button>
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      {showDeactivated ? (
-                        <button
-                          color="primary"
-                          onClick={() => handleActivate(addOn)}
-                          className='activate-btn'
-                          title='Activate'
-                        >
-                          <RefreshIcon />
-                        </button>
-                      ) : (
-                        <>
-                          <button color="primary" onClick={() => handleEdit(addOn)} className='edit-btn' title='Edit'>
-                            <EditIcon />
-                          </button>
+                    <button
+                        type="button"
+                        onClick={() => handleDeactivate(addOn)}
+                        className="deactivate-btn kot-master-row-action"
+                        title="Deactivate"
+                        aria-label={`Deactivate ${addOn.addOn}`}
+                      >
+                        <DeleteOutlineRoundedIcon />
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
 
-                          <button
-                            color="primary"
-                            onClick={() => handleDeactivate(addOn)}
-                            className='deactivate-btn'
-                            title='Deactivate'
-                          >
-                            <DeleteIcon />
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {(showDeactivated ? deactivatedItems : addOns).length === 0 && (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center' }}>
-                      <h2>
-                        {showDeactivated ? 'No deactivated addOns found' : 'No active addOns found'}
-                      </h2>
-                    </td>
-                  </tr>
-                )}
-              </>
+            {visibleAddOns.length === 0 && (
+              <tr>
+                <td colSpan={6} className="kot-master-empty-cell">
+                  {showDeactivated
+                    ? 'No deactivated addOns found'
+                    : 'No active addOns found'}
+                </td>
+              </tr>
+            )}
          
           </tbody>
         </table>
@@ -240,11 +200,9 @@ const AddOnTableContainer: React.FC<AddOnTableContainerProps> = ({
         //   vertical: "top",
         //   horizontal: "center",
         // }}
-        PaperProps={{
-          className: "custom-popover",
-        }}
+        PaperProps={{ className: 'custom-popover kot-master-popover' }}
       >
-        <div className="custom-popover">
+        <div className="custom-popover kot-master-popover-content">
           {selectedVariances.map((variance, index) => (
             <h4 key={index}>{variance}</h4>
           ))}

@@ -28,7 +28,7 @@ import {
   Grid,
   DialogActions,
   Dialog,
-  DialogTitle,
+  DialogTitle,InputAdornment,
 } from '@mui/material';
 import { Add as AddIcon, Edit as EditIcon, Search as SearchIcon, } from '@mui/icons-material';
 import { AppDispatch, RootState } from '../../../../redux/store';
@@ -684,10 +684,10 @@ const TableMaster: React.FC = () => {
     areas?.map((area: any, index: number) => (
       <MuiPaper
         key={index}
-        elevation={5}
-        sx={{ mb: 2, p: 0.9, backgroundColor: '#f9f9f9', borderRadius: '12px' }}
+        elevation={0}
+        className="kot-table-area-card"
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        <Box className="kot-table-area-header">
           <Typography className='icon-action-label'
             sx={{
               fontFamily: "'Poppins', sans-serif",
@@ -703,8 +703,8 @@ const TableMaster: React.FC = () => {
           </Typography>
           {!showDeactivated && (
             <button
-              className='btn-primary'
-              color="primary"
+              type="button"
+              className="kot-master-card-action"
               onClick={() => handleOpenLayoutView(area, branchId, branchLocation)}
             >
               View Layout
@@ -737,25 +737,10 @@ const TableMaster: React.FC = () => {
       )}
 
       {!layoutViewOpen && (
-        <Box
-          sx={{
-            display: 'flex',
-            backgroundColor: 'white',
-            marginLeft: '40px',
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 0,
-              mb: 0,
-              flexWrap: 'wrap',
-            }}
-          >
+        <Box className="kot-master-page kot-table-master-page">
+          <Box className="kot-table-master-content">
             <Box sx={{ minWidth: 0 }}>
-              <Typography className="icon-action-label"
+              <Typography className="kot-master-toolbar-title"
                 sx={{
                   fontFamily: "'Poppins', sans-serif",
                   fontWeight: 600,
@@ -770,9 +755,10 @@ const TableMaster: React.FC = () => {
               </Typography>
             </Box>
 
-            <Box sx={{ width: 230, marginRight: 25 }} >
+           <Box className="kot-master-search-slot">
               <FormControl fullWidth>
                 <Autocomplete
+                className="kot-master-location-autocomplete"
                   freeSolo
                   options={allBranch.map((b) => b.aliasName)}
                   value={locationFilter}
@@ -785,20 +771,17 @@ const TableMaster: React.FC = () => {
                       placeholder="Search Tables Location"
                       variant="outlined"
                       size="small"
-                      sx={{
-                        width: '300px',
-                        '& .MuiInputBase-root': {
-                          '&:hover fieldset': { borderColor: '#000000', borderWidth: 2 },
-                          '&.Mui-focused fieldset': { borderColor: '#000000ff', borderWidth: 2 },
-
-                          '& .MuiInputBase-input::placeholder': {
-                            color: '#352f2fff !important',   // very dark gray / almost black
-                            opacity: 1,
-                            height: '30px',
-                            fontSize: '0.875rem'
-                          }
-
-                        }
+                      className="purchase-reference-search kot-master-location-search"
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <>
+                            <InputAdornment position="start">
+                              <SearchIcon className="purchase-reference-search-icon" />
+                            </InputAdornment>
+                            {params.InputProps.startAdornment}
+                           </>
+                        ),
                       }}
                     />
                   )}
@@ -821,78 +804,48 @@ const TableMaster: React.FC = () => {
               </FormControl>
             </Box>
 
-            <div className="flex items-center gap-4">
+            <Box className="kot-master-toolbar-actions">
               {!showDeactivated && (
-                <>
-                  <div className="icon-action-wrapper">
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleOpen('add')}
-                      className="icon-action-button"
-                      title="Add"
-                    >
-                      <AddIcon className="icon-action-svg" />
-                    </IconButton>
-                    <Typography className="icon-action-label">Add</Typography>
-                  </div>
-                </>
+               <Button
+                  type="button"
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => handleOpen('add')}
+                  className="purchase-reference-action-button kot-master-action-button"
+                >
+                  Add
+                </Button>
               )}
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showDeactivated}
-                    onChange={() => dispatch(setShowDeactivated(!showDeactivated))}
-                    color="primary"
-                    size="small"
-                  />
-                }
-                label={label}
-                sx={{
-                  marginLeft: 1,
-                  marginRight: 1,
-                  "& .MuiFormControlLabel-label": {
-                    fontSize: "0.75rem",
-                    fontFamily: "'Poppins', sans-serif",
-                  },
-                }}
-              />
-            </div>
+<Box className="purchase-reference-active-toggle kot-master-status-toggle">
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showDeactivated}
+                      onChange={() => dispatch(setShowDeactivated(!showDeactivated))}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={label}
+                  className="kot-master-toggle-label"
+                />
+              </Box>
+            </Box>
 
 
-            <TableContainer component={Paper}
-              sx={{
-                maxHeight: 'calc(93vh - 170px)',
-                overflowY: 'auto',
-                width: '100%',
-              }}
+            <TableContainer
+              component={Paper}
+              className="kot-table-branch-container"
             >
 
               {filteredTables.map((branch) => (
                 <MuiPaper
                   key={branch._id}
-                  elevation={4}
-                  sx={{
-                    // mb: 5,
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    backgroundColor: '#f2f8f8ff',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  }}
+                elevation={0}
+                  className="kot-table-branch-card"
                 >
-                  <Box
-                    sx={{
-                      position: 'sticky',
-                      top: 0,
-                      backgroundColor: '#cfcfd8ff',
-                      zIndex: 0,
-                      borderBottom: '1px solid #e2e8f0',
-                      p: 1,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Typography className="icon-action-label"
+                <Box className="kot-table-branch-header">
+                    <Typography className="kot-table-branch-title"
                       sx={{
                         fontFamily: "'Poppins', sans-serif",
                         fontWeight: 600,
@@ -907,35 +860,48 @@ const TableMaster: React.FC = () => {
                       Branch Name : {branch.location}
                     </Typography>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                   <Box className="kot-table-branch-actions">
                       {!showDeactivated && (
                         <>
-                          <button color="primary" onClick={() => handleEdit(branch)} className='edit-btn'>
+                        <button
+                            type="button"
+                            onClick={() => handleEdit(branch)}
+                            className="edit-btn kot-master-row-action"
+                            title="Edit"
+                          >
                             <EditIcon />
                           </button>
-                          <button color="primary" onClick={() => handleDeactivate(branch)} className='btn-primary'>
+                        <button
+                            type="button"
+                            onClick={() => handleDeactivate(branch)}
+                            className="kot-master-card-action"
+                          >
                             Deactivate
                           </button>
                         </>
                       )}
                       {showDeactivated && (
-                        <button color="primary" onClick={() => handleActivate(branch)} className='btn-primary'>
+                       <button
+                          type="button"
+                          onClick={() => handleActivate(branch)}
+                          className="kot-master-card-action"
+                        >
                           Activate
                         </button>
                       )}
                     </Box>
                   </Box>
 
-                  <Box sx={{ maxHeight: '70vh', overflowY: 'auto', p: 1 }}>
+                  <Box className="kot-table-branch-body">
                     {renderAreas(branch?.totalTable, branch.location, branch._id)}
                   </Box>
                 </MuiPaper>
               ))}
 
               {filteredTables.length === 0 && (
-                <h2 className="empty-state" >
+             <div className="kot-master-empty-state">
                   {showDeactivated ? 'No deactivated branches found' : 'No active branches found'}
-                </h2>
+                </div>
               )}
             </TableContainer>
 
@@ -1043,6 +1009,7 @@ const TableMaster: React.FC = () => {
 
           {selectedTable && !showDeactivated && (
             <Dialog
+            className="kot-master-dialog"
               open={!!selectedTable}
               onClose={() => setSelectedTable(null)}
               PaperProps={{

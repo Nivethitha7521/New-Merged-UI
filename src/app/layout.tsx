@@ -11,6 +11,9 @@ import '@/styles/purchase/purchaseTable.css';
 import '@/styles/purchase/vendor.css';
 import '@/styles/purchase/purchaseOrder.css';
 import '@/styles/desktopDensity.css';
+
+/* MUST BE LAST - global dialog override */
+import '@/styles/yenDialog.css';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">

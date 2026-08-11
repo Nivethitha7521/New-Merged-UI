@@ -58,7 +58,6 @@ import POSDeviceSnackbar from "../POSDevicePage/Modules/POSDeviceSnackbar";
 import CloseConfirmationDialog from "../../Components/Dialogs/CloseConfirmationDialog";
 import EditConfirmationDialog from "../../Components/Dialogs/EditConfirmationDialog";
 import ActivateDeactivateConfirmationDialog from "../../Components/Dialogs/ActivateDeactivateConfirmationDialog";
-import YenPosPage from "../page";
 import { Device } from "../POSDevicePage/Models/PosDeviceModel";
 import { AxiosError } from "axios";
 
@@ -553,70 +552,41 @@ const handleServerConflictConfirm = useCallback(async () => {
 
   return (
     <>
-      <YenPosPage />
+      <Box className="item-master-toolbar-shell">
+        <Box className="purchase-reference-toolbar item-master-toolbar yen-pos-device-toolbar">
+          <Box sx={{ flex: '0 0 auto', minWidth: 0 }}>
+            <Typography className="yen-pos-toolbar-title">
+              {showDeactivated ? 'Deactivated POS Devices' : 'Active POS Devices'}
+            </Typography>
+          </Box>
 
-      {/* Search & Header */}
-      <Box sx={{ p: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: { xs: 2, md: 3 },
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            minHeight: 10,
-          }}
-        >
-          {/* Search Fields */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 0,
-              flexWrap: "nowrap",
-              width: { xs: "100%", md: "auto" },
-              justifyContent: "center",
-              maxWidth: { xs: "100%", md: 500 },
-            }}
-          >
+          <Box className="yen-pos-device-searches">
             <TextField
               size="small"
               autoComplete="off"
               placeholder="Search Device Name"
               value={searchDeviceName}
               onChange={handleSearchDeviceNameChange}
+                            className="custom-textfield purchase-reference-search item-master-search yen-pos-device-search"
+
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
+                   <SearchIcon className="purchase-reference-search-icon" />
                   </InputAdornment>
                 ),
-                endAdornment: searchDeviceName && (
+                endAdornment: searchDeviceName ? (
                   <InputAdornment position="end">
                     <IconButton
                       size="small"
-                      onClick={() => setSearchDeviceName("")}
+                     onClick={() => setSearchDeviceName('')}
+                      title="Clear device search"
                     >
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
-                ),
-              }}
-              sx={{
-                width: "300px",
-                "& .MuiInputBase-root": {
-                  "&:hover fieldset": {
-                    borderColor: "#000000",
-                    borderWidth: 2,
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#000000ff",
-                    borderWidth: 2,
-                  },
-                  height: "32px",
-                  fontSize: "0.75rem",
-                  width: 220,
-                },
+              
+               ) : undefined,
               }}
             />
 
@@ -626,58 +596,31 @@ const handleServerConflictConfirm = useCallback(async () => {
               placeholder="Search Branch Name"
               value={searchBranchName}
               onChange={handleSearchBranchNameChange}
+               className="custom-textfield purchase-reference-search item-master-search yen-pos-device-search"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
+                  <SearchIcon className="purchase-reference-search-icon" />
                   </InputAdornment>
                 ),
-                endAdornment: searchBranchName && (
+                 endAdornment: searchBranchName ? (
                   <InputAdornment position="end">
                     <IconButton
                       size="small"
-                      onClick={() => setSearchBranchName("")}
+                     onClick={() => setSearchBranchName('')}
+                      title="Clear branch search"
                     >
                       <ClearIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
-                ),
-              }}
-              sx={{
-                width: "300px",
-                "& .MuiInputBase-root": {
-                  "&:hover fieldset": {
-                    borderColor: "#000000",
-                    borderWidth: 2,
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#000000ff",
-                    borderWidth: 2,
-                  },
-                  height: "32px",
-                  fontSize: "0.75rem",
-                  width: 220,
-                },
-              }}
+              
+              ) : undefined,
             />
           </Box>
 
-          {/* Right-side Controls */}
-          <Box
-            sx={{
-              position: { md: "absolute" },
-              right: { md: 16 },
-              top: "50%",
-              transform: { md: "translateY(-50%)" },
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              width: { xs: "100%", md: "auto" },
-              justifyContent: { xs: "center", md: "flex-end" },
-            }}
-          >
+        <Box className="purchase-reference-actions item-master-actions">
             {!showDeactivated && (
-              <div className="icon-action-wrapper">
+              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
                 <IconButton
                   color="primary"
                   onClick={handleOpenAdd}
@@ -690,23 +633,17 @@ const handleServerConflictConfirm = useCallback(async () => {
               </div>
             )}
             <FormControlLabel
+             className="purchase-reference-active-toggle item-master-active-toggle"
               control={
                 <Switch
                   checked={showDeactivated}
-                  onChange={() => setLocalShowDeactivated((v) => !v)}
+                  onChange={() => setLocalShowDeactivated((value) => !value)}
                   color="primary"
                   size="small"
                 />
               }
               label={label}
-              sx={{
-                marginLeft: 1,
-                marginRight: 1,
-                "& .MuiFormControlLabel-label": {
-                  fontSize: "0.75rem",
-                  fontFamily: "'Poppins', sans-serif",
-                },
-              }}
+            
             />
           </Box>
         </Box>

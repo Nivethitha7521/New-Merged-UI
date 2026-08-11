@@ -2,8 +2,8 @@
 
 import { StoreDispatchReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { storeDispatchConfig } from '../../configs/storeDispatch.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { storeDispatchConfig } from '@/features/purchase-order/reports/storeDispatch.config';
 
 // Select 'storeDispatch' (the key defined in your config)
 const selector = (s: RootState) => s.storeDispatch;

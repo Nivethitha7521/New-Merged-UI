@@ -180,22 +180,18 @@ const DeliveryOrdersPage: React.FC = () => {
       {/* <MenuPage /> */}
 
 
-      <Typography className='icon-action-label'
-        sx={{
-         fontWeight: "bold",
-          margin: "0",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          maxWidth: "100%",
-          marginLeft: 5,
-          marginTop: 2
-        }}
-      >
-        {"Delivery Order Configuration"}
-      </Typography>
+ <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          className="purchase-reference-toolbar item-master-toolbar"
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}
+        >
+          <Typography className="sale-order-toolbar-title">
+            Delivery Order Configuration
+          </Typography>
+        </Box>
+      </Box>
 
-      <Grid container spacing={2} mt={1}>
+     <Grid container spacing={2} mt={0}>
         {reversedItems.map((order) => (
           <Grid item xs={12} key={order.deliveryOrderId}>
             <DeliveryOrderCard

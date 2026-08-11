@@ -1,7 +1,7 @@
 
 
 'use client';
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../../redux/store";
 import { PaymentType } from "../../PaymentType/Models/paymenttypeModels";
@@ -10,13 +10,14 @@ import {
   IconButton,
   Switch,
   Typography,
-  FormControlLabel,
+  FormControlLabel,TextField,
   // Alert,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
+import SearchIcon from '@mui/icons-material/Search';
 
 
 interface PaymentTableContainerProps {
@@ -37,77 +38,78 @@ const PaymentTable: React.FC<PaymentTableContainerProps> = ({
   setViewDeactivated,
 }) => {
   const { items, deactivatedItems, loading, } = useSelector((state: RootState) => state.maPaymentType);
+  const [searchValue, setSearchValue] = useState('');
 
   const label = viewDeactivated ? 'Show Activated' : 'Show Deactivated';
+  const displayedPayments = viewDeactivated ? deactivatedItems : items;
 
+  const filteredPayments = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+    if (!query) return displayedPayments;
+
+    return displayedPayments.filter((payment) =>
+      payment.paymentType?.toLowerCase().includes(query) ||
+      payment.description?.toLowerCase().includes(query)
+    );
+  }, [displayedPayments, searchValue]);
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 1 }}
-      >
-
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+ <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          className="purchase-reference-toolbar item-master-toolbar"
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}
         >
-          {viewDeactivated ? "Deactivated Payments" : "Active Payments"}
-        </Typography>
+ <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography className="sale-order-toolbar-title">
+              {viewDeactivated ? "Deactivated Payments" : "Active Payments"}
+            </Typography>
+          </Box>
 
-        <div className="flex items-center gap-4">
-          {!viewDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
+          <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              size="small"
+              variant="outlined"
+              autoComplete="off"
+              placeholder="Search Payment Type..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="custom-textfield purchase-reference-search item-master-search"
+              sx={{ width: '300px' }}
+              InputProps={{ startAdornment: <SearchIcon className="purchase-reference-search-icon" /> }}
+            />
+          </Box>
+
+          <Box
+            className="purchase-reference-actions item-master-actions"
+            sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}
+          >
+            {!viewDeactivated && (
+              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
                   <AddIcon className="icon-action-svg" />
                 </IconButton>
                 <Typography className="icon-action-label">Add</Typography>
               </div>
-            </>
           )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={viewDeactivated}
-                onChange={() => setViewDeactivated(!viewDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+
+            <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={viewDeactivated}
+                  onChange={() => setViewDeactivated(!viewDeactivated)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={label}
+            />
+          </Box>
+        </Box>
       </Box>
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(90vh - 170px)' }}>
-        <table className="custom-tables">
+ <div className="item-master-table-container">
+        <table className="item-master-table item-master-lookup-table sale-order-lookup-table--4">
           <thead>
             <tr>
               <th style={{ textAlign: "center" }}>S.NO</th>
@@ -126,54 +128,56 @@ const PaymentTable: React.FC<PaymentTableContainerProps> = ({
               </tr>
             ) : ( */}
               <>
-                {(viewDeactivated ? deactivatedItems : items).map((payment, index) => (
-                  <tr key={payment.paymentTypeId}>
+               {filteredPayments.map((payment, index) => (
+                  <tr key={payment.paymentTypeId} className="item-master-data-row">
                     <td style={{ textAlign: "center" }}>{index + 1}</td>
                     <td style={{ textAlign: "center" }}>{payment.paymentType || "-"}</td>
                     <td style={{ textAlign: "center" }}>{payment.description || "-"}</td>
-                    <td style={{ textAlign: "center" }}>
-                      {viewDeactivated ? (
-                        <button
-                          color="primary"
-                          onClick={() => handleActivate(payment)}
-                          className="activate-btn"
-                          title="Activate"
-                        >
-                          <RefreshIcon />
-                        </button>
-                      ) : (
-                        <>
-                          {!payment.editStatus === false && (
-                            <button
-                              color="primary"
-                              onClick={() => handleEdit(payment)}
-                              className="edit-btn"
-                              title="Edit"
-                            >
-                              <EditIcon />
-                            </button>
-                          )}
-
-                          {!payment.editStatus === false && (
-                          <button
-                            color="primary"
-                            onClick={() => handleDeactivate(payment)}
-                            className="deactivate-btns"
-                            title="Deactivate"
+  <td className="item-master-actions-cell">
+                      <div>
+                        {viewDeactivated ? (
+                          <IconButton
+                            onClick={() => handleActivate(payment)}
+                            className="purchase-master-action-button is-activate"
+                            title="Activate"
+                            size="small"
                           >
-                            <DeleteIcon />
-                          </button>
-                          )}
-                        </>
-                      )}
+                          <RestoreRoundedIcon />
+                          </IconButton>
+                        ) : (
+                          <>
+                            {!payment.editStatus === false && (
+                              <IconButton
+                                onClick={() => handleEdit(payment)}
+                                className="purchase-master-action-button is-edit"
+                                title="Edit"
+                                size="small"
+                              >
+                                <EditOutlinedIcon />
+                              </IconButton>
+                            )}
+
+                            {!payment.editStatus === false && (
+                              <IconButton
+                                onClick={() => handleDeactivate(payment)}
+                                className="purchase-master-action-button is-delete"
+                                title="Deactivate"
+                                size="small"
+                              >
+                                <DeleteOutlineRoundedIcon />
+                              </IconButton>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
 
-                {(viewDeactivated ? deactivatedItems.length === 0 : items.length === 0) && (
+                 {filteredPayments.length === 0 && (
                   <tr>
-                    <td colSpan={4} style={{ textAlign: "center" }}>
-                      <h2 >No data found</h2>
+                   <td colSpan={4} className="empty-state">
+                      <h2>No data found</h2>
                     </td>
                   </tr>
                 )}

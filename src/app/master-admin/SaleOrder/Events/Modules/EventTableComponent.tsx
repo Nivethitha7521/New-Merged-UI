@@ -1,5 +1,5 @@
 'use client';
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Event } from "../Models/eventModels";
 import {
   Box,
@@ -12,13 +12,14 @@ import {
   Paper,
   IconButton,
   Switch,
-  Typography,
+  Typography,TextField,
   FormControlLabel,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
+import SearchIcon from '@mui/icons-material/Search';
 
 export interface EventTableProps {
   items: Event[];
@@ -44,80 +45,85 @@ const EventTableComponent: React.FC<EventTableProps> = ({
 
 }) => {
 
-
+const [searchValue, setSearchValue] = useState('');
   const label = viewDeactivated ? 'Show Activated' : 'Show Deactivated';
+ const filteredEvents = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
 
+    return items.filter((event) => {
+      const matchesStatus = viewDeactivated
+        ? event.status === "deactivated"
+        : event.status === "active";
+
+      if (!matchesStatus) return false;
+      if (!query) return true;
+
+      return (
+        event.eventname?.toLowerCase().includes(query) ||
+        event.remarks?.toLowerCase().includes(query)
+      );
+    });
+  }, [items, searchValue, viewDeactivated]);
 
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 1 }}
-      >
-
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+ <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          className="purchase-reference-toolbar item-master-toolbar"
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}
         >
-          {viewDeactivated ? "Deactivated Events" : "Active Events"}
-        </Typography>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography className="sale-order-toolbar-title">
+              {viewDeactivated ? "Deactivated Events" : "Active Events"}
+            </Typography>
+          </Box>
 
-        <div className="flex items-center gap-4">
-          {!viewDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
+          <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              size="small"
+              variant="outlined"
+              autoComplete="off"
+              placeholder="Search Events..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="custom-textfield purchase-reference-search item-master-search"
+              sx={{ width: '300px' }}
+              InputProps={{ startAdornment: <SearchIcon className="purchase-reference-search-icon" /> }}
+            />
+          </Box>
+
+          <Box
+            className="purchase-reference-actions item-master-actions"
+            sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}
+          >
+            {!viewDeactivated && (
+              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
                   <AddIcon className="icon-action-svg" />
                 </IconButton>
                 <Typography className="icon-action-label">Add</Typography>
               </div>
-            </>
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={viewDeactivated}
-                onChange={() => setViewDeactivated(!viewDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+            )}
+             <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={viewDeactivated}
+                  onChange={() => setViewDeactivated(!viewDeactivated)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={label}
+            />
+          </Box>
+        </Box>
       </Box>
-     <Box>
+      <Box>
 
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(90vh - 170px)' }}>
-        <table className="custom-table">
+    <div className="item-master-table-container">
+        <table className="item-master-table item-master-lookup-table sale-order-lookup-table--4">
           <thead>
                 <tr>
                   <th style={{ textAlign: "center" }}>S.NO</th>
@@ -128,50 +134,50 @@ const EventTableComponent: React.FC<EventTableProps> = ({
               </thead>
               <tbody>
                   <>
-                    {items
-                      .filter((event) => (viewDeactivated ? event.status === "deactivated" : event.status === "active"))
-                      .map((event, index) => (
-                        <tr key={event.eventId} >
+                   {filteredEvents.map((event, index) => (
+                        <tr key={event.eventId} className="item-master-data-row">
                           <td style={{ textAlign: "center" }}>{index + 1}</td>
                           <td style={{ textAlign: "center" }}>{event.eventname || "-"}</td>
                           <td style={{ textAlign: "center" }}>{event.remarks || "-"}</td>
-                          <td style={{ textAlign: "center" }}>
-                            {viewDeactivated ? (
-                              <button
-                                color="primary"
-                                onClick={() => handleActivate(event)}
-                                className="activate-btn"
-                                title="Activate"
-                              >
-                                <RefreshIcon />
-                              </button>
-                            ) : (
-                              <>
-                                <button
-                                  color="primary"
-                                  onClick={() => handleEdit(event)}
-                                  className="edit-btn"
-                                  title="Edit"
+ <td className="item-master-actions-cell">
+                            <div>
+                              {viewDeactivated ? (
+                                <IconButton
+                                  onClick={() => handleActivate(event)}
+                                  className="purchase-master-action-button is-activate"
+                                  title="Activate"
+                                  size="small"
                                 >
-                                  <EditIcon />
-                                </button>
+                                  <RestoreRoundedIcon />
+                                </IconButton>
+                              ) : (
+                                <>
+                                  <IconButton
+                                    onClick={() => handleEdit(event)}
+                                    className="purchase-master-action-button is-edit"
+                                    title="Edit"
+                                    size="small"
+                                  >
+                                    <EditOutlinedIcon />
+                                  </IconButton>
 
-                                <button
-                                  color="primary"
-                                  onClick={() => handleDeactivate(event)}
-                                  className="deactivate-btn"
-                                  title="Deactivate"
-                                >
-                                  <DeleteIcon />
-                                </button>
-                              </>
-                            )}
+                                  <IconButton
+                                    onClick={() => handleDeactivate(event)}
+                                    className="purchase-master-action-button is-delete"
+                                    title="Deactivate"
+                                    size="small"
+                                  >
+                                    <DeleteOutlineRoundedIcon />
+                                  </IconButton>
+                                </>
+                             )}
+                            </div>
                           </td>
                         </tr>
                       ))}
-                    {items.filter((event) => (viewDeactivated ? event.status === "deactivated" : event.status === "active")).length === 0 && (
+                   {filteredEvents.length === 0 && (
                       <tr>
-                        <td colSpan={4} style={{ textAlign: "center" }}>
+                        <td colSpan={4} className="empty-state">
                           <h2>No data found</h2>
                         </td>
                       </tr>

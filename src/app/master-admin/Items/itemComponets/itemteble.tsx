@@ -547,8 +547,8 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
   return (
     <>
       {/* ── Table ─────────────────────────────────────────────────────────── */}
-      <div className="table-container" style={{ maxHeight: 'calc(86.5vh - 170px)' }}>
-        <table className="custom-table">
+    <div className="table-container item-master-table-container" style={{ maxHeight: 'calc(86.5vh - 170px)' }}>
+        <table className="custom-table item-master-table">
           <thead>
             <tr>
               <th>S.No</th>
@@ -589,9 +589,10 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                       <React.Fragment key={rowKey}>
                         {/* ── Main Item Row ──────────────────────────────── */}
                         <tr
+                        className={`clickable-row item-master-data-row ${itemIsDeactivated ? 'is-deactivated' : ''}`}
                           style={itemIsDeactivated ? { backgroundColor: '#fee' } : {}}
                           onClick={() => toggleRow(rowKey)}
-                          className="clickable-row"
+                         
                         >
                           <td style={{ textAlign: 'center' }}>{serialNo}</td>
                           {shownHeaders.map((header) => (
@@ -603,6 +604,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                             </td>
                           ))}
                           <td
+                          className="item-master-actions-cell"
                             style={{ textAlign: 'center' }}
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -652,7 +654,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                         </tr>
 
                         {/* ── Expanded Variance Sub-Table ────────────────── */}
-                        <tr>
+                       <tr className="item-master-variance-collapse-row">
                           <td colSpan={shownHeaders.length + 2} style={{ padding: 0 }}>
                             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                               <Box
@@ -665,7 +667,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                                   width: 'fit-content',
                                 }}
                               >
-                                <table style={{ border: '1px solid #e5e7eb', width: '100%' }}>
+                             <table className="item-master-variance-table" style={{ border: '1px solid #e5e7eb', width: '100%' }}>
                                   <thead>
                                     <tr>
                                       <th>S.no</th>

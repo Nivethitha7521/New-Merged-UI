@@ -157,7 +157,7 @@ const EventDialog: React.FC<EventDialogProps> = ({
           />
         </div>
       </DialogContent>
-      <DialogActions>
+    <DialogActions className="dialog-actions">
         <button onClick={onClose} className="btn-secondary">
           Cancel
         </button>

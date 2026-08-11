@@ -17,8 +17,9 @@ import {
   Switch,
   Popover,
   Checkbox,
-  Tooltip,
+  Tooltip,TextField,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { AppDispatch, RootState } from "../../../../redux/store";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -51,7 +52,7 @@ const DeliveryTypePage: React.FC = () => {
   const [errors, setErrors] = useState({ deliveryType: "", remarks: "" });
   const [showDeactivatedTable, setShowDeactivatedTable] = useState(false);
   const [formModified, setFormModified] = useState(false);
-
+const [searchValue, setSearchValue] = useState('');
   // State for FilterListIcon and Popover
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [visibleColumns, setVisibleColumns] = useState({
@@ -258,9 +259,19 @@ const DeliveryTypePage: React.FC = () => {
   };
 
   const filteredTypes = Array.isArray(types)
-    ? types.filter((type) =>
-      type?.status === (showDeactivatedTable ? "deactivate" : "active")
-    )
+    ? types.filter((type) => {
+      const matchesStatus =
+        type?.status === (showDeactivatedTable ? "deactivate" : "active");
+      const query = searchValue.trim().toLowerCase();
+
+      if (!matchesStatus) return false;
+      if (!query) return true;
+
+      return (
+        type.deliveryType?.toLowerCase().includes(query) ||
+        type.remarks?.toLowerCase().includes(query)
+      );
+    })
     : [];
 
 
@@ -270,100 +281,57 @@ const DeliveryTypePage: React.FC = () => {
     <div>
       {/* <MenuPage /> */}
 
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 2 }}
-      >
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
+ <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box
+          className="purchase-reference-toolbar item-master-toolbar"
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 2 }}
         >
-          {showDeactivatedTable ? "Deactivated Delivery Types" : "Active Delivery Types"}
-        </Typography>
+ <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography className="sale-order-toolbar-title">
+              {showDeactivatedTable ? "Deactivated Delivery Types" : "Active Delivery Types"}
+            </Typography>
+          </Box>
 
-        {/* <Box sx={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          {!showDeactivatedTable && (
+          <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+            <TextField
+              size="small"
+              variant="outlined"
+              autoComplete="off"
+              placeholder="Search Delivery Type..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="custom-textfield purchase-reference-search item-master-search"
+              sx={{ width: '300px' }}
+              InputProps={{ startAdornment: <SearchIcon className="purchase-reference-search-icon" /> }}
+            />
+          </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 2 }}>
-              <IconButton
-                color="primary"
-                onClick={handleAddNew}
-                className="icon-button-outline"
-                size="small"
-                sx={{ p: 0.3 }}
-              >
-                <AddIcon fontSize="small" />
-              </IconButton>
-              <Typography variant="caption" align="center" sx={{ maxWidth: 50, mt: 0.8 }}>
-                Add
-              </Typography>
-            </Box>
-
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivatedTable}
-                onChange={() => setShowDeactivatedTable(!showDeactivatedTable)}
-                color="primary"
-              />
-            }
-            label={label}
-            labelPlacement="end"
-          />
-        </Box> */}
-
-
-        <div className="flex items-center gap-4">
-          {!showDeactivatedTable && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleAddNew}
-                  className="icon-action-button"
-                  title="Add"
-                >
+          <Box
+            className="purchase-reference-actions item-master-actions"
+            sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}
+          >
+            {!showDeactivatedTable && (
+              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                <IconButton color="primary" onClick={handleAddNew} className="icon-action-button" title="Add">
                   <AddIcon className="icon-action-svg" />
                 </IconButton>
                 <Typography className="icon-action-label">Add</Typography>
               </div>
-            </>
-          )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivatedTable}
-                onChange={() => setShowDeactivatedTable(!showDeactivatedTable)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+            )}
+            <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={showDeactivatedTable}
+                  onChange={() => setShowDeactivatedTable(!showDeactivatedTable)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={label}
+            />
+          </Box>
+        </Box>
       </Box>
 
       {/* <Popover

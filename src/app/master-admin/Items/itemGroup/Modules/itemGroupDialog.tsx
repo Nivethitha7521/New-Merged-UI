@@ -115,7 +115,7 @@ const ItemGroupDialog: React.FC<ItemGroupDialogProbs> = ({
         }
       }}
     >
-      <DialogTitle className="dialog-title">{mode === 'edit' ? 'Edit' : 'Add'} ItemGroupName </DialogTitle>
+      <DialogTitle className="dialog-title">{mode === 'edit' ? 'Edit' : 'Add'} Item Group</DialogTitle>
       <DialogContent className="dialog-content">
 
         <div className="form-section">
@@ -123,7 +123,7 @@ const ItemGroupDialog: React.FC<ItemGroupDialogProbs> = ({
             <TextField
               autoComplete='off'
               margin="dense"
-              label="itemGroup Name"
+             label="Item Group Name"
               name="itemGroupName"
               value={itemGroupData.itemGroupName}
               onChange={handleTextChange}

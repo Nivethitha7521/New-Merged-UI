@@ -8,6 +8,7 @@ import { forceLogout } from "../features/authSlice";
 import { initializeAuth, validateToken, clearSnackbar } from '../features/authSlice';
 import PurchaseModuleSideMenu from '@/components/PurchaseModuleSideMenu';
 import MasterAdminModuleSideMenu from '@/components/MasterAdminModuleSideMenu';
+// import KOTMasterSubMenu from '@/components/KOTMasterSubMenu';
 import BookModuleSideMenu from '@/components/BookModuleSideMenu';
 import { Toaster } from "react-hot-toast";
 import { fetchBusinesses } from '@/features/account-setting/businessSlice';
@@ -15,6 +16,10 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import SideMenu from '@/components/SideMenu';
 import Navbar from '@/components/Navbar';
+import RecipeModuleSideMenu from '@/components/RecipeModuleSideMenu';
+import ModuleNavigationTabs from '@/components/ModuleNavigationTabs';
+import type { ModuleNavigationKey } from '@/components/ModuleNavigationTabs';
+import { useDisplaySettings } from '@/contexts/DisplaySettingsContext';
 const PROTECTED_ROUTES = [
   '/yen-purchase',
   '/yen-pos',
@@ -23,6 +28,7 @@ const PROTECTED_ROUTES = [
   '/yen-book',
   '/yen-store',
   '/yen-inventory',
+  "/yen-recipie",
   '/master-admin',
   '/account-settings',
   '/QlikReport',
@@ -38,7 +44,7 @@ const LoadingSpinner = () => (
 const ClientLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
-
+const { settings: displaySettings } = useDisplaySettings();
   const normalizedPath = useMemo(() => {
     if (!pathname) return "";
     const parts = pathname.split("/").filter(Boolean);
@@ -62,6 +68,7 @@ const [
   isMasterAdminSubMenuOpen,
   setIsMasterAdminSubMenuOpen,
 ] = useState(false);
+const [isRecipeSubMenuOpen, setIsRecipeSubMenuOpen] = useState(false);
 const [pendingBookPath, setPendingBookPath] =
   useState<string | null>(null);
 
@@ -78,7 +85,7 @@ useEffect(() => {
     setPendingBookPath(null);
   }
 }, [pathname, pendingBookPath]);
-
+const isReportsRoute = pathname === '/QlikReport' || pathname?.startsWith('/QlikReport/');
 const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
 
   const isProtectedRoute = useMemo(() =>
@@ -309,14 +316,57 @@ const isPurchaseRoute =
 const isMasterAdminRoute =
   pathname === '/master-admin' ||
   pathname?.startsWith('/master-admin/');
+const isRecipeRoute =
+  pathname === "/yen-recipie" ||
+  pathname?.startsWith("/yen-recipie/");
+  const isPosRoute =
+  pathname === '/yen-pos' ||
+  pathname?.startsWith('/yen-pos/');
+// const isKotMasterRoute =
+//   pathname === '/master-admin/KOTMaster' ||
+//   pathname?.startsWith('/master-admin/KOTMaster/');
+const useMasterAdminDesign =
+  isMasterAdminRoute || isRecipeRoute || isPosRoute;
 const isBookRoute =
   pathname === '/yen-book' ||
   pathname?.startsWith('/yen-book/');
+  const tabNavigationModule: ModuleNavigationKey | null = isPurchaseRoute
+  ? 'purchase'
+  : isMasterAdminRoute
+    ? 'master-admin'
+    : isRecipeRoute
+      ? 'recipe'
+      : isBookRoute
+        ? 'book'
+       : pathname === '/yen-inventory' || pathname?.startsWith('/yen-inventory/')
+          ? 'inventory'
+          : pathname === '/yen-pos' || pathname?.startsWith('/yen-pos/')
+            ? 'pos'
+            : pathname === '/WhatsApp' || pathname?.startsWith('/WhatsApp/')
+             ? 'whatsapp'
+             : pathname === '/QlikReport' || pathname?.startsWith('/QlikReport/')
+                ? 'reports'
+                : pathname === '/account-settings' || pathname?.startsWith('/account-settings/')
+                  ? 'account-settings'
+                  : pathname === '/yen-settings' || pathname?.startsWith('/yen-settings/')
+                    ? 'settings'
+                    : null;
+const useTabNavigation = displaySettings.navigationLayout === 'tabs';
+if (isLoggedIn && isReportsRoute) {
+  return (
+    <>
+      <Toaster position="top-right" />
+      {children}
+      {snackbarElement}
+    </>
+  );
+}
   if (isLoggedIn) {
     return (
       <>
         <Toaster position="top-right" />
         <div className="erp-app-shell">
+          
 <SideMenu
   collapsed={!isMenuOpen}
   onToggleCollapse={() =>
@@ -329,7 +379,10 @@ const isBookRoute =
     },
   ) => {
     setSelectedModule(menuItem.text);
-
+ if (menuItem.path === '/QlikReport') {
+    window.open('/QlikReport', '_blank');
+    return;
+  }
 if (menuItem.path === '/yen-purchase') {
   setSelectedModule(menuItem.text);
   setIsBookSubMenuOpen(false);
@@ -382,8 +435,8 @@ if (menuItem.path === '/master-admin') {
   username={username || 'User'}
 />
 
-  <div className="erp-module-layout">
-{isPurchaseRoute && (
+<div className={`erp-module-layout ${useTabNavigation ? 'is-tab-navigation' : ''}`}>
+    {!useTabNavigation && isPurchaseRoute && (
   <PurchaseModuleSideMenu
     expanded={isPurchaseSubMenuOpen}
     onToggle={() =>
@@ -402,7 +455,7 @@ if (menuItem.path === '/master-admin') {
     }}
   />
 )}
-{isMasterAdminRoute && (
+{!useTabNavigation && isMasterAdminRoute && (  
   <MasterAdminModuleSideMenu
     expanded={isMasterAdminSubMenuOpen}
     onToggle={() =>
@@ -425,8 +478,22 @@ if (menuItem.path === '/master-admin') {
     }}
   />
 )}
-{isBookRoute && isBookSubMenuOpen && (
-  <BookModuleSideMenu
+{!useTabNavigation && isRecipeRoute && (
+    <RecipeModuleSideMenu
+    expanded={isRecipeSubMenuOpen}
+    onToggle={() => setIsRecipeSubMenuOpen((previous) => !previous)}
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+      const pageAlreadyOpen =
+        pathname === menuItem.path || pathname?.startsWith(`${menuItem.path}/`);
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
+{!useTabNavigation && isBookRoute && isBookSubMenuOpen && (
+    <BookModuleSideMenu
     onNavigate={(
       menuItem: {
         text: string;
@@ -450,16 +517,39 @@ if (menuItem.path === '/master-admin') {
     }}
   />
 )}
+{useTabNavigation && tabNavigationModule && (
+  <ModuleNavigationTabs
+    module={tabNavigationModule}
+   onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+      router.push(menuItem.path);
+    }}
+  />
+)}
+{/* {useTabNavigation && isKotMasterRoute && (
+  <KOTMasterSubMenu
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
 
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
+
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)} */}
 <main
   className={`erp-page-viewport ${
     isPurchaseRoute
-      ? 'erp-purchase-viewport'
-      : ''
+      ? "erp-purchase-viewport"
+      : ""
   } ${
-    isMasterAdminRoute
-      ? 'erp-master-admin-viewport'
-      : ''
+    useMasterAdminDesign
+      ? "erp-master-admin-viewport"
+      : ""
   }`}
 >
       {children}

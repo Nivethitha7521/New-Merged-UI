@@ -178,10 +178,10 @@ function Items() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <Box>
+    <Box className="item-master-page">
       {/* <MasterAdminMenu /> */}
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, ml: 2 }}>
+    <Box className="item-master-toolbar-shell" sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <ItemActions
           search={search}
           setSearch={setSearch}
@@ -220,6 +220,7 @@ function Items() {
           count={deactivatedTotalPages}       // passed up from ItemsTable
           page={deactivatedPage}
           onChange={(_, page) => setDeactivatedPage(page)}
+           className="item-master-pagination"
           color="primary"
           sx={{ mt: 0, display: 'flex', justifyContent: 'center' }}
         />
@@ -227,7 +228,7 @@ function Items() {
         <Pagination
           count={totalPages}
           page={currentPage}
-          onChange={handlePageChange}
+          className="item-master-pagination"
           color="primary"
           sx={{ mt: 0, display: 'flex', justifyContent: 'center' }}
         />

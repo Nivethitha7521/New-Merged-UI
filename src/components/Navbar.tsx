@@ -24,6 +24,7 @@ const routeLabels: Record<string, string> = {
   'yen-purchase': 'YEN Purchase',
   'yen-book': 'YEN Book',
   'yen-inventory': 'YEN Inventory',
+  "yen-recipie": "YEN Recipe",
   'yen-pos': 'YEN POS',
   'master-admin': 'Master Admin',
   'account-settings': 'Account Settings',

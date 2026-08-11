@@ -23,14 +23,14 @@ import {
   TuneOutlined,
   LanguageOutlined,
   PaymentsOutlined,
-  CheckCircleRounded,
+  CheckCircleRounded,ViewSidebarOutlined,TabOutlined,
 } from '@mui/icons-material';
 import {
   DEFAULT_DISPLAY_SETTINGS,
   DisplayCurrency,
   DisplayFont,
   DisplayFontSize,
-  DisplayLanguage,
+  DisplayLanguage,NavigationLayout,
   DisplaySettings,
   DisplayStyle,
   DisplayTheme,
@@ -117,6 +117,44 @@ export default function DisplaySettingsPage() {
       </Box>
 
       <Box className="display-settings-grid">
+      <Card className="display-settings-card display-settings-card-wide">
+          <CardContent>
+            <Box className="display-section-title">
+             <ViewSidebarOutlined />
+              <Box>
+                <Typography>Navigation Layout</Typography>
+                <span>Choose how module submenus are presented across the ERP.</span>
+              </Box>
+            </Box>
+            <Box
+              className="display-navigation-segmented"
+              role="radiogroup"
+              aria-label="Navigation layout"
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked={draft.navigationLayout === 'sidebar'}
+                className={draft.navigationLayout === 'sidebar' ? 'is-active' : ''}
+                onClick={() => update('navigationLayout', 'sidebar' as NavigationLayout)}
+              >
+               <ViewSidebarOutlined />
+                <span>Sidebar</span>
+                <small>Default</small>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={draft.navigationLayout === 'tabs'}
+                className={draft.navigationLayout === 'tabs' ? 'is-active' : ''}
+                onClick={() => update('navigationLayout', 'tabs' as NavigationLayout)}
+             >
+                <TabOutlined />
+                <span>Tabs</span>
+              </button>
+            </Box>
+          </CardContent>
+        </Card>
         <Card className="display-settings-card">
           <CardContent>
             <Box className="display-section-title"><TuneOutlined /><Box><Typography>Theme</Typography><span>Choose the application brightness.</span></Box></Box>

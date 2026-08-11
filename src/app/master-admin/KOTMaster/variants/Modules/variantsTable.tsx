@@ -20,10 +20,10 @@ import {
   Typography,
   FormControlLabel,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 
 
 interface Variant {
@@ -73,162 +73,124 @@ const VariantTableContainer: React.FC<VariantTableContainerProps> = ({
   const id = open ? 'variances-popover' : undefined;
 
   const label = showDeactivated ? 'Show Activated' : 'Show Deactivated';
+const visibleVariants = showDeactivated ? deactivatedItems : variants;  
 
+return (
+  <Box className="kot-master-page">
+    <Box className="kot-master-toolbar">
+      <Typography className="kot-master-section-title">
+        {showDeactivated
+          ? 'Deactivated Variants'
+          : 'Active Variants'}
+      </Typography>
 
-  return (
-    <Box>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 1 }}
-      >
-        <Typography className='icon-action-label'
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
-        >
-          {showDeactivated ? "Deactivated Variants" : "Active Varinats"}
-        </Typography>
-
-        <div className="flex items-center gap-4">
+      <Box className="kot-master-toolbar-actions">
           {!showDeactivated && (
-            <>
-              <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
-            </>
+             <Button
+              type="button"
+              variant="outlined"
+              startIcon={<AddRoundedIcon />}
+              onClick={handleOpen}
+              className="purchase-reference-action-button kot-master-action-button"
+            >
+              Add
+            </Button>
           )}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showDeactivated}
-                onChange={() => setShowDeactivated(!showDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.75rem",
-                fontFamily: "'Poppins', sans-serif",
-              },
-            }}
-          />
-        </div>
+      <Box className="purchase-reference-active-toggle kot-master-status-toggle">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showDeactivated}
+              onChange={() => setShowDeactivated(!showDeactivated)}
+              color="primary"
+              size="small"
+            />
+          }
+          label={label}
+          className="kot-master-toggle-label"
+        />
       </Box>
+    </Box>
+  </Box>
 
-
-        <div className="table-container my-1" style={{ maxHeight: 'calc(90.5vh - 170px)' }}>
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>S.NO</th>
-                <th>Variant ID</th>
-                <th>Variant Name</th>
-                <th>Variances</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-
-                <>
-                  {(showDeactivated ? deactivatedItems : variants).map((variant, index) => (
-                    <tr key={variant.variantId || index}>
-                      <td style={{ textAlign: 'center' }}>{index + 1}</td>
-                      <td style={{ textAlign: 'center' }}>{variant.variantId}</td>
-                      <td style={{ textAlign: 'center' }}>{variant.variant}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button
-                          onClick={(e) => handleClickVariances(e, variant.variantItems || [])}
-                          disabled={!variant.variantItems || variant.variantItems.length === 0}
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            color: variant.variantItems?.length ? "#252527ff" : "#999",   // Blue when clickable, gray when disabled
-                            fontWeight: "500",
-                            cursor: variant.variantItems?.length ? "pointer" : "default",
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (variant.variantItems?.length) {
-                              e.currentTarget.style.textDecoration = "underline";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (variant.variantItems?.length) {
-                              e.currentTarget.style.textDecoration = "none";
-                            }
-                          }}
-                        >
-                          {variant.variantItems?.length || 0} SELECTED
-                        </button>
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {showDeactivated ? (
-                          <button
-                            color="primary"
-                            onClick={() => handleActivate(variant)}
-                            className='activate-btn'
-                            title='Activate'
-                          >
-                            <RefreshIcon />
-                          </button>
-                        ) : (
-                          <>
-                            <button color="primary" onClick={() => handleEdit(variant)} className='edit-btn' title='Edit'>
-                              <EditIcon />
-                            </button>
-                            <button
-                              color="primary"
-                              onClick={() => handleDeactivate(variant)}
-                              className='deactivate-btn'
-                              title='Deactivate'
-                            >
-                              <DeleteIcon />
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  {(showDeactivated ? deactivatedItems : variants).length === 0 && (
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: 'center' }}>
-                        <h2 >
-                          {showDeactivated ? 'No deactivated variants found' : 'No active variants found'}
-                        </h2>
-                      </td>
-                    </tr>
+  <div className="kot-master-table-container">
+        <table className="custom-table kot-master-table">
+          <thead>
+            <tr>
+              <th>S.NO</th>
+              <th>Variant ID</th>
+              <th>Variant Name</th>
+              <th>Variances</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleVariants.map((variant, index) => (
+              <tr key={variant.variantId || index}>
+                <td>{index + 1}</td>
+                <td>{variant.variantId}</td>
+                <td>{variant.variant}</td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={(event) => handleClickVariances(event, variant.variantItems || [])}
+                    disabled={!variant.variantItems || variant.variantItems.length === 0}
+                    className="kot-master-variance-pill"
+                  >
+                    {variant.variantItems?.length || 0} SELECTED
+                  </button>
+                </td>
+                <td className="kot-master-actions-cell">
+                  {showDeactivated ? (
+                    <button
+                      type="button"
+                      onClick={() => handleActivate(variant)}
+                      className="activate-btn kot-master-row-action"
+                     title="Activate"
+                      aria-label={`Activate ${variant.variant}`}
+                    >
+                      <RefreshRoundedIcon />
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(variant)}
+                        className="edit-btn kot-master-row-action"
+                        title="Edit"
+                        aria-label={`Edit ${variant.variant}`}
+                      >
+                        <EditOutlinedIcon />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeactivate(variant)}
+                        className="deactivate-btn kot-master-row-action"
+                        title="Deactivate"
+                        aria-label={`Deactivate ${variant.variant}`}
+                      >
+                        <DeleteOutlineRoundedIcon />
+                      </button>
+                    </>
                   )}
-                </>
-            
-            </tbody>
-          </table>
-        </div>
+                </td>
+              </tr>
+            ))}
+     
+
+
+        {visibleVariants.length === 0 && (
+              <tr>
+              <td colSpan={5} className="kot-master-empty-cell">
+                  {showDeactivated
+                    ? 'No deactivated variants found'
+                    : 'No active variants found'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <Popover
         id={id}
@@ -243,11 +205,9 @@ const VariantTableContainer: React.FC<VariantTableContainerProps> = ({
         //   vertical: "top",
         //   horizontal: "center",
         // }}
-        PaperProps={{
-          className: "custom-popover",
-        }}
+        PaperProps={{ className: 'custom-popover kot-master-popover' }}
       >
-        <div className="custom-popover">
+        <div className="custom-popover kot-master-popover-content">
           {selectedVariances.map((variance, index) => (
             <h4 key={index}>{variance}</h4>
           ))}

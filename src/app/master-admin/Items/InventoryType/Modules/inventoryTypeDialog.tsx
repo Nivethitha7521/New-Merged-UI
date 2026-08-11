@@ -128,7 +128,7 @@ const InventoryDialog: React.FC<InventoryDialogProps> = ({
       TransitionProps={transitionProps}
     >
       <DialogTitle className="dialog-title">{mode === 'edit' ? 'Edit' : 'Add'} Inventory Type</DialogTitle>
-      <DialogContent dividers className="dialog-content">
+      <DialogContent className="dialog-content">
 
         <div className="form-section">
           <div className="form-field">

@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Button,
@@ -21,13 +18,14 @@ import {
   Checkbox,
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  GetApp as GetAppIcon,
-  Upload as UploadIcon,
-  Description as DescriptionIcon,
-  Image as ImageIcon,
-  FilterList as FilterListIcon,
+  AddRounded as AddIcon,
+  SearchRounded as SearchIcon,
+  FileUploadOutlined as ImportIcon,
+  FileDownloadOutlined as ExportIcon,
+  DescriptionOutlined as DescriptionIcon,
+  ImageOutlined as ImageIcon,
+  FilterListRounded as FilterListIcon,
+  PriceChangeOutlined as PriceChangeIcon,
 } from '@mui/icons-material';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { AppDispatch } from '../../../../redux/store';
@@ -403,6 +401,7 @@ function ItemActions({
   return (
     <>
       <Box
+       className="purchase-reference-toolbar item-master-toolbar"
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -411,9 +410,9 @@ function ItemActions({
           gap: 2,
         }}
       >
-        <Box sx={{ flex: 1 }} />
+<Box className="item-master-toolbar-spacer" sx={{ flex: 1 }} />
 
-        <Box sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
+       <Box className="item-master-search-slot" sx={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center' }}>
           <TextField
             size="small"
             variant="outlined"
@@ -422,7 +421,7 @@ function ItemActions({
             value={search}
             onChange={handleSearchChange}
             disabled={isAnyActionLoading}
-            className="custom-textfield"
+           className="custom-textfield purchase-reference-search item-master-search"
             sx={{
               width: '300px',
               '& .MuiInputBase-root': {
@@ -434,13 +433,14 @@ function ItemActions({
             }}
             InputProps={{
               startAdornment: (
-                <SearchIcon sx={{ color: 'text.secondary', mr: 1, fontSize: '1.2rem' }} />
+              <SearchIcon className="purchase-reference-search-icon" />
               ),
             }}
           />
         </Box>
 
         <Box
+         className="purchase-reference-actions item-master-actions"
           sx={{
             flex: 1,
             display: 'flex',
@@ -472,17 +472,17 @@ function ItemActions({
               color="primary"
               onClick={handlePriceMasterClick}
               disabled={isAnyActionLoading}
-              className="btn-primary"
+              className="purchase-reference-action-button item-master-price-button"
               title="Price Master"
             >
-              {/* <PriceChangeIcon className="icon-action-svg" /> */} Price Master
+             <PriceChangeIcon className="item-master-price-icon" /> Price Master
             </button>
             {/* <Typography className="icon-action-label">Price Master</Typography> */}
           </div>
 
 
           {/* Add */}
-          <div className="icon-action-wrapper">
+        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="primary"
               onClick={handleAddClick}
@@ -567,7 +567,7 @@ function ItemActions({
 
 
           {/* Import */}
-          <div className="icon-action-wrapper">
+        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="primary"
               onClick={handleImportClick}
@@ -578,7 +578,7 @@ function ItemActions({
               {isImporting ? (
                 <CircularProgress size={24} sx={{ color: 'primary.main' }} />
               ) : (
-                <GetAppIcon className="icon-action-svg" />
+               <ImportIcon className="icon-action-svg" />
               )}
             </IconButton>
             <Typography className="icon-action-label">
@@ -607,7 +607,7 @@ function ItemActions({
 
 
           {/* Image Upload — Item / Variance choice */}
-          <div className="icon-action-wrapper">
+        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="primary"
               onClick={(e) => !isAnyActionLoading && setImageMenuAnchorEl(e.currentTarget)}
@@ -673,7 +673,7 @@ function ItemActions({
           />
 
           {/* Export */}
-          <div className="icon-action-wrapper">
+        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="primary"
               onClick={handleExport}
@@ -684,14 +684,14 @@ function ItemActions({
               {isExporting ? (
                 <CircularProgress size={24} sx={{ color: 'primary.main' }} />
               ) : (
-                <UploadIcon className="icon-action-svg" />
+              <ExportIcon className="icon-action-svg" />
               )}
             </IconButton>
             <Typography className="icon-action-label">Export</Typography>
           </div>
 
           {/* Sample CSV */}
-          <div className="icon-action-wrapper">
+        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="primary"
               onClick={handleDownloadSampleCSV}
@@ -708,7 +708,7 @@ function ItemActions({
           </div>
 
           {/* Rollback */}
-          <div className="icon-action-wrapper">
+       <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="secondary"
               onClick={handleRollback}
@@ -727,6 +727,7 @@ function ItemActions({
 
           {/* Show Deactivated Toggle */}
           <FormControlLabel
+          className="purchase-reference-active-toggle item-master-active-toggle"
             control={
               <Switch
                 checked={showDeactivated}
@@ -750,7 +751,7 @@ function ItemActions({
           />
 
           {/* ── Filter Icon — next to Show Deactivated ──────────────────── */}
-          <div className="icon-action-wrapper">
+        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
             <IconButton
               color="primary"
               size="small"
@@ -769,6 +770,7 @@ function ItemActions({
 
       {/* ── Column Filter Popover ─────────────────────────────────────────── */}
       <Popover
+      className="item-master-filter-popover"
         open={openFilterPopover}
         anchorEl={filterAnchorEl}
         onClose={() => setFilterAnchorEl(null)}

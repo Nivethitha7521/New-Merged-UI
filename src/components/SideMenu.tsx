@@ -30,7 +30,7 @@ import Image from 'next/image';
 import './SideMenu.css';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-
+import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 
 export interface MenuItem {
   text: string;
@@ -54,6 +54,12 @@ export const menuItems: MenuItem[] = [
   { text: 'WHATSAPP', icon: <WhatsAppIcon />, subItems: ['WhatsAppAdmin', 'WhatsAppMaster'], path: '/WhatsApp' },
   { text: 'YEN PURCHASE', icon: <ShoppingCartIcon />, subItems: ['Purchase Master', 'Vendor', 'Purchase Item', 'Purchase Order', 'Service Order', 'GRN Note', 'AP Invoice'], path: '/yen-purchase' },
   { text: 'YEN INVENTORY', icon: <Inventory2Icon />, subItems: ['Outlets Inventory Management', 'Warehouse Inventory Management'], path: '/yen-inventory' },
+  {
+  text: "YEN RECIPE",
+  icon: <RestaurantMenuIcon />,
+  subItems: [],
+  path: "/yen-recipie/RecipeManagement",
+},
   { text: 'YEN BOOK', icon: <BookOnlineIcon />, subItems: ['OutGoing Payment'], path: '/yen-book' },
   { text: 'YEN REPORTS', icon: <AssessmentIcon />, subItems: [], path: '/QlikReport' },
   { text: 'ACCOUNT SETTINGS', icon: <AccountCircleIcon />, subItems: ['Business Details', 'Personal Details'], path: '/account-settings' },

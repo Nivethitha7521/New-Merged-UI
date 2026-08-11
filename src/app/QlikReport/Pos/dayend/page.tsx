@@ -2,8 +2,8 @@
 
 import { DayendReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { dayendConfig } from '../../configs/dayend.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { dayendConfig } from '@/features/pos/reports/dayend.config';
 
 // Select 'dayend' (the key defined in your config)
 const selector = (s: RootState) => s.dayend;

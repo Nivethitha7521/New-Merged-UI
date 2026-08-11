@@ -117,6 +117,7 @@ const EditBranchDialog: React.FC<EditBranchDialogProps> = ({
   return (
     <>
       <Dialog
+      className="kot-master-dialog"
         open={open}
         onClose={onClose}
         maxWidth="md"

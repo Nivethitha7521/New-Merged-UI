@@ -182,6 +182,7 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
 
   return (
     <Dialog
+    className="kot-master-dialog"
       open={open}
       onClose={handleClose}
       maxWidth="lg"

@@ -1,5 +1,3 @@
-
-
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/redux/store";
 import purchaseApi from '@/utils/api';

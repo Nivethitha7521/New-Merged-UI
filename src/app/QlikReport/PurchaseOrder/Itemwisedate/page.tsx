@@ -2,8 +2,8 @@
 
 import { ItemDateWiseReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { itemDateWiseConfig } from '../../configs/itemDateWise.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { itemDateWiseConfig } from '@/features/purchase-order/reports/itemDateWise.config';
 
 // Select 'itemDateWise' (the key defined in your config)
 const selector = (s: RootState) => s.itemDateWise;

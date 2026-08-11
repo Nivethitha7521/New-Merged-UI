@@ -14,6 +14,7 @@ export type DisplayFont =
 export type DisplayFontSize = 'small' | 'medium' | 'large';
 export type DisplayLanguage = 'en';
 export type DisplayCurrency = 'INR' | 'USD' | 'EUR' | 'GBP';
+export type NavigationLayout = 'sidebar' | 'tabs';
 
 export interface DisplaySettings {
   theme: DisplayTheme;
@@ -23,6 +24,7 @@ export interface DisplaySettings {
   fontSize: DisplayFontSize;
   language: DisplayLanguage;
   currency: DisplayCurrency;
+  navigationLayout: NavigationLayout;
 }
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
@@ -33,6 +35,7 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   fontSize: 'medium',
   language: 'en',
   currency: 'INR',
+  navigationLayout: 'sidebar',
 };
 
 interface DisplaySettingsContextValue {
@@ -71,6 +74,11 @@ const normaliseSettings = (value: Partial<DisplaySettings> | null): DisplaySetti
   ...DEFAULT_DISPLAY_SETTINGS,
   ...(value || {}),
 });
+const getPersistedNavigationLayout = (): NavigationLayout | null => {
+  if (typeof window === 'undefined') return null;
+  const value = window.localStorage.getItem('erp:navigation-layout');
+  return value === 'sidebar' || value === 'tabs' ? value : null;
+};
 const normalizeHex = (value: string) => {
   const hex = value.replace('#', '').trim();
 
@@ -117,6 +125,7 @@ const applySettingsToDocument = (
   root.dataset.erpTheme = settings.theme;
   root.dataset.erpStyle = settings.uiStyle;
   root.dataset.erpFontSize = settings.fontSize;
+  root.dataset.erpNavigationLayout = settings.navigationLayout;
 
   root.style.setProperty(
     '--erp-accent',
@@ -210,7 +219,16 @@ export const DisplaySettingsProvider: React.FC<{ children: React.ReactNode }> = 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(getStorageKey());
-      const restored = normaliseSettings(raw ? JSON.parse(raw) : null);
+      const parsed = raw ? JSON.parse(raw) as Partial<DisplaySettings> : null;
+      const persistedNavigationLayout = getPersistedNavigationLayout();
+      const restored = normaliseSettings({
+        ...(parsed || {}),
+        ...(parsed?.navigationLayout
+          ? {}
+         : persistedNavigationLayout
+            ? { navigationLayout: persistedNavigationLayout }
+            : {}),
+      });
       setSettings(restored);
       applySettingsToDocument(restored);
     } catch {
@@ -228,12 +246,14 @@ export const DisplaySettingsProvider: React.FC<{ children: React.ReactNode }> = 
   const saveSettings = useCallback((next: DisplaySettings) => {
     const safe = normaliseSettings(next);
     localStorage.setItem(getStorageKey(), JSON.stringify(safe));
+    localStorage.setItem('erp:navigation-layout', safe.navigationLayout);
     setSettings(safe);
     applySettingsToDocument(safe);
   }, []);
 
   const resetSettings = useCallback(() => {
     localStorage.removeItem(getStorageKey());
+    localStorage.removeItem('erp:navigation-layout');
     setSettings(DEFAULT_DISPLAY_SETTINGS);
     applySettingsToDocument(DEFAULT_DISPLAY_SETTINGS);
   }, []);

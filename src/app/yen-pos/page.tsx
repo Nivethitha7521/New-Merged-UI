@@ -37,7 +37,7 @@ const YenPosPage = () => {
 
   React.useEffect(() => {
     if (pathname === '/yen-pos' || pathname === '/yen-pos/') {
-      router.replace('/yen-pos');
+     router.replace('/yen-pos/CashManagement/OpeningCash');
     }
   }, [pathname, router]);
 

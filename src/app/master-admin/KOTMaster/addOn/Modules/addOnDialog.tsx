@@ -183,6 +183,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
 
   return (
     <Dialog
+    className="kot-master-dialog"
       open={open}
       onClose={handleClose}
       maxWidth="lg"

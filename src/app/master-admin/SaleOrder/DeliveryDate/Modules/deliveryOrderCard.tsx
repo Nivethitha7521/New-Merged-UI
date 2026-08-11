@@ -239,7 +239,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Close, Edit, Save } from "@mui/icons-material";
+ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import {
   DeliveryOrderItem,
   Config,
@@ -299,8 +301,8 @@ const DeliveryOrderCard: React.FC<DeliveryOrderProps> = ({
       display="flex"
       justifyContent="start"
       mb={1}
-      width="92%"
-      marginLeft="30px"
+      width="100%"
+      marginLeft="0"
     >
       <Box display="flex" alignItems="center" gap={1} width="100%">
         {/* Radio Button */}
@@ -310,7 +312,7 @@ const DeliveryOrderCard: React.FC<DeliveryOrderProps> = ({
             onChange={() => onRadioChange(order.deliveryOrderId)}
             color="primary"
             sx={{
-              "& .MuiSvgIcon-root": { fontSize: 2 },
+            "& .MuiSvgIcon-root": { fontSize: 14 },
               p: 0,
             }}
           />
@@ -421,28 +423,18 @@ const DeliveryOrderCard: React.FC<DeliveryOrderProps> = ({
                         <IconButton
                           onClick={onEditSubmit}
                           size="small"
-                          sx={{
-                            color: "#1976d2",
-                            padding: "4px",
-                            "&:hover": {
-                              backgroundColor: "#ebf5ff",
-                            },
-                          }}
+                         className="purchase-master-action-button is-edit"
+                          title="Save"
                         >
-                          <Save sx={{ fontSize: "1.1rem" }} />
+                          <SaveOutlinedIcon />
                         </IconButton>
                         <IconButton
                           onClick={onEditCancel}
                           size="small"
-                          sx={{
-                            color: "#dc2626",
-                            padding: "4px",
-                            "&:hover": {
-                              backgroundColor: "#fef2f2",
-                            },
-                          }}
+                         className="purchase-master-action-button is-delete"
+                          title="Cancel"
                         >
-                          <Close sx={{ fontSize: "1.1rem" }} />
+                        <CloseRoundedIcon />
                         </IconButton>
                       </>
                     ) : (
@@ -450,18 +442,10 @@ const DeliveryOrderCard: React.FC<DeliveryOrderProps> = ({
                         onClick={() => onEditClick(cfg)}
                         size="small"
                         disabled={order.status !== "enabled"}
-                        sx={{
-                          color: "#1976d2",
-                          padding: "4px",
-                          "&:hover": {
-                            backgroundColor: "#ebf5ff",
-                          },
-                          "&.Mui-disabled": {
-                            color: "#9ca3af",
-                          },
-                        }}
+                        className="purchase-master-action-button is-edit"
+                        title="Edit"
                       >
-                        <Edit sx={{ fontSize: "1.1rem" }} />
+                      <EditOutlinedIcon />
                       </IconButton>
                     )}
                   </>

@@ -101,15 +101,19 @@ import rawMaterialStoreReducer from "../features/yen_inventory/wharehoueStoreSli
 import stockSummaryReducer from "../features/yen_inventory/ledgerrawSlice";
 import stockSummaryOutletReducer from "../features/yen_inventory/ledgeroutletSlice";
 import itemsReducer from '../features/yen_inventory/OuletePhysicalStockSlice';
-import dailyActivitiesReducer from '../app/QlikReport/PurchaseOrder/RawMaterials/features/branchesSlice';
-import dispatchesReducer from '../app/QlikReport/PurchaseOrder/RawMaterials/features/storedispatch';
+
 import dateFilterReducer from '../glopals/dateFilterSlice';
 import { reportReducers } from '../redux/reportRegistry';
 import expenseCategoryReducer from '../features/yen-book/ExpenseCategorySlice';
 import expenseSubcategoryReducer from '../features/yen-book/ExpenseSubcategorySlice';
 import expenseNameReducer from '../features/yen-book/ExpenseNameSlice';
 import GRNSettingReducer from '../../src/app/yen-settings/Features/GRNSettingsSlice';
-
+import newrecipeReducer from "../app/yen-recipie/StoreKitchenMaster/newRecipe/Features/newrecipeSlice";
+import recipehistoryReducer from "../app/yen-recipie/StoreKitchenMaster/edit/versionhistory/features/viewrecipehistory";
+import recipesReducer from "../app/yen-recipie/StoreKitchenMaster/Slicefiles/recipeassignSlice";
+import editRecipeReducer from "../app/yen-recipie/StoreKitchenMaster/edit/editing/features/editRecipeSlice";
+import storeKitchenItemReducer from "../app/yen-recipie/StoreKitchenMaster/Slicefiles/storekitchenmaster";
+import recipesectionReducer from "../app/yen-recipie/StoreKitchenMaster/edit/slicefiles/selectsectionslice";
 import categoryReducer from '../app/master-admin/Items/Category/Features/categorySlice';
 import discountReducer from '../app/master-admin/Discount/Features/discountSlice';
 import itemGroupReducer from '../app/master-admin/Items/itemGroup/Features/itemgroupSlice';
@@ -148,6 +152,7 @@ import dineInTaxesReducer from '../app/master-admin/Tax/Features/dineInTaxSlice'
 import prefixTypeReducer from '../app/yen-pos/prefixMaster/Features/prefixSlice';
 import ReasonsReducer from '../app/yen-pos/reasons/Features/reasonSlice';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import recipeReducer from "../app/yen-recipie/RecipeManagement/Features/recipeSlice";
 const store = configureStore({
   reducer: {
     // locations: locationAreaReducer,
@@ -156,7 +161,6 @@ const store = configureStore({
     billReceipts: billReceiptsReducer,
     purchaseOrder: purchaseOrderReducer,
     grn: grnReducer,
-    apInvoice: apInvoiceReducer,
     outgoingPayment: outgoingPaymentReducer,
     vendor: vendorReducer,
     purchaseItems: purchaseItemReducer,
@@ -234,8 +238,7 @@ const store = configureStore({
   stockSummary: stockSummaryReducer,
   stockSummaryOutlet: stockSummaryOutletReducer,
 
-  dailyActivities: dailyActivitiesReducer,
-    dispatches: dispatchesReducer,
+
     dateFilter: dateFilterReducer,
     ...reportReducers,
         expenseCategory: expenseCategoryReducer,
@@ -302,6 +305,13 @@ sfg: sfgReducer,
 dineInTaxes: dineInTaxesReducer,
 prefixType: prefixTypeReducer,
 Reasons: ReasonsReducer,
+recipe: recipeReducer,
+newrecipe: newrecipeReducer,
+recipehistory: recipehistoryReducer,
+recipes: recipesReducer,
+editRecipe: editRecipeReducer,
+storeKitchenItem: storeKitchenItemReducer,
+recipesection: recipesectionReducer,
   },
   
 });

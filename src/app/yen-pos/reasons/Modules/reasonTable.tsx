@@ -1,19 +1,17 @@
 
 'use client';
-import React, { useCallback, useState } from "react";
-import { Reasons } from "../Models/reasonModels";
+import React, { useCallback, useState } from 'react';
+import { Reasons } from '../Models/reasonModels';
 import {
   Box,
-  IconButton,
+  IconButton,FormControlLabel, Popover,
   Switch,
   Typography,
-  FormControlLabel,
-  Popover,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import RefreshIcon from "@mui/icons-material/Refresh";
+ } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 
 export interface ReasonTableProps {
   items: Reasons[];
@@ -27,7 +25,7 @@ export interface ReasonTableProps {
 }
 
 const ReasonTableComponent: React.FC<ReasonTableProps> = ({
-  items,
+  items,loading,
   viewDeactivated,
   setViewDeactivated,
   handleOpen,
@@ -35,8 +33,8 @@ const ReasonTableComponent: React.FC<ReasonTableProps> = ({
   handleDeactivate,
   handleActivate,
 }) => {
-  const label = viewDeactivated ? "Show Activated" : "Show Deactivated";
-
+const label = viewDeactivated ? 'Show Activated' : 'Show Deactivated';
+ 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
 
@@ -53,138 +51,126 @@ const ReasonTableComponent: React.FC<ReasonTableProps> = ({
   }, []);
 
   const openPopover = Boolean(anchorEl);
-
-  const filtered = items.filter((r) =>
-    viewDeactivated ? r.status === "deactivated" : r.status === "active"
+const filtered = items.filter((reason) =>
+    viewDeactivated
+      ? reason.status === 'deactivated'
+      : reason.status === 'active'
   );
 
   return (
     <>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", sm: "row" }}
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        justifyContent="space-between"
-        gap={0}
-        my={1}
-        ml={1}
-        px={{ xs: 2, sm: 3 }}
-        sx={{ width: "99%", boxSizing: "border-box", mt: 2 }}
-      >
-        <Typography
-          className="icon-action-label"
-          sx={{
-            fontFamily: "'Poppins', sans-serif",
-            fontWeight: 750,
-            margin: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "100%",
-          }}
-        >
-          {viewDeactivated ? "Deactivated Reasons" : "Active Reasons"}
-        </Typography>
+       <Box className="item-master-toolbar-shell">
+        <Box className="purchase-reference-toolbar item-master-toolbar">
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography className="yen-pos-toolbar-title">
+              {viewDeactivated ? 'Deactivated Reasons' : 'Active Reasons'}
+            </Typography>
+          </Box>
 
-        <div className="flex items-center gap-4">
-          {!viewDeactivated && (
-            <div className="icon-action-wrapper">
-              <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
-                <AddIcon className="icon-action-svg" />
-              </IconButton>
-              <Typography className="icon-action-label">Add</Typography>
-            </div>
-          )}
+          <Box className="purchase-reference-actions item-master-actions">
+             {!viewDeactivated && (
+             <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+                <IconButton
+                  color="primary"
+                  onClick={handleOpen}
+                  className="icon-action-button"
+                  title="Add"
+                >
+                  <AddIcon className="icon-action-svg" />
+                </IconButton>
+                <Typography className="icon-action-label">Add</Typography>
+              </div>
+            )}
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={viewDeactivated}
-                onChange={() => setViewDeactivated(!viewDeactivated)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={label}
-            sx={{
-              marginLeft: 1,
-              marginRight: 1,
-              "& .MuiFormControlLabel-label": { fontSize: "0.75rem", fontFamily: "'Poppins', sans-serif" },
-            }}
-          />
-        </div>
+            <FormControlLabel
+              className="purchase-reference-active-toggle item-master-active-toggle"
+              control={
+                <Switch
+                  checked={viewDeactivated}
+                  onChange={() => setViewDeactivated(!viewDeactivated)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={label}
+            />
+          </Box>
+        </Box>
+
       </Box>
 
-      <div className="table-container my-1" style={{ maxHeight: "calc(90.5vh - 170px)" }}>
-        <table className="custom-table">
+       <div className="item-master-table-container">
+        <table className="item-master-table item-master-lookup-table item-master-lookup-table--4 yen-pos-reason-table">
+
           <thead>
             <tr>
-              <th style={{ textAlign: "center" }}>S.NO</th>
-              <th style={{ textAlign: "center" }}>Reason Name</th>
-              <th style={{ textAlign: "center" }}>Reasons</th>
-              <th style={{ textAlign: "center" }}>Actions</th>
+               <th>S.NO</th>
+              <th>Reason Name</th>
+              <th>Reasons</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <>
-              {filtered.map((r, index) => (
-                <tr key={r.id}>
-                  <td style={{ textAlign: "center" }}>{index + 1}</td>
-                  <td style={{ textAlign: "center" }}>{r.module || "-"}</td>
-                  <td style={{ textAlign: "center" }}>
-                    <button
-                      onClick={(e) => handleClickReasons(e, r.reason || [])}
-                      disabled={!r.reason || r.reason.length === 0}
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        color: r.reason?.length ? "#252527ff" : "#056eb4ff",
-                        fontWeight: 500,
-                        cursor: r.reason?.length ? "pointer" : "default",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        fontFamily: "'Poppins', sans-serif",
-                      }}
-                      onMouseEnter={(e) => {
-                        if (r.reason?.length) {
-                          e.currentTarget.style.textDecoration = "underline";
+             <tr key={reason.id} className="item-master-data-row">
+                    <td>{index + 1}</td>
+                    <td>{reason.module || '-'}</td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={(event) =>
+                          handleClickReasons(event, reason.reason || [])
                         }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (r.reason?.length) {
-                          e.currentTarget.style.textDecoration = "none";
-                        }
-                      }}
-                    >
-                      {r.reason?.length || 0} SELECTED
-                    </button>
-                  </td>
-                  <td style={{ textAlign: "center" }}>
-                    {viewDeactivated ? (
-                      <button onClick={() => handleActivate(r)} className="activate-btn" title="Activate">
-                        <RefreshIcon fontSize="small" />
+                      disabled={!reason.reason || reason.reason.length === 0}
+                        className="yen-pos-view-pill"
+                      >
+                        {reason.reason?.length || 0} SELECTED
                       </button>
-                    ) : (
-                      <>
-                        <button onClick={() => handleEdit(r)} className="edit-btn" title="Edit">
-                          <EditIcon fontSize="small" />
-                        </button>
-                        <button onClick={() => handleDeactivate(r)} className="deactivate-btn" title="Deactivate">
-                          <DeleteIcon fontSize="small" />
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: "center" }}>
-                    <h2>No data found</h2>
-                  </td>
-                </tr>
-              )}
-            </>
+                      </td>
+                    <td className="item-master-actions-cell">
+                      <div>
+                        {viewDeactivated ? (
+                          <IconButton
+                            onClick={() => handleActivate(reason)}
+                            className="purchase-master-action-button is-activate"
+                            title="Activate"
+                            size="small"
+                          >
+                            <RestoreRoundedIcon />
+                          </IconButton>
+                        ) : (
+                          <>
+                            <IconButton
+                              onClick={() => handleEdit(reason)}
+                              className="purchase-master-action-button is-edit"
+                              title="Edit"
+                              size="small"
+                            >
+                              <EditOutlinedIcon />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => handleDeactivate(reason)}
+                              className="purchase-master-action-button is-delete"
+                              title="Deactivate"
+                              size="small"
+                            >
+                              <DeleteOutlineRoundedIcon />
+                            </IconButton>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="empty-state">
+                      <h2>No data found</h2>
+                    </td>
+                  </tr>
+                )}
+              </>
+            )}
           </tbody>
         </table>
       </div>
@@ -193,9 +179,9 @@ const ReasonTableComponent: React.FC<ReasonTableProps> = ({
         open={openPopover}
         anchorEl={anchorEl}
         onClose={handleClosePopover}
-        PaperProps={{ className: "custom-popover" }}
+      PaperProps={{ className: 'custom-popover' }}
       >
-        <div className="custom-popover">
+        <div className="custom-popover yen-pos-reasons-popover">
           {selectedReasons.map((reasonText, index) => (
             <h4 key={index}>{reasonText}</h4>
           ))}

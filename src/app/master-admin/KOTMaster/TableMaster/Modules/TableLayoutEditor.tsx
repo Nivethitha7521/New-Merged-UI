@@ -172,6 +172,7 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
 
   return (
     <Box
+    className="kot-layout-editor"
       sx={{
         position: 'fixed',
         top: -1,
@@ -186,6 +187,7 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
     >
       {/* Header */}
       <Box
+      className="kot-layout-editor-header"
         sx={{
           backgroundColor: 'white',
           borderBottom: '1px solid #e2e8f0',
@@ -197,21 +199,22 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={onClose} size="large">
+         <IconButton onClick={onClose} size="large" className="kot-layout-editor-back">
+
             <ArrowBackIcon />
           </IconButton>
           <Box>
-            <label style={{ fontWeight:"bold" }} >
+            <label className="kot-layout-editor-title" style={{ fontWeight:"bold" }} >
               Layout Editor — {area.areaName}
             </label>
-            <Typography variant="subtitle1" color="text.secondary">
+            <Typography variant="subtitle1" color="text.secondary" className="kot-layout-editor-subtitle">
               {branchLocation} • {screenSize.width}px × {screenSize.height}px • Drag tables to position them freely
             </Typography>
           </Box>
         </Box>
         
         <button 
-          className='btn-primary' 
+          className='btn-primary kot-layout-editor-action' 
           color="secondary" 
           onClick={handleResetPositions}
           disabled={isSubmitting}
@@ -222,6 +225,7 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
 
       {/* Canvas Area */}
       <Box
+      className="kot-layout-editor-canvas"
         onDrop={handleCanvasDrop}
         onDragOver={handleDragOver}
         sx={{
@@ -362,11 +366,11 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
         </Typography>
         
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <button onClick={onClose} disabled={isSubmitting} className='btn-secondary'>
+        <button onClick={onClose} disabled={isSubmitting} className='btn-secondary kot-layout-editor-action'>
             Cancel
           </button>
           <button
-          className='btn-primary'
+          className='btn-primary kot-layout-editor-action'
             onClick={handleUpdateLayout}
             disabled={isSubmitting}
           >

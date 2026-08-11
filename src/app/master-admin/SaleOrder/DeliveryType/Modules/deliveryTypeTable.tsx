@@ -10,11 +10,11 @@ import {
   Paper,
   IconButton,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { DeliveryType } from "../Models/deliverytypeModels"
 
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 
 interface DeliveryTypeTableProps {
   filteredTypes: DeliveryType[];
@@ -41,8 +41,8 @@ const DeliveryTypeTableComponent: React.FC<DeliveryTypeTableProps> = ({
 }) => {
   return (
 
-    <div className="table-container" style={{ maxHeight: 'calc(90.5vh - 170px)' }}>
-      <table className="custom-table">
+ <div className="item-master-table-container">
+      <table className="item-master-table item-master-lookup-table sale-order-lookup-table--4">
         <thead>
           <tr>
             <th>S.No</th>
@@ -54,47 +54,49 @@ const DeliveryTypeTableComponent: React.FC<DeliveryTypeTableProps> = ({
         <tbody>
           {filteredTypes.length > 0 ? (
             filteredTypes.map((type, index) => (
-              <tr key={type.deliveryTypeId}>
+              <tr key={type.deliveryTypeId} className="item-master-data-row">
                   <td style={{ textAlign: "center" }}>{index + 1}</td>
                   <td style={{ textAlign: "center" }}>{type.deliveryType}</td>
                   <td style={{ textAlign: "center" }}>{type.remarks || "-"}</td>
-                  <td style={{ textAlign: "center" }}>
-                    {!showDeactivatedTable && type.status === "active" && (
-                      <>
-                        <button
-                          color="primary"
-                          onClick={() => onOpenEdit(type)}
-                          className="edit-btn"
-                          title="Edit"
+                <td className="item-master-actions-cell">
+                    <div>
+                      {!showDeactivatedTable && type.status === "active" && (
+                        <>
+                          <IconButton
+                            onClick={() => onOpenEdit(type)}
+                            className="purchase-master-action-button is-edit"
+                            title="Edit"
+                            size="small"
+                          >
+                            <EditOutlinedIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => onDeactivate(type)}
+                            className="purchase-master-action-button is-delete"
+                            title="Deactivate"
+                            size="small"
+                          >
+                            <DeleteOutlineRoundedIcon />
+                          </IconButton>
+                        </>
+                      )}
+                      {showDeactivatedTable && type.status === "deactivate" && (
+                        <IconButton
+                          onClick={() => onActivate(type)}
+                          className="purchase-master-action-button is-activate"
+                          title="Activate"
+                          size="small"
                         >
-                          <EditIcon />
-                        </button>
-                        <button
-                          onClick={() => onDeactivate(type)}
-                          color="primary"
-                          className="deactivate-btn"
-                          title="Deactivate"
-                        >
-                          <DeleteIcon />
-                        </button>
-                      </>
-                    )}
-                    {showDeactivatedTable && type.status === "deactivate" && (
-                      <button
-                        onClick={() => onActivate(type)}
-                        color="primary"
-                        className="activate-btn"
-                        title="Activate"
-                      >
-                        <RefreshIcon />
-                      </button>
-                    )}
+ <RestoreRoundedIcon />
+                        </IconButton>
+                      )}
+                    </div>
                   </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={5} className="empty-state">
+             <td colSpan={4} className="empty-state">
                 <h2> No {showDeactivatedTable ? "Deactivated" : "Active"} Delivery Types</h2>
               </td>
             </tr>

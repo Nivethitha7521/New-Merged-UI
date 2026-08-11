@@ -30,6 +30,9 @@ import {
   AssignmentOutlined,
   ViewModuleOutlined,
   AdminPanelSettingsOutlined,
+  AddCircleOutlineRounded,
+  TuneRounded,
+  TableRestaurantOutlined,
 } from '@mui/icons-material';
 
 import './MasterAdminModuleSideMenu.css';
@@ -48,6 +51,12 @@ interface MasterAdminModuleItem {
   path: string;
   icon: React.ReactNode;
 }
+
+
+
+/* -------------------------------------------------------------------------- */
+/* MASTER ADMIN MODULES                                                       */
+/* -------------------------------------------------------------------------- */
 
 const masterAdminModules: MasterAdminModuleItem[] = [
   {
@@ -112,6 +121,10 @@ const masterAdminModules: MasterAdminModuleItem[] = [
   },
 ];
 
+/* -------------------------------------------------------------------------- */
+/* COMPONENT                                                                  */
+/* -------------------------------------------------------------------------- */
+
 const MasterAdminModuleSideMenu: React.FC<
   MasterAdminModuleSideMenuProps
 > = ({
@@ -130,12 +143,18 @@ const MasterAdminModuleSideMenu: React.FC<
     pathname === path ||
     Boolean(pathname?.startsWith(`${path}/`));
 
+ 
+
   return (
     <Box
       className={`master-admin-module-sidebar ${
         expanded ? 'is-expanded' : 'is-collapsed'
       }`}
     >
+      {/* ------------------------------------------------------------------ */}
+      {/* HEADER                                                             */}
+      {/* ------------------------------------------------------------------ */}
+
       <Box className="master-admin-module-sidebar-header">
         <Tooltip
           title={!expanded ? 'Master Admin' : ''}
@@ -143,7 +162,7 @@ const MasterAdminModuleSideMenu: React.FC<
           arrow
         >
           <Box className="master-admin-module-brand">
-            <Box className="master-admin-module-logo">
+            <Box className="master-admin-module-brand-icon">
               <AdminPanelSettingsOutlined />
             </Box>
 
@@ -186,53 +205,62 @@ const MasterAdminModuleSideMenu: React.FC<
         </IconButton>
       </Box>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* MODULE LIST                                                        */}
+      {/* ------------------------------------------------------------------ */}
+
       <List
         disablePadding
         className="master-admin-module-list"
       >
-        {visibleModules.map(
-          (module: MasterAdminModuleItem) => (
-            <Tooltip
-              key={module.path}
-              title={!expanded ? module.text : ''}
-              placement="right"
-              arrow
-            >
-              <ListItem
-                button
-                onClick={() =>
-                  onNavigate({
-                    path: module.path,
-                    text: module.text,
-                  })
-                }
-                className={`master-admin-module-item ${
-                  isActive(module.path)
-                    ? 'is-active'
-                    : ''
-                }`}
-              >
-                <ListItemIcon className="master-admin-module-icon">
-                  {module.icon}
-                </ListItemIcon>
+        {visibleModules.map((module: MasterAdminModuleItem) => {
+        
 
-                <Box
-                  className={`master-admin-module-label-wrapper ${
-                    expanded ? 'is-visible' : ''
+          return (
+            <React.Fragment key={module.path}>
+              <Tooltip
+                title={!expanded ? module.text : ''}
+                placement="right"
+                arrow
+              >
+                <ListItem
+                  button
+                  onClick={() =>
+                    onNavigate({
+                      path: module.path,
+                      text: module.text,
+                    })
+                  }
+                  className={`master-admin-module-item ${
+                    isActive(module.path)
+                      ? 'is-active'
+                      : ''
                   }`}
                 >
-                  <ListItemText
-                    primary={module.text}
-                    primaryTypographyProps={{
-                      className:
-                        'master-admin-module-label',
-                    }}
-                  />
-                </Box>
-              </ListItem>
-            </Tooltip>
-          )
-        )}
+                  <ListItemIcon className="master-admin-module-icon">
+                    {module.icon}
+                  </ListItemIcon>
+
+                  <Box
+                    className={`master-admin-module-label-wrapper ${
+                      expanded ? 'is-visible' : ''
+                    }`}
+                  >
+                    <ListItemText
+                      primary={module.text}
+                      primaryTypographyProps={{
+                        className:
+                          'master-admin-module-label',
+                      }}
+                    />
+                  </Box>
+                </ListItem>
+              </Tooltip>
+
+
+            </React.Fragment>
+          );
+        })}
       </List>
     </Box>
   );

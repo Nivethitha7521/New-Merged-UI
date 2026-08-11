@@ -398,8 +398,9 @@ useEffect(() => {
   };
 
   return (
-    <Modal open={dialogOpen === 'edit'} onClose={handleModalClose} disableEscapeKeyDown={isDirty}>
+  <Modal className="yen-erp-modal-root" open={dialogOpen === 'edit'} onClose={handleModalClose} disableEscapeKeyDown={isDirty}>
       <Box
+      className="yen-erp-modal-surface"
         sx={{
           p: 4,
           backgroundColor: 'white',

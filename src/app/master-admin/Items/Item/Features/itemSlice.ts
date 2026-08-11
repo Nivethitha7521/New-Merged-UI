@@ -265,7 +265,7 @@ export const fetchItems = createAsyncThunk<
   FetchItemsParams,
   { rejectValue: string }
 >(
-  'items/fetchItems',
+  'maItems/fetchItems',
   async ({ page, limit, itemName }, { rejectWithValue }) => {
     try {
       const params: Record<string, any> = { page, limit };

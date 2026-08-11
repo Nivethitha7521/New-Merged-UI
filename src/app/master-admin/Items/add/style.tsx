@@ -3,8 +3,8 @@
 import { useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import { usePathname, useRouter } from 'next/navigation';
-import Navbar from '../../../Components/NavBar';
-import SideMenu from '../../../Components/SideMenu';
+// import Navbar from '../../../Components/NavBar';
+// import SideMenu from '../../../Components/SideMenu';
 
 
 
@@ -30,11 +30,11 @@ const ItemMaster = () => {
 
   return (
     <Box>
-      {/* Navbar at the top */}
+      {/* Navbar at the top
       <Navbar moduleName="ITEMS" onLogout={handleLogout} />
 
       {/* SideMenu */}
-      <SideMenu onMenuClick={handleMenuClick} activePath={pathname || '/'} />
+      {/* <SideMenu onMenuClick={handleMenuClick} activePath={pathname || '/'} />  */}
 
       {/* Item Master submenu */}
       <Box sx={{ 

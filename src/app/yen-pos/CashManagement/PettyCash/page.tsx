@@ -35,7 +35,6 @@ import { PettyCash } from '../PettyCash/Models/pettycashModels';   // adjust pat
 import { PettyCashDialog } from '../PettyCash/Modules/PettyCashDialog';   // <-- new
 import { PettyCashTable } from '../PettyCash/Modules/PettyCashTableContainer';     // <-- new
 
-import CashManagementPage from '../page';
 import CloseConfirmationDialog from '../../../Components/Dialogs/CloseConfirmationDialog';
 import EditConfirmationDialog from '../../../Components/Dialogs/EditConfirmationDialog';
 import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/ActivateDeactivateConfirmationDialog';
@@ -287,7 +286,6 @@ const PettyCashPage: React.FC = () => {
   // ---------- render ----------
   return (
     <>
-      <CashManagementPage />
 
       {/* <Box
         sx={{

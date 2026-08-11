@@ -251,21 +251,18 @@ import React from 'react';
 import {
   Box,
   Dialog,
+ DialogContent,
   DialogTitle,
-  DialogContent,
+  IconButton,
   DialogActions,
-  Typography,
-  Pagination,
+  Pagination, Typography,
 } from '@mui/material';
-import {
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Refresh as RefreshIcon,
-  Visibility as VisibilityIcon,
-} from '@mui/icons-material';
+
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import { Device } from '../Models/PosDeviceModel';
-import { RootState } from '@/redux/store';
-import { useSelector } from 'react-redux';
 
 interface POSDeviceTableProps {
   displayedDevices: Device[];
@@ -276,7 +273,7 @@ interface POSDeviceTableProps {
   page: number;
   totalPages: number;
   onPageChange: (value: number) => void;
-  handleToggleDcStatus: (device: Device) => void; // ADD: called when user confirms status change
+handleToggleDcStatus: (device: Device) => void;
 }
 
 const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
@@ -288,7 +285,7 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
   page,
   totalPages,
   onPageChange,
-  handleToggleDcStatus, // ADD
+handleToggleDcStatus,
 }) => {
   const displayedDevice = displayedDevices;
 
@@ -333,8 +330,9 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
   return (
     <Box>
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(95.9vh - 170px)' }}>
-        <table className="custom-table">
+       <div className="item-master-table-container yen-pos-device-table-container">
+        <table className="item-master-table yen-pos-device-table">
+
           <thead>
             <tr>
               <th>S.No</th>
@@ -353,106 +351,97 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
           <tbody>
             {displayedDevice.length > 0 ? (
               displayedDevice.map((device, index) => (
-                <tr key={device.id || index}>
-                  <td style={{ textAlign: 'center' }}>{(page - 1) * 15 + index + 1}</td>
-                  <td style={{ textAlign: 'center' }}>{device.tillId}</td>
-                  <td style={{ textAlign: 'center' }}>{device.deviceName}</td>
-                  <td style={{ textAlign: 'center' }}>{device.companyName}</td>
-                  <td style={{ textAlign: 'center' }}>{device.branchName}</td>
-                  <td style={{ textAlign: 'center' }}>{device.aliasName}</td>
-                  <td style={{ textAlign: 'center' }}>{device.deviceCode}</td>
+                 <tr key={device.id || index} className="item-master-data-row">
+                  <td>{(page - 1) * 15 + index + 1}</td>
+                  <td>{device.tillId}</td>
+                  <td>{device.deviceName}</td>
+                  <td>{device.companyName}</td>
+                  <td>{device.branchName}</td>
+                  <td>{device.aliasName}</td>
+                  <td>{device.deviceCode}</td>
 
-                  {/* DC Status as clickable badge */}
-                  <td style={{ textAlign: 'center' }}>
-                    <span
+                  <td>
+                    <button
+                      type="button"
                       onClick={() => handleOpenStatusDialog(device)}
                       title="Click to change status"
-                      style={{
-                        cursor: 'pointer',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        fontFamily: "'Poppins', sans-serif",
-                        padding: '2px 10px',
-                        borderRadius: '12px',
-                        backgroundColor: isActiveStatus(device.dcStatus) ? '#e8f5e9' : '#fce4ec',
-                        color: isActiveStatus(device.dcStatus) ? '#2e7d32' : '#c62828',
-                      }}
+                      className={`purchase-master-status-pill yen-pos-clickable-status ${
+                        isActiveStatus(device.dcStatus) ? 'is-active' : 'is-inactive'
+                      }`}
                     >
                       {device.dcStatus}
-                    </span>
+                    </button>
                   </td>
 
-                  <td style={{ textAlign: 'center' }}>
-                    <span style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      fontFamily: "'Poppins', sans-serif",
-                      padding: '2px 10px',
-                      borderRadius: '12px',
-                      backgroundColor: device.isServer ? '#e8f5e9' : '#fce4ec',
-                      color: device.isServer ? '#2e7d32' : '#c62828',
-                    }}>
+               <td>
+                     <span
+                      className={`purchase-master-status-pill ${
+                        device.isServer ? 'is-active' : 'is-inactive'
+                      }`}
+                    >
                       {device.isServer ? 'Yes' : 'No'}
                     </span>
                   </td>
 
-                  {/* Description cell with View icon */}
-                  <td style={{ textAlign: 'center' }}>
-                    <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                      <Typography
+               <td>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      gap={0.5}
+                    >    <Typography
                         variant="body2"
                         noWrap
-                        sx={{
-                          maxWidth: 50,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          fontFamily: '"Poppins", sans-serif'
-                        }}
+                       className="yen-pos-description-text"
                       >
                         {device.description || '-'}
                       </Typography>
-                      <button
-                        onClick={() => handleOpenDescription(device.description || '')}
-                        title="View full description"
-                        className='edit-btn'
+                     <IconButton
+                       onClick={() =>
+                          handleOpenDescription(device.description || '')
+                        }            title="View full description"
+                        className="purchase-master-action-button is-edit"
+                        size="small"
                       >
-                        <VisibilityIcon fontSize="small" />
-                      </button>
+                         <VisibilityOutlinedIcon />
+                      </IconButton>
                     </Box>
                   </td>
 
-                  {/* Actions */}
-                  <td style={{ textAlign: 'center' }}>
-                    {!showDeactivated && (
-                      <button
-                        color="primary"
-                        onClick={() => handleEditDevice(device)}
-                        className='edit-btn'
-                        title='Edit'
-                      >
-                        <EditIcon />
-                      </button>
-                    )}
+                    <td className="item-master-actions-cell">
+                    <div>
+                      {!showDeactivated && (
+                        <IconButton
+                          onClick={() => handleEditDevice(device)}
+                          className="purchase-master-action-button is-edit"
+                          title="Edit"
+                          size="small"
+                        >
+                          <EditOutlinedIcon />
+                        </IconButton>
+                      )}
 
-                    {!showDeactivated ? (
-                      <button
-                        color="primary"
-                        onClick={() => handleDeactivate(device)}
-                        className='deactivate-btn'
-                        title="deactivate"
-                      >
-                        <DeleteIcon />
-                      </button>
-                    ) : (
-                      <button
-                        color="primary"
-                        onClick={() => handleActivate(device)}
-                        className='activate-btn'
-                        title="activate"
-                      >
-                        <RefreshIcon />
-                      </button>
-                    )}
+                      {!showDeactivated ? (
+                        <IconButton
+                          onClick={() => handleDeactivate(device)}
+                          className="purchase-master-action-button is-delete"
+                          title="Deactivate"
+                          size="small"
+                        >
+                          <DeleteOutlineRoundedIcon />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          onClick={() => handleActivate(device)}
+                          className="purchase-master-action-button is-activate"
+                          title="Activate"
+                          size="small"
+                        >
+                          <RestoreRoundedIcon />
+                        </IconButton>
+                      )}
+                    </div>
+    
                   </td>
                 </tr>
               ))
@@ -475,6 +464,7 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
             page={page}
             color="primary"
             onChange={(_, value) => onPageChange(value)}
+            className="item-master-pagination"
           />
         </Box>
       )}
@@ -485,18 +475,20 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
         onClose={handleCloseDescription}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          className: "dialog-paper-medium",
-        }}>
-        <DialogTitle className='dialog-title'>Description</DialogTitle>
-        <DialogContent dividers className='dialog-content'>
+        PaperProps={{ className: 'dialog-paper-medium' }}
+      >
+        <DialogTitle className="dialog-title">Description</DialogTitle>
+        <DialogContent dividers className="dialog-content">
           <Typography variant="body1" style={{ whiteSpace: 'pre-line' }}>
             {selectedDescription}
           </Typography>
         </DialogContent>
-        <DialogActions className='dialog-actions'>
-          <button onClick={handleCloseDescription} color="primary" className='btn-secondary'>
-            Close
+       <DialogActions className="dialog-actions">
+          <button
+            type="button"
+            onClick={handleCloseDescription}
+            className="btn-secondary"
+          >            Close
           </button>
         </DialogActions>
       </Dialog>
@@ -507,25 +499,34 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
         onClose={handleCloseStatusDialog}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          className: "dialog-paper-medium",
-        }}>
-        <DialogTitle className='dialog-title'>Confirm Status Change</DialogTitle>
-        <DialogContent dividers className='dialog-content'>
+       PaperProps={{ className: 'dialog-paper-medium' }}
+      >
+        <DialogTitle className="dialog-title">
+          Confirm Status Change
+        </DialogTitle>
+        <DialogContent dividers className="dialog-content">
           <Typography variant="body1">
-            {selectedDevice && (
-              isActiveStatus(selectedDevice.dcStatus)
+          {selectedDevice &&
+              (isActiveStatus(selectedDevice.dcStatus)
+   
                 ? `Are you sure you want to change the status of "${selectedDevice.deviceName}" to Inactive?`
-                : `Are you sure you want to change the status of "${selectedDevice.deviceName}" to Active?`
-            )}
+                          : `Are you sure you want to change the status of "${selectedDevice.deviceName}" to Active?`)}
+
           </Typography>
         </DialogContent>
-        <DialogActions className='dialog-actions'>
-          <button onClick={handleCloseStatusDialog} className='btn-secondary'>
+      <DialogActions className="dialog-actions">
+          <button
+            type="button"
+            onClick={handleCloseStatusDialog}
+            className="btn-secondary"
+          >
             Cancel
           </button>
-          <button onClick={handleConfirmStatusChange} className='btn-primary'>
-            Confirm
+ <button
+           type="button"
+            onClick={handleConfirmStatusChange}
+            className="btn-primary"
+          >            Confirm
           </button>
         </DialogActions>
       </Dialog>

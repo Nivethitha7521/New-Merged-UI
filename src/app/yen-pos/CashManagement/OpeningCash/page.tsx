@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import { OpeningCashDialog } from '../OpeningCash/Modules/OpeningCashDialog';
 import { OpeningCashTable } from '../OpeningCash/Modules/OpeningCashTableComponent';
-import CashManagementPage from '../page';
 import {
   RootState,
   AppDispatch,
@@ -281,7 +280,7 @@ const OpeningCashPage: React.FC = () => {
 
   return (
     <>
-      <CashManagementPage />
+     
 
       {/* <Box
         sx={{
