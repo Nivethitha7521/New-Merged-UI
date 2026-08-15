@@ -432,6 +432,7 @@ const WareHouseDialog: React.FC<WareHouseDialogProps> = ({
         onClose={handleCloseRequest}
         maxWidth="md"
         fullWidth
+        className="ma-scope warehouse-form-dialog"
         PaperProps={{ className: "dialog-paper" }}
         TransitionProps={{ onEntered }}
       >

@@ -1,0 +1,165 @@
+/* =========================================================
+   YEN POS — YEN PURCHASE / ITEM MASTER VISUAL PARITY
+   Presentation only. No API, Redux, handler or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-toolbar-title {
+    margin: 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-toolbar-title {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-apply-all-input {
+    width: calc(var(--erp-ui) * 17.5) !important;
+    flex: 0 0 calc(var(--erp-ui) * 17.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-apply-all-input
+    .MuiOutlinedInput-root {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-apply-all-input
+    .MuiInputBase-input {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  /* POS Devices keeps both existing searches; only their layout changes. */
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-device-searches {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(
+      2,
+      minmax(calc(var(--erp-ui) * 28), calc(var(--erp-ui) * 36))
+    ) !important;
+    justify-content: center !important;
+    gap: var(--erp-ui) !important;
+  }
+
+  .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-device-searches
+    .yen-pos-device-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  /* POS Device has many columns, so keep horizontal table scrolling. */
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-device-table {
+    min-width: calc(var(--erp-ui) * 190) !important;
+    table-layout: auto !important;
+  }
+
+  .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-device-table
+    > :is(thead, tbody)
+    > tr
+    > :is(th, td) {
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-description-text {
+    max-width: calc(var(--erp-ui) * 12) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-family: inherit !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-description-text {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-clickable-status {
+    cursor: pointer !important;
+    border: 0 !important;
+  }
+
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-view-pill {
+    min-height: calc(var(--erp-ui) * 2.875) !important;
+    padding: calc(var(--erp-ui) * 0.375) calc(var(--erp-ui) * 1.25) !important;
+    color: var(--erp-accent, #155eef) !important;
+    background: var(--erp-accent-soft, #eef4ff) !important;
+    border: 1px solid var(--erp-accent-border, #b8cbf8) !important;
+    border-radius: var(--erp-ui) !important;
+    font-family: inherit !important;
+    font-weight: 650 !important;
+    white-space: nowrap !important;
+    cursor: pointer;
+  }
+
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-view-pill:disabled {
+    color: #98a2b3 !important;
+    background: #f2f4f7 !important;
+    border-color: #e4e7ec !important;
+    cursor: default;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-view-pill {
+    font-size: calc(
+      var(--erp-ui) * 1.62 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .yen-pos-reasons-popover {
+    min-width: calc(var(--erp-ui) * 22) !important;
+    max-width: calc(var(--erp-ui) * 48) !important;
+    padding: calc(var(--erp-ui) * 1.5) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-device-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .erp-master-admin-viewport .yen-pos-layout .yen-pos-device-searches {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    order: 2;
+  }
+
+  .erp-master-admin-viewport
+    .yen-pos-layout
+    .yen-pos-device-toolbar
+    .item-master-actions {
+    order: 3;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+}

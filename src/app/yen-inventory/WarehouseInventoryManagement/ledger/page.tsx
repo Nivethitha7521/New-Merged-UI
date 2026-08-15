@@ -1,545 +1,3412 @@
+// 'use client';
+
+// import React, {
+//   useEffect,
+//   useState,
+//   useCallback,
+//   useRef,
+//   useMemo,
+// } from 'react';
+// import 'react-date-range/dist/styles.css';
+// import 'react-date-range/dist/theme/default.css';
+
+// import {
+//   Box,
+//   Typography,
+//   Button,
+//   Table,
+//   TableContainer,
+//   TableHead,
+//   TableBody,
+//   TableRow,
+//   TableCell,
+//   CircularProgress,
+//   Chip,
+//   Grid,
+//   Card,
+//   CardContent,
+//   Divider,
+//   alpha,
+//   useTheme,
+//   useMediaQuery,
+//   Collapse,
+//   IconButton,
+//   Tooltip,
+//   Paper,
+// } from '@mui/material';
+
+// import FilterAltIcon from '@mui/icons-material/FilterAlt';
+// import DownloadIcon from '@mui/icons-material/Download';
+// import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
+// import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+// import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+// import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+// import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+// import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+// import RefreshIcon from '@mui/icons-material/Refresh';
+// import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+// import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+// import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+
+// import { useDispatch, useSelector } from 'react-redux';
+// import { AppDispatch, RootState } from '@/redux/store';
+// import moment from 'moment';
+// import { startOfMonth, endOfDay } from 'date-fns';
+// import DateRangeDialog from '../../../../components/Inventory/ledger/daterangeDialog';
+// import CollapsibleFilter from '@/components/Inventory/physcialstockvarience/ui/collabsfiler';
+// import { debounce } from 'lodash';
+// import jsPDF from 'jspdf';
+// import autoTable from 'jspdf-autotable';
+
+// import {
+//   fetchStockLedger,
+//   searchPurchaseItems,
+//   addSelectedItem,
+//   clearStockLedger,
+//   clearSearchResults,
+//   clearSelectedItems,
+//   setSearchQuery,
+//   selectStockLedger,
+//   selectStockLoading,
+//   selectSearchResults,
+//   selectSearchLoading,
+//   exportStockLedgerExcel,
+//   selectSearchQuery,
+//   selectWarehouses,
+//   selectSelectedWarehouse,
+//   clearSelectedWarehouse,
+//   setSelectedWarehouse,
+//   fetchWarehouses,
+// } from '../../../../features/yen_inventory/ledgerrawSlice';
+
+// import { convertImageToBase64 } from '@/components/Hooks/useTodayDate';
+// import { selectBusinesses } from '@/features/businessSlice';
+// import WarehouseInventoryManagementPage from '../page';
+// import DownloadDialog from '@/components/Inventory/ledger/ConfirmDialog';
+// import {
+//   formatLedgerValue,
+//   getWarehouseLedgerColor,
+//   getWarehouseLedgerSummary,
+//   type DateSelectionRange,
+//   type SearchItemsDebounce,
+// } from '@/features/yen_inventory/warehouseLedgerUtils';
+
+// const T = {
+//   pageBg: '#f6f9fd',
+//   surface: '#ffffff',
+//   surfaceSoft: '#fbfdff',
+
+//   headerGlass: 'rgba(248,251,255,0.72)',
+//   headerStickyGlass: 'rgba(248,251,255,0.92)',
+
+//   border: '#e8eef6',
+//   borderSoft: '#f0f4f8',
+//   borderStrong: 'rgba(203,213,225,0.62)',
+
+//   accent: '#1976d2',
+//   accentDark: '#1258a8',
+//   accentBg: '#eef6ff',
+
+//   success: '#16a34a',
+//   successBg: '#ecfdf5',
+//   successBorder: '#bbf7d0',
+
+//   warning: '#d97706',
+//   warningBg: '#fff7ed',
+
+//   danger: '#dc2626',
+//   dangerBg: '#fef2f2',
+
+//   info: '#4f46e5',
+//   infoBg: '#eef2ff',
+
+//   textPrimary: '#0f172a',
+//   textSecondary: '#334155',
+//   textMuted: '#64748b',
+
+//   fontDisplay: `'Plus Jakarta Sans', 'DM Sans', sans-serif`,
+
+//   r1: '8px',
+//   r2: '12px',
+//   r3: '14px',
+// };
+
+// interface StatCardProps {
+//   label: string;
+//   value: string | number;
+//   icon: React.ReactNode;
+//   color: string;
+//   bgColor: string;
+// }
+
+// const StatCard: React.FC<StatCardProps> = ({
+//   label,
+//   value,
+//   icon,
+//   color,
+//   bgColor,
+// }) => (
+//   <Card
+//     elevation={0}
+//     sx={{
+//       height: '100%',
+//       border: `1px solid ${T.border}`,
+//       borderRadius: T.r2,
+//       background:
+//         'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(249,252,255,0.96) 100%)',
+//       boxShadow: '0 1px 4px rgba(15,23,42,0.04)',
+//     }}
+//   >
+//     <CardContent
+//       sx={{
+//         p: '8px 10px !important',
+//         display: 'flex',
+//         alignItems: 'center',
+//         gap: 1,
+//         minHeight: 48,
+//       }}
+//     >
+//       <Box
+//         sx={{
+//           width: 32,
+//           height: 32,
+//           borderRadius: T.r1,
+//           bgcolor: bgColor,
+//           color,
+//           display: 'flex',
+//           alignItems: 'center',
+//           justifyContent: 'center',
+//           flexShrink: 0,
+//         }}
+//       >
+//         {icon}
+//       </Box>
+
+//       <Box sx={{ minWidth: 0 }}>
+//         <Typography
+//           sx={{
+//             fontSize: '0.58rem',
+//             fontWeight: 850,
+//             color: T.textMuted,
+//             textTransform: 'uppercase',
+//             letterSpacing: '0.07em',
+//             mb: 0.2,
+//           }}
+//         >
+//           {label}
+//         </Typography>
+
+//         <Typography
+//           sx={{
+//             fontSize: '0.9rem',
+//             fontWeight: 900,
+//             color: T.textPrimary,
+//             lineHeight: 1,
+//             fontFamily: T.fontDisplay,
+//             fontVariantNumeric: 'tabular-nums',
+//           }}
+//         >
+//           {value}
+//         </Typography>
+//       </Box>
+//     </CardContent>
+//   </Card>
+// );
+
+// const TABLE_COLS = [
+//   { label: 'Date', align: 'left' as const, sticky: true, accent: false, w: 110 },
+//   { label: 'Vendor', align: 'left' as const, sticky: false, accent: false },
+//   { label: 'In', align: 'right' as const, sticky: false, accent: false, color: T.success },
+//   { label: 'Ret-Vend', align: 'right' as const, sticky: false, accent: false, color: T.danger },
+//   { label: 'Return', align: 'right' as const, sticky: false, accent: false, color: T.warning },
+//   { label: 'Dispatch', align: 'left' as const, sticky: false, accent: false },
+//   { label: 'Out', align: 'right' as const, sticky: false, accent: false, color: T.danger },
+//   { label: 'Balance', align: 'right' as const, sticky: false, accent: true },
+// ];
+
+// const StockSummaryPage = () => {
+//   const dispatch = useDispatch<AppDispatch>();
+//   const theme = useTheme();
+//   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+//   const stockLedger = useSelector(selectStockLedger);
+//   const loading = useSelector(selectStockLoading);
+//   const searchResults = useSelector(selectSearchResults);
+//   const warehouses = useSelector(selectWarehouses);
+//   const selectedWarehouse = useSelector(selectSelectedWarehouse);
+//   const searchLoading = useSelector(selectSearchLoading);
+//   const selectedItems = useSelector(
+//     (state: RootState) => state.stockSummary.selectedItems
+//   );
+//   const { businesses } = useSelector(selectBusinesses);
+//   const business = businesses?.[0];
+//   const searchQuery = useSelector(selectSearchQuery);
+//   const currentPage = useSelector(
+//     (state: RootState) => state.stockSummary.currentPage
+//   );
+//   const hasMore = useSelector((state: RootState) => state.stockSummary.hasMore);
+
+//   const [openDialog, setOpenDialog] = useState(false);
+//   const [filtersOpen, setFiltersOpen] = useState(true);
+//   const debouncedSearchRef = useRef<SearchItemsDebounce | null>(null);
+//   const isFetchingRef = useRef(false);
+
+//   const today = new Date();
+
+//   const [selectionRange, setSelectionRange] = useState<DateSelectionRange>({
+//     startDate: startOfMonth(today),
+//     endDate: endOfDay(today),
+//     key: 'selection',
+//   });
+
+//   useEffect(() => {
+//     dispatch(fetchWarehouses({ page: 1, limit: 30 }));
+//     dispatch(searchPurchaseItems({ search: '', page: 1 }));
+
+//     debouncedSearchRef.current = debounce((term: string) => {
+//       dispatch(searchPurchaseItems({ search: term, page: 1 }));
+//     }, 400);
+
+//     return () => debouncedSearchRef.current?.cancel();
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     if (warehouses.length > 0 && !selectedWarehouse) {
+//       const storedLocation = localStorage.getItem("globalSelectedWarehouseLocation");
+//       let defaultWarehouse = warehouses[0].locationId;
+//       if (storedLocation && warehouses.some(w => w.locationId === storedLocation)) {
+//         defaultWarehouse = storedLocation;
+//       }
+//       dispatch(setSelectedWarehouse(defaultWarehouse));
+//     }
+//   }, [warehouses, selectedWarehouse, dispatch]);
+
+//   const handleSearchChange = (value: string) => {
+//     dispatch(setSearchQuery(value));
+//     dispatch(clearSearchResults());
+//     debouncedSearchRef.current?.(value);
+//   };
+
+//   const handleScrollBottom = useCallback(() => {
+//     if (searchLoading || !hasMore || isFetchingRef.current) return;
+
+//     isFetchingRef.current = true;
+
+//     dispatch(searchPurchaseItems({ search: searchQuery, page: currentPage }))
+//       .finally(() => {
+//         isFetchingRef.current = false;
+//       });
+//   }, [dispatch, currentPage, searchLoading, hasMore, searchQuery]);
+
+//   const handleItemSelectionChange = (selected: string[]) => {
+//     const selectedObjects = searchResults
+//       .filter((item) => selected.includes(item.randomId))
+//       .map((item) => ({ randomId: item.randomId, itemName: item.itemName }));
+
+//     dispatch(clearSelectedItems());
+//     selectedObjects.forEach((item) => dispatch(addSelectedItem(item)));
+//   };
+
+//   const fetchLedgerWithCurrentFilters = useCallback(() => {
+//     if (selectedItems.length === 0 || !selectedWarehouse) return;
+
+//     const warehouseName =
+//       warehouses.find((w) => w.locationId === selectedWarehouse)?.locationId ||
+//       '';
+
+//     dispatch(
+//       fetchStockLedger({
+//         fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
+//         toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
+//         itemRandomId: selectedItems.map((item) => item.randomId).join(','),
+//         locationName: warehouseName,
+//       })
+//     );
+//   }, [
+//     dispatch,
+//     selectedItems,
+//     selectedWarehouse,
+//     selectionRange.endDate,
+//     selectionRange.startDate,
+//     warehouses,
+//   ]);
+
+//   const handleFilterClick = () => {
+//     fetchLedgerWithCurrentFilters();
+
+//     if (isMobile) {
+//       setFiltersOpen(false);
+//     }
+//   };
+
+//   const refreshDropdownData = useCallback(() => {
+//     dispatch(fetchWarehouses({ page: 1, limit: 30 }));
+//     dispatch(searchPurchaseItems({ search: searchQuery, page: 1 }));
+//   }, [dispatch, searchQuery]);
+
+//   const handleRefreshLedgerData = useCallback(() => {
+//     refreshDropdownData();
+
+//     if (selectedItems.length === 0 || !selectedWarehouse) {
+//       return;
+//     }
+
+//     const warehouseName =
+//       warehouses.find((w) => w.locationId === selectedWarehouse)?.locationId ||
+//       '';
+
+//     dispatch(
+//       fetchStockLedger({
+//         fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
+//         toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
+//         itemRandomId: selectedItems.map((item) => item.randomId).join(','),
+//         locationName: warehouseName,
+//       })
+//     );
+//   }, [
+//     dispatch,
+//     refreshDropdownData,
+//     selectedItems,
+//     selectedWarehouse,
+//     selectionRange.endDate,
+//     selectionRange.startDate,
+//     warehouses,
+//   ]);
+
+//   const handleClearEverything = () => {
+//     dispatch(clearStockLedger());
+//     dispatch(clearSelectedItems());
+//     dispatch(clearSelectedWarehouse());
+//     dispatch(clearSearchResults());
+//     dispatch(setSearchQuery(''));
+//     dispatch(searchPurchaseItems({ search: '', page: 1 }));
+//     dispatch(fetchWarehouses({ page: 1, limit: 30 }));
+//   };
+
+//   const stats = useMemo(
+//     () => getWarehouseLedgerSummary(stockLedger, selectedItems),
+//     [stockLedger, selectedItems]
+//   );
+
+//   interface LedgerTransaction {
+//     date?: string;
+//     grnVendorName?: string;
+//     dispatchBranch?: string;
+//     inStock?: number | string;
+//     outStock?: number | string;
+//     returnedStock?: number | string;
+//     returnedToVendor?: number | string;
+//     balanceStock?: number | string;
+//     [key: string]: unknown;
+//   }
+
+//   const getLedgerTransactions = (ledger?: { transactions?: unknown }): LedgerTransaction[] =>
+//     Array.isArray(ledger?.transactions) ? (ledger.transactions as LedgerTransaction[]) : [];
+
+//   interface JsPDFWithAutoTable extends jsPDF {
+//     lastAutoTable?: { finalY: number };
+//   }
+
+//   const handleDownloadPDF = async () => {
+//     if (!stockLedger || selectedItems.length === 0) return;
+
+//     const PRIMARY: [number, number, number] = [99, 102, 241];
+//     const LIGHT_BG: [number, number, number] = [238, 242, 255];
+//     const DARK: [number, number, number] = [30, 41, 59];
+//     const doc = new jsPDF('p', 'mm', 'a4') as JsPDFWithAutoTable;
+
+//     let logo = '';
+
+//     if (business?.imageUrl) {
+//       try {
+//         logo = await convertImageToBase64(business.imageUrl);
+//       } catch {}
+//     }
+
+//     const warehouseName =
+//       warehouses.find((w) => w.locationId === selectedWarehouse)
+//         ?.locationName || '';
+
+//     selectedItems.forEach((item, index) => {
+//       const ledger = stockLedger[item.randomId];
+
+//       if (!ledger) return;
+//       if (index > 0) doc.addPage();
+
+//       doc.setFillColor(248, 250, 252);
+//       doc.rect(0, 0, 210, 35, 'F');
+
+//       if (logo) doc.addImage(logo, 'PNG', 14, 8, 25, 12);
+
+//       doc.setFont('helvetica', 'bold');
+//       doc.setFontSize(12);
+//       doc.setTextColor(...DARK);
+//       doc.text(business?.companyName || 'Company Name', 45, 14);
+
+//       doc.setFontSize(8);
+//       doc.setFont('helvetica', 'normal');
+//       doc.text(`${business?.address1 || ''} ${business?.address2 || ''}`, 45, 19);
+//       doc.text(`GSTIN: ${business?.gstIn || '-'}`, 45, 23);
+
+//       doc.setFont('helvetica', 'bold');
+//       doc.setFontSize(11);
+//       doc.setTextColor(...PRIMARY);
+//       doc.text('STOCK LEDGER REPORT', 196, 14, { align: 'right' });
+
+//       doc.setFontSize(8);
+//       doc.setTextColor(100);
+//       doc.text(
+//         `Period: ${moment(selectionRange.startDate).format('DD-MM-YYYY')} to ${moment(
+//           selectionRange.endDate
+//         ).format('DD-MM-YYYY')}`,
+//         196,
+//         20,
+//         { align: 'right' }
+//       );
+//       doc.text(`Warehouse: ${warehouseName}`, 196, 25, { align: 'right' });
+
+//       doc.setDrawColor(200);
+//       doc.line(14, 38, 196, 38);
+
+//       doc.setFontSize(10);
+//       doc.setTextColor(...PRIMARY);
+//       doc.text(`Item: ${item.itemName}`, 14, 45);
+
+//       doc.setFillColor(...LIGHT_BG);
+//       doc.rect(14, 48, 182, 10, 'F');
+
+//       doc.setFontSize(9);
+//       doc.setTextColor(...DARK);
+//       doc.text(
+//         `Opening Balance: ${formatLedgerValue(ledger.openingReference?.closingStock)}`,
+//         18,
+//         54.5
+//       );
+//       doc.text(
+//         `Closing Balance: ${formatLedgerValue(ledger.closingSummary?.closingStock)}`,
+//         140,
+//         54.5
+//       );
+
+//       autoTable(doc, {
+//         startY: 62,
+//         margin: { left: 14, right: 14 },
+//         theme: 'grid',
+//         head: [
+//           [
+//             'Date',
+//             'Vendor / Particulars',
+//             'In Stock',
+//             'Ret. Out',
+//             'Dispatch Location',
+//             'Out',
+//             'Balance',
+//           ],
+//         ],
+//         body: getLedgerTransactions(ledger).map((row) => [
+//           moment(row.date).format('DD-MM-YYYY'),
+//           row.grnVendorName || row.dispatchBranch || '-',
+//           formatLedgerValue(row.inStock),
+//           formatLedgerValue(Number(row.returnedToVendor)),
+//           row.dispatchBranch || '-',
+//           formatLedgerValue(row.outStock),
+//           formatLedgerValue(row.balanceStock),
+//         ]),
+//         styles: { fontSize: 8, cellPadding: 2.5, valign: 'middle' },
+//         headStyles: {
+//           fillColor: PRIMARY,
+//           textColor: [255, 255, 255],
+//           fontStyle: 'bold',
+//           halign: 'center',
+//         },
+//         columnStyles: {
+//           0: { cellWidth: 22, halign: 'left' },
+//           1: { cellWidth: 'auto', halign: 'left' },
+//           2: { cellWidth: 18, halign: 'right' },
+//           3: { cellWidth: 18, halign: 'right' },
+//           4: { cellWidth: 35, halign: 'left' },
+//           5: { cellWidth: 18, halign: 'right' },
+//           6: { cellWidth: 22, halign: 'right', fontStyle: 'bold' },
+//         },
+//       });
+//     });
+
+//     doc.save(`WarehouseStockLedger_${moment().format('DD_MM_YYYY')}.pdf`);
+//   };
+
+//   const handleDownloadExcel = () => {
+//     if (selectedItems.length === 0) return;
+
+//     const warehouseName =
+//       warehouses.find((w) => w.locationId === selectedWarehouse)?.locationId ||
+//       '';
+
+//     dispatch(
+//       exportStockLedgerExcel({
+//         fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
+//         toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
+//         itemRandomId: selectedItems.map((item) => item.randomId).join(','),
+//         locationName: warehouseName || undefined,
+//       })
+//     );
+
+//     setOpenDialog(false);
+//   };
+
+//   const hasData =
+//     !!stockLedger &&
+//     selectedItems.length > 0 &&
+//     Object.keys(stockLedger).length > 0;
+
+//   const selectedWarehouseObj = warehouses.find(
+//     (warehouse) => warehouse.locationId === selectedWarehouse
+//   );
+
+//   const warehouseLabel = selectedWarehouseObj?.locationName || '';
+
+//   return (
+//     <>
+//       <style>{`
+//         .wsl-root * {
+//           font-family: 'Plus Jakarta Sans', sans-serif;
+//         }
+
+//         .wsl-scroll::-webkit-scrollbar {
+//           width: 6px;
+//           height: 6px;
+//         }
+
+//         .wsl-scroll::-webkit-scrollbar-track {
+//           background: transparent;
+//         }
+
+//         .wsl-scroll::-webkit-scrollbar-thumb {
+//           background: #cbd5e1;
+//           border-radius: 999px;
+//         }
+
+//         .wsl-scroll::-webkit-scrollbar-thumb:hover {
+//           background: #94a3b8;
+//         }
+
+//         .wsl-row:hover td {
+//           background: #f8fbff !important;
+//         }
+
+//         @keyframes wslIn {
+//           from {
+//             opacity: 0;
+//             transform: translateY(5px);
+//           }
+//           to {
+//             opacity: 1;
+//             transform: translateY(0);
+//           }
+//         }
+
+//         .wsl-in {
+//           animation: wslIn 0.22s ease both;
+//         }
+//       `}</style>
+
+//       <Box
+//         className="wsl-root"
+//         sx={{
+//           bgcolor: T.pageBg,
+//           height: 'calc(100dvh - var(--app-topbar-height, 64px))',
+//           minHeight: 0,
+//           display: 'flex',
+//           flexDirection: 'column',
+//           overflow: 'hidden',
+//         }}
+//       >
+//         <WarehouseInventoryManagementPage />
+
+//         <Box
+//           sx={{
+//             px: { xs: 0.75, md: 1 },
+//             py: 0.55,
+//             flexShrink: 0,
+//             borderBottom: `1px solid ${T.border}`,
+//             background:
+//               'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,251,255,0.82) 100%)',
+//             backdropFilter: 'blur(12px)',
+//             WebkitBackdropFilter: 'blur(12px)',
+//           }}
+//         >
+//           <Collapse in={filtersOpen || !isMobile}>
+//             <Box
+//               sx={{
+//                 display: 'flex',
+//                 alignItems: 'flex-end',
+//                 gap: 0.5,
+//                 flexWrap: 'wrap',
+//                 width: '100%',
+
+//                 '& .inventory-filter-field': {
+//                   width: '100% !important',
+//                   minWidth: '0 !important',
+//                   maxWidth: '100% !important',
+//                   flex: '1 1 auto !important',
+//                 },
+
+//                 '& .inventory-filter-button': {
+//                   height: '34px !important',
+//                   minHeight: '34px !important',
+//                   borderRadius: '9px !important',
+//                   padding: '3px 8px !important',
+//                 },
+//               }}
+//             >
+//               <Box
+//                 sx={{
+//                   height: 34,
+//                   px: 0.9,
+//                   display: { xs: 'none', sm: 'inline-flex' },
+//                   alignItems: 'center',
+//                   justifyContent: 'center',
+//                   borderRadius: T.r1,
+//                   border: `1px solid ${T.border}`,
+//                   bgcolor: T.surface,
+//                   color: T.accentDark,
+//                   fontSize: '0.68rem',
+//                   fontWeight: 950,
+//                   lineHeight: 1,
+//                   whiteSpace: 'nowrap',
+//                   flex: '0 0 auto',
+//                   gap: 0.5,
+//                 }}
+//               >
+//                 <Inventory2OutlinedIcon sx={{ fontSize: 14 }} />
+//                 Stock Ledger
+//               </Box>
+
+//               <Box
+//                 sx={{
+//                   flex: {
+//                     xs: '1 1 100%',
+//                     sm: '0 1 clamp(145px, 16vw, 190px)',
+//                   },
+//                   minWidth: { xs: 0, sm: 145 },
+//                   maxWidth: { xs: '100%', sm: 200 },
+//                 }}
+//               >
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.56rem',
+//                     fontWeight: 900,
+//                     color: T.textMuted,
+//                     textTransform: 'uppercase',
+//                     letterSpacing: '0.07em',
+//                     mb: 0.2,
+//                   }}
+//                 >
+//                   Warehouse
+//                 </Typography>
+
+//                 <CollapsibleFilter
+//                   title="Select warehouse"
+//                   inputType="single-select"
+//                   options={warehouses.map((warehouse) => ({
+//                     label: warehouse.locationName,
+//                     value: warehouse.locationId,
+//                   }))}
+//                   selectedOptions={selectedWarehouse || ''}
+//                   onChange={(value) => {
+//                      localStorage.setItem("globalSelectedWarehouseLocation", value as string);
+//                      dispatch(setSelectedWarehouse(value as string));
+//                    }}
+//                   onClear={() => dispatch(clearSelectedWarehouse())}
+//                 />
+//               </Box>
+
+//               <Box
+//                 sx={{
+//                   flex: {
+//                     xs: '1 1 100%',
+//                     sm: '0 1 clamp(220px, 28vw, 390px)',
+//                     lg: '0 1 clamp(240px, 24vw, 430px)',
+//                   },
+//                   minWidth: { xs: 0, sm: 220 },
+//                   maxWidth: { xs: '100%', sm: 410, lg: 440 },
+//                 }}
+//               >
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.56rem',
+//                     fontWeight: 900,
+//                     color: T.textMuted,
+//                     textTransform: 'uppercase',
+//                     letterSpacing: '0.07em',
+//                     mb: 0.2,
+//                   }}
+//                 >
+//                   Items
+//                 </Typography>
+
+//                 <CollapsibleFilter
+//                   title="Select items"
+//                   inputType="multi-select"
+//                   isMulti
+//                   options={searchResults.map((item) => ({
+//                     label: item.itemName,
+//                     value: item.randomId,
+//                   }))}
+//                   selectedOptions={selectedItems.map((item) => item.randomId)}
+//                   onChange={(value) => handleItemSelectionChange(value as string[])}
+//                   onClear={() => dispatch(clearSelectedItems())}
+//                   onSearch={handleSearchChange}
+//                   onScrollBottom={handleScrollBottom}
+//                   loading={searchLoading}
+//                 />
+//               </Box>
+
+//               <Box
+//                 sx={{
+//                   flex: {
+//                     xs: '1 1 100%',
+//                     sm: '0 1 clamp(165px, 16vw, 210px)',
+//                   },
+//                   minWidth: { xs: 0, sm: 165 },
+//                   maxWidth: { xs: '100%', sm: 220 },
+//                 }}
+//               >
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.56rem',
+//                     fontWeight: 900,
+//                     color: T.textMuted,
+//                     textTransform: 'uppercase',
+//                     letterSpacing: '0.07em',
+//                     mb: 0.2,
+//                   }}
+//                 >
+//                   Date Range
+//                 </Typography>
+
+//                 <DateRangeDialog
+//                   selectionRange={selectionRange}
+//                   setSelectionRange={setSelectionRange}
+//                   onApply={handleFilterClick}
+//                 />
+//               </Box>
+
+//               <Box
+//                 sx={{
+//                   display: 'flex',
+//                   flexWrap: 'wrap',
+//                   alignItems: 'flex-end',
+//                   justifyContent: { xs: 'flex-end', sm: 'flex-start' },
+//                   gap: 0.45,
+//                   flex: { xs: '1 1 100%', sm: '0 0 auto' },
+//                   ml: { xs: 0, lg: 'auto' },
+//                 }}
+//               >
+//                 <Tooltip title="Apply filters" arrow>
+//                   <span>
+//                     <Button
+//                       variant="contained"
+//                       size="small"
+//                       startIcon={
+//                         loading ? (
+//                           <CircularProgress size={13} color="inherit" />
+//                         ) : (
+//                           <FilterAltIcon />
+//                         )
+//                       }
+//                       onClick={handleFilterClick}
+//                       disabled={
+//                         selectedItems.length === 0 || !selectedWarehouse || loading
+//                       }
+//                       sx={{
+//                         bgcolor: T.accent,
+//                         '&:hover': { bgcolor: T.accentDark },
+//                         '&:disabled': {
+//                           bgcolor: T.border,
+//                           color: T.textMuted,
+//                         },
+//                         borderRadius: T.r1,
+//                         textTransform: 'none',
+//                         fontWeight: 850,
+//                         fontSize: '0.72rem',
+//                         height: 34,
+//                         px: 1.3,
+//                         minWidth: 84,
+//                         boxShadow: `0 4px 12px ${alpha(T.accent, 0.22)}`,
+//                       }}
+//                     >
+//                       Apply
+//                     </Button>
+//                   </span>
+//                 </Tooltip>
+
+//                 <Tooltip title="Download report" arrow>
+//                   <span>
+//                     <IconButton
+//                       disabled={!hasData}
+//                       onClick={() => setOpenDialog(true)}
+//                       size="small"
+//                       aria-label="Download report"
+//                       sx={{
+//                         width: 34,
+//                         height: 34,
+//                         borderRadius: T.r1,
+//                         border: `1px solid ${
+//                           hasData ? T.successBorder : T.border
+//                         }`,
+//                         color: hasData ? T.success : T.textMuted,
+//                         bgcolor: T.surface,
+//                         '&:hover': {
+//                           bgcolor: T.successBg,
+//                           borderColor: T.successBorder,
+//                         },
+//                       }}
+//                     >
+//                       <DownloadIcon sx={{ fontSize: 17 }} />
+//                     </IconButton>
+//                   </span>
+//                 </Tooltip>
+
+//                 <Tooltip title="Refresh data" arrow>
+//                   <span>
+//                     <IconButton
+//                       size="small"
+//                       onClick={handleRefreshLedgerData}
+//                       disabled={loading}
+//                       aria-label="Refresh data"
+//                       sx={{
+//                         width: 34,
+//                         height: 34,
+//                         borderRadius: T.r1,
+//                         border: `1px solid ${T.border}`,
+//                         color: T.accent,
+//                         bgcolor: T.surface,
+//                         '&:hover': {
+//                           bgcolor: T.accentBg,
+//                           borderColor: T.borderStrong,
+//                         },
+//                         '&.Mui-disabled': {
+//                           color: T.textMuted,
+//                           bgcolor: T.surfaceSoft,
+//                         },
+//                       }}
+//                     >
+//                       {loading ? (
+//                         <CircularProgress size={15} thickness={4} />
+//                       ) : (
+//                         <RefreshIcon sx={{ fontSize: 16 }} />
+//                       )}
+//                     </IconButton>
+//                   </span>
+//                 </Tooltip>
+
+//                 {isMobile && (
+//                   <IconButton
+//                     size="small"
+//                     onClick={() => setFiltersOpen((value) => !value)}
+//                     aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+//                     sx={{
+//                       width: 34,
+//                       height: 34,
+//                       borderRadius: T.r1,
+//                       border: `1px solid ${T.border}`,
+//                       bgcolor: T.surface,
+//                     }}
+//                   >
+//                     <FilterAltIcon sx={{ fontSize: 16, color: T.accent }} />
+//                   </IconButton>
+//                 )}
+//               </Box>
+//             </Box>
+//           </Collapse>
+//         </Box>
+
+//         {hasData && (
+//           <Box
+//             sx={{
+//               px: { xs: 0.75, md: 1 },
+//               pt: 0.55,
+//               pb: 0.45,
+//               flexShrink: 0,
+//             }}
+//             className="wsl-in"
+//           >
+//             <Grid container spacing={0.5}>
+//               {[
+//                 {
+//                   label: 'Items',
+//                   value: stats.totalItems,
+//                   icon: <Inventory2OutlinedIcon sx={{ fontSize: 15 }} />,
+//                   color: T.accent,
+//                   bgColor: T.accentBg,
+//                 },
+//                 {
+//                   label: 'Opening',
+//                   value: stats.totalOpening.toFixed(2),
+//                   icon: <LoginOutlinedIcon sx={{ fontSize: 15 }} />,
+//                   color: T.info,
+//                   bgColor: T.infoBg,
+//                 },
+//                 {
+//                   label: 'Movement',
+//                   value: stats.totalMovement.toFixed(2),
+//                   icon: <SwapHorizIcon sx={{ fontSize: 15 }} />,
+//                   color: T.warning,
+//                   bgColor: T.warningBg,
+//                 },
+//                 {
+//                   label: 'Closing',
+//                   value: stats.totalClosing.toFixed(2),
+//                   icon: <CheckCircleOutlineIcon sx={{ fontSize: 15 }} />,
+//                   color: T.success,
+//                   bgColor: T.successBg,
+//                 },
+//               ].map((card, index) => (
+//                 <Grid size={{ xs: 6, sm: 3 }} key={index}>
+//                   <StatCard {...card} />
+//                 </Grid>
+//               ))}
+//             </Grid>
+//           </Box>
+//         )}
+
+//         <Box
+//           sx={{
+//             flex: 1,
+//             minHeight: 0,
+//             px: { xs: 0.75, md: 1 },
+//             pb: 0.55,
+//             display: 'flex',
+//             flexDirection: 'column',
+//           }}
+//         >
+//           {hasData && (
+//             <Box
+//               className="wsl-scroll"
+//               sx={{
+//                 flex: 1,
+//                 minHeight: 0,
+//                 overflowY: 'auto',
+//                 overflowX: 'hidden',
+//                 display: 'flex',
+//                 flexDirection: 'column',
+//                 gap: 0.65,
+//                 pr: 0.1,
+//               }}
+//             >
+//               {selectedItems.map((item, index) => {
+//                 const ledger = stockLedger[item.randomId];
+
+//                 if (!ledger) return null;
+
+//                 const ic = getWarehouseLedgerColor(index);
+//                 const transactions = getLedgerTransactions(ledger);
+
+//                 const totalIn = transactions.reduce(
+//                   (sum, txn) =>
+//                     sum +
+//                     (Number(txn.inStock) || 0) +
+//                     (Number(txn.returnedStock) || 0),
+//                   0
+//                 );
+
+//                 const totalOut = transactions.reduce(
+//                   (sum, txn) =>
+//                     sum +
+//                     (Number(txn.outStock) || 0) +
+//                     (Number(txn.returnedToVendor) || 0),
+//                   0
+//                 );
+
+//                 return (
+//                   <Paper
+//                     key={item.randomId}
+//                     elevation={0}
+//                     className="wsl-in"
+//                     sx={{
+//                       borderRadius: T.r3,
+//                       overflow: 'hidden',
+//                       border: `1px solid ${T.border}`,
+//                       bgcolor: T.surface,
+//                       boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+//                       flexShrink: 0,
+//                       animationDelay: `${index * 0.035}s`,
+//                     }}
+//                   >
+//                     <Box
+//                       sx={{
+//                         px: { xs: 1, md: 1.2 },
+//                         py: 0.7,
+//                         background:
+//                           'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,251,255,0.88) 100%)',
+//                         borderBottom: `1px solid ${T.border}`,
+//                         display: 'flex',
+//                         alignItems: 'center',
+//                         justifyContent: 'space-between',
+//                         gap: 1,
+//                       }}
+//                     >
+//                       <Box
+//                         sx={{
+//                           display: 'flex',
+//                           alignItems: 'center',
+//                           gap: 0.8,
+//                           minWidth: 0,
+//                         }}
+//                       >
+//                         <Box
+//                           sx={{
+//                             width: 30,
+//                             height: 30,
+//                             borderRadius: T.r1,
+//                             bgcolor: ic.light,
+//                             color: ic.main,
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             justifyContent: 'center',
+//                             fontWeight: 900,
+//                             fontSize: '0.72rem',
+//                             flexShrink: 0,
+//                           }}
+//                         >
+//                           {index + 1}
+//                         </Box>
+
+//                         <Box sx={{ minWidth: 0 }}>
+//                           <Typography
+//                             sx={{
+//                               fontWeight: 900,
+//                               fontSize: { xs: '0.78rem', md: '0.86rem' },
+//                               color: T.textPrimary,
+//                               overflow: 'hidden',
+//                               textOverflow: 'ellipsis',
+//                               whiteSpace: 'nowrap',
+//                               letterSpacing: '-0.02em',
+//                             }}
+//                           >
+//                             {ledger.itemDetails.itemName}
+//                           </Typography>
+
+//                           <Box
+//                             sx={{
+//                               display: 'flex',
+//                               alignItems: 'center',
+//                               gap: 0.5,
+//                               mt: 0.15,
+//                             }}
+//                           >
+//                             <Chip
+//                               label={ledger.itemDetails.uom}
+//                               size="small"
+//                               sx={{
+//                                 height: 16,
+//                                 fontSize: '0.56rem',
+//                                 fontWeight: 900,
+//                                 bgcolor: ic.light,
+//                                 color: ic.main,
+//                                 border: 'none',
+//                               }}
+//                             />
+
+//                             <Typography
+//                               sx={{
+//                                 fontSize: '0.6rem',
+//                                 color: T.textMuted,
+//                                 fontWeight: 650,
+//                               }}
+//                             >
+//                               {transactions.length} transaction
+//                               {transactions.length !== 1 ? 's' : ''}
+//                             </Typography>
+//                           </Box>
+//                         </Box>
+//                       </Box>
+
+//                       <Box
+//                         sx={{
+//                           display: 'flex',
+//                           alignItems: 'center',
+//                           gap: { xs: 1, md: 1.5 },
+//                           flexShrink: 0,
+//                         }}
+//                       >
+//                         <Box sx={{ textAlign: 'right' }}>
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.55rem',
+//                               color: T.textMuted,
+//                               fontWeight: 850,
+//                               textTransform: 'uppercase',
+//                             }}
+//                           >
+//                             Open
+//                           </Typography>
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.8rem',
+//                               fontWeight: 850,
+//                               color: T.textSecondary,
+//                               fontVariantNumeric: 'tabular-nums',
+//                             }}
+//                           >
+//                             {formatLedgerValue(
+//                               ledger.openingReference?.closingStock
+//                             )}
+//                           </Typography>
+//                         </Box>
+
+//                         <Divider
+//                           orientation="vertical"
+//                           flexItem
+//                           sx={{ height: 24, borderColor: T.border }}
+//                         />
+
+//                         <Box sx={{ textAlign: 'right' }}>
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.55rem',
+//                               color: T.textMuted,
+//                               fontWeight: 850,
+//                               textTransform: 'uppercase',
+//                             }}
+//                           >
+//                             Close
+//                           </Typography>
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.86rem',
+//                               fontWeight: 950,
+//                               color: T.success,
+//                               fontVariantNumeric: 'tabular-nums',
+//                             }}
+//                           >
+//                             {formatLedgerValue(
+//                               ledger.closingSummary?.closingStock
+//                             )}
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                     </Box>
+
+//                     <Box
+//                       sx={{
+//                         px: { xs: 1, md: 1.2 },
+//                         py: 0.45,
+//                         bgcolor: alpha(T.warning, 0.045),
+//                         borderBottom: `1px solid ${alpha(T.warning, 0.14)}`,
+//                         display: 'flex',
+//                         alignItems: 'center',
+//                         justifyContent: 'space-between',
+//                         flexWrap: 'wrap',
+//                         gap: 0.55,
+//                       }}
+//                     >
+//                       <Typography
+//                         sx={{
+//                           fontSize: '0.62rem',
+//                           fontWeight: 850,
+//                           color: '#92400e',
+//                         }}
+//                       >
+//                         Opening: {formatLedgerValue(ledger.openingReference?.closingStock)}{' '}
+//                         {ledger.itemDetails.uom}
+//                         {ledger.openingReference?.date
+//                           ? ` · ${moment(ledger.openingReference.date).format('DD MMM YYYY')}`
+//                           : ''}
+//                       </Typography>
+
+//                       <Box sx={{ display: 'flex', gap: 1 }}>
+//                         <Box
+//                           sx={{
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             gap: 0.25,
+//                           }}
+//                         >
+//                           <TrendingUpIcon sx={{ fontSize: 12, color: T.success }} />
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.62rem',
+//                               fontWeight: 850,
+//                               color: T.success,
+//                             }}
+//                           >
+//                             In: {formatLedgerValue(totalIn)}
+//                           </Typography>
+//                         </Box>
+
+//                         <Box
+//                           sx={{
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             gap: 0.25,
+//                           }}
+//                         >
+//                           <TrendingDownIcon sx={{ fontSize: 12, color: T.danger }} />
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.62rem',
+//                               fontWeight: 850,
+//                               color: T.danger,
+//                             }}
+//                           >
+//                             Out: {formatLedgerValue(totalOut)}
+//                           </Typography>
+//                         </Box>
+
+//                         <Box
+//                           sx={{
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             gap: 0.25,
+//                           }}
+//                         >
+//                           <SwapHorizIcon sx={{ fontSize: 12, color: T.textMuted }} />
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.62rem',
+//                               fontWeight: 850,
+//                               color: T.textSecondary,
+//                             }}
+//                           >
+//                             Net: {formatLedgerValue(totalIn - totalOut)}
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                     </Box>
+
+//                     <TableContainer
+//                       className="wsl-scroll"
+//                       sx={{ overflowX: 'auto', width: '100%', maxWidth: '100%' }}
+//                     >
+//                       <Table
+//                         size="small"
+//                         stickyHeader
+//                         sx={{
+//                           minWidth: { xs: 720, md: 900 },
+//                           width: '100%',
+//                           tableLayout: 'fixed',
+//                           borderCollapse: 'separate',
+//                           borderSpacing: 0,
+//                         }}
+//                       >
+//                         <TableHead>
+//                           <TableRow
+//                             sx={{
+//                               '& th': {
+//                                 height: 36,
+//                                 backgroundColor: `${T.headerGlass} !important`,
+//                                 backdropFilter: 'blur(12px)',
+//                                 WebkitBackdropFilter: 'blur(12px)',
+//                                 borderBottom: `1px solid ${T.borderStrong}`,
+//                                 color: T.textPrimary,
+//                                 fontSize: '0.58rem',
+//                                 fontWeight: 950,
+//                                 textTransform: 'uppercase',
+//                                 letterSpacing: '0.07em',
+//                                 whiteSpace: 'nowrap',
+//                                 px: { xs: 0.75, md: 1 },
+//                                 py: 0.55,
+//                               },
+//                             }}
+//                           >
+//                             {TABLE_COLS.map((column, tableColumnIndex) => (
+//                               <TableCell
+//                                 key={tableColumnIndex}
+//                                 align={column.align}
+//                                 sx={{
+//                                   bgcolor: column.accent
+//                                     ? `${alpha(T.success, 0.045)} !important`
+//                                     : undefined,
+//                                   color: column.accent
+//                                     ? `${T.success} !important`
+//                                     : column.color || undefined,
+//                                   ...(column.sticky
+//                                     ? {
+//                                         width: column.w,
+//                                         position: 'sticky',
+//                                         left: 0,
+//                                         zIndex: 6,
+//                                         backgroundColor: `${T.headerStickyGlass} !important`,
+//                                         backdropFilter: 'blur(12px)',
+//                                         WebkitBackdropFilter: 'blur(12px)',
+//                                         boxShadow: `1px 0 0 ${T.borderSoft}`,
+//                                       }
+//                                     : {}),
+//                                 }}
+//                               >
+//                                 {column.label}
+//                               </TableCell>
+//                             ))}
+//                           </TableRow>
+//                         </TableHead>
+
+//                         <TableBody>
+//                           {transactions.map((row, rowIndex) => (
+//                             <TableRow
+//                               key={rowIndex}
+//                               className="wsl-row"
+//                               sx={{
+//                                 '& td': {
+//                                   height: 34,
+//                                   borderBottom: `1px solid ${T.borderSoft}`,
+//                                   fontSize: '0.66rem',
+//                                   px: { xs: 0.75, md: 1 },
+//                                   py: 0.45,
+//                                   backgroundColor: '#ffffff',
+//                                 },
+//                                 '&:last-child td': { borderBottom: 0 },
+//                               }}
+//                             >
+//                               <TableCell
+//                                 sx={{
+//                                   position: 'sticky',
+//                                   left: 0,
+//                                   zIndex: 3,
+//                                   bgcolor: '#ffffff',
+//                                   boxShadow: `1px 0 0 ${T.borderSoft}`,
+//                                   whiteSpace: 'nowrap',
+//                                   color: T.textPrimary,
+//                                   fontWeight: 850,
+//                                 }}
+//                               >
+//                                 {moment(row.date).format('DD MMM YYYY')}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 sx={{
+//                                   color: T.textSecondary,
+//                                   overflow: 'hidden',
+//                                   textOverflow: 'ellipsis',
+//                                   whiteSpace: 'nowrap',
+//                                 }}
+//                               >
+//                                 {row.grnVendorName || '-'}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 align="right"
+//                                 sx={{ color: T.success, fontWeight: 850 }}
+//                               >
+//                                 {formatLedgerValue(row.inStock)}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 align="right"
+//                                 sx={{ color: T.danger, fontWeight: 850 }}
+//                               >
+//                                 {formatLedgerValue(Number(row.returnedToVendor))}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 align="right"
+//                                 sx={{ color: T.warning, fontWeight: 850 }}
+//                               >
+//                                 {formatLedgerValue(row.returnedStock)}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 sx={{
+//                                   color: T.textSecondary,
+//                                   overflow: 'hidden',
+//                                   textOverflow: 'ellipsis',
+//                                   whiteSpace: 'nowrap',
+//                                 }}
+//                               >
+//                                 {row.dispatchBranch || '-'}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 align="right"
+//                                 sx={{ color: T.danger, fontWeight: 850 }}
+//                               >
+//                                 {formatLedgerValue(row.outStock)}
+//                               </TableCell>
+
+//                               <TableCell
+//                                 align="right"
+//                                 sx={{
+//                                   color: T.textPrimary,
+//                                   fontWeight: 950,
+//                                   bgcolor: `${alpha(T.success, 0.035)} !important`,
+//                                   fontVariantNumeric: 'tabular-nums',
+//                                 }}
+//                               >
+//                                 {formatLedgerValue(row.balanceStock)}
+//                               </TableCell>
+//                             </TableRow>
+//                           ))}
+//                         </TableBody>
+//                       </Table>
+//                     </TableContainer>
+
+//                     <Box
+//                       sx={{
+//                         px: { xs: 1, md: 1.2 },
+//                         py: 0.6,
+//                         bgcolor: alpha(T.success, 0.035),
+//                         borderTop: `1px solid ${alpha(T.success, 0.16)}`,
+//                         display: 'flex',
+//                         alignItems: 'center',
+//                         justifyContent: 'space-between',
+//                         flexWrap: 'wrap',
+//                         gap: 0.5,
+//                       }}
+//                     >
+//                       <Box
+//                         sx={{
+//                           display: 'flex',
+//                           alignItems: 'center',
+//                           gap: 0.45,
+//                         }}
+//                       >
+//                         <CheckCircleOutlineIcon
+//                           sx={{ color: T.success, fontSize: 14 }}
+//                         />
+//                         <Typography
+//                           sx={{
+//                             fontSize: '0.67rem',
+//                             fontWeight: 900,
+//                             color: '#065f46',
+//                           }}
+//                         >
+//                           Closing Balance:{' '}
+//                           {formatLedgerValue(ledger.closingSummary?.closingStock)}{' '}
+//                           {ledger.itemDetails.uom}
+//                         </Typography>
+//                       </Box>
+
+//                       <Box sx={{ display: 'flex', gap: 1 }}>
+//                         <Box
+//                           sx={{
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             gap: 0.25,
+//                           }}
+//                         >
+//                           <ArrowUpwardIcon
+//                             sx={{ fontSize: 10, color: T.success }}
+//                           />
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.6rem',
+//                               fontWeight: 850,
+//                               color: T.success,
+//                             }}
+//                           >
+//                             Total In: {formatLedgerValue(totalIn)}
+//                           </Typography>
+//                         </Box>
+
+//                         <Box
+//                           sx={{
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                             gap: 0.25,
+//                           }}
+//                         >
+//                           <ArrowDownwardIcon
+//                             sx={{ fontSize: 10, color: T.danger }}
+//                           />
+//                           <Typography
+//                             sx={{
+//                               fontSize: '0.6rem',
+//                               fontWeight: 850,
+//                               color: T.danger,
+//                             }}
+//                           >
+//                             Total Out: {formatLedgerValue(totalOut)}
+//                           </Typography>
+//                         </Box>
+//                       </Box>
+//                     </Box>
+//                   </Paper>
+//                 );
+//               })}
+//             </Box>
+//           )}
+
+//           {selectedItems.length > 0 &&
+//             (!stockLedger || Object.keys(stockLedger).length === 0) &&
+//             !loading && (
+//               <Box
+//                 sx={{
+//                   flex: 1,
+//                   minHeight: 0,
+//                   display: 'grid',
+//                   placeItems: 'center',
+//                   px: 3,
+//                   textAlign: 'center',
+//                 }}
+//               >
+//                 <Box>
+//                   <Box
+//                     sx={{
+//                       width: 56,
+//                       height: 56,
+//                       mx: 'auto',
+//                       borderRadius: '50%',
+//                       bgcolor: T.accentBg,
+//                       color: T.accent,
+//                       display: 'flex',
+//                       alignItems: 'center',
+//                       justifyContent: 'center',
+//                       mb: 1.1,
+//                       boxShadow: '0 12px 30px rgba(25,118,210,0.10)',
+//                     }}
+//                   >
+//                     <Inventory2OutlinedIcon sx={{ fontSize: 27 }} />
+//                   </Box>
+
+//                   <Typography
+//                     sx={{
+//                       fontWeight: 950,
+//                       fontSize: '0.96rem',
+//                       color: T.textPrimary,
+//                       mb: 0.35,
+//                     }}
+//                   >
+//                     No data found
+//                   </Typography>
+
+//                   <Typography
+//                     sx={{
+//                       fontSize: '0.74rem',
+//                       color: T.textMuted,
+//                       maxWidth: 330,
+//                       lineHeight: 1.6,
+//                       fontWeight: 650,
+//                     }}
+//                   >
+//                     No ledger records for the selected warehouse, items and date
+//                     range.
+//                   </Typography>
+//                 </Box>
+//               </Box>
+//             )}
+
+//           {selectedItems.length === 0 && !loading && (
+//             <Box
+//               sx={{
+//                 flex: 1,
+//                 minHeight: 0,
+//                 display: 'grid',
+//                 placeItems: 'center',
+//                 px: 3,
+//                 textAlign: 'center',
+//               }}
+//             >
+//               <Box>
+//                 <Box
+//                   sx={{
+//                     width: 56,
+//                     height: 56,
+//                     mx: 'auto',
+//                     borderRadius: '50%',
+//                     bgcolor: T.accentBg,
+//                     color: T.accent,
+//                     display: 'flex',
+//                     alignItems: 'center',
+//                     justifyContent: 'center',
+//                     mb: 1.1,
+//                     boxShadow: '0 12px 30px rgba(25,118,210,0.10)',
+//                   }}
+//                 >
+//                   <Inventory2OutlinedIcon sx={{ fontSize: 27 }} />
+//                 </Box>
+
+//                 <Typography
+//                   sx={{
+//                     fontWeight: 950,
+//                     fontSize: '0.96rem',
+//                     color: T.textPrimary,
+//                     mb: 0.35,
+//                   }}
+//                 >
+//                   No ledger data yet
+//                 </Typography>
+
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.74rem',
+//                     color: T.textMuted,
+//                     maxWidth: 330,
+//                     lineHeight: 1.6,
+//                     fontWeight: 650,
+//                   }}
+//                 >
+//                   Choose a warehouse, select one or more items, pick a date
+//                   range, then press <b>Apply</b>.
+//                 </Typography>
+//               </Box>
+//             </Box>
+//           )}
+
+//           {loading && (
+//             <Box
+//               sx={{
+//                 flex: 1,
+//                 display: 'grid',
+//                 placeItems: 'center',
+//               }}
+//             >
+//               <Box sx={{ textAlign: 'center' }}>
+//                 <CircularProgress
+//                   size={32}
+//                   thickness={4}
+//                   sx={{ color: T.accent }}
+//                 />
+//                 <Typography
+//                   sx={{
+//                     mt: 1,
+//                     fontSize: '0.75rem',
+//                     color: T.textMuted,
+//                     fontWeight: 750,
+//                   }}
+//                 >
+//                   Loading ledger data…
+//                 </Typography>
+//               </Box>
+//             </Box>
+//           )}
+//         </Box>
+
+//         <Box
+//           component="footer"
+//           sx={{
+//             flexShrink: 0,
+//             borderTop: `1px solid ${T.border}`,
+//             bgcolor: T.surface,
+//             px: { xs: 0.75, md: 1 },
+//             py: 0.5,
+//             minHeight: 32,
+//             display: 'flex',
+//             alignItems: 'center',
+//             justifyContent: 'space-between',
+//             flexWrap: 'wrap',
+//             gap: 0.45,
+//           }}
+//         >
+//           <Box
+//             sx={{
+//               display: 'flex',
+//               alignItems: 'center',
+//               gap: 0.85,
+//               flexWrap: 'wrap',
+//               minWidth: 0,
+//             }}
+//           >
+//             {warehouseLabel && (
+//               <Box
+//                 sx={{
+//                   display: 'flex',
+//                   alignItems: 'center',
+//                   gap: 0.32,
+//                 }}
+//               >
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.56rem',
+//                     fontWeight: 900,
+//                     color: T.textMuted,
+//                     textTransform: 'uppercase',
+//                   }}
+//                 >
+//                   Warehouse:
+//                 </Typography>
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.64rem',
+//                     fontWeight: 850,
+//                     color: T.textPrimary,
+//                   }}
+//                 >
+//                   {warehouseLabel}
+//                 </Typography>
+//               </Box>
+//             )}
+
+//             {hasData && (
+//               <>
+//                 <Divider
+//                   orientation="vertical"
+//                   flexItem
+//                   sx={{ height: 13, borderColor: T.border }}
+//                 />
+
+//                 <Box
+//                   sx={{
+//                     display: 'flex',
+//                     alignItems: 'center',
+//                     gap: 0.32,
+//                   }}
+//                 >
+//                   <Typography
+//                     sx={{
+//                       fontSize: '0.56rem',
+//                       fontWeight: 900,
+//                       color: T.textMuted,
+//                       textTransform: 'uppercase',
+//                     }}
+//                   >
+//                     Period:
+//                   </Typography>
+//                   <Typography
+//                     sx={{
+//                       fontSize: '0.64rem',
+//                       fontWeight: 850,
+//                       color: T.textPrimary,
+//                     }}
+//                   >
+//                     {moment(selectionRange.startDate).format('DD MMM YYYY')} —{' '}
+//                     {moment(selectionRange.endDate).format('DD MMM YYYY')}
+//                   </Typography>
+//                 </Box>
+
+//                 <Divider
+//                   orientation="vertical"
+//                   flexItem
+//                   sx={{ height: 13, borderColor: T.border }}
+//                 />
+
+//                 <Box
+//                   sx={{
+//                     display: 'flex',
+//                     alignItems: 'center',
+//                     gap: 0.32,
+//                   }}
+//                 >
+//                   <Typography
+//                     sx={{
+//                       fontSize: '0.56rem',
+//                       fontWeight: 900,
+//                       color: T.textMuted,
+//                       textTransform: 'uppercase',
+//                     }}
+//                   >
+//                     Items:
+//                   </Typography>
+//                   <Typography
+//                     sx={{
+//                       fontSize: '0.64rem',
+//                       fontWeight: 950,
+//                       color: T.accent,
+//                     }}
+//                   >
+//                     {stats.totalItems}
+//                   </Typography>
+//                 </Box>
+//               </>
+//             )}
+//           </Box>
+
+//           {hasData ? (
+//             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.85 }}>
+//               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.32 }}>
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.56rem',
+//                     fontWeight: 900,
+//                     color: T.textMuted,
+//                     textTransform: 'uppercase',
+//                   }}
+//                 >
+//                   Closing:
+//                 </Typography>
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.7rem',
+//                     fontWeight: 950,
+//                     color: T.success,
+//                   }}
+//                 >
+//                   {stats.totalClosing.toFixed(2)}
+//                 </Typography>
+//               </Box>
+
+//               <Divider
+//                 orientation="vertical"
+//                 flexItem
+//                 sx={{ height: 13, borderColor: T.border }}
+//               />
+
+//               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.32 }}>
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.56rem',
+//                     fontWeight: 900,
+//                     color: T.textMuted,
+//                     textTransform: 'uppercase',
+//                   }}
+//                 >
+//                   Movement:
+//                 </Typography>
+//                 <Typography
+//                   sx={{
+//                     fontSize: '0.7rem',
+//                     fontWeight: 950,
+//                     color: T.warning,
+//                   }}
+//                 >
+//                   {stats.totalMovement.toFixed(2)}
+//                 </Typography>
+//               </Box>
+//             </Box>
+//           ) : (
+//             !loading && (
+//               <Typography
+//                 sx={{
+//                   fontSize: '0.6rem',
+//                   color: T.textMuted,
+//                   fontWeight: 750,
+//                 }}
+//               >
+//                 YEN Inventory · Warehouse Stock Ledger
+//               </Typography>
+//             )
+//           )}
+//         </Box>
+//       </Box>
+
+//       <DownloadDialog
+//         open={openDialog}
+//         onClose={() => setOpenDialog(false)}
+//         onDownloadPDF={handleDownloadPDF}
+//         onDownloadExcel={handleDownloadExcel}
+//       />
+//     </>
+//   );
+// };
+
+// export default StockSummaryPage;
+// replace the entirepart 7 8 1
 'use client';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import 'react-date-range/dist/styles.css';
-import { usePermissions } from "@/hooks/usePermissions";
-import { useRouter } from "next/navigation";
 import 'react-date-range/dist/theme/default.css';
+
 import {
-    Box,
-    Typography,
-    Button,
-    Paper,
-    Table,
-    TableContainer,
-    TableHead,
-    TableBody,
-    TableRow,
-    TableCell,
-    Dialog,
-    DialogTitle,
-    DialogActions,
-    CircularProgress,
-    Stack,
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableContainer,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  CircularProgress,
+  Chip,
+  Grid,
+  Card,
+  CardContent,
+  Divider,
+  alpha,
+  useTheme,
+  useMediaQuery,
+  Collapse,
+  IconButton,
+  Tooltip,
+  Paper,
 } from '@mui/material';
-import TuneIcon from '@mui/icons-material/Tune';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import GetAppIcon from '@mui/icons-material/GetApp';
 
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import DownloadIcon from '@mui/icons-material/Download';
+import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import ClearIcon from '@mui/icons-material/Clear';
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-
-import HistoryIcon from '@mui/icons-material/History';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import moment from 'moment';
-
-import {
-    fetchStockLedger,
-    searchPurchaseItems,
-    addSelectedItem,
-    removeSelectedItem,
-    clearStockLedger,
-    clearSearchResults,
-    clearSelectedItems,
-    setSearchQuery,
-    selectStockLedger,
-    selectStockLoading,
-    selectSearchResults,
-    selectSearchLoading,
-    selectSelectedItems,
-    exportStockLedgerExcel,
-    selectSearchQuery,
-    selectWarehouses,
-    selectSelectedWarehouse,
-    clearSelectedWarehouse,
-    setSelectedWarehouse,
-    fetchWarehouses
-} from '../../../../features/yen_inventory/ledgerrawSlice';
-
 import { startOfMonth, endOfDay } from 'date-fns';
 import DateRangeDialog from '../../../../components/Inventory/ledger/daterangeDialog';
-import WarehouseInventoryManagementPage from '../page';
 import CollapsibleFilter from '@/components/Inventory/physcialstockvarience/ui/collabsfiler';
 import { debounce } from 'lodash';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+import {
+  fetchStockLedger,
+  searchPurchaseItems,
+  addSelectedItem,
+  clearStockLedger,
+  clearSearchResults,
+  clearSelectedItems,
+  setSearchQuery,
+  selectStockLedger,
+  selectStockLoading,
+  selectSearchResults,
+  selectSearchLoading,
+  exportStockLedgerExcel,
+  selectSearchQuery,
+  selectWarehouses,
+  selectSelectedWarehouse,
+  clearSelectedWarehouse,
+  setSelectedWarehouse,
+  fetchWarehouses,
+} from '../../../../features/yen_inventory/ledgerrawSlice';
+
 import { convertImageToBase64 } from '@/components/Hooks/useTodayDate';
 import { selectBusinesses } from '@/features/businessSlice';
+import WarehouseInventoryManagementPage from '../page';
 import DownloadDialog from '@/components/Inventory/ledger/ConfirmDialog';
+import {
+  formatLedgerValue,
+  getWarehouseLedgerColor,
+  getWarehouseLedgerSummary,
+  type DateSelectionRange,
+  type SearchItemsDebounce,
+} from '@/features/yen_inventory/warehouseLedgerUtils';
 
-interface SelectedItem {
-    randomId: string;
-    itemName: string;
+const T = {
+  pageBg: '#f6f9fd',
+  surface: '#ffffff',
+  surfaceSoft: '#fbfdff',
+
+  headerGlass: 'rgba(248,251,255,0.72)',
+  headerStickyGlass: 'rgba(248,251,255,0.92)',
+
+  border: '#e8eef6',
+  borderSoft: '#f0f4f8',
+  borderStrong: 'rgba(203,213,225,0.62)',
+
+  accent: '#1976d2',
+  accentDark: '#1258a8',
+  accentBg: '#eef6ff',
+
+  success: '#16a34a',
+  successBg: '#ecfdf5',
+  successBorder: '#bbf7d0',
+
+  warning: '#d97706',
+  warningBg: '#fff7ed',
+
+  danger: '#dc2626',
+  dangerBg: '#fef2f2',
+
+  info: '#4f46e5',
+  infoBg: '#eef2ff',
+
+  textPrimary: '#0f172a',
+  textSecondary: '#334155',
+  textMuted: '#64748b',
+
+  fontDisplay: `'Plus Jakarta Sans', 'DM Sans', sans-serif`,
+
+  r1: '8px',
+  r2: '12px',
+  r3: '14px',
+};
+
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  color: string;
+  bgColor: string;
 }
 
+const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  icon,
+  color,
+  bgColor,
+}) => (
+  <Card
+    elevation={0}
+    sx={{
+      height: '100%',
+      border: `1px solid ${T.border}`,
+      borderRadius: T.r2,
+      background:
+        'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(249,252,255,0.96) 100%)',
+      boxShadow: '0 1px 4px rgba(15,23,42,0.04)',
+    }}
+  >
+    <CardContent
+      sx={{
+        p: '8px 10px !important',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        minHeight: 48,
+      }}
+    >
+      <Box
+        sx={{
+          width: 32,
+          height: 32,
+          borderRadius: T.r1,
+          bgcolor: bgColor,
+          color,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </Box>
+
+      <Box sx={{ minWidth: 0 }}>
+        <Typography
+          sx={{
+            fontSize: '0.58rem',
+            fontWeight: 850,
+            color: T.textMuted,
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            mb: 0.2,
+          }}
+        >
+          {label}
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: '0.9rem',
+            fontWeight: 900,
+            color: T.textPrimary,
+            lineHeight: 1,
+            fontFamily: T.fontDisplay,
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {value}
+        </Typography>
+      </Box>
+    </CardContent>
+  </Card>
+);
+
+const TABLE_COLS = [
+  { label: 'Date', align: 'left' as const, sticky: true, accent: false, w: 110 },
+  { label: 'Vendor', align: 'left' as const, sticky: false, accent: false },
+  { label: 'In', align: 'right' as const, sticky: false, accent: false, color: T.success },
+  { label: 'Ret-Vend', align: 'right' as const, sticky: false, accent: false, color: T.danger },
+  { label: 'Return', align: 'right' as const, sticky: false, accent: false, color: T.warning },
+  { label: 'Dispatch', align: 'left' as const, sticky: false, accent: false },
+  { label: 'Out', align: 'right' as const, sticky: false, accent: false, color: T.danger },
+  { label: 'Balance', align: 'right' as const, sticky: false, accent: true },
+];
+
 const StockSummaryPage = () => {
-    const dispatch = useDispatch<AppDispatch>();
-const router = useRouter();
-const { hasPermission, isModuleVisible,permissions } = usePermissions();
+  const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-const canRead = hasPermission("yenerp", "warehousestockledger", "read");
+  const stockLedger = useSelector(selectStockLedger);
+  const loading = useSelector(selectStockLoading);
+  const searchResults = useSelector(selectSearchResults);
+  const warehouses = useSelector(selectWarehouses);
+  const selectedWarehouse = useSelector(selectSelectedWarehouse);
+  const searchLoading = useSelector(selectSearchLoading);
+  const selectedItems = useSelector(
+    (state: RootState) => state.stockSummary.selectedItems
+  );
+  const { businesses } = useSelector(selectBusinesses);
+  const business = businesses?.[0];
+  const searchQuery = useSelector(selectSearchQuery);
+  const currentPage = useSelector(
+    (state: RootState) => state.stockSummary.currentPage
+  );
+  const hasMore = useSelector((state: RootState) => state.stockSummary.hasMore);
 
-    const stockLedger = useSelector(selectStockLedger);
-    const loading = useSelector(selectStockLoading);
-    const searchResults = useSelector(selectSearchResults);
-    const warehouses = useSelector(selectWarehouses);
-    const selectedWarehouse = useSelector(selectSelectedWarehouse);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(true);
+  const debouncedSearchRef = useRef<SearchItemsDebounce | null>(null);
+  const isFetchingRef = useRef(false);
 
-    const searchLoading = useSelector(selectSearchLoading);
-    const selectedItems = useSelector((state: RootState) => state.stockSummary.selectedItems) as SelectedItem[];
-    const { businesses } = useSelector(selectBusinesses);
-    const business = businesses?.[0];
-    const searchQuery = useSelector(selectSearchQuery);
-    const currentPage = useSelector((state: RootState) => state.stockSummary.currentPage);
-    const hasMore = useSelector((state: RootState) => state.stockSummary.hasMore);
+  const today = new Date();
 
-    const [openDialog, setOpenDialog] = useState(false);
-    const [locationName, setLocationName] = useState('');
-    const debouncedSearchRef = useRef<any>(null);
-    const isFetchingRef = useRef(false);
+  const [selectionRange, setSelectionRange] = useState<DateSelectionRange>({
+    startDate: startOfMonth(today),
+    endDate: endOfDay(today),
+    key: 'selection',
+  });
 
-    const today = new Date();
-    const [selectionRange, setSelectionRange] = useState({
-        startDate: startOfMonth(today),
-        endDate: endOfDay(today),
-        key: 'selection',
-    });
+  useEffect(() => {
+    dispatch(fetchWarehouses({ page: 1, limit: 30 }));
+    dispatch(searchPurchaseItems({ search: '', page: 1 }));
 
-    useEffect(() => {
-        dispatch(fetchWarehouses({ page: 1, limit: 30 }));
-    }, [dispatch]);
+    debouncedSearchRef.current = debounce((term: string) => {
+      dispatch(searchPurchaseItems({ search: term, page: 1 }));
+    }, 400);
 
-    useEffect(() => {
-        dispatch(searchPurchaseItems({ search: '', page: 1 }));
+    return () => debouncedSearchRef.current?.cancel();
+  }, [dispatch]);
 
-        debouncedSearchRef.current = debounce((term: string) => {
-            dispatch(searchPurchaseItems({ search: term, page: 1 }));
-        }, 400);
+  useEffect(() => {
+    if (warehouses.length > 0 && !selectedWarehouse) {
+      const storedLocation = localStorage.getItem("globalSelectedWarehouseLocation");
+      let defaultWarehouse = warehouses[0].locationId;
+      if (storedLocation && warehouses.some(w => w.locationId === storedLocation)) {
+        defaultWarehouse = storedLocation;
+      }
+      dispatch(setSelectedWarehouse(defaultWarehouse));
+    }
+  }, [warehouses, selectedWarehouse, dispatch]);
 
-        return () => debouncedSearchRef.current?.cancel();
-    }, [dispatch]);
+  const handleSearchChange = (value: string) => {
+    dispatch(setSearchQuery(value));
+    dispatch(clearSearchResults());
+    debouncedSearchRef.current?.(value);
+  };
 
-    const handleSearchChange = (value: string) => {
-        dispatch(setSearchQuery(value));
-        dispatch(clearSearchResults());
-        debouncedSearchRef.current?.(value);
-    };
+  const handleScrollBottom = useCallback(() => {
+    if (searchLoading || !hasMore || isFetchingRef.current) return;
 
-    const handleScrollBottom = useCallback(() => {
-        if (searchLoading || !hasMore || isFetchingRef.current) return;
+    isFetchingRef.current = true;
 
-        isFetchingRef.current = true;
-        dispatch(
-            searchPurchaseItems({
-                search: searchQuery,
-                page: currentPage,
-            })
-        ).finally(() => {
-            isFetchingRef.current = false;
-        });
-    }, [dispatch, currentPage, searchLoading, hasMore, searchQuery]);
+    dispatch(searchPurchaseItems({ search: searchQuery, page: currentPage }))
+      .finally(() => {
+        isFetchingRef.current = false;
+      });
+  }, [dispatch, currentPage, searchLoading, hasMore, searchQuery]);
 
-    // ------------------ PDF Download ------------------
+  const handleItemSelectionChange = (selected: string[]) => {
+    const selectedObjects = searchResults
+      .filter((item) => selected.includes(item.randomId))
+      .map((item) => ({ randomId: item.randomId, itemName: item.itemName }));
 
-    interface JsPDFWithAutoTable extends jsPDF {
-        lastAutoTable?: { finalY: number };
+    dispatch(clearSelectedItems());
+    selectedObjects.forEach((item) => dispatch(addSelectedItem(item)));
+  };
+
+  const fetchLedgerWithCurrentFilters = useCallback(() => {
+    if (selectedItems.length === 0 || !selectedWarehouse) return;
+
+    const warehouseName =
+      warehouses.find((w) => w.locationId === selectedWarehouse)?.locationId ||
+      '';
+
+    dispatch(
+      fetchStockLedger({
+        fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
+        toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
+        itemRandomId: selectedItems.map((item) => item.randomId).join(','),
+        locationName: warehouseName,
+      })
+    );
+  }, [
+    dispatch,
+    selectedItems,
+    selectedWarehouse,
+    selectionRange.endDate,
+    selectionRange.startDate,
+    warehouses,
+  ]);
+
+  const handleFilterClick = () => {
+    fetchLedgerWithCurrentFilters();
+
+    if (isMobile) {
+      setFiltersOpen(false);
+    }
+  };
+
+  const refreshDropdownData = useCallback(() => {
+    dispatch(fetchWarehouses({ page: 1, limit: 30 }));
+    dispatch(searchPurchaseItems({ search: searchQuery, page: 1 }));
+  }, [dispatch, searchQuery]);
+
+  const handleRefreshLedgerData = useCallback(() => {
+    refreshDropdownData();
+
+    if (selectedItems.length === 0 || !selectedWarehouse) {
+      return;
     }
 
-    const handleDownloadPDF = async () => {
-        if (!stockLedger || selectedItems.length === 0) return;
+    const warehouseName =
+      warehouses.find((w) => w.locationId === selectedWarehouse)?.locationId ||
+      '';
 
-        // Define ERP Colors
-        const PRIMARY_BLUE: [number, number, number] = [25, 118, 210];
-        const LIGHT_BLUE_BG: [number, number, number] = [235, 245, 255];
-        const DARK_TEXT: [number, number, number] = [40, 40, 40];
+    dispatch(
+      fetchStockLedger({
+        fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
+        toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
+        itemRandomId: selectedItems.map((item) => item.randomId).join(','),
+        locationName: warehouseName,
+      })
+    );
+  }, [
+    dispatch,
+    refreshDropdownData,
+    selectedItems,
+    selectedWarehouse,
+    selectionRange.endDate,
+    selectionRange.startDate,
+    warehouses,
+  ]);
 
-        const doc = new jsPDF("p", "mm", "a4") as JsPDFWithAutoTable;
+  const handleClearEverything = () => {
+    dispatch(clearStockLedger());
+    dispatch(clearSelectedItems());
+    dispatch(clearSelectedWarehouse());
+    dispatch(clearSearchResults());
+    dispatch(setSearchQuery(''));
+    dispatch(searchPurchaseItems({ search: '', page: 1 }));
+    dispatch(fetchWarehouses({ page: 1, limit: 30 }));
+  };
 
-        let logo = "";
-        if (business?.imageUrl) {
-            try {
-                logo = await convertImageToBase64(business.imageUrl);
-            } catch { }
+  const handleClearAllFilters = useCallback(() => {
+    handleClearEverything();
+    setSelectionRange({
+      startDate: startOfMonth(new Date()),
+      endDate: endOfDay(new Date()),
+      key: 'selection',
+    });
+  }, []);
+
+  const isAnyFilterActive =
+    Boolean(selectedWarehouse) ||
+    selectedItems.length > 0 ||
+    Boolean(searchQuery) ||
+    (!!stockLedger && Object.keys(stockLedger).length > 0);
+
+  const stats = useMemo(
+    () => getWarehouseLedgerSummary(stockLedger, selectedItems),
+    [stockLedger, selectedItems]
+  );
+
+  interface LedgerTransaction {
+    date?: string;
+    grnVendorName?: string;
+    dispatchBranch?: string;
+    inStock?: number | string;
+    outStock?: number | string;
+    returnedStock?: number | string;
+    returnedToVendor?: number | string;
+    balanceStock?: number | string;
+    [key: string]: unknown;
+  }
+
+  const getLedgerTransactions = (ledger?: { transactions?: unknown }): LedgerTransaction[] =>
+    Array.isArray(ledger?.transactions) ? (ledger.transactions as LedgerTransaction[]) : [];
+
+  interface JsPDFWithAutoTable extends jsPDF {
+    lastAutoTable?: { finalY: number };
+  }
+
+  const handleDownloadPDF = async () => {
+    if (!stockLedger || selectedItems.length === 0) return;
+
+    const PRIMARY: [number, number, number] = [99, 102, 241];
+    const LIGHT_BG: [number, number, number] = [238, 242, 255];
+    const DARK: [number, number, number] = [30, 41, 59];
+    const doc = new jsPDF('p', 'mm', 'a4') as JsPDFWithAutoTable;
+
+    let logo = '';
+
+    if (business?.imageUrl) {
+      try {
+        logo = await convertImageToBase64(business.imageUrl);
+      } catch {}
+    }
+
+    const warehouseName =
+      warehouses.find((w) => w.locationId === selectedWarehouse)
+        ?.locationName || '';
+
+    selectedItems.forEach((item, index) => {
+      const ledger = stockLedger[item.randomId];
+
+      if (!ledger) return;
+      if (index > 0) doc.addPage();
+
+      doc.setFillColor(248, 250, 252);
+      doc.rect(0, 0, 210, 35, 'F');
+
+      if (logo) doc.addImage(logo, 'PNG', 14, 8, 25, 12);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(...DARK);
+      doc.text(business?.companyName || 'Company Name', 45, 14);
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${business?.address1 || ''} ${business?.address2 || ''}`, 45, 19);
+      doc.text(`GSTIN: ${business?.gstIn || '-'}`, 45, 23);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...PRIMARY);
+      doc.text('STOCK LEDGER REPORT', 196, 14, { align: 'right' });
+
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.text(
+        `Period: ${moment(selectionRange.startDate).format('DD-MM-YYYY')} to ${moment(
+          selectionRange.endDate
+        ).format('DD-MM-YYYY')}`,
+        196,
+        20,
+        { align: 'right' }
+      );
+      doc.text(`Warehouse: ${warehouseName}`, 196, 25, { align: 'right' });
+
+      doc.setDrawColor(200);
+      doc.line(14, 38, 196, 38);
+
+      doc.setFontSize(10);
+      doc.setTextColor(...PRIMARY);
+      doc.text(`Item: ${item.itemName}`, 14, 45);
+
+      doc.setFillColor(...LIGHT_BG);
+      doc.rect(14, 48, 182, 10, 'F');
+
+      doc.setFontSize(9);
+      doc.setTextColor(...DARK);
+      doc.text(
+        `Opening Balance: ${formatLedgerValue(ledger.openingReference?.closingStock)}`,
+        18,
+        54.5
+      );
+      doc.text(
+        `Closing Balance: ${formatLedgerValue(ledger.closingSummary?.closingStock)}`,
+        140,
+        54.5
+      );
+
+      autoTable(doc, {
+        startY: 62,
+        margin: { left: 14, right: 14 },
+        theme: 'grid',
+        head: [
+          [
+            'Date',
+            'Vendor / Particulars',
+            'In Stock',
+            'Ret. Out',
+            'Dispatch Location',
+            'Out',
+            'Balance',
+          ],
+        ],
+        body: getLedgerTransactions(ledger).map((row) => [
+          moment(row.date).format('DD-MM-YYYY'),
+          row.grnVendorName || row.dispatchBranch || '-',
+          formatLedgerValue(row.inStock),
+          formatLedgerValue(Number(row.returnedToVendor)),
+          row.dispatchBranch || '-',
+          formatLedgerValue(row.outStock),
+          formatLedgerValue(row.balanceStock),
+        ]),
+        styles: { fontSize: 8, cellPadding: 2.5, valign: 'middle' },
+        headStyles: {
+          fillColor: PRIMARY,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          halign: 'center',
+        },
+        columnStyles: {
+          0: { cellWidth: 22, halign: 'left' },
+          1: { cellWidth: 'auto', halign: 'left' },
+          2: { cellWidth: 18, halign: 'right' },
+          3: { cellWidth: 18, halign: 'right' },
+          4: { cellWidth: 35, halign: 'left' },
+          5: { cellWidth: 18, halign: 'right' },
+          6: { cellWidth: 22, halign: 'right', fontStyle: 'bold' },
+        },
+      });
+    });
+
+    doc.save(`WarehouseStockLedger_${moment().format('DD_MM_YYYY')}.pdf`);
+  };
+
+  const handleDownloadExcel = () => {
+    if (selectedItems.length === 0) return;
+
+    const warehouseName =
+      warehouses.find((w) => w.locationId === selectedWarehouse)?.locationId ||
+      '';
+
+    dispatch(
+      exportStockLedgerExcel({
+        fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
+        toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
+        itemRandomId: selectedItems.map((item) => item.randomId).join(','),
+        locationName: warehouseName || undefined,
+      })
+    );
+
+    setOpenDialog(false);
+  };
+
+  const hasData =
+    !!stockLedger &&
+    selectedItems.length > 0 &&
+    Object.keys(stockLedger).length > 0;
+
+  const selectedWarehouseObj = warehouses.find(
+    (warehouse) => warehouse.locationId === selectedWarehouse
+  );
+
+  const warehouseLabel = selectedWarehouseObj?.locationName || '';
+
+  return (
+    <>
+      <style>{`
+        .wsl-root * {
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        const warehouseName = warehouses.find(w => w.locationId === selectedWarehouse)?.locationName || '';
+        .wsl-scroll::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
 
-        selectedItems.forEach((item, index) => {
-            const ledger = stockLedger[item.randomId];
-            if (!ledger) return;
+        .wsl-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
 
-            if (index > 0) doc.addPage();
+        .wsl-scroll::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 999px;
+        }
 
-            // --- 1. Top Header Banner ---
-            doc.setFillColor(245, 247, 250);
-            doc.rect(0, 0, 210, 35, "F");
-            if (logo) doc.addImage(logo, "PNG", 14, 8, 25, 12);
+        .wsl-scroll::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(12);
-            doc.setTextColor(...DARK_TEXT);
-            doc.text(business?.companyName || "Company Name", 45, 14);
+        .wsl-row:hover td {
+          background: #f8fbff !important;
+        }
 
-            doc.setFontSize(8);
-            doc.setFont("helvetica", "normal");
-            doc.text(`${business?.address1 || ""} ${business?.address2 || ""}`, 45, 19);
-            doc.text(`GSTIN: ${business?.gstIn || "-"}`, 45, 23);
+        @keyframes wslIn {
+          from {
+            opacity: 0;
+            transform: translateY(5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
 
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
-            doc.setTextColor(...PRIMARY_BLUE);
-            doc.text("STOCK LEDGER REPORT", 196, 14, { align: "right" });
+        .wsl-in {
+          animation: wslIn 0.22s ease both;
+        }
+      `}</style>
 
-            doc.setFontSize(8);
-            doc.setTextColor(100);
-            doc.text(`Period: ${moment(selectionRange.startDate).format("DD-MM-YYYY")} to ${moment(selectionRange.endDate).format("DD-MM-YYYY")}`, 196, 20, { align: "right" });
-            doc.text(`Warehouse: ${warehouseName}`, 196, 25, { align: "right" });
+      <Box
+        className="wsl-root"
+        sx={{
+          bgcolor: T.pageBg,
+          height: 'calc(100dvh - var(--app-topbar-height, 64px))',
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <WarehouseInventoryManagementPage />
 
-            // --- 2. Item & Balance Info Box (Separate from Table) ---
-            doc.setDrawColor(200);
-            doc.line(14, 38, 196, 38);
+        <Box
+          sx={{
+            px: { xs: 0.75, md: 1 },
+            py: 0.55,
+            flexShrink: 0,
+            borderBottom: `1px solid ${T.border}`,
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(248,251,255,0.82) 100%)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          <Collapse in={filtersOpen || !isMobile}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                gap: 0.5,
+                flexWrap: 'wrap',
+                width: '100%',
 
-            // Item Name
-            doc.setFontSize(10);
-            doc.setTextColor(...PRIMARY_BLUE);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Item: ${item.itemName}`, 14, 45);
-
-            // Balance Summary Boxes
-            doc.setFillColor(...LIGHT_BLUE_BG);
-            doc.rect(14, 48, 182, 10, "F"); // Light blue background for totals
-
-            doc.setFontSize(9);
-            doc.setTextColor(...DARK_TEXT);
-            doc.text(`Opening Balance: ${ledger.openingReference.closingStock.toFixed(2)}`, 18, 54.5);
-            doc.text(`Closing Balance: ${ledger.closingSummary.closingStock.toFixed(2)}`, 140, 54.5);
-
-            // --- 3. Transaction Table with Blue Header ---
-            autoTable(doc, {
-                startY: 62,
-                margin: { left: 14, right: 14 },
-                theme: 'grid',
-                head: [[
-                    "Date",
-                    "Vendor / Particulars",
-                    "In Stock",
-                    "Ret. Out",
-                    "Dispatch Location",
-                    "Out",
-                    "Balance"
-                ]],
-                // Only transaction rows here - Opening/Closing rows removed
-                body: ledger.transactions.map((row) => ([
-                    moment(row.date).format("DD-MM-YYYY"),
-                    row.grnVendorName || row.dispatchBranch || "-",
-                    row.inStock > 0 ? row.inStock.toFixed(2) : "-",
-                    row.returnedStock > 0 ? row.returnedStock.toFixed(2) : "-",
-                    row.dispatchBranch || "-",
-                    row.outStock > 0 ? row.outStock.toFixed(2) : "-",
-                    row.balanceStock.toFixed(2),
-                ])),
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2.5,
-                    valign: 'middle',
-                    font: 'helvetica',
-                    lineWidth: 0.1,
-                    lineColor: [200, 200, 200]
+                '& .inventory-filter-field': {
+                  width: '100% !important',
+                  minWidth: '0 !important',
+                  maxWidth: '100% !important',
+                  flex: '1 1 auto !important',
                 },
-                headStyles: {
-                    fillColor: PRIMARY_BLUE, // Solid Blue Header
-                    textColor: [255, 255, 255], // White Text
-                    fontStyle: 'bold',
-                    halign: 'center'
+
+                '& .inventory-filter-button': {
+                  height: '34px !important',
+                  minHeight: '34px !important',
+                  borderRadius: '9px !important',
+                  padding: '3px 8px !important',
                 },
-                columnStyles: {
-                    0: { cellWidth: 22, halign: 'left' },
-                    1: { cellWidth: 'auto', halign: 'left' },
-                    2: { cellWidth: 18, halign: 'right' },
-                    3: { cellWidth: 18, halign: 'right' },
-                    4: { cellWidth: 35, halign: 'left' },
-                    5: { cellWidth: 18, halign: 'right' },
-                    6: { cellWidth: 22, halign: 'right', fontStyle: 'bold' }
-                },
-                didDrawPage: (data) => {
-                    const h = doc.internal.pageSize.getHeight();
-                    doc.setFontSize(7);
-                    doc.setTextColor(150);
-                    doc.text(`Generated: ${moment().format("DD-MM-YYYY HH:mm")}`, 14, h - 10);
-                    doc.text(`Page ${doc.getNumberOfPages()}`, 196, h - 10, { align: "right" });
-                }
-            });
-        });
+              }}
+            >
+              <Box
+                sx={{
+                  height: 34,
+                  px: 0.9,
+                  display: { xs: 'none', sm: 'inline-flex' },
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: T.r1,
+                  border: `1px solid ${T.border}`,
+                  bgcolor: T.surface,
+                  color: T.accentDark,
+                  fontSize: '0.68rem',
+                  fontWeight: 950,
+                  lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                  flex: '0 0 auto',
+                  gap: 0.5,
+                }}
+              >
+                <Inventory2OutlinedIcon sx={{ fontSize: 14 }} />
+                Stock Ledger
+              </Box>
 
-        doc.save(`WarehouseStockLedger_YenERP_${moment().format("DD_MM_YYYY")}.pdf`);
-    };
+              <Box
+                sx={{
+                  flex: {
+                    xs: '1 1 100%',
+                    sm: '0 1 clamp(145px, 16vw, 190px)',
+                  },
+                  minWidth: { xs: 0, sm: 145 },
+                  maxWidth: { xs: '100%', sm: 200 },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: '0.56rem',
+                    fontWeight: 900,
+                    color: T.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.07em',
+                    mb: 0.2,
+                  }}
+                >
+                  Warehouse
+                </Typography>
 
-    const headerStyle = {
-        fontWeight: 700,
-        bgcolor: '#f1f5f9',
-        color: '#475569',
-        fontSize: '0.85rem',
-        textTransform: 'uppercase',
-        py: 1.5,
-        borderBottom: '2px solid #e2e8f0'
-    };
+                <CollapsibleFilter
+                  title="Select warehouse"
+                  inputType="single-select"
+                  options={warehouses.map((warehouse) => ({
+                    label: warehouse.locationName,
+                    value: warehouse.locationId,
+                  }))}
+                  selectedOptions={selectedWarehouse || ''}
+                  onChange={(value) => {
+                     localStorage.setItem("globalSelectedWarehouseLocation", value as string);
+                     dispatch(setSelectedWarehouse(value as string));
+                   }}
+                  onClear={() => dispatch(clearSelectedWarehouse())}
+                />
+              </Box>
 
-    const handleDownloadExcel = () => {
-        if (selectedItems.length === 0) return;
+              <Box
+                sx={{
+                  flex: {
+                    xs: '1 1 100%',
+                    sm: '0 1 clamp(220px, 28vw, 390px)',
+                    lg: '0 1 clamp(240px, 24vw, 430px)',
+                  },
+                  minWidth: { xs: 0, sm: 220 },
+                  maxWidth: { xs: '100%', sm: 410, lg: 440 },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: '0.56rem',
+                    fontWeight: 900,
+                    color: T.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.07em',
+                    mb: 0.2,
+                  }}
+                >
+                  Items
+                </Typography>
 
-        const warehouseName = warehouses.find(w => w.locationId === selectedWarehouse)?.locationId || '';
+                <CollapsibleFilter
+                  title="Select items"
+                  inputType="multi-select"
+                  isMulti
+                  options={searchResults.map((item) => ({
+                    label: item.itemName,
+                    value: item.randomId,
+                  }))}
+                  selectedOptions={selectedItems.map((item) => item.randomId)}
+                  onChange={(value) => handleItemSelectionChange(value as string[])}
+                  onClear={() => dispatch(clearSelectedItems())}
+                  onSearch={handleSearchChange}
+                  onScrollBottom={handleScrollBottom}
+                  loading={searchLoading}
+                />
+              </Box>
 
-        dispatch(exportStockLedgerExcel({
-            fromDate: moment(selectionRange.startDate).format("YYYY-MM-DD"),
-            toDate: moment(selectionRange.endDate).format("YYYY-MM-DD"),
-            itemRandomId: selectedItems.map(i => i.randomId).join(","),
-            locationName: warehouseName || undefined,
-        }));
-    };
+              <Box
+                sx={{
+                  flex: {
+                    xs: '1 1 100%',
+                    sm: '0 1 clamp(165px, 16vw, 210px)',
+                  },
+                  minWidth: { xs: 0, sm: 165 },
+                  maxWidth: { xs: '100%', sm: 220 },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: '0.56rem',
+                    fontWeight: 900,
+                    color: T.textMuted,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.07em',
+                    mb: 0.2,
+                  }}
+                >
+                  Date Range
+                </Typography>
 
-    const branchDisplayName = selectedWarehouse
-        ? ` (${warehouses.find(w => w.locationId === selectedWarehouse)?.aliasName || ''})`
-        : 'All Locations';
+                <DateRangeDialog
+                  selectionRange={selectionRange}
+                  setSelectionRange={setSelectionRange}
+                  onApply={handleFilterClick}
+                />
+              </Box>
 
-    // ------------------ Item Selection ------------------
-    const handleItemSelectionChange = (selected: string[]) => {
-        const selectedObjects = searchResults
-            .filter(item => selected.includes(item.randomId))
-            .map(item => ({ randomId: item.randomId, itemName: item.itemName }));
-
-        dispatch(clearSelectedItems());
-        selectedObjects.forEach(item => dispatch(addSelectedItem(item)));
-    };
-
-    // ------------------ Apply Filter ------------------
-    const handleFilterClick = () => {
-        if (selectedItems.length === 0 || !selectedWarehouse) return;
-
-        const warehouseName = warehouses.find(w => w.locationId === selectedWarehouse)?.locationId || '';
-
-        dispatch(fetchStockLedger({
-            fromDate: moment(selectionRange.startDate).format('YYYY-MM-DD'),
-            toDate: moment(selectionRange.endDate).format('YYYY-MM-DD'),
-            itemRandomId: selectedItems.map(i => i.randomId).join(','),
-            locationName: warehouseName,
-        }));
-    };
-
-    const handleFilterClose = () => {
-        dispatch(clearStockLedger());
-        dispatch(clearSelectedItems());
-        dispatch(clearSelectedWarehouse());
-        dispatch(clearSearchResults());
-        setLocationName('');
-        dispatch(searchPurchaseItems({ search: '', page: 1 }));
-    };
-
-
-    return (
-        <Box sx={{ backgroundColor: '#f9f9f9', minHeight: '100vh', pb: 4 }}>
-            <WarehouseInventoryManagementPage />
-            {/* ACTION BAR */}
-            <Paper elevation={0} sx={{ mx: 3, p: 1, borderRadius: 2, }}>
-                <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                    <CollapsibleFilter
-                        title="Warehouse"
-                        inputType="single-select"
-                        options={warehouses.map(w => ({ label: w.locationName, value: w.locationId }))}
-                        selectedOptions={selectedWarehouse ? [selectedWarehouse] : []}
-                        onChange={(v) => dispatch(setSelectedWarehouse(v as string))}
-                        onClear={() => dispatch(clearSelectedWarehouse())}
-                        displayLabel={branchDisplayName}
-                    />
-
-                    <CollapsibleFilter
-                        title="Select Items"
-                        inputType="multi-select"
-                        isMulti
-                        options={searchResults.map((item) => ({
-                            label: item.itemName,
-                            value: item.randomId,
-                        }))}
-                        selectedOptions={selectedItems.map(i => i.randomId)}
-                        onChange={(v) => handleItemSelectionChange(v as string[])}
-                        onClear={() => dispatch(clearSelectedItems())}
-                        onSearch={handleSearchChange}
-                        onScrollBottom={handleScrollBottom}
-                        loading={searchLoading}
-                        showSelectedCount
-                    />
-
-                    <DateRangeDialog
-                        selectionRange={selectionRange}
-                        setSelectionRange={setSelectionRange}
-                        onApply={handleFilterClick}
-                    />
-
-                    <Box sx={{ flexGrow: 1 }} />
-
-                    <Stack direction="row" spacing={1.5}>
-                        <Button
-                            variant="contained"
-                            startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <TuneIcon />}
-                            onClick={handleFilterClick}
-                            disabled={selectedItems.length === 0 || !selectedWarehouse}
-                            sx={{ borderRadius: '8px', textTransform: 'none', px: 3 }}
-                        >
-                            Apply Filter
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            startIcon={<RotateLeftIcon />}
-                            onClick={handleFilterClose}
-                            sx={{ borderRadius: '8px', textTransform: 'none' }}
-                        >
-                            Reset
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="success"
-                            startIcon={<GetAppIcon />}
-                            disabled={!stockLedger}
-                            onClick={() => setOpenDialog(true)}
-                            sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}
-                        >
-                            Export
-                        </Button>
-                    </Stack>
-                </Stack>
-            </Paper>
-
-            {selectedItems.length === 0 && (
-                <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <Typography variant="h6" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                        Select the Warehouse & items to view the data
-                    </Typography>
-                </Box>
-            )}
-
-            {/* ... after the Action Bar ... */}
-
-            {selectedItems.length > 0 && stockLedger && (
-                <Box sx={{ mx: 3 }}>
-                    {/* Main Scrollable Container */}
-                    <Box
-                        sx={{
-                            height: 'calc(100vh - 240px)', // Adjusted to give more space
-                            overflowY: 'auto',
-                            borderRadius: 3,
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                            border: '1px solid #e5e7eb',
-                            backgroundColor: '#fff',
-                            '&::-webkit-scrollbar': { width: '8px' },
-                            '&::-webkit-scrollbar-thumb': { bgcolor: '#cbd5e1', borderRadius: '4px' }
-                        }}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'flex-end',
+                  justifyContent: { xs: 'flex-end', sm: 'flex-start' },
+                  gap: 0.45,
+                  flex: { xs: '1 1 100%', sm: '0 0 auto' },
+                  ml: { xs: 0, lg: 'auto' },
+                }}
+              >
+                <Tooltip title="Apply filters" arrow>
+                  <span>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={
+                        loading ? (
+                          <CircularProgress size={13} color="inherit" />
+                        ) : (
+                          <FilterAltIcon />
+                        )
+                      }
+                      onClick={handleFilterClick}
+                      disabled={
+                        selectedItems.length === 0 || !selectedWarehouse || loading
+                      }
+                      sx={{
+                        bgcolor: T.accent,
+                        '&:hover': { bgcolor: T.accentDark },
+                        '&:disabled': {
+                          bgcolor: T.border,
+                          color: T.textMuted,
+                        },
+                        borderRadius: T.r1,
+                        textTransform: 'none',
+                        fontWeight: 850,
+                        fontSize: '0.72rem',
+                        height: 34,
+                        px: 1.3,
+                        minWidth: 84,
+                        boxShadow: `0 4px 12px ${alpha(T.accent, 0.22)}`,
+                      }}
                     >
-                        {selectedItems.map((item) => {
-                            const ledger = stockLedger[item.randomId];
-                            if (!ledger) return null;
+                      Apply
+                    </Button>
+                  </span>
+                </Tooltip>
 
-                            return (
-                                <Box key={item.randomId} sx={{ mb: 4 }}>
-                                    {/* ITEM HEADER - Now the primary header */}
-                                    <Box
-                                        sx={{
-                                            px: 3,
-                                            py: 1.8,
-                                            position: 'sticky',
-                                            top: 0,
-                                            zIndex: 10,
-                                            background: 'linear-gradient(90deg,#1976d2,#42a5f5)',
+                <Tooltip title="Clear all filters" arrow>
+                  <span>
+                    <IconButton
+                      onClick={handleClearAllFilters}
+                      disabled={!isAnyFilterActive}
+                      size="small"
+                      aria-label="Clear all filters"
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: T.r1,
+                        border: `1px solid ${T.danger}`,
+                        color: T.danger,
+                        bgcolor: T.surface,
+                        '&:hover': {
+                          bgcolor: T.dangerBg,
+                          borderColor: T.danger,
+                        },
+                        '&.Mui-disabled': {
+                          border: `1px solid ${T.border}`,
+                          color: T.textMuted,
+                          bgcolor: T.surfaceSoft,
+                        },
+                      }}
+                    >
+                      <ClearIcon sx={{ fontSize: 17 }} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
 
-                                            color: '#fff',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                        }}
-                                    >
-                                        <Stack direction="row" alignItems="baseline" spacing={1}>
-                                            <Typography sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
-                                                {ledger.itemDetails.itemName}
-                                            </Typography>
-                                            <Typography sx={{ fontSize: 13, opacity: 0.8 }}>
-                                                ({ledger.itemDetails.uom})
-                                            </Typography>
-                                        </Stack>
+                <Tooltip title="Download report" arrow>
+                  <span>
+                    <IconButton
+                      disabled={!hasData}
+                      onClick={() => setOpenDialog(true)}
+                      size="small"
+                      aria-label="Download report"
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: T.r1,
+                        border: `1px solid ${
+                          hasData ? T.successBorder : T.border
+                        }`,
+                        color: hasData ? T.success : T.textMuted,
+                        bgcolor: T.surface,
+                        '&:hover': {
+                          bgcolor: T.successBg,
+                          borderColor: T.successBorder,
+                        },
+                      }}
+                    >
+                      <DownloadIcon sx={{ fontSize: 17 }} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
 
-                                        <Typography sx={{ fontWeight: 600, bgcolor: 'rgba(255,255,255,0.2)', px: 2, py: 0.5, borderRadius: 1 }}>
-                                            Current Stock: {ledger.closingSummary.closingStock.toFixed(2)}
-                                        </Typography>
-                                    </Box>
+                <Tooltip title="Refresh data" arrow>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={handleRefreshLedgerData}
+                      disabled={loading}
+                      aria-label="Refresh data"
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: T.r1,
+                        border: `1px solid ${T.border}`,
+                        color: T.accent,
+                        bgcolor: T.surface,
+                        '&:hover': {
+                          bgcolor: T.accentBg,
+                          borderColor: T.borderStrong,
+                        },
+                        '&.Mui-disabled': {
+                          color: T.textMuted,
+                          bgcolor: T.surfaceSoft,
+                        },
+                      }}
+                    >
+                      {loading ? (
+                        <CircularProgress size={15} thickness={4} />
+                      ) : (
+                        <RefreshIcon sx={{ fontSize: 16 }} />
+                      )}
+                    </IconButton>
+                  </span>
+                </Tooltip>
 
-                                    {/* TABLE SECTION */}
-                                    <TableContainer component={Box}>
-                                        <Table size="small">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell sx={headerStyle} align="left">Date</TableCell>
-                                                    <TableCell sx={headerStyle} align="left">Vendor Name</TableCell>
-                                                    <TableCell sx={headerStyle} align="right">In Stock</TableCell>
-                                                    <TableCell sx={headerStyle} align="right">Ret. to Vendor</TableCell>
-                                                    <TableCell sx={headerStyle} align="right">Returned Stock</TableCell>
-                                                    <TableCell sx={headerStyle} align="left">Dispatch loc</TableCell>
-                                                    <TableCell sx={headerStyle} align="right">Out Stock</TableCell>
-                                                    <TableCell sx={headerStyle} align="right">Balance</TableCell>
-                                                    {/* <TableCell sx={headerStyle} align="center">UOM</TableCell> */}
-                                                </TableRow>
-                                            </TableHead>
-
-                                            <TableBody>
-                                                {/* OPENING STOCK - CENTERED SEPARATE ROW */}
-                                                <TableRow sx={{ bgcolor: '#fff9db' }}>
-                                                    <TableCell colSpan={9} align="center" sx={{ py: 1.5, borderBottom: '1px solid #fab005' }}>
-                                                        <Typography variant="subtitle2" sx={{ color: '#856404', fontWeight: 700, letterSpacing: 0.5 }}>
-                                                            OPENING STOCK AS ON {moment(ledger.openingReference.date).format('DD-MM-YYYY')} : {ledger.openingReference.closingStock.toFixed(2)} {ledger.itemDetails.uom}
-                                                        </Typography>
-                                                    </TableCell>
-                                                </TableRow>
-
-                                                {/* TRANSACTIONS */}
-                                                {ledger.transactions.map((row, idx) => (
-                                                    <TableRow key={idx} hover>
-                                                        <TableCell align="left">{moment(row.date).format('DD-MM-YYYY')}</TableCell>
-                                                        <TableCell align="left">{row.grnVendorName || '-'}</TableCell>
-                                                        <TableCell align="right" sx={{ color: '#2e7d32', fontWeight: 600 }}>{row.inStock || '0.00'}</TableCell>
-                                                        <TableCell align="right" sx={{ color: '#d32f2f' }}>{row.returnedToVendor || '0.00'}</TableCell>
-                                                        <TableCell align="right" sx={{ color: '#ed6c02' }}>{row.returnedStock || '0.00'}</TableCell>
-                                                        <TableCell align="left">{row.dispatchBranch || '-'}</TableCell>
-                                                        <TableCell align="right" sx={{ color: '#c62828', fontWeight: 600 }}>{row.outStock || '0.00'}</TableCell>
-                                                        <TableCell align="right" sx={{ fontWeight: 800, bgcolor: '#f8fafc' }}>{row.balanceStock.toFixed(2)}</TableCell>
-                                                        {/* <TableCell align="center" sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>{ledger.itemDetails.uom}</TableCell> */}
-                                                    </TableRow>
-                                                ))}
-
-                                                {/* CLOSING STOCK - CENTERED SEPARATE ROW */}
-                                                <TableRow sx={{ bgcolor: '#e7f5ff' }}>
-                                                    <TableCell colSpan={9} align="center" sx={{ py: 1.5, borderTop: '2px solid #1976d2' }}>
-                                                        <Typography variant="subtitle2" sx={{ color: '#1864ab', fontWeight: 700, letterSpacing: 0.5 }}>
-                                                            CLOSING STOCK AS ON {moment(ledger.closingSummary.date).format('DD-MM-YYYY')} : {ledger.closingSummary.closingStock.toFixed(2)} {ledger.itemDetails.uom}
-                                                        </Typography>
-                                                    </TableCell>
-                                                </TableRow>
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
-                                </Box>
-                            );
-                        })}
-                    </Box>
-                </Box>
-            )}
-
-            <DownloadDialog
-                open={openDialog}
-                onClose={() => setOpenDialog(false)}
-                onDownloadPDF={handleDownloadPDF}
-                onDownloadExcel={handleDownloadExcel}
-            />
+                {isMobile && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setFiltersOpen((value) => !value)}
+                    aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                    sx={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: T.r1,
+                      border: `1px solid ${T.border}`,
+                      bgcolor: T.surface,
+                    }}
+                  >
+                    <FilterAltIcon sx={{ fontSize: 16, color: T.accent }} />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          </Collapse>
         </Box>
-    );
+
+        {hasData && (
+          <Box
+            sx={{
+              px: { xs: 0.75, md: 1 },
+              pt: 0.55,
+              pb: 0.45,
+              flexShrink: 0,
+            }}
+            className="wsl-in"
+          >
+            <Grid container spacing={0.5}>
+              {[
+                {
+                  label: 'Items',
+                  value: stats.totalItems,
+                  icon: <Inventory2OutlinedIcon sx={{ fontSize: 15 }} />,
+                  color: T.accent,
+                  bgColor: T.accentBg,
+                },
+                {
+                  label: 'Opening',
+                  value: stats.totalOpening.toFixed(2),
+                  icon: <LoginOutlinedIcon sx={{ fontSize: 15 }} />,
+                  color: T.info,
+                  bgColor: T.infoBg,
+                },
+                {
+                  label: 'Movement',
+                  value: stats.totalMovement.toFixed(2),
+                  icon: <SwapHorizIcon sx={{ fontSize: 15 }} />,
+                  color: T.warning,
+                  bgColor: T.warningBg,
+                },
+                {
+                  label: 'Closing',
+                  value: stats.totalClosing.toFixed(2),
+                  icon: <CheckCircleOutlineIcon sx={{ fontSize: 15 }} />,
+                  color: T.success,
+                  bgColor: T.successBg,
+                },
+              ].map((card, index) => (
+                <Grid size={{ xs: 6, sm: 3 }} key={index}>
+                  <StatCard {...card} />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            px: { xs: 0.75, md: 1 },
+            pb: 0.55,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {hasData && (
+            <Box
+              className="wsl-scroll"
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0.65,
+                pr: 0.1,
+              }}
+            >
+              {selectedItems.map((item, index) => {
+                const ledger = stockLedger[item.randomId];
+
+                if (!ledger) return null;
+
+                const ic = getWarehouseLedgerColor(index);
+                const transactions = getLedgerTransactions(ledger);
+
+                const totalIn = transactions.reduce(
+                  (sum, txn) =>
+                    sum +
+                    (Number(txn.inStock) || 0) +
+                    (Number(txn.returnedStock) || 0),
+                  0
+                );
+
+                const totalOut = transactions.reduce(
+                  (sum, txn) =>
+                    sum +
+                    (Number(txn.outStock) || 0) +
+                    (Number(txn.returnedToVendor) || 0),
+                  0
+                );
+
+                return (
+                  <Paper
+                    key={item.randomId}
+                    elevation={0}
+                    className="wsl-in"
+                    sx={{
+                      borderRadius: T.r3,
+                      overflow: 'hidden',
+                      border: `1px solid ${T.border}`,
+                      bgcolor: T.surface,
+                      boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+                      flexShrink: 0,
+                      animationDelay: `${index * 0.035}s`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        px: { xs: 1, md: 1.2 },
+                        py: 0.7,
+                        background:
+                          'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,251,255,0.88) 100%)',
+                        borderBottom: `1px solid ${T.border}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 1,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.8,
+                          minWidth: 0,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: T.r1,
+                            bgcolor: ic.light,
+                            color: ic.main,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 900,
+                            fontSize: '0.72rem',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {index + 1}
+                        </Box>
+
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography
+                            sx={{
+                              fontWeight: 900,
+                              fontSize: { xs: '0.78rem', md: '0.86rem' },
+                              color: T.textPrimary,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              letterSpacing: '-0.02em',
+                            }}
+                          >
+                            {ledger.itemDetails.itemName}
+                          </Typography>
+
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              mt: 0.15,
+                            }}
+                          >
+                            <Chip
+                              label={ledger.itemDetails.uom}
+                              size="small"
+                              sx={{
+                                height: 16,
+                                fontSize: '0.56rem',
+                                fontWeight: 900,
+                                bgcolor: ic.light,
+                                color: ic.main,
+                                border: 'none',
+                              }}
+                            />
+
+                            <Typography
+                              sx={{
+                                fontSize: '0.6rem',
+                                color: T.textMuted,
+                                fontWeight: 650,
+                              }}
+                            >
+                              {transactions.length} transaction
+                              {transactions.length !== 1 ? 's' : ''}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: { xs: 1, md: 1.5 },
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography
+                            sx={{
+                              fontSize: '0.55rem',
+                              color: T.textMuted,
+                              fontWeight: 850,
+                              textTransform: 'uppercase',
+                            }}
+                          >
+                            Open
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: '0.8rem',
+                              fontWeight: 850,
+                              color: T.textSecondary,
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                          >
+                            {formatLedgerValue(
+                              ledger.openingReference?.closingStock
+                            )}
+                          </Typography>
+                        </Box>
+
+                        <Divider
+                          orientation="vertical"
+                          flexItem
+                          sx={{ height: 24, borderColor: T.border }}
+                        />
+
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography
+                            sx={{
+                              fontSize: '0.55rem',
+                              color: T.textMuted,
+                              fontWeight: 850,
+                              textTransform: 'uppercase',
+                            }}
+                          >
+                            Close
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: '0.86rem',
+                              fontWeight: 950,
+                              color: T.success,
+                              fontVariantNumeric: 'tabular-nums',
+                            }}
+                          >
+                            {formatLedgerValue(
+                              ledger.closingSummary?.closingStock
+                            )}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        px: { xs: 1, md: 1.2 },
+                        py: 0.45,
+                        bgcolor: alpha(T.warning, 0.045),
+                        borderBottom: `1px solid ${alpha(T.warning, 0.14)}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 0.55,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: '0.62rem',
+                          fontWeight: 850,
+                          color: '#92400e',
+                        }}
+                      >
+                        Opening: {formatLedgerValue(ledger.openingReference?.closingStock)}{' '}
+                        {ledger.itemDetails.uom}
+                        {ledger.openingReference?.date
+                          ? ` · ${moment(ledger.openingReference.date).format('DD MMM YYYY')}`
+                          : ''}
+                      </Typography>
+
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                          }}
+                        >
+                          <TrendingUpIcon sx={{ fontSize: 12, color: T.success }} />
+                          <Typography
+                            sx={{
+                              fontSize: '0.62rem',
+                              fontWeight: 850,
+                              color: T.success,
+                            }}
+                          >
+                            In: {formatLedgerValue(totalIn)}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                          }}
+                        >
+                          <TrendingDownIcon sx={{ fontSize: 12, color: T.danger }} />
+                          <Typography
+                            sx={{
+                              fontSize: '0.62rem',
+                              fontWeight: 850,
+                              color: T.danger,
+                            }}
+                          >
+                            Out: {formatLedgerValue(totalOut)}
+                          </Typography>
+                        </Box>
+
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.25,
+                          }}
+                        >
+                          <SwapHorizIcon sx={{ fontSize: 12, color: T.textMuted }} />
+                          <Typography
+                            sx={{
+                              fontSize: '0.62rem',
+                              fontWeight: 850,
+                              color: T.textSecondary,
+                            }}
+                          >
+                            Net: {formatLedgerValue(totalIn - totalOut)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    {/* Dynamic Height and Vertical Scroll Enabled here */}
+                    <TableContainer
+                      className="wsl-scroll"
+                      sx={{
+                        overflowX: 'auto',
+                        overflowY: 'auto',
+                        width: '100%',
+                        maxWidth: '100%',
+                        maxHeight: { xs: 'calc(100dvh - 460px)', sm: 'calc(100dvh - 380px)' }
+                      }}
+                    >
+                      <Table
+                        size="small"
+                        stickyHeader
+                        sx={{
+                          minWidth: { xs: 720, md: 900 },
+                          width: '100%',
+                          tableLayout: 'fixed',
+                          borderCollapse: 'separate',
+                          borderSpacing: 0,
+                        }}
+                      >
+                        <TableHead>
+                          <TableRow
+                            sx={{
+                              '& th': {
+                                position: 'sticky', // Sticky heading
+                                top: 0,              // Sticks to top of table container
+                                zIndex: 5,
+                                height: 36,
+                                backgroundColor: `${T.headerGlass} !important`,
+                                backdropFilter: 'blur(12px)',
+                                WebkitBackdropFilter: 'blur(12px)',
+                                borderBottom: `1px solid ${T.borderStrong}`,
+                                color: T.textPrimary,
+                                fontSize: '0.58rem',
+                                fontWeight: 950,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.07em',
+                                whiteSpace: 'nowrap',
+                                px: { xs: 0.75, md: 1 },
+                                py: 0.55,
+                              },
+                            }}
+                          >
+                            {TABLE_COLS.map((column, tableColumnIndex) => (
+                              <TableCell
+                                key={tableColumnIndex}
+                                align={column.align}
+                                sx={{
+                                  bgcolor: column.accent
+                                    ? `${alpha(T.success, 0.045)} !important`
+                                    : undefined,
+                                  color: column.accent
+                                    ? `${T.success} !important`
+                                    : column.color || undefined,
+                                  ...(column.sticky
+                                    ? {
+                                        width: column.w,
+                                        position: 'sticky',
+                                        left: 0,
+                                        zIndex: 6,
+                                        backgroundColor: `${T.headerStickyGlass} !important`,
+                                        backdropFilter: 'blur(12px)',
+                                        WebkitBackdropFilter: 'blur(12px)',
+                                        boxShadow: `1px 0 0 ${T.borderSoft}`,
+                                      }
+                                    : {}),
+                                }}
+                              >
+                                {column.label}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                          {transactions.map((row, rowIndex) => (
+                            <TableRow
+                              key={rowIndex}
+                              className="wsl-row"
+                              sx={{
+                                '& td': {
+                                  height: 34,
+                                  borderBottom: `1px solid ${T.borderSoft}`,
+                                  fontSize: '0.66rem',
+                                  px: { xs: 0.75, md: 1 },
+                                  py: 0.45,
+                                  backgroundColor: '#ffffff',
+                                },
+                                '&:last-child td': { borderBottom: 0 },
+                              }}
+                            >
+                              <TableCell
+                                sx={{
+                                  position: 'sticky',
+                                  left: 0,
+                                  zIndex: 3,
+                                  bgcolor: '#ffffff',
+                                  boxShadow: `1px 0 0 ${T.borderSoft}`,
+                                  whiteSpace: 'nowrap',
+                                  color: T.textPrimary,
+                                  fontWeight: 850,
+                                }}
+                              >
+                                {moment(row.date).format('DD MMM YYYY')}
+                              </TableCell>
+
+                              <TableCell
+                                sx={{
+                                  color: T.textSecondary,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {row.grnVendorName || row.dispatchBranch || '-'}
+                              </TableCell>
+
+                              <TableCell align="right" sx={{ color: T.success, fontWeight: 850, fontVariantNumeric: 'tabular-nums' }}>
+                                {formatLedgerValue(row.inStock)}
+                              </TableCell>
+
+                              <TableCell align="right" sx={{ color: T.danger, fontWeight: 850, fontVariantNumeric: 'tabular-nums' }}>
+                                {formatLedgerValue(Number(row.returnedToVendor))}
+                              </TableCell>
+
+                              <TableCell align="right" sx={{ color: T.warning, fontWeight: 850, fontVariantNumeric: 'tabular-nums' }}>
+                                {formatLedgerValue(row.returnedStock)}
+                              </TableCell>
+
+                              <TableCell
+                                sx={{
+                                  color: T.textSecondary,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {row.dispatchBranch || '-'}
+                              </TableCell>
+
+                              <TableCell align="right" sx={{ color: T.danger, fontWeight: 850, fontVariantNumeric: 'tabular-nums' }}>
+                                {formatLedgerValue(row.outStock)}
+                              </TableCell>
+
+                              <TableCell
+                                align="right"
+                                sx={{
+                                  color: T.success,
+                                  fontWeight: 950,
+                                  bgcolor: alpha(T.success, 0.04),
+                                  fontVariantNumeric: 'tabular-nums',
+                                }}
+                              >
+                                {formatLedgerValue(row.balanceStock)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+                );
+              })}
+            </Box>
+          )}
+
+          {!hasData && (
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Inventory2OutlinedIcon sx={{ fontSize: 48, color: T.border }} />
+              <Typography sx={{ color: T.textMuted, fontSize: '0.85rem', fontWeight: 700 }}>
+                No ledger data found
+              </Typography>
+              <Typography sx={{ color: T.textMuted, fontSize: '0.75rem' }}>
+                Select warehouse, items, and date range, then apply filters.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+    <DownloadDialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        onDownloadPDF={handleDownloadPDF}
+        onDownloadExcel={handleDownloadExcel}
+      />
+      </Box>
+    </>
+  );
 };
 
 export default StockSummaryPage;

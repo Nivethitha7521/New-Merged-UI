@@ -1,6 +1,5 @@
 import '../masterAdminGlobal.css';
-import '@/styles/master-admin/masterAdmin.css';
-
+import '@/styles/master-admin/masterAdmin.runtime.css';
 export default function MasterAdminLayout({
   children,
 }: {

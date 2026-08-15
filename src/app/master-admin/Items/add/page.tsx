@@ -1198,7 +1198,7 @@ function AddItemPage() {
 
     return (
 
-        <Box>
+       <Box className="item-master-form-page">
             <ItemMaster />
 
             <Container maxWidth={false} sx={{ px: { xs: 2, sm: 3, md: 4 }, py: 2 }}>
@@ -1237,8 +1237,7 @@ function AddItemPage() {
                     <Grid container spacing={1.2} sx={{ mb: 0 }}>
                         {/* First Row: Item Name to Price field (7 fields) */}
 
-                        <Grid item xs={12} sm={6} md={4} lg={1.2}>
-                            <Autocomplete
+<Grid item xs={12} sm={6} md={4} lg={1.2}>                            <Autocomplete
                                 size="small"
                                 options={inventory}
                                 slotProps={{
@@ -1300,7 +1299,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1.7}>
+                      <Grid item xs={12} sm={6} md={4} lg={1.7}>
                             <TextField
                                 autoComplete="off"
                                 label="Item Name *"
@@ -1333,7 +1332,7 @@ function AddItemPage() {
                         </Grid>
 
 
-                        <Grid item xs={12} sm={6} md={4} lg={2}>
+                      <Grid item xs={12} sm={6} md={4} lg={2}>
                             <Autocomplete
                                 size="small"
                                 options={categories}
@@ -1387,7 +1386,7 @@ function AddItemPage() {
                         </Grid>
 
 
-                        <Grid item xs={12} sm={6} md={4} lg={2}>
+                     <Grid item xs={12} sm={6} md={4} lg={2}>
                             <Autocomplete
                                 size="small"
                                 options={
@@ -1509,7 +1508,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1.2}>
+                       <Grid item xs={12} sm={6} md={4} lg={1.2}>
                             <Autocomplete
                                 size="small"
                                 slotProps={{
@@ -1563,7 +1562,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1.5}>
+                      <Grid item xs={12} sm={6} md={4} lg={1.5}>
                             <Autocomplete
                                 size="small"
                                 options={taxes}
@@ -1654,7 +1653,7 @@ function AddItemPage() {
 
 
                         {/* Second Row: Net Price to Image Delete Icon (6 fields) */}
-                        <Grid item xs={12} sm={6} md={4} lg={1}>
+                      <Grid item xs={12} sm={6} md={4} lg={1}>
                             <TextField
                                 autoComplete="off"
                                 label="Net Price"
@@ -1671,7 +1670,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1}>
+                      <Grid item xs={12} sm={6} md={4} lg={1}>
                             <TextField
                                 autoComplete="off"
                                 label="Tax Price"
@@ -1688,7 +1687,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1}>
+                       <Grid item xs={12} sm={6} md={4} lg={1}>
                             <TextField
                                 autoComplete="off"
                                 label="Final Price"
@@ -1730,7 +1729,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1.1}>
+                     <Grid item xs={12} sm={6} md={4} lg={1.1}>
                             <TextField
                                 autoComplete="off"
                                 label="HSN Code"
@@ -1752,7 +1751,7 @@ function AddItemPage() {
 
 
                         {/* Third Row: 4 Checkboxes in a single row */}
-                        <Grid item xs={12} sm={6} md={4} lg={0.9} >
+                       <Grid item xs={12} sm={6} md={4} lg={0.9} >
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -1772,7 +1771,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={0.9} >
+                       <Grid item xs={12} sm={6} md={4} lg={0.9} >
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -1793,7 +1792,7 @@ function AddItemPage() {
                         </Grid>
 
 
-                        <Grid item xs={12} sm={6} md={4} lg={1} >
+                       <Grid item xs={12} sm={6} md={4} lg={1} >
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -1813,7 +1812,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={0.84} >
+                      <Grid item xs={12} sm={6} md={4} lg={0.84} >
                             <FormControlLabel
                                 control={
                                     <Radio
@@ -1839,7 +1838,7 @@ function AddItemPage() {
                             />
                         </Grid>
 
-                        <Grid item xs={12} sm={6} md={4} lg={1.6}>
+                       <Grid item xs={12} sm={6} md={4} lg={1.6}>
                             {newItem.image ? (
                                 <Box
                                     sx={{

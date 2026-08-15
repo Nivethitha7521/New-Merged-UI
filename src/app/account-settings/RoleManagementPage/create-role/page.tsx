@@ -1006,7 +1006,7 @@ const [confirmOpen, setConfirmOpen] = useState(false);
           ROLE_OPTIONS.map(async (role) => {
             try {
               const res = await authFetch(
-                `http://127.0.0.1:8000/yenerpapi/permissions/${encodeURIComponent(role)}`
+                `https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(role)}`
               );
               if (!res.ok) return [role, null] as const;
               const data = await res.json();
@@ -1056,7 +1056,7 @@ const [confirmOpen, setConfirmOpen] = useState(false);
     // Rare fallback: cache not ready yet, fetch this one role directly.
     try {
       const res = await authFetch(
-        `http://127.0.0.1:8000/yenerpapi/permissions/${encodeURIComponent(role)}`
+        `https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(role)}`
       );
       const data = res.ok ? await res.json() : null;
       const perms = data?.permissions ?? null;
@@ -1243,7 +1243,7 @@ return;
 
    
 
-    const roleResponse = await authFetch("http://127.0.0.1:8000/yenerpapi/roles", {
+    const roleResponse = await authFetch("https://yenerp.com/purchasetestapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1293,7 +1293,7 @@ return;
 
    
 
-    const permResponse = await authFetch("http://127.0.0.1:8000/yenerpapi/permissions", {
+    const permResponse = await authFetch("https://yenerp.com/purchasetestapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)

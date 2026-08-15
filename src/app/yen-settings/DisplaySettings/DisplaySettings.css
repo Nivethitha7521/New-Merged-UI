@@ -99,3 +99,112 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* Compact display-settings layout ------------------------------------------------ */
+.display-navigation-card,
+.display-theme-card {
+  min-width: 0;
+}
+
+.display-navigation-card .MuiCardContent-root,
+.display-theme-card .MuiCardContent-root {
+  padding: 16px !important;
+}
+
+.display-navigation-card .display-section-title,
+.display-theme-card .display-section-title {
+  margin-bottom: 12px;
+}
+
+.display-navigation-segmented {
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.display-navigation-segmented button {
+  min-width: 0;
+  min-height: 46px;
+}
+
+/* Keep font options and their live preview beside each other on desktop. */
+.display-font-family-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(260px, 1.1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.display-font-family-options {
+  min-width: 0;
+}
+
+.display-font-family-options .MuiFormGroup-root {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+.display-font-family-options .MuiFormControlLabel-root {
+  min-width: 0;
+  min-height: 38px;
+  margin: 0 !important;
+  padding: 2px 8px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+}
+
+.display-font-family-options .MuiFormControlLabel-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 5%, transparent);
+}
+
+.display-font-family-options .MuiRadio-root {
+  padding: 7px !important;
+}
+
+.display-font-family-options .MuiFormControlLabel-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.display-font-preview {
+  height: 100%;
+  min-height: 0;
+  margin-top: 0;
+  justify-content: center;
+}
+
+/* Tablet: retain side-by-side cards while giving the font section more room. */
+@media (max-width: 1100px) and (min-width: 901px) {
+  .display-font-family-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .display-font-preview {
+    min-height: 104px;
+  }
+}
+
+/* Mobile / narrow content area: stack only where horizontal space is genuinely tight. */
+@media (max-width: 900px) {
+  .display-font-family-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .display-font-preview {
+    min-height: 104px;
+  }
+}
+
+@media (max-width: 520px) {
+  .display-font-family-options .MuiFormGroup-root {
+    grid-template-columns: 1fr;
+  }
+
+  .display-navigation-segmented button {
+    padding-inline: 9px;
+    gap: 6px;
+  }
+}

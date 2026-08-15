@@ -58,7 +58,7 @@ export default function VerifyOtp() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/yenerpapi/auth/verify-otp`,
+        `https://yenerp.com/purchasetestapi/auth/verify-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,7 +89,7 @@ export default function VerifyOtp() {
     setResending(true);
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/yenerpapi/auth/resend-otp`,
+        `https://yenerp.com/purchasetestapi/auth/resend-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

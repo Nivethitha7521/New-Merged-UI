@@ -117,7 +117,7 @@ export default function DisplaySettingsPage() {
       </Box>
 
       <Box className="display-settings-grid">
-      <Card className="display-settings-card display-settings-card-wide">
+      <Card className="display-settings-card display-navigation-card">
           <CardContent>
             <Box className="display-section-title">
              <ViewSidebarOutlined />
@@ -155,7 +155,7 @@ export default function DisplaySettingsPage() {
             </Box>
           </CardContent>
         </Card>
-        <Card className="display-settings-card">
+        <Card className="display-settings-card display-theme-card">
           <CardContent>
             <Box className="display-section-title"><TuneOutlined /><Box><Typography>Theme</Typography><span>Choose the application brightness.</span></Box></Box>
             <Box className="display-two-options">
@@ -210,39 +210,41 @@ export default function DisplaySettingsPage() {
       </Box>
     </Box>
 
-    <FormControl fullWidth>
-      <RadioGroup
-        value={draft.fontFamily}
-        onChange={(event) =>
-          update('fontFamily', event.target.value as DisplayFont)
-        }
+    <Box className="display-font-family-layout">
+      <FormControl fullWidth className="display-font-family-options">
+        <RadioGroup
+          value={draft.fontFamily}
+          onChange={(event) =>
+            update('fontFamily', event.target.value as DisplayFont)
+          }
+        >
+          {FONT_OPTIONS.map((font) => (
+            <FormControlLabel
+              key={font}
+              value={font}
+              control={<Radio />}
+              label={font}
+            />
+          ))}
+        </RadioGroup>
+      </FormControl>
+
+      <Box
+        className="display-contextual-preview display-font-preview"
+        style={{
+          fontFamily: FONT_PREVIEW_STACKS[draft.fontFamily],
+        }}
       >
-        {FONT_OPTIONS.map((font) => (
-          <FormControlLabel
-            key={font}
-            value={font}
-            control={<Radio />}
-            label={font}
-          />
-        ))}
-      </RadioGroup>
-    </FormControl>
+        <span>Font preview</span>
 
-    <Box
-      className="display-contextual-preview"
-      style={{
-        fontFamily: FONT_PREVIEW_STACKS[draft.fontFamily],
-      }}
-    >
-      <span>Font preview</span>
+        <strong>
+          Enterprise Resource Planning
+        </strong>
 
-      <strong>
-        Enterprise Resource Planning
-      </strong>
-
-      <p>
-        Sales, inventory, purchase and financial operations.
-      </p>
+        <p>
+          Sales, inventory, purchase and financial operations.
+        </p>
+      </Box>
     </Box>
   </CardContent>
 </Card>

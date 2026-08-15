@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../redux/store";
 import { setWhatsAppData, setDialogOpen } from "../WhatsappAdmin/Features/whatsAppSlice";
-import WhatsAppMenu from "../page";
 import WhatsAppTableComponent from "../WhatsappAdmin/Modules/whatsappTable";
 import WhatsAppDialog from "../WhatsappAdmin/Modules/whatsappDialog";
 
@@ -36,7 +35,7 @@ const WhatsAppPage: React.FC = () => {
 
   return (
     <>
-      <WhatsAppMenu  />
+     
       <WhatsAppTableComponent
         viewDeactivated={viewDeactivated}
         setViewDeactivated={setViewDeactivated}

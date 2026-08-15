@@ -110,68 +110,103 @@ const filtered = items.filter((reason) =>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
-             <tr key={reason.id} className="item-master-data-row">
-                    <td>{index + 1}</td>
-                    <td>{reason.module || '-'}</td>
-                    <td>
-                      <button
-                        type="button"
-                        onClick={(event) =>
-                          handleClickReasons(event, reason.reason || [])
-                        }
-                      disabled={!reason.reason || reason.reason.length === 0}
-                        className="yen-pos-view-pill"
-                      >
-                        {reason.reason?.length || 0} SELECTED
-                      </button>
-                      </td>
-                    <td className="item-master-actions-cell">
-                      <div>
-                        {viewDeactivated ? (
-                          <IconButton
-                            onClick={() => handleActivate(reason)}
-                            className="purchase-master-action-button is-activate"
-                            title="Activate"
-                            size="small"
-                          >
-                            <RestoreRoundedIcon />
-                          </IconButton>
-                        ) : (
-                          <>
-                            <IconButton
-                              onClick={() => handleEdit(reason)}
-                              className="purchase-master-action-button is-edit"
-                              title="Edit"
-                              size="small"
-                            >
-                              <EditOutlinedIcon />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => handleDeactivate(reason)}
-                              className="purchase-master-action-button is-delete"
-                              title="Deactivate"
-                              size="small"
-                            >
-                              <DeleteOutlineRoundedIcon />
-                            </IconButton>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+         <tbody>
+  {loading ? (
+    <tr>
+      <td colSpan={4} className="empty-state">
+        <h2>Loading...</h2>
+      </td>
+    </tr>
+  ) : (
+    <>
+      {filtered.map((reason, index) => (
+        <tr
+          key={reason.id}
+          className="item-master-data-row"
+        >
+          <td>
+            {index + 1}
+          </td>
 
-                {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="empty-state">
-                      <h2>No data found</h2>
-                    </td>
-                  </tr>
-                )}
-              </>
-            )}
-          </tbody>
+          <td>
+            {reason.module || '-'}
+          </td>
+
+          <td>
+            <button
+              type="button"
+              onClick={(event) =>
+                handleClickReasons(
+                  event,
+                  reason.reason || []
+                )
+              }
+              disabled={
+                !reason.reason ||
+                reason.reason.length === 0
+              }
+              className="yen-pos-view-pill"
+            >
+              {reason.reason?.length || 0} SELECTED
+            </button>
+          </td>
+
+          <td className="item-master-actions-cell">
+            <div>
+              {viewDeactivated ? (
+                <IconButton
+                  onClick={() =>
+                    handleActivate(reason)
+                  }
+                  className="purchase-master-action-button is-activate"
+                  title="Activate"
+                  size="small"
+                >
+                  <RestoreRoundedIcon />
+                </IconButton>
+              ) : (
+                <>
+                  <IconButton
+                    onClick={() =>
+                      handleEdit(reason)
+                    }
+                    className="purchase-master-action-button is-edit"
+                    title="Edit"
+                    size="small"
+                  >
+                    <EditOutlinedIcon />
+                  </IconButton>
+
+                  <IconButton
+                    onClick={() =>
+                      handleDeactivate(reason)
+                    }
+                    className="purchase-master-action-button is-delete"
+                    title="Deactivate"
+                    size="small"
+                  >
+                    <DeleteOutlineRoundedIcon />
+                  </IconButton>
+                </>
+              )}
+            </div>
+          </td>
+        </tr>
+      ))}
+
+      {filtered.length === 0 && (
+        <tr>
+          <td
+            colSpan={4}
+            className="empty-state"
+          >
+            <h2>No data found</h2>
+          </td>
+        </tr>
+      )}
+    </>
+  )}
+</tbody>
         </table>
       </div>
 

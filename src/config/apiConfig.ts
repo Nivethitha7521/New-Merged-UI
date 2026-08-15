@@ -12,10 +12,10 @@ export const REPORTS_API_BASE =
   process.env.NEXT_PUBLIC_REPORTS_API_BASE || 'https://yenerp.com/reportstestapi';
 
 export const MASTER_ADMIN_API_BASE =
-  process.env.NEXT_PUBLIC_MASTER_ADMIN_API_BASE || 'https://yenerp.com/masteradminapi';
+  process.env.NEXT_PUBLIC_MASTER_ADMIN_API_BASE || 'https://yenerp.com/purchasetestapi';
 
 export const FAST_API_BASE =
-  process.env.NEXT_PUBLIC_FAST_API_BASE || 'https://yenerp.com/fastapi';
+  process.env.NEXT_PUBLIC_FAST_API_BASE || 'https://yenerp.com/purchasetestapi';
 
 export const LIVE_API_BASE =
   process.env.NEXT_PUBLIC_LIVE_API_BASE || 'https://yenerp.com/liveapi';

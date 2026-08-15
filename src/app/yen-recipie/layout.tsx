@@ -1,5 +1,5 @@
 import "../masterAdminGlobal.css";
-import "@/styles/master-admin/masterAdmin.css";
+import "@/styles/master-admin/masterAdmin.runtime.css";
 import "./recipeBehavior.css";
 import "./recipeEditor.css";
 export default function YenRecipeLayout({

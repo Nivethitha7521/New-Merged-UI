@@ -25,7 +25,7 @@ import {
 } from "@/features/account-setting/userSlice";
 import { authFetch } from "@/utils/authFetch";
 
-const API_BASE = "http://127.0.0.1:8000/yenerpapi";
+const API_BASE = "https://yenerp.com/purchasetestapi";
 
 const PREDEFINED_ROLES = [
   "Admin",

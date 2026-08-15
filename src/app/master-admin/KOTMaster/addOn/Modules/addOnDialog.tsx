@@ -183,7 +183,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
 
   return (
     <Dialog
-    className="kot-master-dialog"
+    className="kot-master-dialog kot-addon-dialog"
       open={open}
       onClose={handleClose}
       maxWidth="lg"
@@ -197,9 +197,9 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
       </DialogTitle>
 
       <DialogContent className='dialog-content'>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+     <Box className="kot-addon-dialog-layout" sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
           {/* AddOn Name */}
-          <Box sx={{ flex: '0 0 180px' }}>
+          <Box className="kot-addon-name-field" sx={{ flex: '0 0 180px' }}>
             <TextField
               autoFocus
               autoComplete='off'
@@ -222,7 +222,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
           </Box>
 
           {/* Value */}
-          <Box sx={{ flex: '0 0 150px' }}>
+         <Box className="kot-addon-value-field" sx={{ flex: '0 0 150px' }}>
             <TextField
               autoComplete='off'
               margin="dense"
@@ -242,7 +242,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
           </Box>
 
           {/* Select Variances with Paper Box */}
-          <Box sx={{ minWidth: '290px', display: 'flex', flexDirection: 'column' }}>
+         <Box className="kot-addon-select-column" sx={{ minWidth: '290px', display: 'flex', flexDirection: 'column' }}>
             <Paper
               variant="outlined"
               sx={{
@@ -376,7 +376,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
           </Box>
 
           {/* Action Buttons */}
-          <Box sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1, alignSelf: 'center' }}>
+         <Box className="kot-addon-transfer-actions" sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1, alignSelf: 'center' }}>
             <button
               onClick={handleRemoveItems}
               disabled={highlightedSelected.length === 0 || isSubmitting}
@@ -398,7 +398,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
           </Box>
 
           {/* Selected Items List */}
-          <Box sx={{ flex: '0 0 280px' }}>
+          <Box className="kot-addon-selected-column" sx={{ flex: '0 0 280px' }}>
             <Typography
               variant="subtitle2"
               gutterBottom
@@ -413,6 +413,7 @@ const AddOnDialog: React.FC<AddOnDialogProps> = ({
               Selected Items ({selectedItems.length})
             </Typography>
             <Paper
+             className="kot-addon-selected-panel"
               variant="outlined"
               sx={{
                 height: 360,

@@ -1,5 +1,3 @@
-
-
 export interface TaxSplit {
   id?: number;
   taxcodeName: string;

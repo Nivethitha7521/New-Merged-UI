@@ -9,8 +9,7 @@ import {
   Button,
   CircularProgress,
   Alert, IconButton,
-  TextField,
-  Typography,
+
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
@@ -66,31 +65,31 @@ export const OpeningCashTable: React.FC<OpeningCashTableProps> = ({
             </Typography>
           </Box>
           <Box className="purchase-reference-actions item-master-actions">
-            <TextField
-             placeholder="Apply All (₹)"
-              size="small"
-             autoComplete="off"
-              value={applyAllValue}
-              // onChange={(e) => setApplyAllValue(e.target.value)}
+           <TextField
+  placeholder="Apply All (₹)"
+  size="small"
+  autoComplete="off"
+  value={applyAllValue}
+  onChange={(e) => {
+    const value = e.target.value;
 
-              onChange={(e) => {
-                const value = e.target.value;
-
-                // Allow only digits (no decimals, max 4 digits optional)
-                if (/^\d{0,4}$/.test(value)) {
-                  setApplyAllValue(value);
-                }
-              }}
-
-
-             onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  void handleApplyAll();
-                }
-              inputProps={{ min: 0, step: '0.01' }}
-              disabled={applyingAll}
-              className="custom-textfield yen-pos-apply-all-input"
-            />
+    // Allow only digits, maximum 4 digits
+    if (/^\d{0,4}$/.test(value)) {
+      setApplyAllValue(value);
+    }
+  }}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      void handleApplyAll();
+    }
+  }}
+  inputProps={{
+    min: 0,
+    step: '0.01',
+  }}
+  disabled={applyingAll}
+  className="custom-textfield yen-pos-apply-all-input"
+/>
          <button
               type="button"
               className="item-master-price-button"

@@ -1,0 +1,616 @@
+/* =========================================================
+   SALE ORDER — YEN PURCHASE EXACT DENSITY @ 100% ZOOM
+   Presentation only.
+   No API, Redux, routing, handler or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+
+  /* ---------- Sale Order wrapper ---------- */
+
+  .erp-master-admin-viewport .sale-order-layout {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* ---------- Submodule tabs ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+
+    gap: var(--erp-ui) !important;
+    margin: 0 0 calc(var(--erp-ui) * 2.25) !important;
+    padding: 0 !important;
+
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs
+  .master-admin-submodule-tab {
+    width: auto !important;
+    min-width: unset !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+
+    padding:
+      calc(var(--erp-ui) * 0.75)
+      calc(var(--erp-ui) * 1.8) !important;
+
+    color: #475467 !important;
+    background: var(--erp-surface, #ffffff) !important;
+
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: calc(var(--erp-ui) * 1.375) !important;
+
+    box-shadow: none !important;
+
+    font-weight: 550 !important;
+    line-height: 1 !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs
+  .master-admin-submodule-tab {
+    font-size:
+      calc(var(--erp-ui) * 1.84 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs
+  .master-admin-submodule-tab:hover {
+    color: var(--erp-text, #101828) !important;
+    background: #f8fafc !important;
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs
+  .master-admin-submodule-tab.is-active {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border-color: var(--erp-accent, #155eef) !important;
+    font-weight: 650 !important;
+
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.08),
+      0 5px 12px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.18) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  > .master-admin-submodule-tabs
+  .master-admin-submodule-tab.is-active:hover {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  /* ---------- Toolbar ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-toolbar-shell {
+    width: 100% !important;
+    margin: 0 0 calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-toolbar {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: calc(var(--erp-ui) * 2.25) !important;
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .sale-order-toolbar-title {
+    margin: 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .sale-order-toolbar-title {
+    font-size:
+      calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  /* ---------- Search ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search-slot {
+    flex: 0 1 calc(var(--erp-ui) * 51) !important;
+    width: min(calc(var(--erp-ui) * 51), 100%) !important;
+    min-width: calc(var(--erp-ui) * 30) !important;
+
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search
+  .MuiOutlinedInput-root {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+
+    padding-right: calc(var(--erp-ui) * 1.25) !important;
+
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+
+    box-shadow:
+      0 2px 7px rgba(16, 24, 40, 0.08) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search
+  .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+    border-width: 1px !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search
+  .MuiInputBase-input {
+    padding:
+      calc(var(--erp-ui) * 1.125)
+      var(--erp-ui) !important;
+
+    color: var(--erp-text, #101828) !important;
+    font-weight: 450 !important;
+    line-height: 1.2 !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search
+  .MuiInputBase-input,
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search
+  input::placeholder {
+    font-size:
+      calc(var(--erp-ui) * 2 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-search
+  .purchase-reference-search-icon {
+    margin-left: calc(var(--erp-ui) * 1.5) !important;
+
+    width: calc(var(--erp-ui) * 2.2) !important;
+    height: calc(var(--erp-ui) * 2.2) !important;
+    font-size: calc(var(--erp-ui) * 2.2) !important;
+  }
+
+  /* ---------- Right actions ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-actions {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+
+    gap: calc(var(--erp-ui) * 1.125) !important;
+    margin: 0 !important;
+  }
+
+  /* ---------- Add / Apply button ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-action,
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-price-button {
+    width: auto !important;
+    min-width: calc(var(--erp-ui) * 13.25) !important;
+
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: calc(var(--erp-ui) * 0.8) !important;
+
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+
+    border: 1px solid var(--erp-accent, #155eef) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+
+    box-shadow:
+      0 1px 3px rgba(16, 24, 40, 0.06) !important;
+
+    white-space: nowrap !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-action,
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-price-button {
+    font-size:
+      calc(var(--erp-ui) * 1.94 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-action
+  .icon-action-button {
+    width: calc(var(--erp-ui) * 2.15) !important;
+    min-width: calc(var(--erp-ui) * 2.15) !important;
+    height: calc(var(--erp-ui) * 2.15) !important;
+    min-height: calc(var(--erp-ui) * 2.15) !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: inherit !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-action
+  .icon-action-svg,
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-action
+  .MuiSvgIcon-root {
+    width: calc(var(--erp-ui) * 2.15) !important;
+    height: calc(var(--erp-ui) * 2.15) !important;
+    font-size: calc(var(--erp-ui) * 2.15) !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-action
+  .icon-action-label {
+    margin: 0 !important;
+    font-size:
+      calc(var(--erp-ui) * 1.94 * var(--erp-type-scale)) !important;
+    line-height: 1 !important;
+  }
+
+  /* ---------- Show Deactivated ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-active-toggle {
+    margin: 0 !important;
+
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+
+    padding:
+      0
+      calc(var(--erp-ui) * 1.15)
+      0
+      calc(var(--erp-ui) * 1.65) !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+
+    gap: calc(var(--erp-ui) * 0.9) !important;
+
+    background: var(--erp-surface, #ffffff) !important;
+
+    border: 1px solid var(--erp-accent, #155eef) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+
+    box-shadow:
+      0 1px 3px rgba(16, 24, 40, 0.05) !important;
+
+    white-space: nowrap !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-active-toggle
+  .MuiFormControlLabel-label {
+    color: var(--erp-text, #475467) !important;
+    font-size:
+      calc(var(--erp-ui) * 1.88 * var(--erp-type-scale)) !important;
+    font-weight: 550 !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-active-toggle
+  .MuiSwitch-root {
+    width: calc(var(--erp-ui) * 5.75) !important;
+    height: calc(var(--erp-ui) * 3.25) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-active-toggle
+  .MuiSwitch-switchBase {
+    padding: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-active-toggle
+  .MuiSwitch-thumb {
+    width: calc(var(--erp-ui) * 1.875) !important;
+    height: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-active-toggle
+  .MuiSwitch-switchBase.Mui-checked {
+    transform:
+      translateX(calc(var(--erp-ui) * 2.375)) !important;
+  }
+
+  /* ---------- Advance Amount ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .sale-order-apply-all-input {
+    width: calc(var(--erp-ui) * 17.5) !important;
+    flex: 0 0 calc(var(--erp-ui) * 17.5) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .sale-order-apply-all-input
+  .MuiOutlinedInput-root {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  /* ---------- Table shell ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+
+    max-height: calc(100vh - (var(--erp-ui) * 45)) !important;
+    overflow: auto !important;
+
+    background: var(--erp-surface, #ffffff) !important;
+
+    border: 1px solid var(--erp-border, #dbe2ea) !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.04),
+      0 4px 12px rgba(16, 24, 40, 0.03) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-table {
+    width: 100% !important;
+    min-width: calc(var(--erp-ui) * 84) !important;
+
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+
+    table-layout: fixed !important;
+  }
+
+  /* ---------- Table header ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-table
+  > thead
+  > tr
+  > th {
+    height: calc(var(--erp-ui) * 5.25) !important;
+
+    padding:
+      calc(var(--erp-ui) * 1.375)
+      calc(var(--erp-ui) * 2.5) !important;
+
+    color: var(--erp-muted, #667085) !important;
+    background: #f8fafc !important;
+
+    border-bottom:
+      1px solid var(--erp-border, #dfe5ec) !important;
+
+    font-weight: 750 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    vertical-align: middle !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-table
+  > thead
+  > tr
+  > th {
+    font-size:
+      calc(var(--erp-ui) * 1.52 * var(--erp-type-scale)) !important;
+  }
+
+  /* ---------- Table rows ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-table
+  > tbody
+  > .item-master-data-row
+  > td {
+    height: calc(var(--erp-ui) * 7.75) !important;
+    min-height: calc(var(--erp-ui) * 7.75) !important;
+
+    padding:
+      calc(var(--erp-ui) * 1.5)
+      calc(var(--erp-ui) * 2.5) !important;
+
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+
+    border-bottom: 1px solid #e7ecf1 !important;
+
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    vertical-align: middle !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-table
+  > tbody
+  > .item-master-data-row
+  > td {
+    font-size:
+      calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  /* ---------- Edit / Delete / Activate ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-actions-cell
+  > div {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: calc(var(--erp-ui) * 0.75) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .purchase-master-action-button {
+    width: calc(var(--erp-ui) * 4) !important;
+    min-width: calc(var(--erp-ui) * 4) !important;
+    height: calc(var(--erp-ui) * 4) !important;
+
+    padding: 0 !important;
+
+    display: inline-grid !important;
+    place-items: center !important;
+
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .purchase-master-action-button
+  svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  /* ---------- Pagination ---------- */
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-pagination {
+    margin-top: calc(var(--erp-ui) * 2) !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-pagination
+  .MuiPagination-ul {
+    gap: calc(var(--erp-ui) * 0.5) !important;
+  }
+
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-pagination
+  .MuiPaginationItem-root {
+    min-width: calc(var(--erp-ui) * 4) !important;
+    height: calc(var(--erp-ui) * 4) !important;
+
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .sale-order-layout
+  .item-master-pagination
+  .MuiPaginationItem-root {
+    font-size:
+      calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+}
+
+

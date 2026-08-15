@@ -1,34 +1,107 @@
 "use client";
-import React, { useEffect, useRef, useCallback, useMemo, useState } from "react";
+
+import React, {
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import {
-  Box, IconButton, Button, Dialog, DialogActions, DialogContent, TextField, Typography, DialogTitle, Divider,
+  Box,
+  IconButton,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  TextField,
+  Typography,
+  DialogTitle,
+  Divider,
+  Paper,
+  Tooltip,
+  Chip,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchBranches, fetchItems, selectBranches, selectDataLoading, selectDataError, approveItem, Branchitem,
-  selectSelectedLocation, setSelectedLocation, selectEditableRows, setEditableRows, selectChanges, setChanges,
-  selectVisibleColumns, toggleColumn, SearchFilters, selectOpenFirstDialog, setOpenFirstDialog,
-  selectOpenAdjustmentDialog, setOpenAdjustmentDialog, selectOpenApproveDialog, setOpenApproveDialog,
-  selectSelectedItem, setSelectedItem, selectSelectedApproveItem, setSelectedApproveItem,
-  selectAdjustmentReason, setAdjustmentReason, selectAdjustedPhysicalStock, setAdjustedPhysicalStock,
-  selectApproveDescription, setApproveDescription, selectOpenSnackbar, setOpenSnackbar,
-  selectSnackbarMessage, setSnackbarMessage, selectCurrentPage, setCurrentPage, selectHasMoreData,
-  setHasMoreData, selectAllItems, setAllItems, selectTotalItems, setTotalItems, selectTotalPages,
-  setTotalPages, selectIsLoadingMore, setIsLoadingMore, selectIsFullScreen, setIsFullScreen,
-  selectTableView, setTableView, selectSearchParams, setSearchParams, setApprovedItemsFilters, FetchParams,
-  selectFilterOptions, setDataLoading,
+  fetchBranches,
+  fetchItems,
+  selectBranches,
+  selectDataLoading,
+  selectDataError,
+  approveItem,
+  approveBulkItems,
+  approveAllBranch,
+  fetchPendingCodes,
+  selectBulkApproving,
+  selectApproveAllBranchLoading,
+  Branchitem,
+  selectSelectedLocation,
+  setSelectedLocation,
+  selectEditableRows,
+  setEditableRows,
+  selectChanges,
+  setChanges,
+  selectVisibleColumns,
+  toggleColumn,
+  SearchFilters,
+  selectOpenFirstDialog,
+  setOpenFirstDialog,
+  selectOpenAdjustmentDialog,
+  setOpenAdjustmentDialog,
+  selectOpenApproveDialog,
+  setOpenApproveDialog,
+  selectSelectedItem,
+  setSelectedItem,
+  selectSelectedApproveItem,
+  setSelectedApproveItem,
+  selectAdjustmentReason,
+  setAdjustmentReason,
+  selectAdjustedPhysicalStock,
+  setAdjustedPhysicalStock,
+  selectApproveDescription,
+  setApproveDescription,
+  selectOpenSnackbar,
+  setOpenSnackbar,
+  selectSnackbarMessage,
+  setSnackbarMessage,
+  selectCurrentPage,
+  setCurrentPage,
+  selectHasMoreData,
+  setHasMoreData,
+  selectAllItems,
+  setAllItems,
+  selectTotalItems,
+  setTotalItems,
+  selectTotalPages,
+  setTotalPages,
+  selectIsLoadingMore,
+  setIsLoadingMore,
+  selectIsFullScreen,
+  setIsFullScreen,
+
+  selectSearchParams,
+  setSearchParams,
+  setApprovedItemsFilters,
+  FetchParams,
+  selectFilterOptions,
+  setDataLoading,
 } from "../../../../features/yen_inventory/OutletPhysicalVarianceSlice";
-import { usePermissions } from "@/hooks/usePermissions";
+
 import OutletsInventoryManagementPage from "../page";
 import FilterBar from "../../../../components/Inventory/physcialstockvarience/filterBar";
 import DataTable from "../../../../components/Inventory/physcialstockvarience/dataTable";
 import PaginationControls from "../../../../components/Inventory/physcialstockvarience/paginationcontrol";
 import ConfirmDialog from "../../../../components/Inventory/physcialstockvarience/confirmDailog";
 import FeedbackSnackbar from "../../../../components/Inventory/physcialstockvarience/feedbackSnakbar";
-import { StockAdjustmentTable } from "../../../../components/Inventory/physcialstockvarience/ui/stockAdjustmentTable";
+import { ApprovalModal } from "@/components/Inventory/shared/ApprovalModal";
+import { getApiErrorMessage } from "@/components/Inventory/shared/apiError";
+
 import { AppDispatch } from "@/redux/store";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+
 import { StockAdjustmentDialog } from "@/components/Inventory/physicalstockmodifcation/stockadjustmentDialog";
 import { useTodayDate } from "@/components/Hooks/useTodayDate";
 
@@ -43,13 +116,38 @@ export interface SearchParams {
 
 const ITEMS_PER_PAGE = 30;
 
-const OutletPhysicalStockModification: React.FC = () => {
+const UI = {
+  pageBg: "#f6f9fd",
+  surface: "#ffffff",
+  surfaceSoft: "#fbfdff",
+  border: "#e8eef6",
+  borderStrong: "rgba(203,213,225,0.62)",
+  accent: "#1976d2",
+  accentDark: "#1258a8",
+  accentBg: "#eef6ff",
+  success: "#16a34a",
+  successDark: "#15803d",
+  successBg: "#ecfdf5",
+  successBorder: "#bbf7d0",
+  warning: "#d97706",
+  warningBg: "#fff7ed",
+  warningBorder: "#fdba74",
+  danger: "#dc2626",
+  dangerBg: "#fef2f2",
+  textPrimary: "#0f172a",
+  textSecondary: "#334155",
+  textMuted: "#64748b",
+};
+
+const OutletPhysicalStockVarianceModification: React.FC = () => {
+  const [showPendingOnly, setShowPendingOnly] = useState(false);
+
   const dispatch = useDispatch<AppDispatch>();
-  const { hasPermission, isModuleVisible } = usePermissions();
-  const canRead = hasPermission("yenerp","physicalstockvariancemodification","read");
-const canApprove = hasPermission("yenerp","physicalstockvariancemodification","approve");
+
   const branches = useSelector(selectBranches);
   const loading = useSelector(selectDataLoading);
+  const bulkApproving = useSelector(selectBulkApproving);
+  const approveAllBranchLoading = useSelector(selectApproveAllBranchLoading);
   const selectedLocation = useSelector(selectSelectedLocation);
   const error = useSelector(selectDataError);
   const editableRows = useSelector(selectEditableRows);
@@ -73,10 +171,12 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
   const totalPages = useSelector(selectTotalPages);
   const isLoadingMore = useSelector(selectIsLoadingMore);
   const isFullScreen = useSelector(selectIsFullScreen);
-  const tableView = useSelector(selectTableView);
+
   const searchParams = useSelector(selectSearchParams);
 
   const isApprovingRef = useRef(false);
+  // newly add this 14 8 2
+  const isPendingSelectionRef = useRef(false);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const isFetchingRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -84,51 +184,130 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
   const filterMenuAnchorEl = useRef<(() => void) | null>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
-  // Refs to prevent effect recursion
   const prevTriggersRef = useRef({ location: "", searchStr: "" });
   const filterOptionsRef = useRef(filterOptions);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [cascadeSourceKey, setCascadeSourceKey] = useState<string | null>(null);
+  const [tableView, setTableView] = useState<"stock" | "approved">("stock");
+  // replace the part 14 8 1
+  const [sortField, setSortField] = useState<string | undefined>(undefined);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | undefined>(undefined);
+
+  // Bulk Approval Modal State
+  const [bulkApprovalModalOpen, setBulkApprovalModalOpen] = useState(false);
+  const [bulkApprovalType, setBulkApprovalType] = useState<"BRANCH" | "SELECTED">("BRANCH");
+  const [cascadeLoading, setCascadeLoading] = useState(false);
+  const [selectedApprovalItemCodes, setSelectedApprovalItemCodes] = useState<
+    string[]
+  >([]);
 
   const apiDate = useTodayDate();
 
-  // Keep filterOptions ref in sync
-  useEffect(() => { filterOptionsRef.current = filterOptions; }, [filterOptions]);
+  // newly add this 10 8 1
+  useEffect(() => {
+    if (apiDate) {
+      console.log("API_DATE:", apiDate);
 
-  // Fetch branches on mount
+    }
+  }, [apiDate]);
+  console.log("API_DATE:", apiDate);
+
+  const currentPageSafe = Math.max(currentPage || 1, 1);
+  const totalPagesSafe = Math.max(totalPages || 1, 1);
+
+  const selectedBranchLabel = useMemo(() => {
+    const branch = branches.find(
+      (b) =>
+        b.locationId === selectedLocation ||
+        b.locationName === selectedLocation ||
+        b.aliasName === selectedLocation
+    );
+
+    return branch?.aliasName || branch?.locationName || selectedLocation || "";
+  }, [branches, selectedLocation]);
+
+  const getFallbackCascadeSource = useCallback((params: SearchParams) => {
+    const orderedKeys: Array<
+      keyof Pick<
+        SearchParams,
+        "varianceName" | "itemName" | "subCategory" | "category"
+      >
+    > = ["varianceName", "itemName", "subCategory", "category"];
+
+    return orderedKeys.find((key) => params[key]?.length > 0) ?? null;
+  }, []);
+
+  useEffect(() => {
+    filterOptionsRef.current = filterOptions;
+  }, [filterOptions]);
+
   useEffect(() => {
     if (branches.length === 0) dispatch(fetchBranches());
   }, [dispatch, branches.length]);
 
-  // Set approved items filters
   useEffect(() => {
-    if (tableView === "Approved" && selectedLocation) {
-      dispatch(setApprovedItemsFilters({ branch: selectedLocation, date: searchParams.queryDate || "" }));
+    if (branches.length > 0 && !selectedLocation) {
+      const storedLocation = localStorage.getItem("globalSelectedOutletLocation");
+      let defaultBranch = branches[0].locationId;
+      if (storedLocation && branches.some(b => b.locationId === storedLocation)) {
+        defaultBranch = storedLocation;
+      }
+      dispatch(setSelectedLocation(defaultBranch));
     }
-  }, [dispatch, tableView, selectedLocation, searchParams.queryDate]);
+  }, [branches, selectedLocation, dispatch]);
 
-  // Error snackbar
+
+
   useEffect(() => {
-    if (error) { dispatch(setSnackbarMessage(`Error: ${error}`)); dispatch(setOpenSnackbar(true)); }
+    if (error) {
+      dispatch(setSnackbarMessage(`Error: ${error}`));
+      dispatch(setOpenSnackbar(true));
+    }
   }, [error, dispatch]);
 
-  const fieldTypes = useMemo(() => [
-    "Opening-Stock", "Receiving-Stock", "Stock IN", "Stock OUT", "Sales", "Sales Return",
-    "Wastages", "Warehouse Return", "Calc System", "System Stock", "Physical Stock",
-    "Variance", "Status", "Action",
-  ], []);
+  // Full transaction flow shown in table. Status column is intentionally hidden.
+  const fieldTypes = useMemo(
+    () => [
+      "Opening-Stock",
+      "Receiving-Stock",
+      "Stock IN",
+      "Stock OUT",
+      "Sales",
+      "Sales Return",
+      "Wastages",
+      "Warehouse Return",
+      "Calc System",
+      "System Stock",
+      "Physical Stock",
+      "Variance",
+      "Action",
+    ],
+    []
+  );
 
-  const staticColumns = useMemo(() => ["itemCode", "Item Name", "Variance Name", "Category", "Subcategory"], []);
+  const staticColumns = useMemo(
+    () => ["itemCode", "Item Name", "Variance Name", "Category", "Subcategory"],
+    []
+  );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // loadPage — fetches table data (and optionally filter options)
-  // ─────────────────────────────────────────────────────────────────────────────
+  // const loadPage = useCallback(
+  //   async (page: number, isReset = false, includeFilters = true) => {
+  // replace the part 14 8 1
   const loadPage = useCallback(
-    async (page: number, isReset: boolean = false, includeFilters: boolean = true) => {
+    async (
+      page: number,
+      isReset = false,
+      includeFilters = true,
+      sortFieldOverride: string | undefined = sortField,
+      sortOrderOverride: "asc" | "desc" | undefined = sortOrder
+    ) => {
       if (isFetchingRef.current) return;
       if (loading && !isReset) return;
 
       isFetchingRef.current = true;
+      setCascadeLoading(true);
+
       try {
         if (page > 1) dispatch(setIsLoadingMore(true));
         if (page === 1) dispatch(setDataLoading(true));
@@ -140,22 +319,34 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
           includeWastageReturn: true,
           includeStockTransfer: true,
           include_filter_options: includeFilters,
-          // ← only_filter_options is NOT set here (this is a table fetch)
+          // newly add this 14 8 1
+          sortField: sortFieldOverride,
+          sortOrder: sortOrderOverride,
         };
 
         if (selectedLocation) searchFilters.locationId = selectedLocation;
 
         const dynamicFilters: Partial<SearchFilters> = {
-          ...(searchParams.itemName?.length && { itemName: searchParams.itemName }),
-          ...(searchParams.varianceName?.length && { varianceName: searchParams.varianceName }),
-          ...(searchParams.category?.length && { category: searchParams.category }),
-          ...(searchParams.subCategory?.length && { subCategory: searchParams.subCategory }),
+          ...(searchParams.itemName?.length && {
+            itemName: searchParams.itemName,
+          }),
+          ...(searchParams.varianceName?.length && {
+            varianceName: searchParams.varianceName,
+          }),
+          ...(searchParams.category?.length && {
+            category: searchParams.category,
+          }),
+          ...(searchParams.subCategory?.length && {
+            subCategory: searchParams.subCategory,
+          }),
           queryDate: apiDate,
         };
+
         Object.assign(searchFilters, dynamicFilters);
 
         if (includeFilters) {
           const fo = filterOptionsRef.current;
+
           searchFilters.categoryPage = isReset ? 1 : fo.category.page;
           searchFilters.categoryLimit = 50;
           searchFilters.subCategoryPage = isReset ? 1 : fo.subCategory.page;
@@ -180,9 +371,13 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
             : [...allItems, ...(result.branchwise || [])];
 
         dispatch(setAllItems(newItems));
-        dispatch(setHasMoreData((result.branchwise || []).length >= ITEMS_PER_PAGE));
+        dispatch(
+          setHasMoreData((result.branchwise || []).length >= ITEMS_PER_PAGE)
+        );
         dispatch(setTotalItems(result.total || 0));
-        dispatch(setTotalPages(Math.ceil((result.total || 0) / ITEMS_PER_PAGE)));
+        dispatch(
+          setTotalPages(Math.ceil((result.total || 0) / ITEMS_PER_PAGE))
+        );
       } catch {
         dispatch(setSnackbarMessage("Error fetching data."));
         dispatch(setOpenSnackbar(true));
@@ -190,14 +385,63 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
         dispatch(setIsLoadingMore(false));
         dispatch(setDataLoading(false));
         isFetchingRef.current = false;
+        setCascadeLoading(false);
       }
     },
-    [loading, selectedLocation, searchParams, dispatch, allItems, apiDate]
+    [loading, selectedLocation, searchParams, dispatch, allItems, apiDate, sortField, sortOrder]
+  );
+  // newly add this part 14 8 1
+  const handleColumnSort = useCallback(
+    async (field: string) => {
+      if (field === "Select" || field === "S.No" || field === "Action") {
+        return;
+      }
+
+      let nextField: string | undefined = field;
+      let nextOrder: "asc" | "desc" | undefined = "asc";
+
+      if (field === "Variance") {
+        if (sortField !== "Variance" && sortField !== "editHistory") {
+          // 1st click
+          nextField = "Variance";
+          nextOrder = "asc";
+        } else if (sortField === "Variance" && sortOrder === "asc") {
+          // 2nd click
+          nextField = "Variance";
+          nextOrder = "desc";
+        } else if (sortField === "Variance" && sortOrder === "desc") {
+          // 3rd click
+          nextField = "editHistory";
+          nextOrder = "asc";
+        } else if (sortField === "editHistory" && sortOrder === "asc") {
+          // 4th click
+          nextField = "editHistory";
+          nextOrder = "desc";
+        } else {
+          // 5th click -> original order
+          nextField = undefined;
+          nextOrder = undefined;
+        }
+      } else {
+        // Normal column cycle: ASC -> DESC -> ASC
+        if (sortField === field && sortOrder === "asc") {
+          nextOrder = "desc";
+        } else {
+          nextOrder = "asc";
+        }
+      }
+
+      setSortField(nextField);
+      setSortOrder(nextOrder);
+
+      dispatch(setCurrentPage(1));
+      dispatch(setAllItems([]));
+
+      await loadPage(1, true, false, nextField, nextOrder);
+    },
+    [dispatch, loadPage, sortField, sortOrder]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // loadFilterOptions — fetches ONLY filter dropdown options, table is untouched
-  // ─────────────────────────────────────────────────────────────────────────────
   const loadFilterOptions = useCallback(
     async (
       field: "category" | "subCategory" | "itemName" | "varianceName",
@@ -209,14 +453,20 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
       const params: FetchParams = {
         locationId: selectedLocation,
         include_filter_options: true,
-        only_filter_options: true, // ← key flag: backend skips table data
+        only_filter_options: true,
         queryDate: apiDate,
-        // Pass current active filters so dropdown values are contextually filtered
-        ...(searchParams.category?.length && { category: searchParams.category }),
-        ...(searchParams.subCategory?.length && { subCategory: searchParams.subCategory }),
-        ...(searchParams.itemName?.length && { itemName: searchParams.itemName }),
-        ...(searchParams.varianceName?.length && { varianceName: searchParams.varianceName }),
-        // Only pass the specific field being paginated / searched
+        ...(searchParams.category?.length && {
+          category: searchParams.category,
+        }),
+        ...(searchParams.subCategory?.length && {
+          subCategory: searchParams.subCategory,
+        }),
+        ...(searchParams.itemName?.length && {
+          itemName: searchParams.itemName,
+        }),
+        ...(searchParams.varianceName?.length && {
+          varianceName: searchParams.varianceName,
+        }),
         ...(field === "category" && {
           categoryPage: page,
           categoryLimit: 50,
@@ -237,7 +487,6 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
           varianceNameLimit: 50,
           ...(search !== undefined && { varianceNameSearch: search }),
         }),
-        // NO `page` param → reducer skips table update block entirely
       };
 
       await dispatch(fetchItems(params));
@@ -245,24 +494,23 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
     [dispatch, selectedLocation, apiDate, searchParams]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Infinite scroll for table
-  // ─────────────────────────────────────────────────────────────────────────────
   const loadMoreData = useCallback(async () => {
-    if (isLoadingMore || !hasMoreData || loading || isFetchingRef.current) return;
+    if (isLoadingMore || !hasMoreData || loading || isFetchingRef.current) {
+      return;
+    }
+
     const nextPage = currentPage + 1;
+
     dispatch(setCurrentPage(nextPage));
-    await loadPage(nextPage, false, false); // no filter options on table scroll
+    await loadPage(nextPage, false, false);
   }, [isLoadingMore, hasMoreData, loading, currentPage, loadPage, dispatch]);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Trigger on location / search param change
-  // ─────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!selectedLocation) return;
 
     const searchStr = JSON.stringify(searchParams);
-    const locationChanged = selectedLocation !== prevTriggersRef.current.location;
+    const locationChanged =
+      selectedLocation !== prevTriggersRef.current.location;
     const searchChanged = searchStr !== prevTriggersRef.current.searchStr;
 
     if (!locationChanged && !searchChanged) return;
@@ -276,100 +524,655 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
       dispatch(setAllItems([]));
 
       if (locationChanged) {
-        loadPage(1, true, true); // full reset
+        loadPage(1, true, true);
       } else {
-        loadPage(1, false, true); // filter changed, preserve filter option pages
+        loadPage(1, false, true);
       }
     }, 500);
 
-    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
   }, [selectedLocation, searchParams, loadPage, dispatch]);
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Handlers
-  // ─────────────────────────────────────────────────────────────────────────────
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
-    const { scrollTop, scrollHeight, clientHeight } = target;
-    const scrollPosition = (scrollTop + clientHeight) / scrollHeight;
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const target = e.currentTarget;
+      const { scrollTop, scrollHeight, clientHeight } = target;
+      const scrollPosition = (scrollTop + clientHeight) / scrollHeight;
 
-    if (
-      scrollPosition >= 0.8 &&
-      !loading &&
-      !isLoadingMore &&
-      hasMoreData &&
-      selectedLocation &&
-      !isFetchingRef.current
-    ) {
-      loadMoreData();
-    }
-  }, [loading, isLoadingMore, hasMoreData, selectedLocation, loadMoreData]);
+      if (
+        scrollPosition >= 0.8 &&
+        !loading &&
+        !isLoadingMore &&
+        hasMoreData &&
+        selectedLocation &&
+        !isFetchingRef.current
+      ) {
+        loadMoreData();
+      }
+    },
+    [loading, isLoadingMore, hasMoreData, selectedLocation, loadMoreData]
+  );
 
-  const handleLocationChange = useCallback((value: string | string[]) => {
-    const selectedValue = Array.isArray(value) ? value[0] : value;
-    if (selectedValue !== selectedLocation) dispatch(setSelectedLocation(selectedValue));
-  }, [dispatch, selectedLocation]);
+  const handleLocationChange = useCallback(
+    (value: string | string[]) => {
+      const selectedValue = Array.isArray(value) ? value[0] : value;
 
-  const handleSearchChange = useCallback((field: keyof SearchParams, value: string[] | string) => {
-    dispatch(setSearchParams({ ...searchParams, [field]: value }));
-  }, [dispatch, searchParams]);
+      if (selectedValue !== selectedLocation) {
+        localStorage.setItem("globalSelectedOutletLocation", selectedValue);
+        setCascadeSourceKey(getFallbackCascadeSource(searchParams));
+        setCascadeLoading(false);
+        dispatch(setSelectedLocation(selectedValue));
+      }
+    },
+    [dispatch, selectedLocation, getFallbackCascadeSource, searchParams]
+  );
+
+  const handleSearchChange = useCallback(
+    (field: keyof SearchParams, value: string[] | string) => {
+      const nextValue = Array.isArray(value) ? value : value ? [value] : [];
+      const nextParams = { ...searchParams, [field]: nextValue };
+
+      if (nextValue.length === 0) {
+        if (cascadeSourceKey === String(field)) {
+          setCascadeSourceKey(getFallbackCascadeSource(nextParams));
+          setCascadeLoading(false);
+        }
+      } else {
+        setCascadeSourceKey(String(field));
+      }
+
+      dispatch(setSearchParams({ ...searchParams, [field]: value }));
+    },
+    [dispatch, searchParams, cascadeSourceKey, getFallbackCascadeSource]
+  );
 
   const handleCellEdit = useCallback(
-    (id: string, field: string, value: string, itemName: string, varianceName: string) => {
-      dispatch(setEditableRows({ ...editableRows, [id]: { ...editableRows[id], [field]: value === "" ? "" : value } }));
+    (
+      id: string,
+      field: string,
+      value: string,
+      itemName: string,
+      varianceName: string
+    ) => {
+      dispatch(
+        setEditableRows({
+          ...editableRows,
+          [id]: {
+            ...editableRows[id],
+            [field]: value === "" ? "" : value,
+          },
+        })
+      );
+
       const newChanges = changes.some(
-        (c) => c.itemName === itemName && c.varianceName === varianceName && c.locationName === selectedLocation && c.field === field
+        (change) =>
+          change.itemName === itemName &&
+          change.varianceName === varianceName &&
+          change.locationName === selectedLocation &&
+          change.field === field
       )
-        ? changes.map((c) =>
-          c.itemName === itemName && c.varianceName === varianceName && c.locationName === selectedLocation && c.field === field
-            ? { ...c, newValue: value }
-            : c
+        ? changes.map((change) =>
+          change.itemName === itemName &&
+            change.varianceName === varianceName &&
+            change.locationName === selectedLocation &&
+            change.field === field
+            ? { ...change, newValue: value }
+            : change
         )
-        : [...changes, { itemName, varianceName, locationName: selectedLocation!, field, newValue: value }];
+        : [
+          ...changes,
+          {
+            itemName,
+            varianceName,
+            locationName: selectedLocation!,
+            field,
+            newValue: value,
+          },
+        ];
+
       dispatch(setChanges(newChanges));
     },
     [dispatch, editableRows, changes, selectedLocation]
   );
 
-  const handleToggleColumn = useCallback((column: string) => dispatch(toggleColumn(column)), [dispatch]);
+  const handleToggleColumn = useCallback(
+    (column: string) => dispatch(toggleColumn(column)),
+    [dispatch]
+  );
 
-  const handleApproveClick = useCallback((item: Branchitem) => {
-    dispatch(setSelectedApproveItem(item));
-    dispatch(setOpenApproveDialog(true));
-    dispatch(setApproveDescription(""));
-  }, [dispatch]);
+  const handleApproveClick = useCallback(
+    (item: Branchitem) => {
+      dispatch(setSelectedApproveItem(item));
+      dispatch(setOpenApproveDialog(true));
+      dispatch(setApproveDescription(""));
+    },
+    [dispatch]
+  );
 
-  const handleApproveConfirm = useCallback(async () => {
-    if (!selectedApproveItem || !selectedLocation) return;
+  const isApprovableRow = useCallback((item: Branchitem) => {
+    return (
+      Boolean(item.approvalButton) ||
+      Boolean(item.canApprove) ||
+      item.approvalStatus === "pendingApproval"
+    );
+  }, []);
+
+  const selectedApprovalCount = selectedApprovalItemCodes.length;
+
+  const handleToggleApprovalItem = useCallback(
+    (item: Branchitem) => {
+      if (!isApprovableRow(item) || !item.itemCode) return;
+
+      setSelectedApprovalItemCodes((prev) =>
+        prev.includes(item.itemCode)
+          ? prev.filter((code) => code !== item.itemCode)
+          : [...prev, item.itemCode]
+      );
+    },
+    [isApprovableRow]
+  );
+
+
+
+  useEffect(() => {
+    // Do not clear pending selection while Select All Pending
+    // is actively showing the selected pending rows.
+    if (isPendingSelectionRef.current) {
+      return;
+    }
+
+    setSelectedApprovalItemCodes([]);
+    setShowPendingOnly(false);
+  }, [selectedLocation, apiDate, searchParams]);
+
+  const handleApproveConfirm = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
+    if (!selectedApproveItem || !selectedLocation || isApprovingRef.current) {
+      return;
+    }
+
+    if (!isApprovableRow(selectedApproveItem)) {
+      dispatch(setSnackbarMessage("This item is not available for approval."));
+      dispatch(setOpenSnackbar(true));
+      dispatch(setOpenApproveDialog(false));
+      return;
+    }
+
+    isApprovingRef.current = true;
+
     try {
       const branch = branches.find(
-        (b) => b.locationName === selectedLocation || b.aliasName === selectedLocation
+        (branch) =>
+          branch.locationId === selectedLocation ||
+          branch.locationName === selectedLocation ||
+          branch.aliasName === selectedLocation
       );
+
       await dispatch(
         approveItem({
           itemCode: selectedApproveItem.itemCode,
           locationId: branch?.locationId || selectedLocation,
-          approvedBy: "",
-          description: approveDescription || adjustmentReason || "",
+          queryDate: apiDate,
+          approvedBy: "Inventory",
+          description: description || adjustmentReason || "",
+          adjustmentMode: mode,
         })
       ).unwrap();
 
-      dispatch(setCurrentPage(1));
-      await loadPage(1, false, true);
-
-      dispatch(setSnackbarMessage(`Item "${selectedApproveItem.itemName}" approved successfully`));
-      dispatch(setOpenSnackbar(true));
-    } catch (error: any) {
-      dispatch(
-        setSnackbarMessage(error?.response?.data?.detail || error?.message || "Failed to approve item")
+      setSelectedApprovalItemCodes((prev) =>
+        prev.filter((code) => code !== selectedApproveItem.itemCode)
       );
+
+      // dispatch(setCurrentPage(1));
+      // dispatch(setAllItems([]));
+      // await loadPage(1, false, true);
+      // replace the line 14 8 2 
+      dispatch(setCurrentPage(1));
+      dispatch(setAllItems([]));
+      await loadPage(1, false, false);
+
+      dispatch(
+        setSnackbarMessage(
+          `Item "${selectedApproveItem.varianceName || selectedApproveItem.itemCode
+          }" approved successfully`
+        )
+      );
+      dispatch(setOpenSnackbar(true));
+    } catch (error) {
+      dispatch(setSnackbarMessage(getApiErrorMessage(error, "Failed to approve item")));
       dispatch(setOpenSnackbar(true));
     } finally {
       dispatch(setOpenApproveDialog(false));
       dispatch(setSelectedApproveItem(null));
       dispatch(setApproveDescription(""));
+      isApprovingRef.current = false;
     }
-  }, [dispatch, branches, selectedLocation, selectedApproveItem, approveDescription, adjustmentReason, loadPage]);
+  }, [
+    dispatch,
+    branches,
+    selectedLocation,
+    selectedApproveItem,
+    approveDescription,
+    adjustmentReason,
+    loadPage,
+    apiDate,
+    isApprovableRow,
+  ]);
+
+  const handleBulkApproveSelected = useCallback(() => {
+    if (
+      !selectedLocation ||
+      selectedApprovalItemCodes.length === 0 ||
+      bulkApproving ||
+      isApprovingRef.current
+    ) {
+      return;
+    }
+    setBulkApprovalType("SELECTED");
+    setBulkApprovalModalOpen(true);
+  }, [selectedLocation, selectedApprovalItemCodes, bulkApproving]);
+
+  const executeBulkApproveSelected = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
+    if (!selectedLocation || selectedApprovalItemCodes.length === 0) return;
+    isApprovingRef.current = true;
+
+    try {
+      const branch = branches.find(
+        (branch) =>
+          branch.locationId === selectedLocation ||
+          branch.locationName === selectedLocation ||
+          branch.aliasName === selectedLocation
+      );
+
+      // const result = await dispatch(
+      //   approveBulkItems({
+      //     itemCodes: selectedApprovalItemCodes,
+      //     locationId: branch?.locationId || selectedLocation,
+      //     queryDate: apiDate,
+      //     approvedBy: "Inventory",
+      //     description: description || "Bulk approved from variance module",
+      //     adjustmentMode: mode,
+      //   })
+      // ).unwrap();
+
+      // setSelectedApprovalItemCodes([]);
+
+      // dispatch(setCurrentPage(1));
+      // dispatch(setAllItems([]));
+      // await loadPage(1, false, true);
+      // replace the part 14 8 2
+      const result = await dispatch(
+        approveBulkItems({
+          itemCodes: selectedApprovalItemCodes,
+          locationId: branch?.locationId || selectedLocation,
+          queryDate: apiDate,
+          approvedBy: "Inventory",
+          description: description || "Bulk approved from variance module",
+          adjustmentMode: mode,
+        })
+      ).unwrap();
+
+      setSelectedApprovalItemCodes([]);
+      setShowPendingOnly(false);
+      isPendingSelectionRef.current = false;
+      dispatch(setCurrentPage(1));
+      dispatch(setAllItems([]));
+      await loadPage(1, false, false);
+
+      dispatch(
+        setSnackbarMessage(
+          `Bulk approval completed. Approved: ${result.approvedCount
+          }, Skipped: ${result.totalRequested - result.approvedCount}`
+        )
+      );
+      dispatch(setOpenSnackbar(true));
+    } catch (error) {
+      dispatch(setSnackbarMessage(getApiErrorMessage(error, "Failed to approve selected items")));
+      dispatch(setOpenSnackbar(true));
+    } finally {
+      isApprovingRef.current = false;
+    }
+  }, [selectedLocation, selectedApprovalItemCodes, branches, dispatch, apiDate, loadPage]);
+
+  // // Select ALL pending item codes across entire branch (not just current page)
+  // const handleSelectAllPending = useCallback(async () => {
+  //   if (!selectedLocation || bulkApproving || approveAllBranchLoading) return;
+
+  //   const branch = branches.find(
+  //     (b) =>
+  //       b.locationId === selectedLocation ||
+  //       b.locationName === selectedLocation ||
+  //       b.aliasName === selectedLocation
+  //   );
+  //   const locationId = branch?.locationId || selectedLocation;
+
+  //   try {
+  //     const result = await dispatch(
+  //       fetchPendingCodes({ locationId, queryDate: apiDate })
+  //     ).unwrap();
+
+  //     if (result.itemCodes && result.itemCodes.length > 0) {
+  //       setSelectedApprovalItemCodes(result.itemCodes);
+  //       setShowPendingOnly(true); 
+  //       dispatch(setSnackbarMessage(
+  //         `${result.itemCodes.length} pending items selected (${result.alreadyApproved ?? 0} already approved).`
+  //       ));
+  //     } else {
+  //       setShowPendingOnly(false);
+  //       dispatch(setSnackbarMessage(
+  //         result.message || "No pending items found for this branch."
+  //       ));
+  //     }
+  //     dispatch(setOpenSnackbar(true));
+  //   } catch {
+  //     dispatch(setSnackbarMessage("Failed to fetch pending item codes."));
+  //     dispatch(setOpenSnackbar(true));
+  //   }
+  // }, [selectedLocation, bulkApproving, approveAllBranchLoading, branches, dispatch, apiDate]);
+
+
+  //   const handleSelectAllPending = useCallback(async () => {
+  //   if (!selectedLocation || bulkApproving || approveAllBranchLoading) return;
+
+  //   const branch = branches.find(
+  //     (b) =>
+  //       b.locationId === selectedLocation ||
+  //       b.locationName === selectedLocation ||
+  //       b.aliasName === selectedLocation
+  //   );
+  //   const locationId = branch?.locationId || selectedLocation;
+
+  //   try {
+  //     const result = await dispatch(
+  //       fetchPendingCodes({ locationId, queryDate: apiDate })
+  //     ).unwrap();
+
+  //     if (result.itemCodes && result.itemCodes.length > 0) {
+  //       const fullResult = await dispatch(
+  //         fetchItems({
+  //           locationId,
+  //           page: 1,
+  //           limit: Math.max(result.total || result.itemCodes.length, ITEMS_PER_PAGE),
+  //           queryDate: apiDate,
+  //           includeSalesReturn: true,
+  //           includeWastageReturn: true,
+  //           includeStockTransfer: true,
+  //           include_filter_options: false,
+  //           resetFilterOptions: false,
+  //         } as FetchParams)
+  //       ).unwrap();
+
+  //       dispatch(setAllItems(fullResult.branchwise || []));
+  //       dispatch(setCurrentPage(1));
+  //       dispatch(setHasMoreData(false));
+
+  //       setSelectedApprovalItemCodes(result.itemCodes);
+  //       setShowPendingOnly(true);
+  //       dispatch(setSnackbarMessage(
+  //         `${result.itemCodes.length} pending items selected (${result.alreadyApproved ?? 0} already approved).`
+  //       ));
+  //     } else {
+  //       setShowPendingOnly(false);
+  //       dispatch(setSnackbarMessage(
+  //         result.message || "No pending items found for this branch."
+  //       ));
+  //     }
+  //     dispatch(setOpenSnackbar(true));
+  //   } catch {
+  //     dispatch(setSnackbarMessage("Failed to fetch pending item codes."));
+  //     dispatch(setOpenSnackbar(true));
+  //   }
+  // }, [selectedLocation, bulkApproving, approveAllBranchLoading, branches, dispatch, apiDate]);
+
+
+  const handleSelectAllPending = useCallback(async () => {
+    if (!selectedLocation || bulkApproving || approveAllBranchLoading) {
+      return;
+    }
+
+    const branch = branches.find(
+      (b) =>
+        b.locationId === selectedLocation ||
+        b.locationName === selectedLocation ||
+        b.aliasName === selectedLocation
+    );
+
+    const locationId = branch?.locationId || selectedLocation;
+
+    try {
+      // ---------------------------------------------------------
+      // STEP 1: Get all pending item codes in ONE API call
+      // ---------------------------------------------------------
+      const result = await dispatch(
+        fetchPendingCodes({
+          locationId,
+          queryDate: apiDate,
+        })
+      ).unwrap();
+
+      const pendingCodes: string[] = Array.isArray(result.itemCodes)
+        ? result.itemCodes
+          .map((code: unknown) => String(code ?? "").trim())
+          .filter(Boolean)
+        : [];
+
+      if (pendingCodes.length === 0) {
+        setSelectedApprovalItemCodes([]);
+        setShowPendingOnly(false);
+
+        dispatch(
+          setSnackbarMessage(
+            result.message || "No pending items found for this branch."
+          )
+        );
+        dispatch(setOpenSnackbar(true));
+
+        return;
+      }
+
+      // Fast local lookup
+      const pendingCodeSet = new Set(pendingCodes);
+
+      // ---------------------------------------------------------
+      // STEP 2: Select immediately + enable pending view
+      // ---------------------------------------------------------
+      isPendingSelectionRef.current = true;
+
+      setSelectedApprovalItemCodes(pendingCodes);
+      setShowPendingOnly(true);
+
+      // ---------------------------------------------------------
+      // STEP 3: Fetch first 100 items immediately
+      // ---------------------------------------------------------
+      const firstPageResult = await dispatch(
+        fetchItems({
+          locationId,
+          page: 1,
+          limit: 100,
+          queryDate: apiDate,
+          includeSalesReturn: true,
+          includeWastageReturn: true,
+          includeStockTransfer: true,
+          include_filter_options: false,
+          resetFilterOptions: false,
+        } as FetchParams)
+      ).unwrap();
+
+      const firstPageItems: Branchitem[] =
+        firstPageResult.branchwise || [];
+
+      // Show matching pending rows IMMEDIATELY
+      const firstPendingItems = firstPageItems.filter((item) =>
+        pendingCodeSet.has(String(item.itemCode ?? "").trim())
+      );
+
+      dispatch(setAllItems(firstPendingItems));
+      dispatch(setCurrentPage(1));
+      dispatch(setHasMoreData(false));
+      dispatch(setTotalItems(pendingCodes.length));
+      dispatch(setTotalPages(1));
+
+      dispatch(
+        setSnackbarMessage(
+          `${pendingCodes.length} pending items selected.`
+        )
+      );
+      dispatch(setOpenSnackbar(true));
+
+      // ---------------------------------------------------------
+      // STEP 4: Determine remaining pages
+      // ---------------------------------------------------------
+      const totalBranchItems = Number(
+        firstPageResult.total || firstPageItems.length
+      );
+
+      const totalPages = Math.ceil(totalBranchItems / 100);
+
+      if (totalPages <= 1) {
+        return;
+      }
+
+      // ---------------------------------------------------------
+      // STEP 5: Fetch remaining pages in parallel
+      // ---------------------------------------------------------
+      const remainingPages = Array.from(
+        { length: totalPages - 1 },
+        (_, index) => index + 2
+      );
+
+      const results = await Promise.all(
+        remainingPages.map((page) =>
+          dispatch(
+            fetchItems({
+              locationId,
+              page,
+              limit: 100,
+              queryDate: apiDate,
+              includeSalesReturn: true,
+              includeWastageReturn: true,
+              includeStockTransfer: true,
+              include_filter_options: false,
+              resetFilterOptions: false,
+            } as FetchParams)
+          ).unwrap()
+        )
+      );
+
+      // ---------------------------------------------------------
+      // STEP 6: Collect remaining pending rows
+      // ---------------------------------------------------------
+      const remainingPendingItems: Branchitem[] = results.flatMap(
+        (pageResult) =>
+          (pageResult.branchwise || []).filter((item: Branchitem) =>
+            pendingCodeSet.has(String(item.itemCode ?? "").trim())
+          )
+      );
+
+      // ---------------------------------------------------------
+      // STEP 7: Add remaining pending rows
+      // Remove duplicates safely
+      // ---------------------------------------------------------
+      const combinedPendingItems = [
+        ...firstPendingItems,
+        ...remainingPendingItems,
+      ];
+
+      const uniquePendingItems = Array.from(
+        new Map(
+          combinedPendingItems.map((item) => [
+            String(item.itemCode ?? "").trim(),
+            item,
+          ])
+        ).values()
+      );
+
+      dispatch(setAllItems(uniquePendingItems));
+      dispatch(setTotalItems(uniquePendingItems.length));
+      dispatch(setTotalPages(1));
+      dispatch(setCurrentPage(1));
+      dispatch(setHasMoreData(false));
+    } catch (error) {
+      console.error("Select All Pending failed:", error);
+
+      dispatch(
+        setSnackbarMessage("Failed to fetch pending item codes.")
+      );
+      dispatch(setOpenSnackbar(true));
+    }
+  }, [
+    selectedLocation,
+    bulkApproving,
+    approveAllBranchLoading,
+    branches,
+    dispatch,
+    apiDate,
+  ]);
+
+
+  // Approve ALL items for the branch in one backend call (reads closing doc once)
+  const handleApproveAllBranch = useCallback(() => {
+    if (!selectedLocation || approveAllBranchLoading || isApprovingRef.current) return;
+    setBulkApprovalType("BRANCH");
+    setBulkApprovalModalOpen(true);
+  }, [selectedLocation, approveAllBranchLoading]);
+
+  const executeApproveAllBranch = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
+    if (!selectedLocation) return;
+    isApprovingRef.current = true;
+
+    const branch = branches.find(
+      (b) =>
+        b.locationId === selectedLocation ||
+        b.locationName === selectedLocation ||
+        b.aliasName === selectedLocation
+    );
+    const locationId = branch?.locationId || selectedLocation;
+    const branchLabel = branch?.aliasName || branch?.locationName || locationId;
+
+    try {
+      const result = await dispatch(
+        approveAllBranch({
+          locationId,
+          queryDate: apiDate,
+          approvedBy: "Inventory",
+          description: description || `Branch bulk approval — ${branchLabel}`,
+          adjustmentMode: mode,
+        })
+      ).unwrap();
+
+      // setSelectedApprovalItemCodes([]);
+      // dispatch(setCurrentPage(1));
+      // dispatch(setAllItems([]));
+      // await loadPage(1, false, true);
+      // repalce the part 14 8 2
+      setSelectedApprovalItemCodes([]);
+      setShowPendingOnly(false);
+      isPendingSelectionRef.current = false;
+      dispatch(setCurrentPage(1));
+      dispatch(setAllItems([]));
+      await loadPage(1, false, false);
+
+      const flagNote = result.flagged > 0
+        ? ` | ⚠ ${result.flagged} items flagged for manual review`
+        : "";
+      dispatch(setSnackbarMessage(
+        `Branch approval complete. Approved: ${result.approved}, Auto-verified: ${result.autoVerified}, Skipped: ${result.skipped}${flagNote}`
+      ));
+      dispatch(setOpenSnackbar(true));
+    } catch (error) {
+      dispatch(setSnackbarMessage(getApiErrorMessage(error, "Branch approval failed")));
+      dispatch(setOpenSnackbar(true));
+    } finally {
+      isApprovingRef.current = false;
+    }
+  }, [
+    selectedLocation,
+    branches,
+    dispatch,
+    apiDate,
+    loadPage,
+  ]);
 
   const handleAdjustmentDialogClose = useCallback(() => {
     dispatch(setOpenAdjustmentDialog(false));
@@ -378,7 +1181,10 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
     dispatch(setAdjustmentReason(""));
   }, [dispatch]);
 
-  const handleSnackbarClose = useCallback(() => dispatch(setOpenSnackbar(false)), [dispatch]);
+  const handleSnackbarClose = useCallback(
+    () => dispatch(setOpenSnackbar(false)),
+    [dispatch]
+  );
 
   const handleRefresh = useCallback(async () => {
     if (!selectedLocation) return;
@@ -388,6 +1194,7 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
     try {
       dispatch(setCurrentPage(1));
       dispatch(setAllItems([]));
+      setSelectedApprovalItemCodes([]);
 
       await loadPage(1, false, true);
 
@@ -396,89 +1203,210 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
     } catch {
       dispatch(setSnackbarMessage("Error refreshing data."));
       dispatch(setOpenSnackbar(true));
-    }
-    finally {
+    } finally {
       setIsRefreshing(false);
     }
   }, [dispatch, selectedLocation, loadPage]);
 
-
   const getTotalColspan = useCallback(() => {
-    const visibleStaticCount = staticColumns.filter((col) => visibleColumns[col]).length;
-    const visibleFieldCount = selectedLocation ? fieldTypes.filter((col) => visibleColumns[col]).length : 0;
-    return visibleStaticCount + visibleFieldCount;
+    const visibleStaticCount = staticColumns.filter(
+      (col) => visibleColumns[col]
+    ).length;
+
+    const visibleFieldCount = selectedLocation
+      ? fieldTypes.filter((col) => visibleColumns[col] !== false).length
+      : 0;
+
+    return visibleStaticCount + visibleFieldCount + 1;
   }, [visibleColumns, selectedLocation, fieldTypes, staticColumns]);
 
   const toggleFullScreen = useCallback(() => {
     dispatch(setIsFullScreen(!isFullScreen));
-    if (isFullScreen && filterMenuAnchorEl.current) filterMenuAnchorEl.current();
+
+    if (isFullScreen && filterMenuAnchorEl.current) {
+      filterMenuAnchorEl.current();
+    }
   }, [dispatch, isFullScreen]);
 
-  const toggleTableView = useCallback(() => {
-    dispatch(setTableView(tableView === "Stock" ? "Approved" : "Stock"));
-    if (filterMenuAnchorEl.current) filterMenuAnchorEl.current();
-  }, [dispatch, tableView]);
+
 
   const itemsWithIds = useMemo(
     () =>
       allItems.map((item: Branchitem, index: number) => {
         const row: Branchitem & { id: string } = {
-          id: item.id || `${item.itemName}-${item.varianceName || "N/A"}-${index}`,
+          ...item,
+
+          id:
+            item.id ||
+            `${item.itemCode || item.itemName}-${item.varianceName || "N/A"
+            }-${index}`,
+
           itemName: item.itemName || "N/A",
           varianceName: item.varianceName || "N/A",
           category: item.category || "N/A",
           subCategory: item.subCategory || "N/A",
           itemCode: item.itemCode || "N/A",
+
           openingStockQty: item.openingStockQty?.toString() ?? "0",
           closingStockQty: item.closingStockQty?.toString() ?? "0",
           stockStatus: item.stockStatus ?? "unknown",
-          received: item.receivedQty?.toString() ?? item.received?.toString() ?? "0",
+
+          received:
+            item.received?.toString() ?? item.receivedQty?.toString() ?? "0",
           dispatchedQty: item.dispatchedQty?.toString() ?? "0",
           salesQty: item.salesQty?.toString() ?? "0",
-          salesReturn: item.salesReturnQty?.toString() ?? item.salesReturn?.toString() ?? "0",
+          salesReturn:
+            item.salesReturnQty?.toString() ??
+            item.salesReturn?.toString() ??
+            "0",
+
           wastageReturnQty: item.wastageReturnQty?.toString() ?? "0",
           warehouseReturnQty: item.warehouseReturnQty?.toString() ?? "0",
           stockTransferInQty: item.stockTransferInQty?.toString() ?? "0",
           stockTransferOutQty: item.stockTransferOutQty?.toString() ?? "0",
-          currentSystemQty: item.currentSystemQty?.toString() ?? "0",
-          stockVariance: item.stockVariance?.toString() ?? "0",
-          approvalStatus: item.approvalStatus ?? "Pending",
-          physicalVariance: item.physicalVariance?.toString() ?? "0",
-          updatedCurrentSystemQty: item.updatedCurrentSystemQty?.toString() ?? "0",
-          physicalClosingQty: item.physicalClosingQty?.toString() ?? "0",
+
+          currentSystemQty:
+            item.currentSystemQty?.toString() ??
+            item.currentInventorySystemStock?.toString() ??
+            "0",
+
+          stockVariance:
+            item.stockVariance?.toString() ?? item.variance?.toString() ?? "0",
+
+          approvalStatus: item.approvalStatus ?? "notAvailable",
+
+          physicalVariance:
+            item.physicalVariance?.toString() ??
+            item.variance?.toString() ??
+            "-",
+
+          updatedCurrentSystemQty:
+            item.updatedCurrentSystemQty?.toString() ??
+            item.updatedCurrentSystem?.toString() ??
+            item.systemStock?.toString() ??
+            "-",
+
+          physicalClosingQty:
+            item.physicalClosingQty?.toString() ??
+            item.physicalClosing?.toString() ??
+            item.physicalStock?.toString() ??
+            "-",
+
+          approveButton: Boolean(item.approvalButton),
+          canApprove: Boolean(item.canApprove),
+          status: item.status,
+          stockSource: item.stockSource,
         };
 
         if (selectedLocation) {
           fieldTypes.forEach((field) => {
             const key = `${selectedLocation}-${field}`;
+
             switch (field) {
-              case "Opening-Stock": row[key] = item.openingStockQty?.toString() ?? "0"; break;
-              case "Receiving-Stock": row[key] = item.dispatchedQty?.toString() ?? "0"; break;
-              case "Stock IN": row[key] = item.stockTransferInQty?.toString() ?? "0"; break;
-              case "Stock OUT": row[key] = item.stockTransferOutQty?.toString() ?? "0"; break;
-              case "Sales": row[key] = item.salesQty?.toString() ?? "0"; break;
-              case "Sales Return": row[key] = item.salesReturnQty?.toString() ?? item.salesReturn?.toString() ?? "0"; break;
-              case "Wastages": row[key] = item.wastageReturnQty?.toString() ?? "0"; break;
-              case "Warehouse Return": row[key] = item.warehouseReturnQty?.toString() ?? "0"; break;
-              case "Calc System": row[key] = item.currentSystemQty?.toString() ?? "0"; break;
-              case "Physical Stock": row[key] = item.physicalClosingQty?.toString() ?? "0"; break;
-              case "Variance": row[key] = item.stockVariance?.toString() ?? "0"; break;
-              case "System Stock": row[key] = item.updatedCurrentSystemQty?.toString() ?? "0"; break;
-              case "Status": row[key] = item.approvalStatus ?? "Pending"; break;
-              case "Physical Variance": row[key] = item.physicalVariance?.toString() ?? "0"; break;
-              case "Approve Button": row[key] = "Approve"; break;
-              default: row[key] = item[key]?.toString() ?? "0";
+              case "Opening-Stock":
+                row[key] = item.openingStockQty?.toString() ?? "0";
+                break;
+              case "Receiving-Stock":
+                row[key] = item.received?.toString() ?? "0";
+                break;
+              case "Stock IN":
+                row[key] = item.stockTransferInQty?.toString() ?? "0";
+                break;
+              case "Stock OUT":
+                row[key] = item.stockTransferOutQty?.toString() ?? "0";
+                break;
+              case "Sales":
+                row[key] = item.salesQty?.toString() ?? "0";
+                break;
+              case "Sales Return":
+                row[key] =
+                  item.salesReturnQty?.toString() ??
+                  item.salesReturn?.toString() ??
+                  "0";
+                break;
+              case "Wastages":
+                row[key] = item.wastageReturnQty?.toString() ?? "0";
+                break;
+              case "Warehouse Return":
+                row[key] = item.warehouseReturnQty?.toString() ?? "0";
+                break;
+              case "Calc System":
+                row[key] = item.closingStockQty?.toString() ?? "0";
+                break;
+              case "Physical Stock":
+                row[key] =
+                  item.physicalClosingQty?.toString() ??
+                  item.physicalClosing?.toString() ??
+                  item.physicalStock?.toString() ??
+                  "-";
+                break;
+              case "Variance":
+                row[key] =
+                  item.stockVariance?.toString() ??
+                  item.variance?.toString() ??
+                  "-";
+                break;
+              case "System Stock":
+                row[key] =
+                  item.updatedCurrentSystemQty?.toString() ??
+                  item.updatedCurrentSystem?.toString() ??
+                  item.systemStock?.toString() ??
+                  "-";
+                break;
+              case "Action":
+                row[key] = item.approvalStatus ?? "notAvailable";
+                break;
+              default:
+                row[key] = item[key]?.toString() ?? "0";
             }
           });
         }
+
         return row;
       }),
     [allItems, selectedLocation, fieldTypes]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Render
-  // ─────────────────────────────────────────────────────────────────────────────
+
+
+
+  const displayedItems = useMemo(
+    () =>
+      showPendingOnly
+        ? itemsWithIds.filter((item) =>
+          selectedApprovalItemCodes.some(
+            (code) => String(code).trim() === String(item.itemCode).trim()
+          )
+        )
+        : itemsWithIds,
+    [showPendingOnly, itemsWithIds, selectedApprovalItemCodes]
+  );
+
+
+
+  const handleSelectAllClick = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const rows = itemsWithIds || [];
+      const visibleApprovableCodes = rows
+        .filter(isApprovableRow)
+        .map((item) => item.itemCode)
+        .filter(Boolean);
+
+      setSelectedApprovalItemCodes((prev) => {
+        const allSelected =
+          visibleApprovableCodes.length > 0 &&
+          visibleApprovableCodes.every((code) => prev.includes(code));
+
+        if (allSelected) {
+          return prev.filter((code) => !visibleApprovableCodes.includes(code));
+        }
+
+        return Array.from(new Set([...prev, ...visibleApprovableCodes]));
+      });
+    },
+    [itemsWithIds, isApprovableRow]
+  );
+
   const filterBar = (
     <FilterBar
       key={`filter-${selectedLocation}`}
@@ -495,24 +1423,186 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
       loading={loading}
       isFullScreen={isFullScreen}
       fullScreenContainerRef={fullScreenContainerRef}
-      setResetAnchorEl={(fn) => (filterMenuAnchorEl.current = fn)}
+      setResetAnchorEl={(fn) => {
+        filterMenuAnchorEl.current = fn;
+      }}
       showColumnFilter
-      // ← NEW prop: lets FilterBar load more dropdown options without touching the table
       onLoadMoreFilterOptions={loadFilterOptions}
-      isRefreshing={isRefreshing}    // 3. Pass loading state
-
+      isRefreshing={isRefreshing}
+      cascadeSourceKey={cascadeSourceKey}
+      cascadeLoading={cascadeLoading}
+      onCascadeReset={() => {
+        setCascadeSourceKey(null);
+        setCascadeLoading(false);
+      }}
     />
   );
 
+  const anyApprovalBusy = bulkApproving || approveAllBranchLoading || loading;
+
+  const bulkActionBar = (
+    <Box
+      sx={{
+        flexShrink: 0,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 1,
+        px: 1.25,
+        py: 0.75,
+        borderBottom: `1px solid ${UI.border}`,
+        bgcolor: UI.surface,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, flexWrap: "wrap" }}>
+        {selectedApprovalCount > 0 && (
+          <Chip
+            size="small"
+            label={`${selectedApprovalCount} selected`}
+            sx={{
+              height: 24,
+              fontWeight: 900,
+              bgcolor: UI.accentBg,
+              color: UI.accentDark,
+              border: `1px solid ${UI.border}`,
+            }}
+          />
+        )}
+        <Typography sx={{ fontSize: "0.72rem", fontWeight: 700, color: UI.textMuted, whiteSpace: "nowrap" }}>
+          {selectedApprovalCount > 0 ? "Ready to approve" : "Select items or use quick actions →"}
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+        {/* Select All Pending */}
+        <Tooltip title="Fetch ALL pending item codes for this branch (not just visible rows)" arrow>
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={anyApprovalBusy || !selectedLocation}
+            onClick={handleSelectAllPending}
+            sx={{
+              height: 30,
+              borderRadius: "9px",
+              textTransform: "none",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              borderColor: UI.border,
+              color: UI.textSecondary,
+              "&:hover": { borderColor: UI.accent, color: UI.accent },
+            }}
+          >
+            Select All Pending
+          </Button>
+        </Tooltip>
+
+        {/* Clear selection */}
+        {selectedApprovalCount > 0 && (
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={anyApprovalBusy}
+            // onClick={() => setSelectedApprovalItemCodes([])}
+            onClick={async () => {
+              isPendingSelectionRef.current = false;
+
+              setSelectedApprovalItemCodes([]);
+              setShowPendingOnly(false);
+
+              dispatch(setCurrentPage(1));
+              dispatch(setAllItems([]));
+
+              await loadPage(1, false, false);
+            }}
+            sx={{
+              height: 30,
+              borderRadius: "9px",
+              textTransform: "none",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+            }}
+          >
+            Clear
+          </Button>
+        )}
+
+        {/* Approve Selected */}
+        {selectedApprovalCount > 0 && (
+          <Button
+            variant="contained"
+            size="small"
+            disabled={anyApprovalBusy}
+            onClick={handleBulkApproveSelected}
+            sx={{
+              height: 30,
+              borderRadius: "9px",
+              textTransform: "none",
+              fontSize: "0.72rem",
+              fontWeight: 900,
+              bgcolor: UI.accent,
+              "&:hover": { bgcolor: UI.accentDark },
+            }}
+          >
+            {bulkApproving ? "Approving..." : `Approve Selected (${selectedApprovalCount})`}
+          </Button>
+        )}
+
+        {/* Approve All Branch */}
+        <Tooltip
+          title="Approve ALL pending items for this branch in one call — reads closing doc once, processes 500 at a time"
+          arrow
+        >
+          <Button
+            variant="contained"
+            size="small"
+            disabled={anyApprovalBusy || !selectedLocation}
+            onClick={handleApproveAllBranch}
+            sx={{
+              height: 30,
+              borderRadius: "9px",
+              textTransform: "none",
+              fontSize: "0.72rem",
+              fontWeight: 900,
+              bgcolor: UI.success,
+              "&:hover": { bgcolor: UI.successDark },
+              "&:disabled": { opacity: 0.5 },
+            }}
+          >
+            {approveAllBranchLoading ? "Approving Branch..." : "✓ Approve All"}
+          </Button>
+        </Tooltip>
+      </Box>
+    </Box>
+  );
+
   const tableSection = (
-    <>
-      {tableView === "Approved" ? (
-        <StockAdjustmentTable isFullScreen={isFullScreen} />
-      ) : (
+    <Box
+      sx={{
+        height: "100%",
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: UI.surface,
+        borderRadius: "12px",
+        overflow: "hidden",
+        border: `1px solid ${UI.border}`,
+      }}
+    >
+      {bulkActionBar}
+
+      <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
         <DataTable
           loading={loading}
-          filteredItems={itemsWithIds}
-          visibleColumns={{ ...visibleColumns, ...(isFullScreen ? {} : { "Physical Closing": true }) }}
+          filteredItems={displayedItems}
+          // newly add this line 14 8 1
+          onSortChange={handleColumnSort}
+          visibleColumns={{
+            ...visibleColumns,
+            Select: true,
+            "Item Name": false,
+            Status: false,
+          }}
           fieldTypes={fieldTypes}
           selectedLocation={selectedLocation}
           editableRows={editableRows}
@@ -524,11 +1614,42 @@ const canApprove = hasPermission("yenerp","physicalstockvariancemodification","a
           scrollContainerRef={scrollContainerRef}
           inputRefs={inputRefs}
           isFullScreen={isFullScreen}
-        handleApproveClick={handleApproveClick}
-canApprove={canApprove}
+          handleApproveClick={handleApproveClick}
+          selectedApprovalItemCodes={selectedApprovalItemCodes}
+          onToggleSelectRow={(itemCode) => {
+            setSelectedApprovalItemCodes((prev) =>
+              prev.includes(itemCode)
+                ? prev.filter((code) => code !== itemCode)
+                : [...prev, itemCode]
+            );
+            // setSelectedApprovalItemCodes([]);
+            // setShowPendingOnly(false); // <-- add this
+          }}
+          onSelectAll={handleSelectAllClick}
         />
-      )}
-    </>
+      </Box>
+    </Box>
+  );
+
+  const footer = selectedLocation && totalItems > 0 && (
+    // <PaginationControls
+    //   currentPage={currentPageSafe}
+    //   totalItems={totalItems}
+    //   totalPages={totalPagesSafe}
+    //   loading={loading}
+    //   isFullScreen={isFullScreen}
+    // />repalce the part 29 7 1
+    <PaginationControls
+      currentPage={currentPageSafe}
+      totalItems={totalItems}
+      totalPages={totalPagesSafe}
+      loading={loading}
+      isFullScreen={isFullScreen}
+      startItem={allItems.length === 0 ? 0 : (currentPageSafe - 1) * ITEMS_PER_PAGE + 1}
+      endItem={Math.min(currentPageSafe * ITEMS_PER_PAGE, totalItems)}
+      hideSubmit={true}
+      onSubmitClick={() => { }}
+    />
   );
 
   const dialogs = (
@@ -539,96 +1660,38 @@ canApprove={canApprove}
         adjustedPhysicalStock={adjustedPhysicalStock}
         adjustmentReason={adjustmentReason}
         onCancel={handleAdjustmentDialogClose}
-        onChangePhysicalStock={(value) => dispatch(setAdjustedPhysicalStock(value))}
+        onChangePhysicalStock={(value) =>
+          dispatch(setAdjustedPhysicalStock(value))
+        }
         onChangeReason={(value) => dispatch(setAdjustmentReason(value))}
         fullScreen={isFullScreen}
       />
 
-      <Dialog
-        open={openApproveDialog}
+      <ApprovalModal
+        isOpen={openApproveDialog}
         onClose={() => dispatch(setOpenApproveDialog(false))}
-        disablePortal
-        fullScreen={false} // keep it non-fullscreen if you want
-        sx={{ zIndex: 10001 }} // make sure zIndex is above fullScreen Box
-        BackdropProps={{
-          sx: {
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            backgroundColor: "rgba(0,0,0,0.25)",
-          },
-        }}
-        PaperProps={{
-          sx: {
-            width: 420,
-            maxWidth: "90%",
-            borderRadius: 3,
-            overflow: "hidden",
-            backdropFilter: "blur(4px)", // adds blur behind dialog
-            backgroundColor: "rgba(255,255,255,0.8)", // semi-transparent
-            WebkitBackdropFilter: "blur(10px)",
-          },
-        }}
-      >
-        <DialogTitle sx={{ textAlign: "center", fontWeight: 800 }}>
-          Approve Item: {selectedApproveItem?.varianceName ?? "N/A"}
-        </DialogTitle>
-        <Divider />
-        <DialogContent sx={{ padding: 3 }}>
-          {(() => {
-            const stockVariance = Number(selectedApproveItem?.stockVariance ?? 0);
-            return (
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, p: 2, borderRadius: 2, border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">System Stock</Typography>
-                  <Typography variant="body1" fontWeight={700}>{selectedApproveItem?.updatedCurrentSystemQty ?? 0}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">Physical Stock</Typography>
-                  <Typography variant="body1" fontWeight={700}>{selectedApproveItem?.physicalClosingQty ?? 0}</Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">Stock Variance</Typography>
-                  <Typography variant="body1" fontWeight={700} color={"error.main"}>
-                    {stockVariance}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          })()}
-          <TextField
-            label="Description for Approval"
-            value={approveDescription}
-            onChange={(e) => dispatch(setApproveDescription(e.target.value))}
-            fullWidth
-            rows={4}
-            autoFocus
-            sx={{ mt: 2 }}
-          />
-          <Typography sx={{ mt: 2, fontWeight: 700 }}>Are you sure you want to approve this item?</Typography>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
-          <Button onClick={() => dispatch(setOpenApproveDialog(false))} variant="outlined" sx={{ borderRadius: 2 }}>Cancel</Button>
-          <Button
-   onClick={handleApproveConfirm}
-   disabled={!canApprove || isApprovingRef.current}
-   variant="contained"
->
-   Confirm Approve
-</Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleApproveConfirm}
+        itemName={selectedApproveItem?.varianceName ?? "N/A"}
+        systemStock={Number(
+          selectedApproveItem?.updatedCurrentSystemQty ??
+          selectedApproveItem?.updatedCurrentSystem ??
+          selectedApproveItem?.systemStock ??
+          0
+        )}
+        physicalStock={Number(
+          selectedApproveItem?.physicalClosingQty ??
+          selectedApproveItem?.physicalClosing ??
+          selectedApproveItem?.physicalStock ??
+          0
+        )}
+        variance={Number(
+          selectedApproveItem?.stockVariance ??
+          selectedApproveItem?.variance ??
+          0
+        )}
+        isLoading={isApprovingRef.current || loading}
+      />
 
-      {!isFullScreen && tableView === "Stock" && selectedLocation && totalItems > 0 && (
-        <PaginationControls
-          currentPage={currentPage}
-          totalItems={totalItems}
-          totalPages={totalPages}
-          loading={loading}
-          onSaveChanges={() => dispatch(setOpenFirstDialog(true))}
-          changesLength={changes.length}
-          isFullScreen={isFullScreen}
-        />
-      )}
       {!isFullScreen && (
         <ConfirmDialog
           open={openFirstDialog}
@@ -638,76 +1701,213 @@ canApprove={canApprove}
           fullScreen={isFullScreen}
         />
       )}
-      <FeedbackSnackbar open={openSnackbar} message={snackbarMessage} onClose={handleSnackbarClose} />
+
+      <FeedbackSnackbar
+        open={openSnackbar}
+        message={snackbarMessage}
+        onClose={handleSnackbarClose}
+      />
+
+      <ApprovalModal
+        isOpen={bulkApprovalModalOpen}
+        onClose={() => setBulkApprovalModalOpen(false)}
+        itemName={bulkApprovalType === "BRANCH" ? "All Pending Items in Branch" : `Selected Pending Items (${selectedApprovalItemCodes.length})`}
+        systemStock={"Multiple"}
+        physicalStock={"Multiple"}
+        variance={"-"}
+        isLoading={bulkApprovalType === "BRANCH" ? approveAllBranchLoading : bulkApproving}
+        onConfirm={async (mode, desc) => {
+          if (bulkApprovalType === "BRANCH") {
+            await executeApproveAllBranch(mode, desc);
+          } else {
+            await executeBulkApproveSelected(mode, desc);
+          }
+          setBulkApprovalModalOpen(false);
+        }}
+      />
     </>
   );
-if (!isModuleVisible("yenerp","physicalstockvariancemodification")) {
-  return (
-    <Box p={3}>
-      <Typography color="error">
-        You do not have access to Physical Stock Variance Modification module
-      </Typography>
-    </Box>
-  );
-}
+
   return (
     <Box
       ref={fullScreenContainerRef}
       sx={{
+        height: "calc(100dvh - var(--app-topbar-height, 64px))",
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        bgcolor: UI.pageBg,
+        pt: "env(safe-area-inset-top)",
+        pb: "env(safe-area-inset-bottom)",
         ...(isFullScreen
-          ? { position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: 9999, backgroundColor: "#ffffff", display: "flex", flexDirection: "column", overflow: "hidden" }
+          ? {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100dvh",
+            zIndex: 9999,
+            backgroundColor: UI.pageBg,
+          }
           : {}),
       }}
     >
-      {isFullScreen ? (
-        <>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, borderBottom: "1px solid #e0e0e0", flexShrink: 0, minHeight: 60, backgroundColor: "white", zIndex: 2 }}>
-            {tableView === "Stock" ? <Box sx={{ flex: 1 }}>{filterBar}</Box> : <Box sx={{ flex: 1 }} />}
-            <Button variant="contained" onClick={toggleTableView} sx={{ flexShrink: 0, whiteSpace: "nowrap", minWidth: "auto" }}>
-              {tableView === "Stock" ? "Show Approved Items" : "Show Stock Variance"}
-            </Button>
-            <IconButton onClick={toggleFullScreen} sx={{ flexShrink: 0, color: "primary.main" }}>
-              <FullscreenExitIcon />
+      {!isFullScreen && <OutletsInventoryManagementPage />}
+
+      <Paper
+        elevation={0}
+        sx={{
+          flexShrink: 0,
+          borderRadius: 0,
+          borderBottom: `1px solid ${UI.border}`,
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(248,251,255,0.86) 100%)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          position: "relative",
+          zIndex: 100,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.55,
+            px: { xs: 0.75, md: 1 },
+            py: 0.55,
+            minHeight: 46,
+            minWidth: 0,
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0 }}>{filterBar}</Box>
+
+          <Tooltip title={isFullScreen ? "Exit fullscreen" : "Fullscreen"} arrow>
+            <IconButton
+              onClick={toggleFullScreen}
+              size="small"
+              aria-label={isFullScreen ? "Exit fullscreen" : "Fullscreen"}
+              sx={{
+                width: 34,
+                height: 34,
+                borderRadius: "9px",
+                border: `1px solid ${UI.border}`,
+                color: UI.accent,
+                bgcolor: UI.surface,
+                flexShrink: 0,
+                "&:hover": {
+                  bgcolor: UI.accentBg,
+                  borderColor: UI.borderStrong,
+                },
+              }}
+            >
+              {isFullScreen ? (
+                <FullscreenExitIcon sx={{ fontSize: 18 }} />
+              ) : (
+                <FullscreenIcon sx={{ fontSize: 18 }} />
+              )}
             </IconButton>
-          </Box>
-          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-            <Box sx={{ flex: 1, overflowY: "auto" }}>{tableSection}</Box>
-            {tableView === "Stock" && selectedLocation && totalItems > 0 && (
-              <Box sx={{ flexShrink: 0, borderTop: "1px solid #e0e0e0", bgcolor: "white", p: 1 }}>
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalItems={totalItems}
-                  totalPages={totalPages}
-                  loading={loading}
-                  onSaveChanges={() => dispatch(setOpenFirstDialog(true))}
-                  changesLength={changes.length}
-                  isFullScreen={isFullScreen}
-                />
+          </Tooltip>
+        </Box>
+      </Paper>
+
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          px: { xs: 0.75, md: 1 },
+          pt: 0.6,
+          pb: 0.6,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        {selectedLocation ? (
+          <>
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflow: "hidden",
+                borderRadius: "12px",
+              }}
+            >
+              {tableSection}
+            </Box>
+
+            {footer && (
+              <Box
+                sx={{
+                  flexShrink: 0,
+                  mt: 0.55,
+                }}
+              >
+                {footer}
               </Box>
             )}
-            {dialogs}
+          </>
+        ) : (
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              display: "grid",
+              placeItems: "center",
+              px: 3,
+              textAlign: "center",
+            }}
+          >
+            <Box>
+              <Box
+                sx={{
+                  width: 58,
+                  height: 58,
+                  mx: "auto",
+                  borderRadius: "50%",
+                  bgcolor: UI.accentBg,
+                  color: UI.accent,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mb: 1.2,
+                  boxShadow: "0 12px 30px rgba(25,118,210,0.10)",
+                }}
+              >
+                <Inventory2OutlinedIcon sx={{ fontSize: 28 }} />
+              </Box>
+
+              <Typography
+                sx={{
+                  fontWeight: 950,
+                  fontSize: "1rem",
+                  color: UI.textPrimary,
+                  mb: 0.35,
+                }}
+              >
+                Select an outlet
+              </Typography>
+
+              <Typography
+                sx={{
+                  fontSize: "0.76rem",
+                  color: UI.textMuted,
+                  maxWidth: 360,
+                  lineHeight: 1.6,
+                  fontWeight: 650,
+                }}
+              >
+                Choose an outlet from the filter bar to view physical stock
+                variance data.
+              </Typography>
+            </Box>
           </Box>
-        </>
-      ) : (
-        <>
-          <OutletsInventoryManagementPage />
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 1, backgroundColor: "white", borderBottom: "1px solid #e0e0e0" }}>
-            {tableView === "Stock" ? filterBar : <Box sx={{ flex: 1 }} />}
-            <Button variant="contained" onClick={toggleTableView} sx={{ flexShrink: 0 }}>
-              {tableView === "Stock" ? "Show Approved Items" : "Show Stock Variance"}
-            </Button>
-            <IconButton onClick={toggleFullScreen}>
-              <FullscreenIcon />
-            </IconButton>
-          </Box>
-          <Box sx={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <Box sx={{ flex: 1 }}>{tableSection}</Box>
-            {dialogs}
-          </Box>
-        </>
-      )}
+        )}
+      </Box>
+
+      {dialogs}
     </Box>
   );
 };
 
-export default OutletPhysicalStockModification;
+export default OutletPhysicalStockVarianceModification;

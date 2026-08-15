@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react"
 import axios from "axios"
 
-const EXPORT_PDF_URL = "https://yenerp.com/recipeapi/viewrecipehistory/export-pdf"
+const EXPORT_PDF_URL = "https://yenerp.com/purchasetestapi/viewrecipehistory/export-pdf"
 
 export interface PrintTarget {
   recipeId: string

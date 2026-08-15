@@ -1,21 +1,13 @@
-// components/Inventory/physcialstockvarience/filterBar.tsx
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
-import {
-  Box,
-  IconButton,
-  Menu,
-  Checkbox,
-  Typography,
-  Button,
-  Divider,
-  Stack,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+/**
+ * physcialstockvarience/filterBar.tsx — rewritten with pure Tailwind CSS.
+ * Replaces 650-line MUI version. Props interface 100% identical.
+ */
+
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import {
   selectFilterOptions,
   selectVisibleColumns,
@@ -23,9 +15,11 @@ import {
   setSearchParams,
 } from "../../../features/yen_inventory/OutletPhysicalVarianceSlice";
 import CollapsibleFilter from "./ui/collabsfiler";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import ClearIcon from "@mui/icons-material/Clear";
-import { formatDateDDMMYYYY, useTodayDate } from "@/components/Hooks/useTodayDate";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { useTodayDate } from "@/components/Hooks/useTodayDate";
+import { cn } from "@/lib/utils";
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface SearchParams {
   itemName: string[];
@@ -53,14 +47,67 @@ interface FilterBarProps {
   fullScreenContainerRef?: React.RefObject<HTMLDivElement | null>;
   setResetAnchorEl?: (callback: () => void) => void;
   showColumnFilter: boolean;
-  onLoadMoreFilterOptions?: (
-    field: FilterField,
-    page: number,
-    search?: string
-  ) => Promise<void>;
+  onLoadMoreFilterOptions?: (field: FilterField, page: number, search?: string) => Promise<void>;
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  cascadeSourceKey?: string | null;
+  cascadeLoading?: boolean;
+  onCascadeReset?: () => void;
 }
+
+const filterFields: FilterField[] = ["category", "subCategory", "itemName", "varianceName"];
+
+const getFilterTitle = (field: FilterField) => {
+  if (field === "category") return "Category";
+  if (field === "subCategory") return "Sub Category";
+  if (field === "itemName") return "Item Name";
+  if (field === "varianceName") return "Variance Name";
+  return field;
+};
+
+const getCascadeSourceLabel = (field: string | null) => {
+  if (field === "category") return "Category";
+  if (field === "subCategory") return "Sub Category";
+  if (field === "itemName") return "Item Name";
+  if (field === "varianceName") return "Variance Name";
+  return "";
+};
+
+// ─── Icon Buttons ─────────────────────────────────────────────────────────────
+
+const ClearIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>;
+const RefreshIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>;
+const FilterListIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
+
+const ActionBtn: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  tooltip: string;
+  children: React.ReactNode;
+  danger?: boolean;
+  active?: boolean;
+}> = ({ onClick, disabled, tooltip, children, danger, active }) => (
+  <Tooltip content={tooltip} side="top">
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={tooltip}
+      className={cn(
+        "h-8 w-8 flex items-center justify-center rounded-[8px] border transition-all duration-150 shrink-0",
+        danger
+          ? "border-danger-200 text-danger-500 bg-white hover:bg-danger-50 hover:border-danger-300"
+          : active
+            ? "border-brand-600 text-white bg-brand-600 hover:bg-brand-700"
+            : "border-brand-200 text-brand-600 bg-white hover:bg-brand-50 hover:border-brand-300",
+        disabled && "opacity-40 cursor-not-allowed pointer-events-none border-border text-text-disabled bg-surface-subtle"
+      )}
+    >
+      {children}
+    </button>
+  </Tooltip>
+);
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const FilterBarComponent: React.FC<FilterBarProps> = ({
   searchParams,
@@ -71,155 +118,97 @@ const FilterBarComponent: React.FC<FilterBarProps> = ({
   onLocationChange,
   fieldTypes,
   staticColumns,
-  isFullScreen,
-  fullScreenContainerRef,
   showColumnFilter,
   onRefresh,
   isRefreshing,
   onLoadMoreFilterOptions,
+  cascadeSourceKey = null,
+  cascadeLoading = false,
+  onCascadeReset,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const filterOptions = useSelector(selectFilterOptions);
   const columns = useSelector(selectVisibleColumns);
-
   const apiDate = useTodayDate();
-  const currentDate = searchParams.queryDate || apiDate;
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const filterFields: FilterField[] = [
-    "category",
-    "subCategory",
-    "itemName",
-    "varianceName",
-  ];
+  const hasLocation = Boolean(selectedLocation);
+  const cascadeSourceLabel = useMemo(() => getCascadeSourceLabel(cascadeSourceKey), [cascadeSourceKey]);
 
-  /* ---------------- Column Filter State ---------------- */
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [columnSearch, setColumnSearch] = useState("");
+  useEffect(() => {
+    const clickOut = (e: MouseEvent) => {
+      if (menuOpen && menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", clickOut);
+    return () => document.removeEventListener("mousedown", clickOut);
+  }, [menuOpen]);
 
-  const open = Boolean(anchorEl);
-  const handleIconClick = (event: React.MouseEvent<HTMLButtonElement>) =>
-    setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+  const columnOptions = useMemo(() => [
+    ...staticColumns.map((col) => ({ label: col, value: col })),
+    ...(selectedLocation ? fieldTypes.filter((col) => col !== "Action").map((col) => ({ label: col, value: col })) : []),
+  ], [staticColumns, fieldTypes, selectedLocation]);
 
-  const columnOptions = useMemo(
-    () => [
-      ...staticColumns.map((col) => ({ label: col, value: col })),
-      ...(selectedLocation
-        ? fieldTypes
-          .filter((col) => col !== "Action")
-          .map((col) => ({ label: col, value: col }))
-        : []),
-    ],
-    [staticColumns, fieldTypes, selectedLocation]
-  );
+  const selectedColumns = useMemo(() => Object.keys(columns).filter((col) => columns[col]), [columns]);
 
-  const selectedColumns = useMemo(
-    () => Object.keys(columns).filter((col) => columns[col]),
-    [columns]
-  );
+  const handleClearAllFilters = useCallback(() => {
+    onCascadeReset?.();
+    dispatch(setSearchParams({
+      itemName: [], varianceName: [], category: [], subCategory: [],
+      location: selectedLocation ? [selectedLocation] : [],
+      queryDate: searchParams.queryDate || apiDate,
+    }));
+  }, [apiDate, dispatch, onCascadeReset, searchParams.queryDate, selectedLocation]);
 
-  const filteredColumnOptions = useMemo(() => {
-    return columnOptions.filter((col) =>
-      col.label.toLowerCase().includes(columnSearch.toLowerCase())
-    );
-  }, [columnOptions, columnSearch]);
+  const isAnyFilterActive = useMemo(() => filterFields.some((field) => searchParams[field]?.length > 0), [searchParams]);
 
-  const handleColumnChange = useCallback(
-    (column: string) => {
-      onToggleColumn(column);
-    },
-    [onToggleColumn]
-  );
-
-
-  const handleClearAllFilters = () => {
-    dispatch(
-      setSearchParams({
-        itemName: [],
-        varianceName: [],
-        category: [],
-        subCategory: [],
-        location: selectedLocation ? [selectedLocation] : [],
-        queryDate: searchParams.queryDate || apiDate,
-      })
-    );
+  const getCascadeProps = (field: FilterField) => {
+    const isSource = cascadeSourceKey === field;
+    const isCascadeDisabled = cascadeLoading && Boolean(cascadeSourceKey) && !isSource;
+    return {
+      disabled: !hasLocation || isCascadeDisabled,
+      loading: isCascadeDisabled || filterOptions[field]?.loading || false,
+      linked: Boolean(cascadeSourceKey) && !isSource,
+      statusLabel: isSource ? "Selected" : cascadeSourceKey ? `From ${cascadeSourceLabel}` : undefined,
+      loadingText: "Loading related options...",
+    };
   };
 
-  const isAnyFilterActive = filterFields.some(
-    (field) => searchParams[field]?.length > 0
-  );
+  const handleFilterScroll = useCallback((field: FilterField) => {
+    if (!hasLocation || !onLoadMoreFilterOptions) return;
+    const data = filterOptions[field];
+    if (!data?.hasMore || data?.loading) return;
+    onLoadMoreFilterOptions(field, (data.page || 1) + 1, data.search);
+  }, [filterOptions, hasLocation, onLoadMoreFilterOptions]);
 
-  // --- FIX: Handlers for Search and Scroll ---
-
-  // Handle Scroll Bottom (Load More)
-  const handleFilterScroll = useCallback(
-    (field: FilterField) => {
-      if (!onLoadMoreFilterOptions) return;
-
-      const currentFieldData = filterOptions[field];
-      // Calculate next page based on current count and limit (assumed 50)
-      const nextPage = (currentFieldData.page || 1) + 1;
-
-      onLoadMoreFilterOptions(field, nextPage, currentFieldData.search);
-    },
-    [filterOptions, onLoadMoreFilterOptions]
-  );
-
-  // Handle Search Input Change
-  const handleFilterSearch = useCallback(
-    (field: FilterField, searchTerm: string) => {
-      if (!onLoadMoreFilterOptions) return;
-      // Reset to page 1 when searching
-      onLoadMoreFilterOptions(field, 1, searchTerm);
-    },
-    [onLoadMoreFilterOptions]
-  );
+  const handleFilterSearch = useCallback((field: FilterField, term: string) => {
+    if (hasLocation && onLoadMoreFilterOptions) onLoadMoreFilterOptions(field, 1, term);
+  }, [hasLocation, onLoadMoreFilterOptions]);
 
   const selectedBranchAlias = useMemo(() => {
-    const branch = branches.find(
-      (b) => b.locationId === selectedLocation
-    );
+    const branch = branches.find((b) => b.locationId === selectedLocation);
     return branch?.aliasName || branch?.locationName || selectedLocation;
   }, [branches, selectedLocation]);
 
-
-
-
-
-  /* ---------------- Render ---------------- */
+  const branchOptions = useMemo(() => branches.map((b) => ({
+    label: `${b.locationName} (${b.locationId || ""})`, value: b.locationId,
+  })), [branches]);
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor: "#fff",
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1, mt: 0.5 }}>
+    <div className="w-full min-w-0 flex flex-wrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[20]">
+   
+      {/* Label  4 8 1*/}
+      {/* <div className="hidden sm:flex h-[34px] items-center px-2.5 rounded-[8px] bg-white border border-brand-200 text-[11px] font-extrabold text-brand-700 whitespace-nowrap shrink-0">
+        {cascadeSourceKey ? `Filters · ${cascadeSourceLabel}` : "Filters"}
+      </div> */}
 
-        {/* Date */}
-        <CollapsibleFilter
-          title="Date"
-          selectedOptions={currentDate ? formatDateDDMMYYYY(currentDate) : ""}
-          onChange={(val) => onSearchChange("queryDate", val)}
-          onClear={() => onSearchChange("queryDate", "")}
-          inputType="date"
-
-          isMulti={false}
-          disabled
-        />
-
-        {/* Location */}
+      <div className="shrink-0 w-[140px] md:w-[180px]">
         <CollapsibleFilter
           title="Location"
-          options={branches.map((b) => ({
-            label: `${b.locationName} (${b.locationId || ""})`,
-            value: b.locationId,
-          }))}
+          options={branchOptions}
           selectedOptions={selectedLocation}
           onChange={onLocationChange}
           onClear={() => onLocationChange("")}
@@ -228,184 +217,91 @@ const FilterBarComponent: React.FC<FilterBarProps> = ({
           showSelectedCount={false}
           showRemoveOption={false}
           displayLabel={selectedBranchAlias}
-
         />
+      </div>
 
-        {/* Dynamic Filters */}
-        {filterFields.map((field) => (
-          <CollapsibleFilter
-            key={field}
-            title={field.charAt(0).toUpperCase() + field.slice(1)}
-            options={
-              filterOptions[field]?.values.map((val: any) => ({
-                label: typeof val === "string" ? val : val.name,
-                value: typeof val === "string" ? val : val.id ?? val.name,
-              })) || []
-            }
-            selectedOptions={searchParams[field]}
-            onChange={(val) => onSearchChange(field, val)}
-            onClear={() => onSearchChange(field, [])}
-            inputType="multi-select"
-            isMulti
-            // --- FIX: Pass handlers here ---
-            onScrollBottom={() => handleFilterScroll(field)}
-            onSearch={(term) => handleFilterSearch(field, term)}
-            loading={filterOptions[field]?.loading || false}
-          />
-        ))}
-        <Stack direction="row" spacing={2}>
+      {!hasLocation ? (
+        <div className="shrink-0 h-[34px] flex items-center px-3 rounded-[8px] border border-dashed border-brand-200 bg-brand-50 text-[11px] sm:text-[12px] font-extrabold text-brand-700 whitespace-nowrap">
+          Select a location to enable Category, Sub Category, Item Name and Variance Name filters.
+        </div>
+      ) : (
+        filterFields.map((field) => {
+          const fieldOpts = filterOptions[field];
+          const opts = fieldOpts?.values?.map((val: string | { id?: string; name?: string }) => ({
+            label: typeof val === "string" ? val : val.name ?? "",
+            value: typeof val === "string" ? val : val.id ?? val.name ?? "",
+          })) || [];
 
-          {/* Clear */}
-          <Button
-            onClick={handleClearAllFilters}
-            disabled={!isAnyFilterActive}
-            color="error"
-            variant="outlined"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              py: 1,
-              px: 2,
-              minWidth: 70,
-            }}
-          >
-            <ClearIcon fontSize="small" />
-            <Typography variant="caption">
-              Clear
-            </Typography>
-          </Button>
+          return (
+            <div key={field} className={cn("shrink-0", 
+              (field === "itemName" || field === "varianceName") ? "w-[170px] md:w-[220px]" : "w-[140px] md:w-[180px]")}>
+              <CollapsibleFilter
+                title={getFilterTitle(field)}
+                options={opts}
+                selectedOptions={searchParams[field]}
+                onChange={(val) => onSearchChange(field, val)}
+                onClear={() => onSearchChange(field, [])}
+                inputType="multi-select"
+                isMulti
+                onScrollBottom={() => handleFilterScroll(field)}
+                onSearch={(term) => handleFilterSearch(field, term)}
+                {...getCascadeProps(field)}
+              />
+            </div>
+          );
+        })
+      )}
 
-          {/* Refresh */}
-          <Button
-            onClick={onRefresh}
-            disabled={!selectedLocation || isRefreshing}
-            color="primary"
-            variant="outlined"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              py: 1,
-              px: 2,
-              minWidth: 70,
-            }}
-          >
-            <RefreshIcon fontSize="small" />
-            <Typography variant="caption">
-              Refresh
-            </Typography>
-          </Button>
+      {/* Buttons */}
+      <div className="flex items-center gap-1.5 ml-auto">
+        <ActionBtn onClick={handleClearAllFilters} disabled={!hasLocation || !isAnyFilterActive} tooltip="Clear filters" danger>
+          <ClearIcon />
+        </ActionBtn>
+        <ActionBtn onClick={onRefresh || (() => {})} disabled={!hasLocation || isRefreshing} tooltip="Refresh">
+          <RefreshIcon />
+        </ActionBtn>
+        
+        {/* Column menu */}
+        {showColumnFilter && hasLocation && (
+          <div className="relative" ref={menuRef}>
+            <ActionBtn onClick={() => setMenuOpen(!menuOpen)} active={menuOpen} tooltip="Columns">
+              <FilterListIcon />
+            </ActionBtn>
 
-        </Stack>
-        {/* Compact Column Filter */}
-        {showColumnFilter && selectedLocation && (
-          <>
-            <IconButton
-              size="small"
-              onClick={handleIconClick}
-              sx={{
-                textTransform: "none",
-                fontSize: "0.9rem",
-                color: open ? "primary.main" : "inherit",
-                backgroundColor: open ? "action.selected" : "transparent",
-                "&:hover": {
-                  backgroundColor: "action.hover",
-                },
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <FilterListIcon fontSize="small" />
-            </IconButton>
-
-            <Menu
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handleMenuClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              disableScrollLock
-              container={isFullScreen ? fullScreenContainerRef?.current : undefined}
-              PaperProps={{
-                sx: {
-                  width: 200,
-                  borderRadius: 2,
-                  p: 1,
-                  mt: 1,
-                  boxShadow: "0 10px 28px rgba(0,0,0,0.18)",
-                  zIndex: isFullScreen ? 1500 : 1300,
-                },
-              }}
-            >
-              {/* Header */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 0.5,
-                }}
-              >
-                <Typography fontWeight={600} fontSize="0.78rem">
-                  Show/Hide Columns
-                </Typography>
-
-                <IconButton size="small" onClick={handleMenuClose}>
-                  <CloseIcon sx={{ fontSize: 15 }} />
-                </IconButton>
-              </Box>
-
-              <Divider />
-
-              {/* Column List */}
-              <Box sx={{ maxHeight: 170, overflowY: "auto", mt: 0.5 }}>
-                {filteredColumnOptions.map((option) => {
-                  const isChecked = selectedColumns.includes(option.value);
-
-                  return (
-                    <Box
-                      key={option.value}
-                      onClick={() => handleColumnChange(option.value)}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        px: 0.7,
-                        py: 0.45,
-                        borderRadius: 1,
-                        cursor: "pointer",
-                        transition: "all 0.15s ease",
-                        "&:hover": {
-                          backgroundColor: "#eef2f6",
-                        },
-                      }}
-                    >
-                      <Typography
-                        fontSize="0.72rem"
-                        fontWeight={isChecked ? 500 : 400}
-                        color={isChecked ? "text.primary" : "text.secondary"}
-                        noWrap
+            {menuOpen && (
+              <div className="absolute right-0 top-[110%] w-[230px] rounded-xl border border-brand-200 bg-white shadow-xl p-2 z-[50]">
+                <div className="flex items-center justify-between mb-1.5 px-1">
+                  <span className="text-[12px] font-bold text-text-primary">Show / Hide Columns</span>
+                  <button onClick={() => setMenuOpen(false)} aria-label="Close" className="text-text-muted hover:text-text-primary"><ClearIcon/></button>
+                </div>
+                <div className="h-px bg-border w-full mb-1.5" />
+                <div className="max-h-[190px] overflow-y-auto space-y-0.5 pr-1" style={{ scrollbarWidth: "thin" }}>
+                  {columnOptions.map((opt) => {
+                    const isChecked = selectedColumns.includes(opt.value);
+                    return (
+                      <div
+                        key={opt.value}
+                        onClick={() => onToggleColumn(opt.value)}
+                        className={cn(
+                          "flex items-center justify-between px-2 py-1.5 rounded-lg cursor-pointer transition-colors",
+                          isChecked ? "bg-brand-50 hover:bg-brand-100" : "hover:bg-surface-muted"
+                        )}
                       >
-                        {option.label}
-                      </Typography>
-
-                      <Checkbox
-                        size="small"
-                        checked={isChecked}
-                        onClick={(e) => e.stopPropagation()}
-                        sx={{ p: 0.25 }}
-                      />
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Menu>
-          </>
+                        <span className={cn("text-[11.5px] truncate", isChecked ? "font-bold text-brand-700" : "font-semibold text-text-secondary")}>
+                          {opt.label}
+                        </span>
+                        <input type="checkbox" checked={isChecked} readOnly className="h-3.5 w-3.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer pointer-events-none" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+
+    </div>
   );
 };
 

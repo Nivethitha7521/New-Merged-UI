@@ -1,190 +1,190 @@
 "use client";
-import dynamic from 'next/dynamic';
-import React, { useMemo, useCallback } from "react";
-import { Button } from "@mui/material";
-import { usePathname, useRouter } from "next/navigation";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
 
-const SideMenu = dynamic(() => import('../../components/SideMenu'), {
-  ssr: false,
-});
+import React from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Box, Button } from "@mui/material";
+
+const PRIMARY_BLUE = "#1976d2";
+const PRIMARY_BLUE_DARK = "#0f5fb5";
+const PRIMARY_BLUE_LIGHT = "#e8f2ff";
 
 const modules = [
-  { label: "Outlets Inventory Management", path: "/yen-inventory/OutletsInventoryManagement" },
-  { label: "Warehouse Inventory Management", path: "/yen-inventory/WarehouseInventoryManagement" },
+  {
+    label: "Outlets",
+    fullLabel: "Outlets Inventory Management",
+    path: "/yen-inventory/OutletsInventoryManagement",
+    defaultPath:
+      "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockModification",
+  },
+  {
+    label: "Warehouse",
+    fullLabel: "Warehouse Inventory Management",
+    path: "/yen-inventory/WarehouseInventoryManagement",
+    defaultPath: "/yen-inventory/WarehouseInventoryManagement/stockModification",
+  },
 ];
 
-const outletKeys = [
-  "physicalstockmodification",
-  "physicalstockvariancemodification",
-  "stockledger",
-];
+const DEFAULT_INVENTORY_PAGE =
+  "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockModification";
 
-const warehouseKeys = [
-  "warehousephysicalstockmodification",
-  "warehousephysicalstockvariancemodification",
-  "warehousestockledger",
-];
+const defaultRedirects: Record<string, string> = {
+  "/yen-inventory/OutletsInventoryManagement":
+    "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockModification",
+
+  "/yen-inventory/WarehouseInventoryManagement":
+    "/yen-inventory/WarehouseInventoryManagement/stockModification",
+};
 
 const YenInventoryPage = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { isModuleVisible } = usePermissions();
 
-  // ✅ Redux permissions for SideMenu props calculation
-  const permissions = useSelector(
-    (state: RootState) => state.auth.permissions?.yenerp || {}
-  );
+  React.useEffect(() => {
+    if (!pathname) return;
 
-  const isModuleVisibleLocal = (key: string) => {
-    const m = (permissions as any)?.[key];
-    if (!m) return false;
-    if (m.hide === true || m.hide === 1) return false;
-    const noActions = !m.read && !m.add && !m.edit && !m.delete && !m.approve;
-    if (noActions) return false;
-    return m.read === true || m.read === 1;
-  };
+    if (pathname === "/yen-inventory") {
+      router.replace(DEFAULT_INVENTORY_PAGE);
+      return;
+    }
 
-  const isAnyModuleVisible = (keys: string[]) =>
-    keys.some((k) => isModuleVisible("yenerp", k));
+    const defaultPage = defaultRedirects[pathname];
 
-  // ✅ SideMenu visibility props
-  const yenBookKeys = ["outgoingpayment", "advancepayment", "partialpayment", "paymentdone", "paymenthistory", "ledger", "purchasereturn", "expensecategory", "expensesubcategory", "expensename",];
-  const purchaseMasterKeys = ["purchasecategory", "purchasesubcategory", "itemgroup", "purchaseuom", "purchasetax", "storagelocation", "freight", "itemtype", "service"];
-  const vendorKeys = ["vendors", "vendortype"];
-  const purchaseitemKeys = ["purchaseitem"];
-  const purchaseOrderKeys = ["purchaseorders_pending", "purchaseorders_approved", "purchaseorders_rejected", "purchaseorders_grn_converted"];
-  const serviceOrderKeys = ["serviceorders_pending", "serviceorders_approved", "serviceorders_rejected"];
-  const grnKeys = ["grns", "grns_return"];
-  const apInvoiceKeys = ["apinvoices"];
+    if (defaultPage) {
+      router.replace(defaultPage);
+    }
+  }, [pathname, router]);
 
-  const purchaseKeys = [...purchaseMasterKeys, ...vendorKeys, ...purchaseitemKeys, ...purchaseOrderKeys, ...serviceOrderKeys, ...grnKeys, ...apInvoiceKeys];
+  const activeModule =
+    modules.find(
+      (item) => pathname === item.path || pathname?.startsWith(`${item.path}/`)
+    ) || modules[0];
 
-  const showBookMenu = yenBookKeys.some((k) => isModuleVisibleLocal(k));
-  const showPurchaseMenu = purchaseKeys.some((k) => isModuleVisibleLocal(k));
-  const showInventoryMenu = [...outletKeys, ...warehouseKeys].some((k) => isModuleVisibleLocal(k));
-  const showReportsMenu = isModuleVisibleLocal("posreport") || isModuleVisibleLocal("purchaseorderreport");
-
-  const visibleModules = useMemo(() => {
-    return modules.filter((module) => {
-      if (module.path.includes("Outlets")) return isAnyModuleVisible(outletKeys);
-      if (module.path.includes("Warehouse")) return isAnyModuleVisible(warehouseKeys);
-      return false;
-    });
-  }, [isModuleVisible]);
-
-  const getWarehouseRedirect = () => {
-    if (isModuleVisible("yenerp", "warehousephysicalstockmodification"))
-      return "/yen-inventory/WarehouseInventoryManagement/stockModification";
-    if (isModuleVisible("yenerp", "warehousephysicalstockvariancemodification"))
-      return "/yen-inventory/WarehouseInventoryManagement/storeStockModification";
-    if (isModuleVisible("yenerp", "warehousestockledger"))
-      return "/yen-inventory/WarehouseInventoryManagement/ledger";
-    return "/yen-inventory/WarehouseInventoryManagement/stockModification";
-  };
-
-  const getOutletRedirect = () => {
-    if (isModuleVisible("yenerp", "physicalstockmodification"))
-      return "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockModification";
-    if (isModuleVisible("yenerp", "physicalstockvariancemodification"))
-      return "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockVarianceModification";
-    if (isModuleVisible("yenerp", "stockledger"))
-      return "/yen-inventory/OutletsInventoryManagement/ledger";
-    return "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockModification";
-  };
-
-  const handleMenuClick = useCallback(
-    (menuItem: { path: string }) => {
-      router.push(menuItem.path);
+  const handleModuleClick = React.useCallback(
+    (moduleItem: (typeof modules)[number]) => {
+      router.push(moduleItem.defaultPath);
     },
     [router]
   );
 
-  const handleModuleClick = React.useCallback(
-    (moduleItem: { path: string }) => {
-      let target: string;
-      if (moduleItem.path.includes("Warehouse")) {
-        target = getWarehouseRedirect();
-      } else if (moduleItem.path.includes("Outlets")) {
-        target = getOutletRedirect();
-      } else {
-        target = moduleItem.path;
-      }
-      router.push(target);
-    },
-    [router, isModuleVisible]
-  );
-// ✅ Auto-redirect: exact /yen-inventory path-ல் வந்தா first visible module-க்கு போகும்
-const permissionsLoaded = Object.keys(permissions).length > 0;
-
-React.useEffect(() => {
-  const isExact =
-    pathname === '/yen-inventory' || pathname === '/yen-inventory/';
-
-  if (isExact && permissionsLoaded && visibleModules.length > 0) {
-    const firstModule = visibleModules[0];
-    let target: string;
-    if (firstModule.path.includes("Warehouse")) {
-      target = getWarehouseRedirect();
-    } else if (firstModule.path.includes("Outlets")) {
-      target = getOutletRedirect();
-    } else {
-      target = firstModule.path;
-    }
-    router.replace(target);
-  }
-}, [pathname, permissionsLoaded, visibleModules, router]);
-  const isActiveRoute = (itemPath: string) => pathname?.startsWith(itemPath);
-
   return (
-    <div>
-      {/* ✅ SideMenu with correct props - same as YenPurchasePage */}
-      <SideMenu
-        onMenuClick={handleMenuClick}
-        activePath={pathname || "/"}
-        showPurchaseMenu={showPurchaseMenu}
-        showBookMenu={showBookMenu}
-        showInventoryMenu={showInventoryMenu}
-        showReportsMenu={showReportsMenu}
-      />
-      <div className="flex flex-wrap gap-2 mt-4 ml-4 items-center justify-start">
-        {visibleModules.length === 0 ? (
-          <div className="text-gray-500 mt-6 ml-2">
-            No inventory modules available for this role.
-          </div>
-        ) : (
-          visibleModules.map((item) => {
-            const isActive = isActiveRoute(item.path);
+    <Box
+      sx={{
+        width: "100%",
+        px: { xs: 1, sm: 1.5 },
+        pt: 1,
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: 42,
+          px: { xs: 1, sm: 1.25 },
+          py: 0.65,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          gap: 1.25,
+          flexWrap: "wrap",
+          border: "1px solid #cfe2f8",
+          borderBottom: "0",
+          borderRadius: "12px 12px 0 0",
+          background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+          boxShadow: "0 2px 8px rgba(15, 23, 42, 0.035)",
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
+            width: 4,
+            height: 25,
+            borderRadius: "999px",
+            backgroundColor: PRIMARY_BLUE,
+            flexShrink: 0,
+          }}
+        />
+
+        <Box sx={{ minWidth: 0, flexShrink: 0 }}>
+          <Box
+            sx={{
+              fontSize: "13px",
+              fontWeight: 900,
+              color: "#0f172a",
+              lineHeight: 1.1,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Inventory Management
+          </Box>
+
+          <Box
+            sx={{
+              mt: 0.15,
+              fontSize: "11px",
+              fontWeight: 700,
+              color: "#64748b",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {activeModule.fullLabel}
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            width: "1px",
+            height: 24,
+            backgroundColor: "#dbeafe",
+            mx: 0.25,
+            display: { xs: "none", sm: "block" },
+          }}
+        />
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            flexWrap: "wrap",
+          }}
+        >
+          {modules.map((item) => {
+            const isActive =
+              pathname === item.path || pathname?.startsWith(`${item.path}/`);
+
             return (
               <Button
-                key={item.label}
+                key={item.path}
                 variant={isActive ? "contained" : "outlined"}
-                color="primary"
-                size="medium"
-                sx={{
-                  mt: -2,
-                  textTransform: "none",
-                  fontWeight: isActive ? "bold" : "normal",
-                  fontSize: "14px",
-                  borderRadius: "4px",
-                  padding: "8px 16px",
-                  height: "36px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  transition: "all 0.2s ease",
-                }}
+                size="small"
                 onClick={() => handleModuleClick(item)}
+                sx={{
+                  minHeight: 29,
+                  px: 1.5,
+                  py: 0.3,
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  color: isActive ? "#ffffff" : PRIMARY_BLUE,
+                  borderColor: isActive ? PRIMARY_BLUE : "#b8d6fb",
+                  backgroundColor: isActive ? PRIMARY_BLUE : "#ffffff",
+                  boxShadow: "none",
+                  "&:hover": {
+                    backgroundColor: isActive
+                      ? PRIMARY_BLUE_DARK
+                      : PRIMARY_BLUE_LIGHT,
+                    borderColor: PRIMARY_BLUE,
+                    boxShadow: "none",
+                  },
+                }}
               >
                 {item.label}
               </Button>
             );
-          })
-        )}
-      </div>
-    </div>
+          })}
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

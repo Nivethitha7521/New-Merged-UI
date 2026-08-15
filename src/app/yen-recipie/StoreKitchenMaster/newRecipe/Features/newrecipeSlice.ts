@@ -13,7 +13,7 @@ import {
   SFGMaterial,
 } from "../Models/newrecipeModels";
 
-const BASE_URL = "    https://yenerp.com/recipeapi/newrecipe";
+const BASE_URL = "    https://yenerp.com/purchasetestapi/newrecipe";
 
 export const fetchSFGMaterials = createAsyncThunk<SFGMaterial[], string>(
   "materials/fetchSFG", async (search) => {
@@ -38,7 +38,7 @@ export const fetchPackingMaterials = createAsyncThunk<RawMaterial[], string>(
 
 export const fetchRecipeNames = createAsyncThunk<RecipeName[], string>(
   "recipes/fetchNames", async (search) => {
-    const res = await axios.get<RecipeName[]>(" https://yenerp.com/recipeapi/recipenames", { params: { search } });
+    const res = await axios.get<RecipeName[]>(" https://yenerp.com/purchasetestapi/recipenames", { params: { search } });
     return res.data;
   }
 );

@@ -182,7 +182,7 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
 
   return (
     <Dialog
-    className="kot-master-dialog"
+      className="kot-master-dialog kot-variant-dialog"
       open={open}
       onClose={handleClose}
       maxWidth="lg"
@@ -196,9 +196,12 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
       </DialogTitle>
 
       <DialogContent className='dialog-content'>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+       <Box
+          className="kot-variant-dialog-layout"
+          sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}
+        >
           {/* Variant Name */}
-          <Box sx={{ flex: '0 0 180px' }}>
+         <Box className="kot-variant-name-field" sx={{ flex: '0 0 180px' }}>
             <TextField
               autoFocus
               autoComplete='off'
@@ -221,8 +224,12 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
           </Box>
 
           {/* Select Variances with Paper Box */}
-          <Box sx={{ minWidth: '290px', display: 'flex', flexDirection: 'column' }}>
+          <Box
+            className="kot-variant-select-column"
+            sx={{ minWidth: '290px', display: 'flex', flexDirection: 'column' }}
+          >
             <Paper
+            className="kot-variant-select-panel"
               variant="outlined"
               sx={{
                 height: 380,
@@ -355,8 +362,10 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
           </Box>
 
           {/* Action Buttons */}
-          <Box sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1, alignSelf: 'center' }}>
-            <button
+ <Box
+            className="kot-variant-transfer-actions"
+            sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1, alignSelf: 'center' }}
+          >            <button
               onClick={handleRemoveItems}
               disabled={highlightedSelected.length === 0 || isSubmitting}
               className='btn-primary'
@@ -377,7 +386,7 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
           </Box>
 
           {/* Selected Items List */}
-          <Box sx={{ flex: '0 0 280px' }}>
+         <Box className="kot-variant-selected-column" sx={{ flex: '0 0 280px' }}>
             <Typography
               variant="subtitle2"
               gutterBottom
@@ -392,6 +401,7 @@ const VariantDialog: React.FC<VariantDialogProps> = ({
               Selected Items ({selectedItems.length})
             </Typography>
             <Paper
+             className="kot-variant-selected-panel"
               variant="outlined"
               sx={{
                 height: 360,

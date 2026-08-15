@@ -44,7 +44,7 @@
 //       } else {
 //         // Normal (all-over) login → JSON payload
 //         response = await axios.post(
-//           "https://yenerp.com/recipeapi/login/",
+//           "https://yenerp.com/purchasetestapi/login/",
 //           { username, password },
 //           { headers: { "Content-Type": "application/json" } }
 //         );
@@ -190,7 +190,7 @@ export const login = createAsyncThunk(
         );
       } else {
         response = await axios.post(
-          "https://yenerp.com/recipeapi/login/",
+          "https://yenerp.com/purchasetestapi/login/",
           { username, password },
           { headers: { "Content-Type": "application/json" } }
         );

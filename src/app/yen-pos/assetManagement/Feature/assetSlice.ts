@@ -8,7 +8,7 @@ import { RootState } from '../../../../redux/store';
 import { Asset, initialState, initialAsset } from "../Models/assetModels";
 
 
-const ASSET_API_URL = 'https://yenerp.com/fastapi/assetmanagements/';
+const ASSET_API_URL = 'https://yenerp.com/purchasetestapi/assetmanagements/';
 
 
 

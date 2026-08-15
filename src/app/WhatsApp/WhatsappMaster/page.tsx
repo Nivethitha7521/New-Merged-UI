@@ -43,7 +43,6 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import RadioButtonUncheckedRoundedIcon from '@mui/icons-material/RadioButtonUncheckedRounded';
-import WhatsAppMenu from '../page';
 
 const WhatsAppMessagesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -134,7 +133,7 @@ const WhatsAppMessagesPage: React.FC = () => {
         overflow: 'hidden',
       }}
     >
-      <WhatsAppMenu />
+    
 
       <Box
         sx={{

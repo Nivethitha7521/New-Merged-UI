@@ -1,0 +1,59 @@
+/* =========================================================
+   WHATSAPP — YEN PURCHASE / ITEM MASTER VISUAL PARITY
+   Presentation only. No API, Redux, handler or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  .erp-master-admin-viewport .whatsapp-layout .whatsapp-toolbar-title {
+    margin: 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+  }
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .whatsapp-layout
+    .whatsapp-toolbar-title {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    .whatsapp-layout
+    .whatsapp-admin-table
+    > :is(thead, tbody)
+    > tr
+    > :nth-child(1) {
+    width: 10% !important;
+  }
+
+  .erp-master-admin-viewport
+    .whatsapp-layout
+    .whatsapp-admin-table
+    > :is(thead, tbody)
+    > tr
+    > :nth-child(2) {
+    width: 38% !important;
+  }
+
+  .erp-master-admin-viewport
+    .whatsapp-layout
+    .whatsapp-admin-table
+    > :is(thead, tbody)
+    > tr
+    > :nth-child(3) {
+    width: 32% !important;
+  }
+
+  .erp-master-admin-viewport
+    .whatsapp-layout
+    .whatsapp-admin-table
+    > :is(thead, tbody)
+    > tr
+    > :nth-child(4) {
+    width: 20% !important;
+  }
+}

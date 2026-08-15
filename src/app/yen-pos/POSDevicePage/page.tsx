@@ -615,6 +615,7 @@ const handleServerConflictConfirm = useCallback(async () => {
                   </InputAdornment>
               
               ) : undefined,
+               }}
             />
           </Box>
 

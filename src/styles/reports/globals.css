@@ -211,3 +211,38 @@
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+/* =========================================================
++   YEN Reports route isolation inside the merged YEN ERP app
++   ========================================================= */
+body[data-report-ui='true'] {
+  margin: 0;
+  overflow: hidden !important;
+  background: var(--app-bg) !important;
+  color: var(--app-text) !important;
+  font-family: var(--app-font-family) !important;
+}
+
+/* The main ERP globals set a universal Source Sans font with !important.
+   Restore the report application's own preference-controlled font. */
+body[data-report-ui='true'] * {
+  font-family: var(--app-font-family) !important;
+}
+
+/* Do not depend on an arbitrary Tailwind grid-template class here.
+   This keeps the original dashboard right-side Quick Reports column even
+   when the merged app uses a different Tailwind build/version. */
+.yen-reports-dashboard-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+@media (min-width: 1280px) {
+  .yen-reports-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 255px) !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  .yen-reports-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(235px, 270px) !important;
+  }
+}

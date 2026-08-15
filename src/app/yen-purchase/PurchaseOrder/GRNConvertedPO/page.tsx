@@ -1542,7 +1542,7 @@ if (!canRead) {
                     <MenuItem onClick={handleVendorwiseClick}>Vendorwise Summary</MenuItem>
                     <MenuItem onClick={handleItemwiseClick}>Itemwise Detailed</MenuItem>
                   </Menu>
-                </Box>
+                
               </Grid>
             </Grid>
           </Box>

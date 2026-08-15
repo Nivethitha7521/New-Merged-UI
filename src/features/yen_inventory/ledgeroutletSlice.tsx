@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import purchaseApi from "@/utils/api";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { RootState } from "@/redux/store";
 import { parseAxiosError } from "./OuletePhysicalStockSlice";
+import { API_BASE_URL } from "./OuletePhysicalStockSlice";
 
 
 
@@ -130,8 +130,8 @@ export const fetchBranches = createAsyncThunk<
   "data/fetchBranches",
   async ({ page, limit }, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get<BranchResponse[]>(
-        `/outletinventory/locations?page=${page}&limit=${limit}`
+      const response = await axios.get<BranchResponse[]>(
+        `${API_BASE_URL}/outletinventory/locations?page=${page}&limit=${limit}`
       );
 
       return response.data.map(({ locationId, locationName, aliasName }) => ({
@@ -152,8 +152,8 @@ export const searchBranches = createAsyncThunk<
   "stockSummaryOutlet/searchBranches",
   async ({ search = "", page = 1, limit = 20 }, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/outletinventory/locations`,
+      const response = await axios.get(
+        `${API_BASE_URL}/outletinventory/locations`,
         {
           params: { search: search.trim() || undefined, page, limit }
         }
@@ -183,8 +183,8 @@ export const fetchStockLedger = createAsyncThunk<
         });
       }
 
-      const response = await purchaseApi.get(
-        `/outletinventoryvariance/stock-ledger/transactions`,
+      const response = await axios.get(
+        `${API_BASE_URL}/outletinventoryvariance/stock-ledger/transactions`,
         {
           params: {
             fromDate: params.fromDate,
@@ -195,19 +195,7 @@ export const fetchStockLedger = createAsyncThunk<
           },
           paramsSerializer: {
             indexes: null, // Try null instead of false
-            // OR try a custom serializer
-            // serialize: (params) => {
-            //   const searchParams = new URLSearchParams();
-            //   Object.keys(params).forEach(key => {
-            //     const value = params[key];
-            //     if (Array.isArray(value)) {
-            //       value.forEach(item => searchParams.append(key, item));
-            //     } else {
-            //       searchParams.append(key, value);
-            //     }
-            //   });
-            //   return searchParams.toString();
-            // }
+         
           },
         }
       );
@@ -232,8 +220,8 @@ export const searchPurchaseItems = createAsyncThunk<
     try {
       const isSearching = !!search.trim();
 
-      const response = await purchaseApi.get(
-        `/outletinventoryvariance/items`,
+      const response = await axios.get(
+        `${API_BASE_URL}/outletinventoryvariance/items`,
         {
           params: {
             search: search.trim() || undefined,
@@ -260,8 +248,8 @@ export const fetchAllPurchaseItems = createAsyncThunk<PurchaseItem[]>(
   "stockSummaryOutlet/fetchAllPurchaseItems",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/outletinventoryvariance/items`,
+      const response = await axios.get(
+        `${API_BASE_URL}/outletinventoryvariance/items`,
         { params: { search: "" } }
       );
       return response.data || [];
@@ -287,8 +275,8 @@ export const exportStockLedgerExcel = createAsyncThunk<
   "stockSummaryOutlet/exportStockLedgerExcel",
   async (params, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/outletinventoryvariance/stock-ledger/transactions/excel`,
+      const response = await axios.get(
+        `${API_BASE_URL}/outletinventoryvariance/stock-ledger/transactions/excel`,
         {
           params: {
             locationName: params.locationName,
@@ -335,8 +323,8 @@ export const exportStockLedgerCSV = createAsyncThunk<
   "stockSummaryOutlet/exportStockLedgerCSV",
   async (params, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/outletinventoryvariance/stock-ledger/transactions/export`,
+      const response = await axios.get(
+        `${API_BASE_URL}/outletinventoryvariance/stock-ledger/transactions/export`,
         {
           params: {
             locationId: params.locationId,

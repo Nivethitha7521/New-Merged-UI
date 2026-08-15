@@ -1,0 +1,718 @@
+/* =========================================================
+   KOT MASTER — YEN ERP DESIGN SYSTEM
+   UI-only overrides for Add On, Variant and KOT Table.
+   ========================================================= */
+
+.erp-master-admin-viewport .kot-master-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.erp-master-admin-viewport .kot-master-toolbar {
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.erp-master-admin-viewport .kot-master-toolbar-title,
+.erp-master-admin-viewport .kot-table-branch-title,
+.erp-master-admin-viewport .kot-table-area-header .icon-action-label {
+  margin: 0 !important;
+  color: var(--erp-text, #344054) !important;
+  font-family: inherit !important;
+}
+
+.erp-master-admin-viewport .kot-master-toolbar-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  white-space: nowrap;
+}
+
+.erp-master-admin-viewport .kot-master-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.erp-master-admin-viewport .kot-master-action-button {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  border-radius: 11px !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.erp-master-admin-viewport .kot-master-status-toggle {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 0 8px 0 12px !important;
+  border-radius: 11px !important;
+}
+
+.erp-master-admin-viewport .kot-master-toggle-label {
+  margin: 0 !important;
+}
+
+.erp-master-admin-viewport .kot-master-toggle-label .MuiFormControlLabel-label {
+  color: var(--erp-text, #475467) !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 550 !important;
+  white-space: nowrap;
+}
+
+/* Add On / Variant tables */
+
+.erp-master-admin-viewport .kot-master-table-container {
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100vh - 265px);
+  margin: 0;
+  overflow: auto;
+  background: var(--erp-surface, #ffffff);
+  border: 1px solid var(--erp-border, #dfe5ec);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, .05);
+}
+
+.erp-master-admin-viewport .kot-master-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  table-layout: auto;
+}
+
+.erp-master-admin-viewport .kot-master-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.erp-master-admin-viewport .kot-master-table thead th {
+  height: 42px !important;
+  padding: 11px 15px !important;
+  color: #344054 !important;
+  background: #f6f8fb !important;
+  border-bottom: 1px solid var(--erp-border, #dfe5ec) !important;
+  font-family: inherit !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  line-height: 1.15 !important;
+  letter-spacing: .055em !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+}
+
+.erp-master-admin-viewport .kot-master-table tbody tr {
+  transition: background-color .16s ease;
+}
+
+.erp-master-admin-viewport .kot-master-table tbody tr:nth-child(even) td {
+  background: #fbfcfe;
+}
+
+.erp-master-admin-viewport .kot-master-table tbody tr:hover td {
+  background: var(--erp-accent-soft, #f4f7ff) !important;
+}
+
+.erp-master-admin-viewport .kot-master-table tbody td {
+  height: 52px !important;
+  padding: 8px 15px !important;
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff);
+  border-bottom: 1px solid #e8edf3 !important;
+  font-family: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 450 !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+
+.erp-master-admin-viewport .kot-master-actions-cell {
+  min-width: 94px;
+  white-space: nowrap;
+}
+
+.erp-master-admin-viewport .kot-master-row-action {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 2px !important;
+  padding: 5px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #667085 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  transition: color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+.erp-master-admin-viewport .kot-master-row-action:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  transform: translateY(-1px);
+}
+
+.erp-master-admin-viewport .kot-master-row-action svg {
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 16px !important;
+}
+
+.erp-master-admin-viewport .kot-master-variance-pill {
+  min-height: 26px;
+  padding: 4px 10px;
+  color: var(--erp-accent, #155eef);
+  background: var(--erp-accent-soft, #eef4ff);
+  border: 1px solid rgba(var(--erp-accent-rgb, 21, 94, 239), .14);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+
+.erp-master-admin-viewport .kot-master-variance-pill:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--erp-accent-soft, #eef4ff) 75%, var(--erp-accent, #155eef));
+  border-color: rgba(var(--erp-accent-rgb, 21, 94, 239), .25);
+}
+
+.erp-master-admin-viewport .kot-master-variance-pill:disabled {
+  color: #98a2b3;
+  background: #f8fafc;
+  border-color: #e4e7ec;
+  cursor: default;
+}
+
+.erp-master-admin-viewport .kot-master-empty-cell,
+.erp-master-admin-viewport .kot-master-empty-state {
+  padding: 28px 18px !important;
+  color: var(--erp-muted, #667085) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 550 !important;
+  text-align: center !important;
+}
+
+.kot-master-popover.MuiPaper-root {
+  margin-top: 5px;
+  padding: 6px;
+  border: 1px solid var(--erp-border, #dfe5ec);
+  border-radius: 11px;
+  box-shadow: 0 12px 28px rgba(16, 24, 40, .12);
+}
+
+.kot-master-popover-content h4 {
+  padding: 6px 8px !important;
+  border-radius: 7px !important;
+  color: var(--erp-text, #344054) !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+}
+
+/* KOT Table toolbar */
+
+.erp-master-admin-viewport .kot-table-master-content {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(125px, auto) minmax(240px, 340px) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 14px;
+  row-gap: 14px;
+}
+
+.erp-master-admin-viewport .kot-master-search-slot {
+  width: 100%;
+  min-width: 0;
+}
+
+.erp-master-admin-viewport .kot-master-location-autocomplete,
+.erp-master-admin-viewport .kot-master-location-search {
+  width: 100% !important;
+}
+
+.erp-master-admin-viewport .kot-master-location-search .MuiOutlinedInput-root {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding-right: 10px !important;
+  border-radius: 12px !important;
+  background: var(--erp-surface, #ffffff) !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .06) !important;
+}
+
+.erp-master-admin-viewport .kot-master-location-search .MuiInputBase-input {
+  padding: 8px 8px !important;
+  color: var(--erp-text, #101828) !important;
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: 450 !important;
+}
+
+.erp-master-admin-viewport .kot-master-location-search .MuiInputBase-input::placeholder {
+  color: var(--erp-muted, #667085) !important;
+  opacity: .78 !important;
+}
+
+.erp-master-admin-viewport .kot-table-master-content > .kot-master-toolbar-actions {
+  justify-self: end;
+}
+
+/* Branch / area containers */
+
+.erp-master-admin-viewport .kot-table-branch-container {
+  grid-column: 1 / -1;
+  width: 100% !important;
+  max-height: calc(100vh - 280px) !important;
+  overflow: auto !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.erp-master-admin-viewport .kot-table-branch-card {
+  margin-bottom: 12px;
+  overflow: hidden;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border, #dfe5ec);
+  border-radius: 15px !important;
+  box-shadow: 0 7px 20px rgba(16, 24, 40, .05) !important;
+}
+
+.erp-master-admin-viewport .kot-table-branch-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-height: 46px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f6f8fb;
+  border-bottom: 1px solid var(--erp-border, #dfe5ec);
+}
+
+.erp-master-admin-viewport .kot-table-branch-title {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+.erp-master-admin-viewport .kot-table-branch-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.erp-master-admin-viewport .kot-master-card-action {
+  min-height: 32px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--erp-text, #344054);
+  background: var(--erp-surface, #ffffff);
+  border: 1px solid var(--erp-border-strong, #c5ced8);
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 1.1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .16s ease, border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+
+.erp-master-admin-viewport .kot-master-card-action:hover {
+  color: var(--erp-accent, #155eef);
+  background: var(--erp-accent-soft, #eef4ff);
+  border-color: var(--erp-accent, #155eef);
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, .10));
+}
+
+.erp-master-admin-viewport .kot-table-branch-body {
+  max-height: 68vh;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fbfcfe;
+}
+
+.erp-master-admin-viewport .kot-table-area-card {
+  margin-bottom: 10px;
+  padding: 9px;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid #e8edf3;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.erp-master-admin-viewport .kot-table-area-header {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.erp-master-admin-viewport .kot-table-area-header .icon-action-label {
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+/* KOT dialogs: same visual language as the Master Admin forms. */
+
+.kot-master-dialog .MuiDialog-paper {
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 48px rgba(16, 24, 40, .16) !important;
+}
+
+.kot-master-dialog .dialog-title {
+  padding: 16px 20px 12px !important;
+  color: var(--erp-text, #101828) !important;
+  font-family: inherit !important;
+  font-size: 17px !important;
+  font-weight: 720 !important;
+  line-height: 1.25 !important;
+}
+
+.kot-master-dialog .dialog-content {
+  padding: 16px 20px !important;
+  border-color: var(--erp-border, #e4e7ec) !important;
+}
+
+.kot-master-dialog .dialog-actions {
+  padding: 12px 20px 16px !important;
+  gap: 8px;
+}
+
+.kot-master-dialog .custom-textfield .MuiOutlinedInput-root,
+.kot-master-dialog .MuiFormControl-root .MuiOutlinedInput-root {
+  min-height: 40px;
+  border-radius: 10px !important;
+  background: var(--erp-surface, #ffffff);
+}
+
+.kot-master-dialog .custom-textfield .MuiOutlinedInput-notchedOutline,
+.kot-master-dialog .MuiFormControl-root .MuiOutlinedInput-notchedOutline {
+  border-color: var(--erp-border-strong, #c5ced8) !important;
+}
+
+.kot-master-dialog .custom-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.kot-master-dialog .MuiFormControl-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--erp-accent, #155eef) !important;
+  border-width: 1px !important;
+}
+
+.kot-master-dialog .btn-primary,
+.kot-master-dialog .btn-secondary {
+  min-height: 38px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+/* Responsive */
+
+@media (max-width: 1180px) {
+  .erp-master-admin-viewport .kot-table-master-content {
+    grid-template-columns: minmax(125px, auto) minmax(240px, 1fr);
+  }
+
+  .erp-master-admin-viewport .kot-table-master-content > .kot-master-toolbar-actions {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .erp-master-admin-viewport .kot-master-toolbar,
+  .erp-master-admin-viewport .kot-table-master-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .erp-master-admin-viewport .kot-master-toolbar-actions,
+  .erp-master-admin-viewport .kot-table-master-content > .kot-master-toolbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .erp-master-admin-viewport .kot-master-table-container {
+    border-radius: 12px;
+  }
+}
+
+/* Desktop density: preserves the compact 50%-zoom visual size at 100% zoom. */
+
+@media (min-width: 561px) {
+  .erp-master-admin-viewport .kot-master-toolbar {
+    margin-bottom: calc(var(--erp-ui) * 1.75) !important;
+    gap: calc(var(--erp-ui) * 1.75) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-toolbar-title {
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-toolbar-actions {
+    gap: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-action-button,
+  .erp-master-admin-viewport .kot-master-status-toggle {
+    height: calc(var(--erp-ui) * 5) !important;
+    min-height: calc(var(--erp-ui) * 5) !important;
+    border-radius: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-action-button {
+    padding-inline: calc(var(--erp-ui) * 1.75) !important;
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-toggle-label .MuiFormControlLabel-label {
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-table-container {
+    max-height: calc(100vh - (var(--erp-ui) * 33)) !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-table {
+    min-width: calc(var(--erp-ui) * 95) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-table thead th {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 1.375) calc(var(--erp-ui) * 1.875) !important;
+    font-size: calc(var(--erp-ui) * 1.25 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-table tbody td {
+    height: calc(var(--erp-ui) * 6.5) !important;
+    padding: var(--erp-ui) calc(var(--erp-ui) * 1.875) !important;
+    font-size: calc(var(--erp-ui) * 1.44 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-row-action {
+    width: calc(var(--erp-ui) * 3.5) !important;
+    min-width: calc(var(--erp-ui) * 3.5) !important;
+    height: calc(var(--erp-ui) * 3.5) !important;
+    min-height: calc(var(--erp-ui) * 3.5) !important;
+    padding: calc(var(--erp-ui) * .625) !important;
+    border-radius: var(--erp-ui) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-row-action svg {
+    width: calc(var(--erp-ui) * 2) !important;
+    height: calc(var(--erp-ui) * 2) !important;
+    font-size: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-variance-pill {
+    min-height: calc(var(--erp-ui) * 3.25) !important;
+    padding: calc(var(--erp-ui) * .5) calc(var(--erp-ui) * 1.25) !important;
+    font-size: calc(var(--erp-ui) * 1.31 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-empty-cell,
+  .erp-master-admin-viewport .kot-master-empty-state {
+    padding: calc(var(--erp-ui) * 3.5) calc(var(--erp-ui) * 2.25) !important;
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-master-content {
+    grid-template-columns:
+      minmax(calc(var(--erp-ui) * 15.625), auto)
+      minmax(calc(var(--erp-ui) * 30), calc(var(--erp-ui) * 42.5))
+      minmax(0, 1fr);
+    column-gap: calc(var(--erp-ui) * 1.75) !important;
+    row-gap: calc(var(--erp-ui) * 1.75) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-location-search .MuiOutlinedInput-root {
+    height: calc(var(--erp-ui) * 5) !important;
+    min-height: calc(var(--erp-ui) * 5) !important;
+    border-radius: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-location-search .MuiInputBase-input {
+    padding: var(--erp-ui) !important;
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-branch-container {
+    max-height: calc(100vh - (var(--erp-ui) * 35)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-branch-card {
+    margin-bottom: calc(var(--erp-ui) * 1.5) !important;
+    border-radius: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-branch-header {
+    min-height: calc(var(--erp-ui) * 5.75) !important;
+    padding: var(--erp-ui) calc(var(--erp-ui) * 1.5) !important;
+    gap: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-branch-title {
+    font-size: calc(var(--erp-ui) * 1.44 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-master-card-action {
+    min-height: calc(var(--erp-ui) * 4) !important;
+    padding: calc(var(--erp-ui) * .75) calc(var(--erp-ui) * 1.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+    font-size: calc(var(--erp-ui) * 1.31 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-branch-body {
+    padding: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-area-card {
+    margin-bottom: calc(var(--erp-ui) * 1.25) !important;
+    padding: calc(var(--erp-ui) * 1.125) !important;
+    border-radius: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-area-header {
+    margin-bottom: var(--erp-ui) !important;
+    gap: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-master-admin-viewport .kot-table-area-header .icon-action-label {
+    font-size: calc(var(--erp-ui) * 1.375 * var(--erp-type-scale)) !important;
+  }
+
+  .kot-master-dialog .dialog-title {
+    padding: calc(var(--erp-ui) * 2) calc(var(--erp-ui) * 2.5) calc(var(--erp-ui) * 1.5) !important;
+    font-size: calc(var(--erp-ui) * 2.125 * var(--erp-type-scale)) !important;
+  }
+
+  .kot-master-dialog .dialog-content {
+    padding: calc(var(--erp-ui) * 2) calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .kot-master-dialog .dialog-actions {
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 2.5) calc(var(--erp-ui) * 2) !important;
+    gap: var(--erp-ui) !important;
+  }
+}
+
+html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-master-table thead th,
+[data-theme='dark'] .erp-master-admin-viewport .kot-master-table thead th,
+html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-branch-header,
+[data-theme='dark'] .erp-master-admin-viewport .kot-table-branch-header {
+  color: var(--erp-text, #f8fafc) !important;
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-master-table tbody td,
+[data-theme='dark'] .erp-master-admin-viewport .kot-master-table tbody td,
+html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-area-card,
+[data-theme='dark'] .erp-master-admin-viewport .kot-table-area-card {
+  color: var(--erp-text, #e5e7eb) !important;
+  background: var(--erp-surface, #172033) !important;
+  border-color: #2b3749 !important;
+}
+
+/* KOT Table layout editor — presentation only; drag coordinates/sizing unchanged. */
+
+.kot-layout-editor {
+  font-family: inherit;
+  background: var(--erp-bg, #f4f7fb) !important;
+}
+
+.kot-layout-editor-header,
+.kot-layout-editor-footer {
+  background: var(--erp-surface, #ffffff) !important;
+  border-color: var(--erp-border, #dfe5ec) !important;
+  box-shadow: 0 4px 16px rgba(16, 24, 40, .06) !important;
+}
+
+.kot-layout-editor-back {
+  color: var(--erp-text-secondary, #475467) !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 10px !important;
+}
+
+.kot-layout-editor-back:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.kot-layout-editor-title {
+  color: var(--erp-text, #101828);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700 !important;
+}
+
+.kot-layout-editor-subtitle {
+  color: var(--erp-muted, #667085) !important;
+  font-family: inherit !important;
+  font-size: 10.5px !important;
+}
+
+.kot-layout-editor-action {
+  min-height: 36px !important;
+  padding: 7px 13px !important;
+  border-radius: 10px !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+.kot-layout-editor-canvas {
+  background-color: var(--erp-bg, #f8fafc) !important;
+}
+
+@media (min-width: 561px) {
+  .kot-layout-editor-title {
+    font-size: calc(var(--erp-ui) * 1.625 * var(--erp-type-scale)) !important;
+  }
+
+  .kot-layout-editor-subtitle {
+    font-size: calc(var(--erp-ui) * 1.31 * var(--erp-type-scale)) !important;
+  }
+
+  .kot-layout-editor-action {
+    min-height: calc(var(--erp-ui) * 4.5) !important;
+    padding: calc(var(--erp-ui) * .875) calc(var(--erp-ui) * 1.625) !important;
+    border-radius: calc(var(--erp-ui) * 1.25) !important;
+    font-size: calc(var(--erp-ui) * 1.375 * var(--erp-type-scale)) !important;
+  }
+}
+
+
+
+

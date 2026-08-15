@@ -48,7 +48,7 @@ export const menuItems: MenuItem[] = [
 },
   {
     text: 'YEN POS', icon: <ReceiptLongIcon />,
-    subItems: ['Cash Management', 'Table Master', 'Bill Receipts', 'EB Reading', 'POS Devices', 'Print Barcodes', 'Print Unique Barcodes'],
+   subItems: ['Cash Management', 'POS Devices', 'Reasons', 'Prefix Master'],
     path: '/yen-pos',
   },
   { text: 'WHATSAPP', icon: <WhatsAppIcon />, subItems: ['WhatsAppAdmin', 'WhatsAppMaster'], path: '/WhatsApp' },

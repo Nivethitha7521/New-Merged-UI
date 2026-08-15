@@ -556,7 +556,7 @@ const MainPage: React.FC = () => {
         </div>
       </div>
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden p-2.5 xl:grid-cols-[minmax(0,1fr)_minmax(220px,255px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(235px,270px)]">
+     <main className="yen-reports-dashboard-grid grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden p-2.5 xl:grid-cols-[minmax(0,1fr)_minmax(220px,255px)] 2xl:grid-cols-[minmax(0,1fr)_minmax(235px,270px)]">
         <section className="grid min-h-0 grid-rows-[auto_auto_auto] gap-2 overflow-hidden">
           <div
             className={`min-h-0 rounded-2xl border p-[clamp(11px,1.1vw,16px)] ${

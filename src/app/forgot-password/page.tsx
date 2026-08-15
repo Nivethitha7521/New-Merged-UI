@@ -20,7 +20,7 @@ export default function ForgotPassword() {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/yenerpapi/auth/forgot-password`,
+        `https://yenerp.com/purchasetestapi/auth/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

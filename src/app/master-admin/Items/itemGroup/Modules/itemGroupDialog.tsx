@@ -98,6 +98,7 @@ const ItemGroupDialog: React.FC<ItemGroupDialogProbs> = ({
     <Dialog
       open={open}
       onClose={handleClose}
+      className="item-lookup-form-dialog"
       maxWidth="sm"
       fullWidth
       PaperProps={{

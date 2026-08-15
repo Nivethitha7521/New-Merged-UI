@@ -200,7 +200,7 @@ export default function NewRecipePage() {
   const prevPackingSearchRef = useRef<string>("");
   const fetchedForRecipeRef = useRef<string | null>(null);
 
-  const NEXT_PUBLIC_API_BASE_URL = " https://yenerp.com/recipeapi/"
+  const NEXT_PUBLIC_API_BASE_URL = " https://yenerp.com/purchasetestapi/"
 
   const isEditingExisting = Boolean(recipeIdFromUrl || draftRecipe?.recipeId);
 

@@ -1,0 +1,145 @@
+/* =========================================================
+   TAX MASTER — COMPACT ADD / EDIT DIALOG
+
+   Scope:
+   - Tax Add/Edit dialog
+   - DineIn Tax Add/Edit dialog
+
+   Purpose:
+   - Match the compact Master Admin dialog proportions at 100% zoom.
+   - Keep the existing YEN ERP colors, typography and component behavior.
+   - No business logic, validation, API, Redux or handler changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .tax-form-dialog .tax-dialog-paper {
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: 300px !important;
+    margin: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  body
+    .tax-form-dialog
+    :is(.MuiDialogTitle-root, .master-admin-form-dialog-title, .dialog-title) {
+    padding: 12px 14px 10px !important;
+  }
+
+  body
+    .tax-form-dialog
+    :is(.MuiDialogContent-root, .master-admin-form-content, .dialog-content) {
+    max-height: calc(100vh - 150px) !important;
+    padding: 10px 12px 12px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body .tax-form-dialog .tax-form-section {
+    margin: 0 !important;
+    padding: 10px !important;
+    border-radius: 7px !important;
+  }
+
+  body .tax-form-dialog .tax-form-section .custom-textfield {
+    width: 100% !important;
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  body
+    .tax-form-dialog
+    .tax-form-section
+    .custom-textfield
+    :is(.MuiInputBase-root, .MuiOutlinedInput-root) {
+    height: auto !important;
+    min-height: 38px !important;
+    border-radius: 5px !important;
+  }
+
+  body .tax-form-dialog .tax-form-section .custom-input input {
+    padding: 8px 10px !important;
+  }
+
+  /* Compact the Tax Codes heading without touching its click behavior. */
+  body
+    .tax-form-dialog
+    .tax-form-section
+    > div[style*="align-items: center"] {
+    margin: 10px 0 4px !important;
+  }
+
+  /* Tax split row: Code Name | Code % | remove icon. */
+  body
+    .tax-form-dialog
+    .tax-form-section
+    > div[style*="align-items: flex-start"] {
+    gap: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  body
+    .tax-form-dialog
+    .tax-form-section
+    > div[style*="align-items: flex-start"]
+    > .MuiFormControl-root:first-child {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  body
+    .tax-form-dialog
+    .tax-form-section
+    > div[style*="align-items: flex-start"]
+    > .MuiFormControl-root:nth-child(2) {
+    width: 92px !important;
+    min-width: 92px !important;
+    max-width: 92px !important;
+    flex: 0 0 92px !important;
+  }
+
+  body
+    .tax-form-dialog
+    .tax-form-section
+    > div[style*="align-items: flex-start"]
+    > .MuiIconButton-root {
+    width: 28px !important;
+    height: 28px !important;
+    margin-top: 5px !important;
+    padding: 4px !important;
+    flex: 0 0 28px !important;
+  }
+
+  body
+    .tax-form-dialog
+    :is(.MuiDialogActions-root, .master-admin-form-actions, .dialog-actions) {
+    min-height: auto !important;
+    padding: 8px 12px 10px !important;
+    gap: 8px !important;
+  }
+
+  body
+    .tax-form-dialog
+    :is(.btn-primary, .btn-secondary, .master-admin-dialog-button) {
+    min-width: 76px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body .tax-form-dialog .tax-dialog-paper {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px !important;
+  }
+
+  body
+    .tax-form-dialog
+    :is(.MuiDialogContent-root, .master-admin-form-content, .dialog-content) {
+    max-height: calc(100vh - 140px) !important;
+    overflow-y: auto !important;
+  }
+}

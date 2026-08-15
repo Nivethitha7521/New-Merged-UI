@@ -19,8 +19,7 @@
     --background-end-rgb: 255, 255, 255; /* White background in dark mode */
   }
 }
-* {
-  font-family:'Source Sans 3', sans-serif !important;
+body:not([data-report-ui='true']) * {  font-family:'Source Sans 3', sans-serif !important;
 }
 
 /* Global Body Styling */
@@ -606,10 +605,10 @@ body { margin: 0; }
 .erp-page-viewport > main { max-width: 1600px; margin-left: auto; margin-right: auto; }
 
 /* Typography */
-h1, .MuiTypography-h1 { font-size: 30px !important; line-height: 1.2 !important; font-weight: 750 !important; letter-spacing: -.035em !important; color: var(--erp-text) !important; }
-h2, .MuiTypography-h2 { font-size: 25px !important; line-height: 1.25 !important; font-weight: 720 !important; letter-spacing: -.025em !important; color: var(--erp-text) !important; }
-h3, .MuiTypography-h3, .MuiTypography-h4, .MuiTypography-h5 { color: var(--erp-text) !important; font-weight: 700 !important; }
-p { color: var(--erp-muted); }
+body:not([data-report-ui='true']) h1, body:not([data-report-ui='true']) .MuiTypography-h1 { font-size: 30px !important; line-height: 1.2 !important; font-weight: 750 !important; letter-spacing: -.035em !important; color: var(--erp-text) !important; }
+body:not([data-report-ui='true']) h2, body:not([data-report-ui='true']) .MuiTypography-h2 { font-size: 25px !important; line-height: 1.25 !important; font-weight: 720 !important; letter-spacing: -.025em !important; color: var(--erp-text) !important; }
+body:not([data-report-ui='true']) h3, body:not([data-report-ui='true']) .MuiTypography-h3, body:not([data-report-ui='true']) .MuiTypography-h4, body:not([data-report-ui='true']) .MuiTypography-h5 { color: var(--erp-text) !important; font-weight: 700 !important; }
+body:not([data-report-ui='true']) p { color: var(--erp-muted); }
 
 /* Cards and surfaces */
 .MuiPaper-root:not(.MuiDrawer-paper):not(.MuiMenu-paper):not(.MuiPopover-paper),
@@ -1570,8 +1569,7 @@ textarea,
 html { font-size: 16px; }
 
 /* Accent color: interactive states only, no behavior changes. */
-a,
-.erp-sidebar-item.is-active,
+body:not([data-report-ui='true']) a,.erp-sidebar-item.is-active,
 .erp-sidebar-item.is-active .erp-sidebar-icon,
 .erp-sidebar-item.is-active .erp-sidebar-label,
 .erp-sidebar-item.is-active .erp-sidebar-icon-label,

@@ -8,6 +8,8 @@ import { forceLogout } from "../features/authSlice";
 import { initializeAuth, validateToken, clearSnackbar } from '../features/authSlice';
 import PurchaseModuleSideMenu from '@/components/PurchaseModuleSideMenu';
 import MasterAdminModuleSideMenu from '@/components/MasterAdminModuleSideMenu';
+import YenPosModuleSideMenu from '@/components/YenPosModuleSideMenu';
+import WhatsAppModuleSideMenu from '@/components/WhatsAppModuleSideMenu';
 // import KOTMasterSubMenu from '@/components/KOTMasterSubMenu';
 import BookModuleSideMenu from '@/components/BookModuleSideMenu';
 import { Toaster } from "react-hot-toast";
@@ -34,7 +36,8 @@ const PROTECTED_ROUTES = [
   '/QlikReport',
   '/WhatsApp',
 ];
-
+const REPORTS_APP_URL =
+  process.env.NEXT_PUBLIC_REPORTS_APP_URL || 'https://reports.yenerp.com/QlikReport/';
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -69,6 +72,8 @@ const [
   setIsMasterAdminSubMenuOpen,
 ] = useState(false);
 const [isRecipeSubMenuOpen, setIsRecipeSubMenuOpen] = useState(false);
+const [isPosSubMenuOpen, setIsPosSubMenuOpen] = useState(false);
+const [isWhatsAppSubMenuOpen, setIsWhatsAppSubMenuOpen] = useState(false);
 const [pendingBookPath, setPendingBookPath] =
   useState<string | null>(null);
 
@@ -86,6 +91,41 @@ useEffect(() => {
   }
 }, [pathname, pendingBookPath]);
 const isReportsRoute = pathname === '/QlikReport' || pathname?.startsWith('/QlikReport/');
+ // Keep the standalone Yen Reports visual system isolated from the main YEN ERP
+  // display-settings CSS. Reports already has its own theme/preferences provider.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const root = document.documentElement;
+    const body = document.body;
+
+    if (isReportsRoute) {
+      body.dataset.reportUi = 'true';
+      // These attributes activate the global YEN ERP theme rules in globals.css.
+      // Remove them only while /QlikReport is active so the original Reports UI
+      // can use its own --app-* variables and body[data-theme] rules.
+      delete root.dataset.erpTheme;
+      delete root.dataset.erpStyle;
+      delete root.dataset.erpFontSize;
+      delete root.dataset.erpNavigationLayout;
+      return;
+    }
+
+    delete body.dataset.reportUi;
+
+    // Restore the main ERP display settings when navigating back from reports.
+    root.dataset.erpTheme = displaySettings.theme;
+    root.dataset.erpStyle = displaySettings.uiStyle;
+    root.dataset.erpFontSize = displaySettings.fontSize;
+    root.dataset.erpNavigationLayout = displaySettings.navigationLayout;
+  }, [
+    isReportsRoute,
+    displaySettings.theme,
+    displaySettings.uiStyle,
+    displaySettings.fontSize,
+    displaySettings.navigationLayout,
+  ]);
+
 const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
 
   const isProtectedRoute = useMemo(() =>
@@ -170,10 +210,10 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
     // isUserActive = false → fallback check மட்டும் → TTL refresh வேண்டாம்
     const sendPing = async (isUserActive: boolean = false) => {
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://yenerp.com"
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
-        const res = await fetch(`${API_BASE}/yenerpapi/ping`, {
+        const res = await fetch(`${API_BASE}/purchasetestapi/ping`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -322,11 +362,14 @@ const isRecipeRoute =
   const isPosRoute =
   pathname === '/yen-pos' ||
   pathname?.startsWith('/yen-pos/');
+  const isWhatsAppRoute =
+  pathname === '/WhatsApp' ||
+  pathname?.startsWith('/WhatsApp/');
 // const isKotMasterRoute =
 //   pathname === '/master-admin/KOTMaster' ||
 //   pathname?.startsWith('/master-admin/KOTMaster/');
 const useMasterAdminDesign =
-  isMasterAdminRoute || isRecipeRoute || isPosRoute;
+  isMasterAdminRoute || isRecipeRoute || isPosRoute || isWhatsAppRoute;
 const isBookRoute =
   pathname === '/yen-book' ||
   pathname?.startsWith('/yen-book/');
@@ -380,14 +423,15 @@ if (isLoggedIn && isReportsRoute) {
   ) => {
     setSelectedModule(menuItem.text);
  if (menuItem.path === '/QlikReport') {
-    window.open('/QlikReport', '_blank');
+    window.open(REPORTS_APP_URL, '_blank', 'noopener,noreferrer');
     return;
   }
 if (menuItem.path === '/yen-purchase') {
   setSelectedModule(menuItem.text);
   setIsBookSubMenuOpen(false);
   setIsMasterAdminSubMenuOpen(false);
-
+setIsPosSubMenuOpen(false);
+setIsWhatsAppSubMenuOpen(false);
   if (!pathname?.startsWith('/yen-purchase')) {
     router.push('/yen-purchase');
   }
@@ -399,7 +443,8 @@ if (menuItem.path === '/yen-book') {
   setIsBookSubMenuOpen((previous) => !previous);
   setIsPurchaseSubMenuOpen(false);
   setIsMasterAdminSubMenuOpen(false);
-
+setIsPosSubMenuOpen(false);
+ setIsWhatsAppSubMenuOpen(false);
   if (!pathname?.startsWith('/yen-book')) {
     router.push('/yen-book');
   }
@@ -410,17 +455,45 @@ if (menuItem.path === '/master-admin') {
   setSelectedModule(menuItem.text);
   setIsPurchaseSubMenuOpen(false);
   setIsBookSubMenuOpen(false);
-
+setIsPosSubMenuOpen(false);
   if (!pathname?.startsWith('/master-admin')) {
     router.push('/master-admin');
   }
+ return;
+}
 
+if (menuItem.path === '/yen-pos') {
+  setSelectedModule(menuItem.text);
+  setIsPurchaseSubMenuOpen(false);
+  setIsBookSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
+  setIsRecipeSubMenuOpen(false);
+  setIsWhatsAppSubMenuOpen(false);
+
+  if (!pathname?.startsWith('/yen-pos')) {
+    router.push('/yen-pos/CashManagement/OpeningCash');
+  }
+ return;
+}
+if (menuItem.path === '/WhatsApp') {
+  setSelectedModule(menuItem.text);
+  setIsPurchaseSubMenuOpen(false);
+  setIsBookSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
+  setIsRecipeSubMenuOpen(false);
+  setIsPosSubMenuOpen(false);
+
+  if (!pathname?.startsWith('/WhatsApp')) {
+    router.push('/WhatsApp/WhatsappAdmin');
+  }
   return;
 }
     setIsPurchaseSubMenuOpen(false);
     setIsBookSubMenuOpen(false);
     setIsMasterAdminSubMenuOpen(false);
-    
+    setIsPosSubMenuOpen(false);
+    setIsWhatsAppSubMenuOpen(false);
+     setIsWhatsAppSubMenuOpen(false);
     router.push(menuItem.path);
   }}
   activePath={pathname || '/yen-purchase'}
@@ -471,6 +544,44 @@ if (menuItem.path === '/master-admin') {
         pathname?.startsWith(
           `${menuItem.path}/`
         );
+
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
+ {!useTabNavigation && isPosRoute && (
+  <YenPosModuleSideMenu
+    expanded={isPosSubMenuOpen}
+    onToggle={() =>
+      setIsPosSubMenuOpen((previous) => !previous)
+   }
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
+
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
+{!useTabNavigation && isWhatsAppRoute && (
+  <WhatsAppModuleSideMenu
+    expanded={isWhatsAppSubMenuOpen}
+    onToggle={() =>
+      setIsWhatsAppSubMenuOpen((previous) => !previous)
+    }
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
 
       if (!pageAlreadyOpen) {
         router.push(menuItem.path);

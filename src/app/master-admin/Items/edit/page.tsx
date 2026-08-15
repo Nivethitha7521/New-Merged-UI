@@ -1565,7 +1565,7 @@ function EditItemContent({
 
 
   return (
-    <Box>
+   <Box className="item-master-form-page">
 
       <ItemMaster />
 
@@ -1628,7 +1628,7 @@ function EditItemContent({
             <Grid container spacing={1.2} sx={{ mb: 0 }}>
 
               {/* ✅ Item Type - FIXED VERSION */}
-              <Grid item xs={12} sm={6} md={4} lg={1.2}>
+             <Grid item xs={12} sm={6} md={4} lg={1.2}>
                 <Autocomplete
                   size="small"
                   options={inventory}
@@ -1717,7 +1717,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={2}>
+           <Grid item xs={12} sm={6} md={4} lg={2}>
                 <Autocomplete
                   size="small"
                   options={categories}
@@ -1770,7 +1770,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={2}>
+             <Grid item xs={12} sm={6} md={4} lg={2}>
                 <Autocomplete
                   size="small"
                   options={
@@ -1834,7 +1834,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={1.5}>
+             <Grid item xs={12} sm={6} md={4} lg={1.5}>
                 <Autocomplete
                   size="small"
                   options={itemGroups}
@@ -1891,7 +1891,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={1.2}>
+             <Grid item xs={12} sm={6} md={4} lg={1.2}>
                 <Autocomplete
                   size="small"
                   options={uoms}
@@ -1944,7 +1944,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={1.5}>
+             <Grid item xs={12} sm={6} md={4} lg={1.5}>
                 <Autocomplete
                   size="small"
                   options={taxes}
@@ -2020,7 +2020,7 @@ function EditItemContent({
               </Grid> */}
 
 
-              <Grid item xs={12} sm={6} md={4} lg={0.9}>
+             <Grid item xs={12} sm={6} md={4} lg={0.9}>
                 <TextField
                   autoComplete="off"
                   label="Price *"
@@ -2044,7 +2044,7 @@ function EditItemContent({
 
 
               {/* Second Row: Net Price to Tax Price */}
-              <Grid item xs={12} sm={6} md={4} lg={1}>
+             <Grid item xs={12} sm={6} md={4} lg={1}>
                 <TextField
                   autoComplete="off"
                   label="Net Price"
@@ -2061,7 +2061,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={1}>
+            <Grid item xs={12} sm={6} md={4} lg={1}>
                 <TextField
                   autoComplete="off"
                   label="Tax Price"
@@ -2095,7 +2095,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={1.5}>
+             <Grid item xs={12} sm={6} md={4} lg={1.5}>
                 <TextField
                   autoComplete="off"
                   label="Description"
@@ -2120,7 +2120,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={1.1}>
+            <Grid item xs={12} sm={6} md={4} lg={1.1}>
                 <TextField
                   autoComplete="off"
                   label="HSN Code"
@@ -2135,7 +2135,7 @@ function EditItemContent({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4} lg={0.9} >
+            <Grid item xs={12} sm={6} md={4} lg={0.9} >
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -2182,7 +2182,7 @@ function EditItemContent({
               </Grid>
 
 
-              <Grid item xs={12} sm={6} md={4} lg={1} >
+             <Grid item xs={12} sm={6} md={4} lg={1} >
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -2203,7 +2203,7 @@ function EditItemContent({
               </Grid>
 
 
-              <Grid item xs={12} sm={6} md={4} lg={0.84}>
+             <Grid item xs={12} sm={6} md={4} lg={0.84}>
                 <FormControlLabel
                   control={
                     <Radio
@@ -2225,7 +2225,7 @@ function EditItemContent({
               </Grid>
 
 
-              <Grid item xs={12} sm={6} md={4} lg={0.9}>
+            <Grid item xs={12} sm={6} md={4} lg={0.9}>
                 <FormControlLabel
                   control={
                     <Radio
@@ -2370,7 +2370,7 @@ function EditItemContent({
 
 
 
-              <Grid item xs={12} sm={6} md={4} lg={1.6}>
+            <Grid item xs={12} sm={6} md={4} lg={1.6}>
                 <Box
                   sx={{
                     display: "flex",

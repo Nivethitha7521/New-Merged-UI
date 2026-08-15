@@ -217,6 +217,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
       onClose={onClose}
       maxWidth="lg"
       fullWidth
+      className="category-form-dialog"
       PaperProps={{
         className: "dialog-paper-big"
       }}
@@ -226,10 +227,10 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
       </DialogTitle>
 
       <DialogContent className='dialog-content'>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+        <Box className="category-dialog-layout" sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
 
           {/* Category Name — no special chars, max 30, min 1 letter */}
-          <Box sx={{ flex: '0 0 250px' }}>
+         <Box className="category-name-column" sx={{ flex: '0 0 250px' }}>
             <TextField
               autoFocus
               autoComplete='off'
@@ -252,9 +253,10 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
           </Box>
 
           {/* Select Subcategories — unchanged */}
-          <Box sx={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column' }}>
+         <Box className="category-select-column" sx={{ flex: '0 0 320px', display: 'flex', flexDirection: 'column' }}>
             <Paper
               variant="outlined"
+               className="category-select-panel"
               sx={{
                 height: 380,
                 overflow: 'hidden',
@@ -381,7 +383,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
           </Box>
 
           {/* Action Buttons — unchanged */}
-          <Box sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1, alignSelf: 'center' }}>
+        <Box className="category-transfer-actions" sx={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: 1, pt: 1, alignSelf: 'center' }}>
             <button
               onClick={handleRemoveItems}
               disabled={highlightedSelected.length === 0 || isSubmitting}
@@ -403,7 +405,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
           </Box>
 
           {/* Selected Items List — unchanged */}
-          <Box sx={{ flex: '0 0 280px' }}>
+         <Box className="category-selected-column" sx={{ flex: '0 0 280px' }}>
             <Typography
               variant="subtitle2"
               gutterBottom
@@ -420,6 +422,7 @@ const CategoryDialog: React.FC<CategoryDialogProps> = ({
             </Typography>
             <Paper
               variant="outlined"
+               className="category-selected-panel"
               sx={{
                 height: 360,
                 overflow: 'hidden',

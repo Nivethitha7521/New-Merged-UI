@@ -6,8 +6,8 @@ import { RawMaterial, SFGMaterial, EditRecipeItem, initialState } from "../model
 
   type ToggleableItem = SFGMaterial | RawMaterial;
 
-const MATERIALS_BASE_URL = " https://yenerp.com/recipeapi/storekitchenmaster/materials";
-const SUMMA_URL = " https://yenerp.com/recipeapi/"
+const MATERIALS_BASE_URL = " https://yenerp.com/purchasetestapi/storekitchenmaster/materials";
+const SUMMA_URL = " https://yenerp.com/purchasetestapi/"
 
 // Thunks
 export const fetchSFGMaterials = createAsyncThunk<

@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
-import purchaseApi from "@/utils/api";
-
-
+import axios, { AxiosError } from "axios";
+import { API_BASE_URL } from "./OuletePhysicalStockSlice";
 
 // Type for dropdown options
 type OptionType = {
@@ -33,6 +31,8 @@ export interface RawMaterialStore {
   variance?: number;
   approvalStatus?: string;
   approvalButton?: boolean;
+  canApprove?: boolean;
+  stockVariance?: string;
 };
 
 export interface ApprovedStockItem {
@@ -44,13 +44,46 @@ export interface ApprovedStockItem {
   PhysicalStock: number;
   actualVariance: number;
   systemStockAfter: number;
-  approvedBy: string;
+  // approvedBy: string;
+  // description?: string;
+  // approvedAt: string;
+  // status: "Approved";
+  // replace the part 11 8 1
+    approvedBy?: string | null;
   description?: string;
   approvedAt: string;
-  status: "Approved";
+  status: string;
 }
 
 // --- Define a reusable type for fetchPurchaseItems params ---
+// export interface FetchPurchaseItemsParams {
+//   skip?: number;
+//   limit?: number;
+//   itemName?: string[];
+//   category?: string[];
+//   subcategory?: string[];
+//   varianceName?: string[];
+//   locationName?: string;
+//   createdDate?: string;
+//   fetchDropdowns?: boolean;
+
+//   categorySearch?: string;
+//   categoryPage?: number;
+//   categoryLimit?: number;
+
+//   subcategorySearch?: string;
+//   subcategoryPage?: number;
+//   subcategoryLimit?: number;
+
+//   itemNameSearch?: string;
+//   itemNamePage?: number;
+//   itemNameLimit?: number;
+
+//   varianceNameSearch?: string;
+//   varianceNamePage?: number;
+//   varianceNameLimit?: number;
+// }
+// replace the part 12 8 3
 export interface FetchPurchaseItemsParams {
   skip?: number;
   limit?: number;
@@ -61,6 +94,7 @@ export interface FetchPurchaseItemsParams {
   locationName?: string;
   createdDate?: string;
   fetchDropdowns?: boolean;
+  pendingOnly?: boolean;
 
   categorySearch?: string;
   categoryPage?: number;
@@ -77,8 +111,11 @@ export interface FetchPurchaseItemsParams {
   varianceNameSearch?: string;
   varianceNamePage?: number;
   varianceNameLimit?: number;
-}
 
+  // newly add this part 14 8 1
+  sortField?: string;
+  sortOrder?: "asc" | "desc";
+}
 // Interface for Warehouse
 export interface Warehouse {
   locationId: string;
@@ -153,6 +190,8 @@ interface PurchaseItemState {
   selectedApproveItem: RawMaterialStore | null;
   approveDescription: string;
   visibleColumns: Record<string, boolean>;
+  approveAllBranchLoading: boolean;
+  loadingPendingCodes: boolean;
 }
 
 // Initial state
@@ -206,24 +245,25 @@ const initialState: PurchaseItemState = {
   adjustmentReason: "",
   selectedApproveItem: null,
   approveDescription: "",
+  approveAllBranchLoading: false,
+  loadingPendingCodes: false,
   visibleColumns: {
     "S.No": true,
     "Item Code": true,
     "Item Name": true,
     Category: false,
     Subcategory: false,
-    "Itemgroup": false,
-    "Opening Stock": true,
-    "Receiving Stock": true,
-    "Returned Stock": true,
-    "Dispatch Stock": true,
-    "WH-Return": true,
+    "Itemgroup": true,
+    "Opening": true,
+    "Receiving": true,
+    "Returned": true,
+    "Dispatch": true,
+    "WH Return": true,
     "Calc System": true,
-    SystemStock: true,
-
-    PhysicalStock: true,
+    "System": true,
+    "Physical": true,
     Variance: true,
-    "Status": false,
+    "Status": true,
     Action: true,
   },
 };
@@ -233,7 +273,7 @@ export const fetchWarehouses = createAsyncThunk(
   "purchaseItems/fetchWarehouses",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get<Warehouse[]>(`/warehouseinventory/warehouses`);
+      const response = await axios.get<Warehouse[]>(`${API_BASE_URL}/warehouseinventory/warehouses`);
       return response.data;
     } catch (error) {
       const err = error as AxiosError<{ detail: string }>;
@@ -245,9 +285,9 @@ export const fetchWarehouses = createAsyncThunk(
 // Fetch purchase items with dropdown search support
 export const fetchPurchaseItems = createAsyncThunk(
   "purchaseItems/fetchAll",
-  async (params: FetchPurchaseItemsParams, { rejectWithValue }) => {
+  async (params: FetchPurchaseItemsParams, { rejectWithValue, signal }) => {
     try {
-      const baseUrl = `/warehouseinventoryvariance/`
+      const baseUrl = `${API_BASE_URL}/warehouseinventoryvariance/`
       const queryParams = new URLSearchParams();
 
       Object.entries(params).forEach(([key, value]) => {
@@ -263,9 +303,12 @@ export const fetchPurchaseItems = createAsyncThunk(
       });
 
       const url = `${baseUrl}?${queryParams.toString()}`;
-      const response = await purchaseApi.get<PaginatedItemsResponse>(url);
+      const response = await axios.get<PaginatedItemsResponse>(url, { signal });
       return response.data;
     } catch (error) {
+      if (axios.isCancel(error) || (error as AxiosError).name === "CanceledError") {
+        throw error;
+      }
       const err = error as AxiosError<{ detail: string }>;
       return rejectWithValue(err.response?.data?.detail || "Failed to fetch purchase items");
     }
@@ -275,18 +318,22 @@ export const fetchPurchaseItems = createAsyncThunk(
 // Approve an item (PATCH /approve)
 export const approveItem = createAsyncThunk<
   { randomId: string; updatedItem: any },
-  { item_id: string; locationId: string; approved_by?: string; description?: string },
+  { item_id: string; locationId: string; approved_by?: string; description?: string; adjustmentMode?: "ADJUST_SYSTEM" | "KEEP_SYSTEM" },
   { rejectValue: string }
 >(
   "purchaseItems/approveItem",
   async (params, { rejectWithValue, dispatch }) => {
-    const { item_id, locationId, approved_by, description } = params;
+    const { item_id, locationId, approved_by, description, adjustmentMode } = params;
 
     try {
       // ✅ Ensure no trailing slash
-      const url = `/warehouseinventoryvariance/${item_id}/approve?locationId=${encodeURIComponent(locationId)}`;
+      const url = `${API_BASE_URL}/warehouseinventoryvariance/${item_id}/approve?locationId=${encodeURIComponent(locationId)}`;
 
-      const response = await purchaseApi.patch(url, { approved_by, description });
+      const response = await axios.patch(url, {
+        approved_by,
+        description,
+        adjustmentMode: adjustmentMode || "ADJUST_SYSTEM"
+      });
 
       dispatch(setSnackbarMessage(response.data.message));
       dispatch(setOpenSnackbar(true));
@@ -312,11 +359,13 @@ export const approveItem = createAsyncThunk<
 // Fetch approved items (GET /approved)
 export const fetchApprovedItems = createAsyncThunk<
   { items: ApprovedStockItem[]; total: number },
-  { page: number; limit: number; locationName?: string; date?: string },
+  // { page: number; limit: number; locationName?: string; date?: string },
+  // replace the line 11 8 1
+    { page: number; limit: number; locationName?: string; date?: string; status?: string; itemName?: string; approvedBy?: string; fromDate?: string; toDate?: string },
   { rejectValue: string }
 >("purchaseItems/fetchApprovedItems", async (params, { rejectWithValue }) => {
   try {
-    const res = await purchaseApi.get(`/warehouseinventoryvariance/approved`, { params });
+    const res = await axios.get(`${API_BASE_URL}/warehouseinventoryvariance/approved`, { params });
 
     return {
       items: res.data.data,
@@ -326,6 +375,79 @@ export const fetchApprovedItems = createAsyncThunk<
     return rejectWithValue("Failed to fetch approved items");
   }
 });
+
+export interface ApproveAllWarehouseBranchParams {
+  locationId: string;
+  queryDate?: string;
+  approved_by?: string;
+  description?: string;
+  adjustmentMode?: string;
+  varianceThresholdPct?: number;
+  varianceThresholdUnits?: number;
+  tenant_id?: string;
+}
+
+export interface ApproveAllWarehouseBranchResult {
+  success: boolean;
+  message: string;
+  approved: number;
+  autoVerified: number;
+  flagged: number;
+  failed: number;
+  skipped: number;
+  totalInClosing: number;
+  alreadyApproved: number;
+  flaggedItems?: any[];
+  failedItems?: any[];
+}
+
+export interface WarehousePendingCodesResult {
+  locationId: string;
+  itemCodes: string[];
+  total: number;
+  totalInClosing: number;
+  alreadyApproved: number;
+  closingDate?: string;
+}
+
+export const fetchWarehousePendingCodes = createAsyncThunk<
+  WarehousePendingCodesResult,
+  { locationId: string; queryDate?: string },
+  { rejectValue: string }
+>(
+  "purchaseItems/fetchWarehousePendingCodes",
+  async ({ locationId, queryDate }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/warehouseinventoryvariance/pending-codes`, {
+        params: { branch: locationId, queryDate },
+      });
+      return response.data;
+    } catch (error) {
+      const err = error as AxiosError<{ detail: string }>;
+      return rejectWithValue(err.response?.data?.detail || "Failed to fetch pending item codes");
+    }
+  }
+);
+
+export const approveAllWarehouseBranch = createAsyncThunk<
+  ApproveAllWarehouseBranchResult,
+  ApproveAllWarehouseBranchParams,
+  { rejectValue: string }
+>(
+  "purchaseItems/approveAllWarehouseBranch",
+  async (params, { rejectWithValue }) => {
+    try {
+      const { locationId, queryDate, ...body } = params;
+      const response = await axios.patch(`${API_BASE_URL}/warehouseinventoryvariance/approve/all`, body, {
+        params: { branch: locationId, queryDate },
+      });
+      return response.data;
+    } catch (error) {
+      const err = error as AxiosError<{ detail: string }>;
+      return rejectWithValue(err.response?.data?.detail || "Failed to approve all items for branch");
+    }
+  }
+);
 
 const purchaseItemSlice = createSlice({
   name: "purchaseItems",
@@ -449,18 +571,30 @@ const purchaseItemSlice = createSlice({
       .addCase(fetchPurchaseItems.fulfilled, (state, action) => {
         const payload = action.payload;
         const { skip = 0, limit = 0 } = action.meta.arg;
-
+        console.log(
+    "WAREHOUSE API RESPONSE",
+    payload.items?.find((i: any) => i.randomId === "PI001")
+  );
         // Handle main items only if limit > 0 and items exist
         if (limit > 0 && Array.isArray(payload.items)) {
           if (skip === 0) {
-            state.rawmaterialItems = payload.items;
+            // state.rawmaterialItems = payload.items;
+            // repalce the part 7 8 1
+            state.rawmaterialItems = payload.items.map((item: any) => ({
+              ...item,
+              PhysicalStock: item.PhysicalStock ?? item.physicalStock,
+              SystemStock: item.SystemStock ?? item.systemStock,
+            }));
             state.currentSkip = payload.items.length;
           } else {
+
             const newItems = payload.items.filter(
-              (newItem) => !state.rawmaterialItems.some(
-                (existing) => existing.itemCode === newItem.itemCode
-              )
+              (newItem) =>
+                !state.rawmaterialItems.some(
+                  (existing) => existing.randomId === newItem.randomId
+                )
             );
+
             state.rawmaterialItems = [...state.rawmaterialItems, ...newItems];
             state.currentSkip = state.rawmaterialItems.length;
           }
@@ -544,8 +678,6 @@ const purchaseItemSlice = createSlice({
         state.error = action.payload as string;
         state.hasMore = false;
       })
-
-      // Fetch Warehouses
       .addCase(fetchWarehouses.pending, (state) => {
         state.warehouseStatus = "loading";
       })
@@ -573,8 +705,8 @@ const purchaseItemSlice = createSlice({
           state.rawmaterialItems[index] = {
             ...state.rawmaterialItems[index],
             ...updatedItem,
-            approvalStatus: "Approved", // Optional: you can also rely on backend "status"
-            approvalButton: false,      // Hide approve button after approval
+            approvalStatus: "Approved",
+            approvalButton: false,
           };
         }
       })
@@ -582,9 +714,6 @@ const purchaseItemSlice = createSlice({
         state.status = "failed";
         state.error = action.payload as string;
       })
-
-
-      // Fetch Approved Items
       .addCase(fetchApprovedItems.pending, (state, action) => {
         const { page = 1, limit = 0 } = action.meta.arg;
         if (limit > 0 && page === 1) {
@@ -612,6 +741,24 @@ const purchaseItemSlice = createSlice({
         state.approvedItemsStatus = "failed";
         state.approvedItemsError = action.payload as string;
         state.isLoadingMore = false;
+      })
+      .addCase(approveAllWarehouseBranch.pending, (state) => {
+        state.approveAllBranchLoading = true;
+      })
+      .addCase(approveAllWarehouseBranch.fulfilled, (state) => {
+        state.approveAllBranchLoading = false;
+      })
+      .addCase(approveAllWarehouseBranch.rejected, (state) => {
+        state.approveAllBranchLoading = false;
+      })
+      .addCase(fetchWarehousePendingCodes.pending, (state) => {
+        state.loadingPendingCodes = true;
+      })
+      .addCase(fetchWarehousePendingCodes.fulfilled, (state) => {
+        state.loadingPendingCodes = false;
+      })
+      .addCase(fetchWarehousePendingCodes.rejected, (state) => {
+        state.loadingPendingCodes = false;
       });
   }
 });
@@ -620,6 +767,7 @@ export const {
   clearError,
   resetStatus,
   resetPurchaseItems,
+  resetDropdownPagesSelectively,
   resetApprovedItems,
   incrementDropdownPage,
   resetDropdownPages,

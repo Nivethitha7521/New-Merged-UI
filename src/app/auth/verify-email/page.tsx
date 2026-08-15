@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const BACKEND_BASE = 'http://127.0.0.1:8000/yenerpapi/public';
+const BACKEND_BASE = 'https://yenerp.com/purchasetestapi/public';
 
 
 function VerifyEmailContent() {

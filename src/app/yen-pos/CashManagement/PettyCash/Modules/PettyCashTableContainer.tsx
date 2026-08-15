@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Typography,
-  TextField,
   CircularProgress,IconButton,
   TextField,
   Typography,
@@ -122,34 +120,29 @@ export const PettyCashTable: React.FC<PettyCashTableProps> = ({
                 <td>{index + 1}</td>
                 <td>{cash.branches}</td>
                 <td>{cash.pettyCashId ? cash.pettyCash : '0'}</td>
-                <td className="item-master-actions-cell">
-                  <div>
-                   {isDeactivatedView ? (
-                      <IconButton
-                        onClick={() => onActivate(cash)}
-                        className="purchase-master-action-button is-activate"
-                        title="Activate"
-                        size="small"
-                       >
-                      
-
-                        <RestoreRoundedIcon />
-                      </IconButton>
-
-                      {/* {cash.pettyCashId && (
-                      <IconButton
-                        color="primary"
-                        onClick={() => onDeactivate(cash)}
-                        style={{ marginLeft: '10px' }}
-                      >
-                        <DeleteIcon/>
-                      </IconButton>
-                    )} */}
-                    </>
-                  )}
-                  )}
-                  </div>
-                </td>
+             <td className="item-master-actions-cell">
+  <div>
+    {isDeactivatedView ? (
+      <IconButton
+        onClick={() => onActivate(cash)}
+        className="purchase-master-action-button is-activate"
+        title="Activate"
+        size="small"
+      >
+        <RestoreRoundedIcon />
+      </IconButton>
+    ) : (
+      <IconButton
+        onClick={() => onEdit(cash)}
+        className="purchase-master-action-button is-edit"
+        title="Edit"
+        size="small"
+      >
+        <EditOutlinedIcon />
+      </IconButton>
+    )}
+  </div>
+</td>
               </tr>
             ))}
 
@@ -167,3 +160,4 @@ export const PettyCashTable: React.FC<PettyCashTableProps> = ({
 
     // </Box >
   );
+};

@@ -100,6 +100,8 @@ const OrderTypeDialog: React.FC<OrderTypeDialogProps> = ({
     <Dialog
       open={open}
       onClose={handleClose}
+      className="item-lookup-form-dialog"
+     
       maxWidth="sm"
       fullWidth
       PaperProps={{

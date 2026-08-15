@@ -122,6 +122,7 @@ const InventoryDialog: React.FC<InventoryDialogProps> = ({
     <Dialog
       open={open}
       onClose={handleClose}
+      className="item-lookup-form-dialog"
       maxWidth="sm"
       fullWidth
       PaperProps={DIALOG_PAPER_PROPS}
