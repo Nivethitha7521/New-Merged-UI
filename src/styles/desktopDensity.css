@@ -1,0 +1,1225 @@
+/*
+ * YEN ERP desktop density system
+ * --------------------------------
+ * The original desktop UI was tuned while the browser was at 50% zoom.
+ * Most dimensions were fixed pixels, so returning to 100% doubled the
+ * apparent size and also activated tablet breakpoints.
+ *
+ * One fluid unit now drives the desktop shell and shared Purchase UI:
+ *   0.416667vw = 4px in a 960 CSS-pixel viewport
+ *              = 8px in a 1920 CSS-pixel viewport
+ *
+ * The physical result therefore remains visually stable when browser zoom
+ * changes the number of CSS pixels available to the same desktop window.
+ * Mobile keeps the existing responsive rules below 560px.
+ */
+
+@media (min-width: 561px) {
+  :root {
+    --erp-ui: clamp(0.15rem, 0.4375vw, 1rem);
+    --erp-control-height: calc(var(--erp-ui) * 5);
+    --erp-page-gutter: calc(var(--erp-ui) * 4.25);
+    --erp-section-gap: calc(var(--erp-ui) * 2.25);
+    --erp-compact-radius: calc(var(--erp-ui) * 1.5);
+  }
+
+  /* -------------------------------------------------------
+     Application shell
+     ------------------------------------------------------- */
+
+  .erp-navbar {
+    height: calc(var(--erp-ui) * 8) !important;
+    min-height: calc(var(--erp-ui) * 8) !important;
+    flex: 0 0 calc(var(--erp-ui) * 8) !important;
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto
+      minmax(0, 1fr) !important;
+    padding-inline: calc(var(--erp-ui) * 2.75) !important;
+  }
+
+  .erp-navbar-left,
+  .erp-breadcrumbs {
+    gap: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-breadcrumb-item,
+  .erp-breadcrumb-current {
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-breadcrumb-separator {
+    font-size: calc(var(--erp-ui) * 1.75) !important;
+  }
+
+  .erp-navbar-company {
+    position: static !important;
+    left: auto !important;
+    min-width: calc(var(--erp-ui) * 22.5) !important;
+    max-width: min(50vw, calc(var(--erp-ui) * 60)) !important;
+    padding-inline: calc(var(--erp-ui) * 2.75) !important;
+    display: flex !important;
+    transform: none !important;
+  }
+
+  .erp-navbar-company-name {
+    font-size: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-navbar-right {
+    gap: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+ .erp-navbar-business-logo {
+  width: calc(var(--erp-ui) * 6.25) !important;
+  min-width: calc(var(--erp-ui) * 6.25) !important;
+  height: calc(var(--erp-ui) * 6.25) !important;
+  flex: 0 0 calc(var(--erp-ui) * 6.25) !important;
+
+  border-radius: var(--erp-compact-radius) !important;
+
+  font-size: calc(var(--erp-ui) * 2) !important;
+}
+
+  .erp-navbar-logout-button {
+    min-width: calc(var(--erp-ui) * 11.75) !important;
+    height: calc(var(--erp-ui) * 4.75) !important;
+    gap: var(--erp-ui) !important;
+    padding-inline: calc(var(--erp-ui) * 1.75) !important;
+    border-radius: var(--erp-compact-radius) !important;
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-navbar-logout-button svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-navbar-logout-button span,
+  .erp-breadcrumb-item,
+  .erp-breadcrumb-separator {
+    display: inline !important;
+  }
+
+  .erp-page-viewport {
+    padding: calc(var(--erp-ui) * 3.5) var(--erp-page-gutter)
+      calc(var(--erp-ui) * 5) !important;
+  }
+
+  .erp-purchase-viewport {
+    --purchase-control-height: var(--erp-control-height);
+    --purchase-gap: calc(var(--erp-ui) * 1.5);
+
+    padding: calc(var(--erp-ui) * 2.5) var(--erp-page-gutter)
+      calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  /* -------------------------------------------------------
+     Main sidebar
+     ------------------------------------------------------- */
+
+  .erp-sidebar {
+    flex-basis: calc(var(--erp-ui) * 12) !important;
+    width: calc(var(--erp-ui) * 12) !important;
+  }
+
+  .erp-sidebar.is-expanded {
+    flex-basis: calc(var(--erp-ui) * 31) !important;
+    width: calc(var(--erp-ui) * 31) !important;
+  }
+
+  .erp-sidebar .erp-sidebar-paper {
+    width: calc(var(--erp-ui) * 12) !important;
+    border-radius: 0 0 calc(var(--erp-ui) * 2.5) 0 !important;
+  }
+
+  .erp-sidebar.is-expanded .erp-sidebar-paper {
+    width: calc(var(--erp-ui) * 31) !important;
+  }
+
+  .erp-sidebar-toggle {
+    top: calc(var(--erp-ui) * 8) !important;
+    right: calc(var(--erp-ui) * -1.875) !important;
+    width: calc(var(--erp-ui) * 3.75) !important;
+    min-width: calc(var(--erp-ui) * 3.75) !important;
+    height: calc(var(--erp-ui) * 3.75) !important;
+  }
+
+  .erp-sidebar-toggle svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-sidebar-brand {
+    height: calc(var(--erp-ui) * 8) !important;
+    min-height: calc(var(--erp-ui) * 8) !important;
+    padding: var(--erp-ui) !important;
+  }
+
+  .erp-sidebar.is-collapsed .erp-sidebar-brand {
+    min-height: calc(var(--erp-ui) * 11.5) !important;
+    padding: calc(var(--erp-ui) * 1.25) var(--erp-ui) !important;
+  }
+
+.erp-brand-mark,
+.erp-sidebar.is-collapsed .erp-brand-mark {
+  width: calc(var(--erp-ui) * 6.25) !important;
+  min-width: calc(var(--erp-ui) * 6.25) !important;
+  height: calc(var(--erp-ui) * 6.25) !important;
+  padding: calc(var(--erp-ui) * 0.25) !important;
+  border-radius: var(--erp-compact-radius) !important;
+}
+
+  .erp-brand-title {
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-sidebar-scroll,
+  .erp-sidebar.is-collapsed .erp-sidebar-scroll {
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 0.625)
+      calc(var(--erp-ui) * 1.75) !important;
+  }
+
+  .erp-sidebar-section {
+    padding: 0 calc(var(--erp-ui) * 1.125) var(--erp-ui) !important;
+    font-size: var(--erp-ui) !important;
+  }
+
+  .erp-sidebar-system {
+    margin-top: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-sidebar-item,
+  .erp-sidebar.is-collapsed .erp-sidebar-item {
+    width: calc(var(--erp-ui) * 9.5) !important;
+    min-width: calc(var(--erp-ui) * 9.5) !important;
+    max-width: calc(var(--erp-ui) * 9.5) !important;
+    min-height: calc(var(--erp-ui) * 7.5) !important;
+    margin: calc(var(--erp-ui) * 0.375) auto !important;
+    padding: calc(var(--erp-ui) * 0.875) calc(var(--erp-ui) * 0.375)
+      calc(var(--erp-ui) * 0.75) !important;
+    gap: calc(var(--erp-ui) * 0.625) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-sidebar.is-expanded .erp-sidebar-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: calc(var(--erp-ui) * 5.375) !important;
+    padding-inline: calc(var(--erp-ui) * 1.75) !important;
+  }
+
+  .erp-sidebar-icon,
+  .erp-sidebar.is-collapsed .erp-sidebar-icon {
+    width: calc(var(--erp-ui) * 3) !important;
+    min-width: calc(var(--erp-ui) * 3) !important;
+    height: calc(var(--erp-ui) * 2.75) !important;
+  }
+
+  .erp-sidebar-icon svg,
+  .erp-sidebar.is-collapsed .erp-sidebar-icon svg {
+    width: calc(var(--erp-ui) * 2.375) !important;
+    height: calc(var(--erp-ui) * 2.375) !important;
+    font-size: calc(var(--erp-ui) * 2.375) !important;
+  }
+
+  .erp-sidebar-label {
+    margin-left: calc(var(--erp-ui) * 1.25) !important;
+    font-size: calc(var(--erp-ui) * 1.5625) !important;
+  }
+
+  .erp-sidebar-icon-label {
+    font-size: calc(var(--erp-ui) * 0.9375) !important;
+  }
+
+  .erp-sidebar-footer,
+  .erp-sidebar.is-collapsed .erp-sidebar-footer {
+    min-height: calc(var(--erp-ui) * 7.75) !important;
+    gap: calc(var(--erp-ui) * 0.5) !important;
+    padding: calc(var(--erp-ui) * 0.75) calc(var(--erp-ui) * 0.25) !important;
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-sidebar-footer svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    min-width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-sidebar-footer-mini-label {
+    font-size: calc(var(--erp-ui) * 0.875) !important;
+  }
+
+  /* -------------------------------------------------------
+     Purchase module sidebar
+     ------------------------------------------------------- */
+
+  .purchase-module-sidebar,
+  .purchase-module-sidebar.is-collapsed {
+    position: relative !important;
+    inset: auto !important;
+    width: calc(var(--erp-ui) * 9.5) !important;
+    min-width: calc(var(--erp-ui) * 9.5) !important;
+    height: calc(100vh - (var(--erp-ui) * 8)) !important;
+    box-shadow: none;
+  }
+
+  .purchase-module-sidebar.is-expanded {
+    width: calc(var(--erp-ui) * 28.5) !important;
+    min-width: calc(var(--erp-ui) * 28.5) !important;
+  }
+
+  .purchase-module-sidebar-header {
+    min-height: calc(var(--erp-ui) * 10.25) !important;
+    padding: calc(var(--erp-ui) * 1.75) calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .purchase-module-sidebar.is-expanded .purchase-module-sidebar-header {
+    min-height: calc(var(--erp-ui) * 13.125) !important;
+    padding: calc(var(--erp-ui) * 2.5) calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .purchase-module-brand {
+    gap: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+  .purchase-module-logo {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: var(--erp-compact-radius) !important;
+  }
+
+  .purchase-module-logo svg {
+    font-size: calc(var(--erp-ui) * 2.625) !important;
+  }
+
+  .purchase-module-brand-content.is-visible {
+    max-width: calc(var(--erp-ui) * 18.125) !important;
+  }
+
+  .purchase-module-sidebar-caption {
+    margin-bottom: calc(var(--erp-ui) * 0.5) !important;
+    font-size: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .purchase-module-sidebar-title {
+    font-size: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .purchase-module-sidebar-description {
+    margin-top: calc(var(--erp-ui) * 0.375) !important;
+    font-size: calc(var(--erp-ui) * 1.3125) !important;
+  }
+
+  .purchase-module-toggle {
+    right: calc(var(--erp-ui) * -1.75) !important;
+    width: calc(var(--erp-ui) * 3.5) !important;
+    min-width: calc(var(--erp-ui) * 3.5) !important;
+    height: calc(var(--erp-ui) * 3.5) !important;
+  }
+
+  .purchase-module-toggle svg {
+    font-size: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .purchase-module-list {
+    padding: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .purchase-module-item {
+    min-height: calc(var(--erp-ui) * 6) !important;
+    margin-bottom: calc(var(--erp-ui) * 0.75) !important;
+    border-radius: var(--erp-compact-radius) !important;
+  }
+
+  .purchase-module-sidebar.is-expanded .purchase-module-item {
+    padding-inline: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .purchase-module-icon {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  .purchase-module-icon svg {
+    font-size: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .purchase-module-label-wrapper.is-visible {
+    max-width: calc(var(--erp-ui) * 18.75) !important;
+  }
+
+  .purchase-module-label {
+    font-size: calc(var(--erp-ui) * 1.5625) !important;
+  }
+
+  /* -------------------------------------------------------
+     Shared desktop controls
+     ------------------------------------------------------- */
+
+  .erp-app-shell .MuiTypography-root {
+    font-size: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+  .erp-app-shell h1,
+  .erp-app-shell .MuiTypography-h1 {
+    font-size: calc(var(--erp-ui) * 3.75) !important;
+  }
+
+  .erp-app-shell h2,
+  .erp-app-shell .MuiTypography-h2 {
+    font-size: calc(var(--erp-ui) * 3.125) !important;
+  }
+
+  .erp-app-shell h3,
+  .erp-app-shell .MuiTypography-h3,
+  .erp-app-shell .MuiTypography-h4,
+  .erp-app-shell .MuiTypography-h5 {
+    font-size: calc(var(--erp-ui) * 2.375) !important;
+  }
+
+  .erp-app-shell .MuiButton-root {
+    min-height: var(--erp-control-height) !important;
+    padding: var(--erp-ui) calc(var(--erp-ui) * 2) !important;
+    border-radius: var(--erp-compact-radius) !important;
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-app-shell .MuiIconButton-root {
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-app-shell .MuiOutlinedInput-root,
+  .erp-app-shell .MuiInputBase-root.MuiOutlinedInput-root {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-app-shell .MuiInputBase-input,
+  .erp-app-shell .MuiOutlinedInput-input {
+    min-height: calc(var(--erp-ui) * 2.5) !important;
+    padding: calc(var(--erp-ui) * 1.25) calc(var(--erp-ui) * 1.625) !important;
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+    line-height: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-app-shell input::placeholder {
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-app-shell .MuiFormLabel-root {
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-app-shell .MuiTabs-root {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  .erp-app-shell .MuiTabs-flexContainer {
+    gap: var(--erp-ui) !important;
+  }
+
+  .erp-app-shell .MuiTab-root {
+    min-height: calc(var(--erp-ui) * 4.5) !important;
+    padding: var(--erp-ui) calc(var(--erp-ui) * 1.875) !important;
+    border-radius: calc(var(--erp-ui) * 1.375) !important;
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-app-shell .MuiCard-root,
+  .erp-app-shell .card,
+  .erp-app-shell .dashboard-card,
+  .erp-app-shell .summary-card,
+  .erp-app-shell .content-card,
+  .erp-app-shell .table-container {
+    border-radius: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-app-shell .MuiCardContent-root {
+    padding: calc(var(--erp-ui) * 2.25) calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-app-shell .MuiTableContainer-root {
+    border-radius: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-app-shell .MuiTableCell-head {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 1.375) calc(var(--erp-ui) * 2) !important;
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-app-shell .MuiTableCell-body {
+    min-height: calc(var(--erp-ui) * 7.25) !important;
+    padding: calc(var(--erp-ui) * 1.75) calc(var(--erp-ui) * 2) !important;
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-app-shell .MuiChip-root {
+    height: calc(var(--erp-ui) * 3.125) !important;
+    font-size: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+  .erp-app-shell .MuiPaginationItem-root {
+    min-width: calc(var(--erp-ui) * 4) !important;
+    height: calc(var(--erp-ui) * 4) !important;
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-app-shell .MuiTablePagination-toolbar {
+    min-height: calc(var(--erp-ui) * 6.75) !important;
+  }
+
+  /* -------------------------------------------------------
+     Purchase tabs, toolbar and cards
+     ------------------------------------------------------- */
+
+  .erp-purchase-viewport .purchase-submodule-tabs {
+    flex-wrap: nowrap !important;
+    gap: var(--erp-ui) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.25) !important;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .erp-purchase-viewport .purchase-submodule-tab {
+    flex: 0 0 auto;
+    min-height: calc(var(--erp-ui) * 5) !important;
+    height: calc(var(--erp-ui) * 5) !important;
+    padding: calc(var(--erp-ui) * 0.75) calc(var(--erp-ui) * 1.875) !important;
+    border-radius: calc(var(--erp-ui) * 1.375) !important;
+    font-size: calc(var(--erp-ui) * 1.4375) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-toolbar-shell,
+  .erp-purchase-viewport .purchase-reference-toolbar-section {
+    margin-top: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-toolbar {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: calc(var(--erp-ui) * 2.25) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search {
+    width: min(calc(var(--erp-ui) * 51), 100%) !important;
+    flex: 0 1 calc(var(--erp-ui) * 51) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search .MuiOutlinedInput-root {
+    min-height: calc(var(--erp-ui) * 5) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search-icon {
+    margin-left: calc(var(--erp-ui) * 1.5) !important;
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-actions {
+    flex: 0 0 auto;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-action-button {
+    min-height: calc(var(--erp-ui) * 4.75) !important;
+    padding: var(--erp-ui) calc(var(--erp-ui) * 1.875) !important;
+    border-radius: var(--erp-compact-radius) !important;
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-action-button svg {
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-active-toggle {
+    min-height: calc(var(--erp-ui) * 4.75) !important;
+    padding: 0 calc(var(--erp-ui) * 1.25) 0 calc(var(--erp-ui) * 1.875) !important;
+    gap: var(--erp-ui) !important;
+    border-radius: var(--erp-compact-radius) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-active-toggle .MuiTypography-root {
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-purchase-viewport .MuiSwitch-root {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 3) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+  }
+
+  .erp-purchase-viewport .MuiSwitch-switchBase {
+    padding: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-purchase-viewport .MuiSwitch-thumb {
+    width: calc(var(--erp-ui) * 1.75) !important;
+    height: calc(var(--erp-ui) * 1.75) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: calc(var(--erp-ui) * 1.75) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.75) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-card {
+    min-height: calc(var(--erp-ui) * 11.75) !important;
+    padding: calc(var(--erp-ui) * 2.25) calc(var(--erp-ui) * 2.375) !important;
+    gap: calc(var(--erp-ui) * 2) !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-label {
+    font-size: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-value {
+    margin-top: calc(var(--erp-ui) * 0.875) !important;
+    font-size: calc(var(--erp-ui) * 3.375) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-icon {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-icon svg {
+    width: calc(var(--erp-ui) * 2.375) !important;
+    height: calc(var(--erp-ui) * 2.375) !important;
+    font-size: calc(var(--erp-ui) * 2.375) !important;
+  }
+
+  /* -------------------------------------------------------
+     Purchase tables
+     ------------------------------------------------------- */
+
+  .erp-purchase-viewport .purchase-reference-table,
+  .erp-purchase-viewport .purchase-master-table {
+    max-height: calc(100vh - (var(--erp-ui) * 45)) !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-table .MuiTable-root,
+  .erp-purchase-viewport .purchase-master-table .MuiTable-root,
+  .erp-purchase-viewport .purchase-native-table {
+    min-width: calc(var(--erp-ui) * 84) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-table .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-master-table .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-native-table thead th {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 1.375) calc(var(--erp-ui) * 2.5) !important;
+    font-size: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-table .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-master-table .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-native-table tbody td {
+    height: calc(var(--erp-ui) * 7.5) !important;
+    min-height: calc(var(--erp-ui) * 7.5) !important;
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 2.5) !important;
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-id-pill,
+  .erp-purchase-viewport .purchase-master-id-pill,
+  .erp-purchase-viewport .purchase-master-value-pill,
+  .erp-purchase-viewport .purchase-reference-value-pill {
+    min-height: calc(var(--erp-ui) * 2.875) !important;
+    padding: calc(var(--erp-ui) * 0.375) calc(var(--erp-ui) * 1.125) !important;
+    border-radius: var(--erp-ui) !important;
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-name-cell,
+  .erp-purchase-viewport .purchase-master-name-cell {
+    gap: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-avatar,
+  .erp-purchase-viewport .purchase-master-avatar {
+    width: calc(var(--erp-ui) * 3.75) !important;
+    min-width: calc(var(--erp-ui) * 3.75) !important;
+    height: calc(var(--erp-ui) * 3.75) !important;
+    border-radius: calc(var(--erp-ui) * 1.25) !important;
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-status-pill,
+  .erp-purchase-viewport .purchase-master-status-pill {
+    min-height: calc(var(--erp-ui) * 2.875) !important;
+    padding: calc(var(--erp-ui) * 0.375) calc(var(--erp-ui) * 1.25) !important;
+    gap: calc(var(--erp-ui) * 0.75) !important;
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-status-pill > span,
+  .erp-purchase-viewport .purchase-master-status-pill::before {
+    width: calc(var(--erp-ui) * 0.625) !important;
+    min-width: calc(var(--erp-ui) * 0.625) !important;
+    height: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-view-pill,
+  .erp-purchase-viewport .purchase-master-view-pill {
+    min-height: calc(var(--erp-ui) * 3) !important;
+    height: calc(var(--erp-ui) * 3) !important;
+    padding: calc(var(--erp-ui) * 0.375) calc(var(--erp-ui) * 1.25) !important;
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root,
+  .erp-purchase-viewport .purchase-reference-table .MuiIconButton-root,
+  .erp-purchase-viewport .purchase-master-table .MuiIconButton-root,
+  .erp-purchase-viewport .purchase-master-action-button {
+    width: calc(var(--erp-ui) * 4) !important;
+    min-width: calc(var(--erp-ui) * 4) !important;
+    height: calc(var(--erp-ui) * 4) !important;
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-purchase-viewport .MuiTableCell-body .MuiIconButton-root svg,
+  .erp-purchase-viewport .purchase-reference-table .MuiIconButton-root svg,
+  .erp-purchase-viewport .purchase-master-table .MuiIconButton-root svg,
+  .erp-purchase-viewport .purchase-master-action-button svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  /* MUI overlays are portalled outside .erp-app-shell. */
+  body .MuiDialog-paper {
+    border-radius: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  body .MuiDialogTitle-root {
+    padding: calc(var(--erp-ui) * 2.5) calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 1.5) !important;
+    font-size: calc(var(--erp-ui) * 2.375) !important;
+  }
+
+  body .MuiDialogContent-root {
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  body .MuiDialogActions-root {
+    padding: calc(var(--erp-ui) * 1.75) calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  body .MuiMenu-paper,
+  body .MuiPopover-paper {
+    border-radius: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  body .MuiMenuItem-root {
+    min-height: calc(var(--erp-ui) * 4.75) !important;
+    padding: var(--erp-ui) calc(var(--erp-ui) * 1.625) !important;
+    border-radius: var(--erp-ui) !important;
+    margin: calc(var(--erp-ui) * 0.25) calc(var(--erp-ui) * 0.625) !important;
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  body .MuiTooltip-tooltip {
+    border-radius: calc(var(--erp-ui) * 0.875) !important;
+    font-size: calc(var(--erp-ui) * 1.375) !important;
+  }
+}
+
+/* Real narrow screens retain an intentional stacked layout. */
+@media (max-width: 560px) {
+  .erp-purchase-viewport .purchase-reference-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search {
+    width: 100% !important;
+    flex-basis: auto;
+  }
+
+  .erp-purchase-viewport .purchase-reference-actions {
+    justify-content: flex-start;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Readability and control balance — desktop density v2
+   Keeps the compact layout while making text and controls
+   slightly larger and visually proportional at 100% zoom.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* General text readability */
+  .erp-app-shell .MuiTypography-root {
+    font-size: calc(var(--erp-ui) * 1.5) !important;
+    line-height: 1.35 !important;
+  }
+
+  .erp-breadcrumb-item,
+  .erp-breadcrumb-current {
+    font-size: calc(var(--erp-ui) * 1.6) !important;
+  }
+
+  .erp-navbar-company-name {
+    font-size: calc(var(--erp-ui) * 1.95) !important;
+  }
+
+  .erp-sidebar-icon-label {
+    font-size: calc(var(--erp-ui) * 1.025) !important;
+    line-height: 1.12 !important;
+  }
+
+  .erp-sidebar-label,
+  .purchase-module-label {
+    font-size: calc(var(--erp-ui) * 1.65) !important;
+  }
+
+  /* Tabs */
+  .erp-purchase-viewport .purchase-submodule-tab {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding-inline: calc(var(--erp-ui) * 1.8) !important;
+    font-size: calc(var(--erp-ui) * 1.55) !important;
+    line-height: 1.15 !important;
+  }
+
+  /* Search field */
+  .erp-purchase-viewport .purchase-reference-search .MuiOutlinedInput-root {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search .MuiInputBase-input,
+  .erp-purchase-viewport .purchase-reference-search .MuiOutlinedInput-input,
+  .erp-purchase-viewport .purchase-reference-search input::placeholder {
+    font-size: calc(var(--erp-ui) * 1.7) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-search-icon {
+    font-size: calc(var(--erp-ui) * 2.2) !important;
+  }
+
+  /* Add New / Import / Export */
+  .erp-purchase-viewport .purchase-reference-action-button {
+    min-width: calc(var(--erp-ui) * 13.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+
+    border-width: 1px !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+
+    font-size: calc(var(--erp-ui) * 1.65) !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
+
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.06),
+      0 0 0 1px rgba(var(--erp-accent-rgb), 0.08) !important;
+  }
+
+  .erp-purchase-viewport
+    .purchase-reference-action-button
+    .MuiButton-startIcon {
+    margin-left: 0 !important;
+    margin-right: calc(var(--erp-ui) * 0.8) !important;
+  }
+
+  .erp-purchase-viewport
+    .purchase-reference-action-button
+    .MuiButton-startIcon
+    svg,
+  .erp-purchase-viewport .purchase-reference-action-button > svg {
+    width: calc(var(--erp-ui) * 2.15) !important;
+    height: calc(var(--erp-ui) * 2.15) !important;
+    font-size: calc(var(--erp-ui) * 2.15) !important;
+  }
+
+  /* Show Active Only toggle */
+  .erp-purchase-viewport .purchase-reference-active-toggle {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.15) 0 calc(var(--erp-ui) * 1.65) !important;
+    gap: calc(var(--erp-ui) * 0.9) !important;
+
+    border-width: 1px !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-active-toggle .MuiTypography-root {
+    font-size: calc(var(--erp-ui) * 1.6) !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-active-toggle .MuiSwitch-root {
+    width: calc(var(--erp-ui) * 5.75) !important;
+    height: calc(var(--erp-ui) * 3.25) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+  }
+
+  .erp-purchase-viewport
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase {
+    padding: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-active-toggle .MuiSwitch-thumb {
+    width: calc(var(--erp-ui) * 1.875) !important;
+    height: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-purchase-viewport
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase.Mui-checked {
+    transform: translateX(calc(var(--erp-ui) * 2.375)) !important;
+  }
+
+  /* Summary cards */
+  .erp-purchase-viewport .purchase-reference-summary-label {
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-value {
+    font-size: calc(var(--erp-ui) * 3.5) !important;
+  }
+
+  /* Tables */
+  .erp-purchase-viewport .purchase-reference-table .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-master-table .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-native-table thead th {
+    font-size: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-table .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-master-table .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-native-table tbody td {
+    height: calc(var(--erp-ui) * 7.75) !important;
+    min-height: calc(var(--erp-ui) * 7.75) !important;
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-id-pill,
+  .erp-purchase-viewport .purchase-master-id-pill,
+  .erp-purchase-viewport .purchase-reference-value-pill,
+  .erp-purchase-viewport .purchase-master-value-pill,
+  .erp-purchase-viewport .purchase-reference-status-pill,
+  .erp-purchase-viewport .purchase-master-status-pill,
+  .erp-purchase-viewport .purchase-reference-view-pill,
+  .erp-purchase-viewport .purchase-master-view-pill {
+    font-size: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-name-cell,
+  .erp-purchase-viewport .purchase-master-name-cell {
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+}
+
+/* =========================================================
+   Typography-only display scaling — desktop density v5
+   Small = current/base, Medium = +8%, Large = +16%.
+   No widths, heights, spacing, alignment or behavior change.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* Shared application text */
+  .erp-app-shell .MuiTypography-root {
+    font-size: calc(var(--erp-ui) * 1.78 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell h1:not(.MuiTypography-root) {
+    font-size: calc(var(--erp-ui) * 3.75 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell h2:not(.MuiTypography-root) {
+    font-size: calc(var(--erp-ui) * 3.125 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell h3:not(.MuiTypography-root),
+  .erp-app-shell h4:not(.MuiTypography-root),
+  .erp-app-shell h5:not(.MuiTypography-root) {
+    font-size: calc(var(--erp-ui) * 2.375 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell .MuiButton-root {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell .MuiTab-root {
+    font-size: calc(var(--erp-ui) * 1.625 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell .MuiInputBase-input,
+  .erp-app-shell .MuiOutlinedInput-input,
+  .erp-app-shell input::placeholder,
+  .erp-app-shell .MuiFormLabel-root {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  /* Navbar and sidebars */
+  .erp-breadcrumb-item,
+  .erp-breadcrumb-current {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-breadcrumb-separator {
+    font-size: calc(var(--erp-ui) * 1.75 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-navbar-company-name {
+    font-size: calc(var(--erp-ui) * 2.2 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-navbar-logout-button {
+    font-size: calc(var(--erp-ui) * 1.8 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-brand-title {
+    font-size: calc(var(--erp-ui) * 1.625 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-sidebar-icon-label {
+    font-size: calc(var(--erp-ui) * 1.34 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-sidebar-label,
+  .purchase-module-label {
+    font-size: calc(var(--erp-ui) * 1.92 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-sidebar-section,
+  .purchase-module-sidebar-caption {
+    font-size: calc(var(--erp-ui) * 1.32 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-sidebar-footer,
+  .erp-sidebar-footer-mini-label {
+    font-size: calc(var(--erp-ui) * 1.22 * var(--erp-type-scale)) !important;
+  }
+
+  .purchase-module-sidebar-title {
+    font-size: calc(var(--erp-ui) * 2 * var(--erp-type-scale)) !important;
+  }
+
+  .purchase-module-sidebar-description {
+    font-size: calc(var(--erp-ui) * 1.3125 * var(--erp-type-scale)) !important;
+  }
+
+  /* Purchase tabs */
+  .erp-purchase-viewport .purchase-submodule-tab {
+    font-size: calc(var(--erp-ui) * 1.84 * var(--erp-type-scale)) !important;
+  }
+
+  /* Search field */
+  .erp-purchase-viewport .purchase-reference-search .MuiInputBase-input,
+  .erp-purchase-viewport .purchase-reference-search .MuiOutlinedInput-input,
+  .erp-purchase-viewport .purchase-reference-search input::placeholder {
+    font-size: calc(var(--erp-ui) * 2 * var(--erp-type-scale)) !important;
+  }
+
+  /* Add New / Import / Export — font only */
+  .erp-purchase-viewport .purchase-reference-action-button {
+    font-size: calc(var(--erp-ui) * 1.94 * var(--erp-type-scale)) !important;
+  }
+
+  /* Show Active Only — label only */
+  .erp-purchase-viewport .purchase-reference-active-toggle .MuiTypography-root {
+    font-size: calc(var(--erp-ui) * 1.88 * var(--erp-type-scale)) !important;
+  }
+
+  /* Summary cards */
+  .erp-purchase-viewport .purchase-reference-summary-label {
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-summary-value {
+    font-size: calc(var(--erp-ui) * 3.5 * var(--erp-type-scale)) !important;
+  }
+
+  /* Generic tables */
+  .erp-app-shell .MuiTableCell-head {
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell .MuiTableCell-body {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  /* Purchase tables */
+  .erp-purchase-viewport .purchase-reference-table .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-master-table .MuiTableCell-head,
+  .erp-purchase-viewport .purchase-native-table thead th {
+    font-size: calc(var(--erp-ui) * 1.52 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-table .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-master-table .MuiTableCell-body,
+  .erp-purchase-viewport .purchase-native-table tbody td {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-name-cell,
+  .erp-purchase-viewport .purchase-master-name-cell {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-avatar,
+  .erp-purchase-viewport .purchase-master-avatar {
+    font-size: calc(var(--erp-ui) * 1.25 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-purchase-viewport .purchase-reference-id-pill,
+  .erp-purchase-viewport .purchase-master-id-pill,
+  .erp-purchase-viewport .purchase-reference-value-pill,
+  .erp-purchase-viewport .purchase-master-value-pill,
+  .erp-purchase-viewport .purchase-reference-status-pill,
+  .erp-purchase-viewport .purchase-master-status-pill,
+  .erp-purchase-viewport .purchase-reference-view-pill,
+  .erp-purchase-viewport .purchase-master-view-pill {
+    font-size: calc(var(--erp-ui) * 1.62 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell .MuiChip-root {
+    font-size: calc(var(--erp-ui) * 1.65 * var(--erp-type-scale)) !important;
+  }
+
+  .erp-app-shell .MuiPaginationItem-root {
+    font-size: calc(var(--erp-ui) * 1.8 * var(--erp-type-scale)) !important;
+  }
+
+  /* Portalled text */
+  body .MuiDialog-root .MuiTypography-root:not(.MuiDialogTitle-root),
+  body .MuiSnackbar-root .MuiAlert-message {
+    font-size: calc(var(--erp-ui) * 1.78 * var(--erp-type-scale)) !important;
+  }
+
+  body .MuiDialog-root .MuiButton-root,
+  body .MuiDialog-root .MuiInputBase-input,
+  body .MuiDialog-root .MuiOutlinedInput-input,
+  body .MuiDialog-root input::placeholder,
+  body .MuiDialog-root .MuiFormLabel-root {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  body .MuiDialog-root .MuiTableCell-head {
+    font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale)) !important;
+  }
+
+  body .MuiDialog-root .MuiTableCell-body {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  body .MuiDialogTitle-root {
+    font-size: calc(var(--erp-ui) * 2.7 * var(--erp-type-scale)) !important;
+  }
+
+  body .MuiMenuItem-root {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  body .MuiTooltip-tooltip {
+    font-size: calc(var(--erp-ui) * 1.65 * var(--erp-type-scale)) !important;
+  }
+}
+
+/* =========================================================
+   Table typography display scaling — desktop density v6
+   High-specificity font overrides for every shared table type.
+   No row heights, widths, padding, spacing or behavior changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* Table headers: MUI, native HTML, DataGrid, AG Grid, Ant and Prime. */
+  html[data-erp-font-size] .erp-app-shell .MuiTableCell-head,
+  html[data-erp-font-size] .erp-app-shell table thead th,
+  html[data-erp-font-size] .erp-app-shell .MuiDataGrid-columnHeaderTitle,
+  html[data-erp-font-size] .erp-app-shell .ag-header-cell-text,
+  html[data-erp-font-size] .erp-app-shell .ant-table-thead > tr > th,
+  html[data-erp-font-size] .erp-app-shell .p-datatable-thead > tr > th,
+  html[data-erp-font-size] .erp-app-shell .p-column-title {
+    font-size: calc(var(--erp-ui) * 1.52 * var(--erp-type-scale)) !important;
+  }
+
+  /* Table rows and cell values. */
+  html[data-erp-font-size] .erp-app-shell .MuiTableCell-body,
+  html[data-erp-font-size] .erp-app-shell table tbody td,
+  html[data-erp-font-size] .erp-app-shell .MuiDataGrid-cell,
+  html[data-erp-font-size] .erp-app-shell .MuiDataGrid-cellContent,
+  html[data-erp-font-size] .erp-app-shell .ag-cell,
+  html[data-erp-font-size] .erp-app-shell .ag-cell-value,
+  html[data-erp-font-size] .erp-app-shell .ant-table-tbody > tr > td,
+  html[data-erp-font-size] .erp-app-shell .p-datatable-tbody > tr > td {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+
+  /*
+   * Text components nested inside cells must inherit the scaled cell size.
+   * Pill/avatar containers retain their dedicated scaled sizes from v5.
+   */
+  html[data-erp-font-size]
+    .erp-app-shell
+    .MuiTableCell-root
+    :where(.MuiTypography-root, div, span, p, a, strong, b, em, small, code, button):not([class*='pill']):not([class*='avatar']):not([class*='Icon']):not([class*='icon']):not(.MuiChip-root):not(.MuiIconButton-root),
+  html[data-erp-font-size]
+    .erp-app-shell
+    table
+    :where(th, td)
+    :where(.MuiTypography-root, div, span, p, a, strong, b, em, small, code, button):not([class*='pill']):not([class*='avatar']):not([class*='Icon']):not([class*='icon']):not(.MuiChip-root):not(.MuiIconButton-root),
+  html[data-erp-font-size]
+    .erp-app-shell
+    :where(.MuiDataGrid-cell, .ag-cell, .ant-table-cell, .p-datatable-tbody > tr > td)
+    :where(.MuiTypography-root, div, span, p, a, strong, b, em, small, code, button):not([class*='pill']):not([class*='avatar']):not([class*='Icon']):not([class*='icon']):not(.MuiChip-root):not(.MuiIconButton-root) {
+    font-size: inherit !important;
+  }
+
+  /* Compact table badges and chips remain proportionally smaller. */
+  html[data-erp-font-size] .erp-app-shell .MuiTableCell-root .MuiChip-root,
+  html[data-erp-font-size]
+    .erp-app-shell
+    table
+    :where([class*='status-pill'], [class*='view-pill'], [class*='id-pill'], [class*='value-pill']) {
+    font-size: calc(var(--erp-ui) * 1.62 * var(--erp-type-scale)) !important;
+  }
+
+  /* Table pagination and footer text. */
+  html[data-erp-font-size] .erp-app-shell .MuiTablePagination-selectLabel,
+  html[data-erp-font-size] .erp-app-shell .MuiTablePagination-displayedRows,
+  html[data-erp-font-size] .erp-app-shell .MuiTablePagination-select,
+  html[data-erp-font-size] .erp-app-shell .MuiDataGrid-footerContainer,
+  html[data-erp-font-size] .erp-app-shell .MuiDataGrid-selectedRowCount {
+    font-size: calc(var(--erp-ui) * 1.65 * var(--erp-type-scale)) !important;
+  }
+
+  /* Tables rendered inside portalled dialogs. */
+  html[data-erp-font-size] body .MuiDialog-root .MuiTableCell-head,
+  html[data-erp-font-size] body .MuiDialog-root table thead th {
+    font-size: calc(var(--erp-ui) * 1.52 * var(--erp-type-scale)) !important;
+  }
+
+  html[data-erp-font-size] body .MuiDialog-root .MuiTableCell-body,
+  html[data-erp-font-size] body .MuiDialog-root table tbody td {
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale)) !important;
+  }
+}
+
+

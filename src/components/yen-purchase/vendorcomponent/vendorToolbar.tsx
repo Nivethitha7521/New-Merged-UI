@@ -6,8 +6,12 @@ import {
   Table, TableBody, TableCell, TableHead, TableRow, Menu, MenuItem, Checkbox,
 } from '@mui/material';
 import {
-  Add as AddIcon, GetApp as GetAppIcon, Upload as UploadIcon,
-  InsertDriveFile as InsertDriveFileIcon, FilterList as FilterListIcon,
+  Add as AddIcon,
+  DescriptionOutlined as SampleIcon,
+  FileUploadOutlined as ImportIcon,
+  FileDownloadOutlined as ExportIcon,
+  FilterList as FilterListIcon,
+  SearchRounded as SearchIcon,
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -310,238 +314,179 @@ const VendorToolbar: React.FC<VendorToolbarProps> = ({
     dispatch(setSelectedHeaders(updatedHeaders));
   };
 
-  return (
-    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1} ml={0.5} mt={0.5}>
-      {/* Search Field */}
+return (
+  <Box className="purchase-reference-toolbar-section">
+    <Box className="purchase-reference-toolbar vendor-reference-toolbar">
       <TextField
         autoComplete="off"
-        label="Vendor Name"
+        type="search"
+        placeholder="Search by vendor name or ID..."
         variant="outlined"
-        className="some"
         value={searchInputValue}
         onChange={handleSearchInputChange}
         onKeyPress={handleKeyPress}
-        sx={{
-          flex: 1,
+        className="purchase-reference-search"
+        InputProps={{
+          startAdornment: (
+            <SearchIcon className="purchase-reference-search-icon" />
+          ),
         }}
       />
 
-      {/* Action Buttons */}
-      <Box display="flex" alignItems="center" gap={1}>
-       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-  <IconButton
-    color="primary"
-    onClick={handleDialogOpen}
-    className="icon-button-outline"
-    size="small"
-    sx={{ 
-      p: 0.3,
-      opacity: canAdd ? 1 : 0.4,        // 🔥 Greyed out when no permission
-      cursor: canAdd ? 'pointer' : 'not-allowed' 
-    }}
-    disabled={!canAdd || loading || importLoading || exportStatus === 'loading'} // 🔥 Disable only, don't hide
-  >
-    <AddIcon fontSize="small" />
-  </IconButton>
+      <Box className="purchase-reference-actions">
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={handleDialogOpen}
+          disabled={
+            !canAdd ||
+            loading ||
+            importLoading ||
+            exportStatus === 'loading'
+          }
+          className="purchase-reference-action-button"
+        >
+          Add New
+        </Button>
 
-  <Typography
-    variant="caption"
-    align="center"
-    sx={{
-      maxWidth: 40,
-      wordBreak: 'break-word',
-      display: '-webkit-box',
-      WebkitLineClamp: 2,
-      WebkitBoxOrient: 'vertical',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      lineHeight: 1.1,
-      mt: 0.2,
-      opacity: canAdd ? 1 : 0.5        // 🔥 Label also light
-    }}
-  >
-    Add
-  </Typography>
-</Box>
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<SampleIcon />}
+          onClick={handleDownloadSampleCSV}
+          disabled={
+            loading ||
+            importLoading ||
+            exportStatus === 'loading'
+          }
+          className="purchase-reference-action-button"
+        >
+          Sample
+        </Button>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <IconButton
-            color="primary"
-            onClick={handleDownloadSampleCSV}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.3 }}
-            disabled={loading || importLoading || exportStatus === 'loading'}
-          >
-            <InsertDriveFileIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            Sample
+        <input
+          accept=".csv"
+          style={{ display: 'none' }}
+          id="import-csv"
+          type="file"
+          ref={inputFileRef}
+          onChange={(e) =>
+            e.target.files &&
+            handleFileSelect(e.target.files[0])
+          }
+          disabled={loading || importLoading}
+        />
+
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={
+            importLoading ? (
+              <CircularProgress size={15} />
+            ) : (
+              <ImportIcon />
+            )
+          }
+          disabled={
+            loading ||
+            importLoading ||
+            exportStatus === 'loading'
+          }
+          onClick={handleImportClick}
+          className="purchase-reference-action-button"
+        >
+          Import
+        </Button>
+
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={
+            exportStatus === 'loading' ? (
+              <CircularProgress size={15} />
+            ) : (
+              <ExportIcon />
+            )
+          }
+          onClick={handleExportCsv}
+          disabled={
+            loading ||
+            importLoading ||
+            exportStatus === 'loading'
+          }
+          className="purchase-reference-action-button"
+        >
+          Export
+        </Button>
+
+        <IconButton
+          type="button"
+          onClick={handleFilterClick}
+          disabled={
+            loading ||
+            importLoading ||
+            exportStatus === 'loading'
+          }
+          className="purchase-reference-filter-button"
+          aria-label="Choose vendor table columns"
+          title="Choose columns"
+        >
+          <FilterListIcon />
+        </IconButton>
+
+        <Box className="purchase-reference-active-toggle">
+          <Typography component="span">
+            Show Active Only
           </Typography>
-        </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <input
-            accept=".csv"
-            style={{ display: 'none' }}
-            id="import-csv"
-            type="file"
-            ref={inputFileRef}
-            onChange={(e) => e.target.files && handleFileSelect(e.target.files[0])}
-            disabled={loading || importLoading}
+          <Switch
+            checked={!showDeactivated}
+            onChange={handleShowDeactivated}
+            disabled={
+              loading ||
+              importLoading ||
+              exportStatus === 'loading'
+            }
+            size="small"
+            inputProps={{
+              'aria-label': 'Show active vendors only',
+            }}
           />
-          <IconButton
-            color="primary"
-            className="icon-button-outline"
-            sx={{ p: 0.3 }}
-            disabled={loading || importLoading || exportStatus === 'loading'}
-            onClick={handleImportClick}
-            size="small"
-          >
-            {importLoading ? <CircularProgress size={16} /> : <GetAppIcon fontSize="small" />}
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            Import
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <IconButton
-            color="primary"
-            onClick={handleExportCsv}
-            className="icon-button-outline"
-            disabled={loading || importLoading || exportStatus === 'loading'}
-            size="small"
-            sx={{ p: 0.3 }}
-          >
-            {exportStatus === 'loading' ? <CircularProgress size={16} /> : <UploadIcon fontSize="small" />}
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            Export
-          </Typography>
-        </Box>
-    
-
-        {/* Filter Button */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <IconButton
-            color="primary"
-            onClick={handleFilterClick}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.3 }}
-            disabled={loading || importLoading || exportStatus === 'loading'}
-          >
-            <FilterListIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            Filter
-          </Typography>
         </Box>
       </Box>
+    </Box>
 
-      {/* Filter Menu */}
-      <Menu
-        anchorEl={filterAnchorEl}
-        open={Boolean(filterAnchorEl)}
-        onClose={handleFilterClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        {allHeaders.map((header) => (
-          <MenuItem
-            key={header}
-            onClick={() => handleHeaderToggle(header)}
-          >
-            <Checkbox
-              checked={selectedHeaders.includes(header)}
-            />
-            <Typography variant="body2">{headerNameMap[header]}</Typography>
-          </MenuItem>
-        ))}
-      </Menu>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' ,ml:0.5}}>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 60,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            {showDeactivated ? 'Deactivated' : 'Activated'}
-          </Typography>
-          <Switch
-            checked={showDeactivated}
-            onChange={handleShowDeactivated}
-            disabled={loading || importLoading || exportStatus === 'loading'}
-            size="small"
-            sx={{ height: 24 }}
+    <Menu
+      anchorEl={filterAnchorEl}
+      open={Boolean(filterAnchorEl)}
+      onClose={handleFilterClose}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+    >
+      {allHeaders.map((header) => (
+        <MenuItem
+          key={header}
+          onClick={() => handleHeaderToggle(header)}
+        >
+          <Checkbox
+            checked={selectedHeaders.includes(header)}
           />
-        </Box>
+
+          <Typography variant="body2">
+            {headerNameMap[header]}
+          </Typography>
+        </MenuItem>
+      ))}
+    </Menu>
+
+    {/* Format Requirement Dialog */}
 
       {/* Format Requirement Dialog */}
       <Dialog open={formatDialogOpen} onClose={handleFormatDialogCancel} disableEscapeKeyDown={importLoading}>

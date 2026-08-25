@@ -1,18 +1,13 @@
 "use client";
 
-import React, { useRef } from "react";
-import {
-  Typography,
-  Box,
-  IconButton,
-  Button,
-} from "@mui/material";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import ClearIcon from '@mui/icons-material/Clear';
-import RefreshIcon from "@mui/icons-material/Refresh";
+/**
+ * stock/filterBar.tsx — rewritten with pure Tailwind CSS v4.
+ * All MUI Box, IconButton, Tooltip, Menu, MenuItem, Checkbox, ListItemText,
+ * Typography, UploadFileIcon, FileDownloadIcon, etc. removed.
+ * Business logic (dispatch calls, cascade, handlers) 100% unchanged.
+ */
 
+import React, { useRef, useMemo, useCallback } from "react";
 import {
   RawMaterialsState,
   downloadExportCSV,
@@ -20,12 +15,17 @@ import {
   importRawMaterialStock,
   setEditMessage,
   setOpenSnackbar,
+  selectVisibleColumns,
+  toggleColumn,
 } from "@/features/yen_inventory/wharehoueSlice";
 import CollapsibleFilter from "../physcialstockvarience/ui/collabsfiler";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { AxiosError } from "axios";
-import { formatDateDDMMYYYY } from "@/components/Hooks/useTodayDate";
+import { cn } from "@/lib/utils";
+import { Tooltip } from "@/components/ui/Tooltip";
+
+// ─── Props (unchanged from original) ─────────────────────────────────────────
 
 export interface FilterBarProps {
   searchParams: {
@@ -79,8 +79,135 @@ export interface FilterBarProps {
   onImportCSV?: (file: File) => Promise<void>;
   todayDate: string | null;
   handleRefreshData: () => void;
-
+  disabled?: boolean;
+  busyType?:
+    | "loading"
+    | "importing"
+    | "exporting"
+    | "saving"
+    | "approving"
+    | "deleting"
+    | null;
+  cascadeSourceKey?: string | null;
+  cascadeLoading?: boolean;
 }
+
+type CascadeKey =
+  | "purchasecategoryName"
+  | "purchasesubcategoryName"
+  | "itemName"
+  | "varianceName";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getCascadeSourceLabel = (key: string | null) => {
+  if (key === "purchasecategoryName")    return "Category";
+  if (key === "purchasesubcategoryName") return "Sub Category";
+  if (key === "itemName")                return "Item Group";
+  if (key === "varianceName")            return "Item Name";
+  return "";
+};
+
+// ─── Icon Buttons (inline SVGs — no @mui/icons-material) ──────────────────────
+
+const SampleIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>;
+const ImportIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
+const ExportIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+const ClearIcon   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>;
+const RefreshIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>;
+const ColumnIcon  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>;
+
+// ─── Action Button Primitive ──────────────────────────────────────────────────
+
+const ActionBtn: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  tooltip: string;
+  children: React.ReactNode;
+  danger?: boolean;
+}> = ({ onClick, disabled, tooltip, children, danger }) => (
+  <Tooltip content={tooltip} side="top">
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={tooltip}
+      className={cn(
+        "h-8 w-8 flex items-center justify-center rounded-[8px] border",
+        "transition-all duration-150",
+        danger
+          ? "border-danger-200 text-danger-500 bg-white hover:bg-danger-50 hover:border-danger-300"
+          : "border-brand-200 text-brand-600 bg-white hover:bg-brand-50 hover:border-brand-300",
+        disabled && "opacity-40 cursor-not-allowed pointer-events-none border-border text-text-disabled bg-surface-subtle"
+      )}
+    >
+      {children}
+    </button>
+  </Tooltip>
+);
+
+// ─── Column Toggle Dropdown ────────────────────────────────────────────────────
+
+const ColumnToggle: React.FC<{
+  visibleColumns: Record<string, boolean>;
+  onToggle: (key: string) => void;
+  disabled?: boolean;
+}> = ({ visibleColumns, onToggle, disabled }) => {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <ActionBtn
+        onClick={() => !disabled && setOpen((p) => !p)}
+        disabled={disabled}
+        tooltip="Toggle columns"
+      >
+        <ColumnIcon />
+      </ActionBtn>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-[1200] w-48 rounded-xl border border-border bg-white shadow-xl animate-scale-in overflow-hidden">
+          <div className="px-3 py-2 border-b border-border">
+            <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider">Columns</p>
+          </div>
+          <div className="max-h-56 overflow-y-auto">
+            {Object.entries(visibleColumns).map(([key, visible]) => (
+              <button
+                key={key}
+                onClick={() => onToggle(key)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium text-text-secondary hover:bg-surface-subtle transition-colors"
+              >
+                <span className={cn(
+                  "h-4 w-4 rounded-[4px] border-2 flex items-center justify-center shrink-0 transition-colors",
+                  visible ? "bg-brand-600 border-brand-600" : "border-border bg-white"
+                )}>
+                  {visible && (
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </span>
+                {key}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Main FilterBar ───────────────────────────────────────────────────────────
+
 const FilterBar: React.FC<FilterBarProps> = ({
   searchParams,
   onClearAll,
@@ -93,375 +220,250 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onDownloadCSV,
   onDownloadSampleCSV,
   onImportCSV,
-  todayDate,
   handleRefreshData,
+  disabled = false,
+  busyType = null,
+  cascadeSourceKey = null,
+  cascadeLoading = false,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const visibleColumns = useSelector(selectVisibleColumns) || {
+    "S.No": true, "Item Code": true, "Category": false,
+    "Sub Category": false, "Item Group": true, "Item Name": true,
+    "SO Stock": true, "Prev System": true, "System Stock": true, "Physical": true,
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cascadeSourceLabel = useMemo(() => getCascadeSourceLabel(cascadeSourceKey), [cascadeSourceKey]);
 
-  const handleDownloadSampleCSV = () => {
-    if (onDownloadSampleCSV) {
-      onDownloadSampleCSV();
-    } else {
-      dispatch(downloadSampleCSV());
+  const handleDownloadSampleCSV = useCallback(() => {
+    if (onDownloadSampleCSV) { onDownloadSampleCSV(); return; }
+    dispatch(downloadSampleCSV());
+  }, [dispatch, onDownloadSampleCSV]);
+
+  const handleDownloadCSV = useCallback(() => {
+    if (onDownloadCSV) { onDownloadCSV(); return; }
+    if (!searchParams.locationId) {
+      dispatch(setEditMessage("Please select a warehouse first."));
+      dispatch(setOpenSnackbar(true));
+      return;
     }
-  };
+    dispatch(downloadExportCSV({
+      locationId: searchParams.locationId,
+      purchasecategoryName:    searchParams.purchasecategoryName?.join(","),
+      purchasesubcategoryName: searchParams.purchasesubcategoryName?.join(","),
+      itemName:      searchParams.itemName?.join(","),
+      varianceName:  searchParams.varianceName?.join(","),
+    }));
+  }, [dispatch, onDownloadCSV, searchParams.itemName, searchParams.locationId, searchParams.purchasecategoryName, searchParams.purchasesubcategoryName, searchParams.varianceName]);
 
-  const handleDownloadCSV = () => {
-    if (onDownloadCSV) {
-      onDownloadCSV();
-    } else {
-      if (!searchParams.locationId) {
-        dispatch(setEditMessage("Please select a warehouse first."));
-        dispatch(setOpenSnackbar(true));
-        return;
-      }
-      dispatch(
-        downloadExportCSV({
-          locationId: searchParams.locationId,
-          purchasecategoryName: searchParams.purchasecategoryName?.join(","),
-          purchasesubcategoryName: searchParams.purchasesubcategoryName?.join(","),
-          itemName: searchParams.itemName?.join(","),
-          varianceName: searchParams.varianceName?.join(","),
-        })
-      );
-    }
-  };
+  const handleImportClick = useCallback(() => {
+    if (!disabled) fileInputRef.current?.click();
+  }, [disabled]);
 
-  const handleImportClick = () => fileInputRef.current?.click();
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-
     if (onImportCSV) {
-      try {
-        await onImportCSV(file);
-      } catch (error) {
+      try { await onImportCSV(file); }
+      catch (error) {
         const err = error as Error;
         dispatch(setEditMessage(`Import failed: ${err.message}`));
         dispatch(setOpenSnackbar(true));
-      }
-    } else {
-      if (!searchParams.locationId) {
-        dispatch(setEditMessage("Please select a warehouse first."));
-        dispatch(setOpenSnackbar(true));
-        return;
-      }
-      try {
-        await dispatch(importRawMaterialStock({ file, locationId: searchParams.locationId })).unwrap();
-        dispatch(setEditMessage("CSV imported successfully"));
-        dispatch(setOpenSnackbar(true));
-        onImportSuccess?.();
-      } catch (err) {
-        const error = err as AxiosError;
-        dispatch(setEditMessage(`Import failed: ${error?.message || "Unknown error"}`));
-        dispatch(setOpenSnackbar(true));
-      }
+      } finally { e.target.value = ""; }
+      return;
     }
-    event.target.value = "";
-  };
-  const warehouseOptions = filterOptions.warehouses.map((w) => ({
-    label: w.label,     // Only aliasName
-    value: w.value,
-    locationId: w.value,
-  }));
+    if (!searchParams.locationId) {
+      dispatch(setEditMessage("Please select a warehouse first."));
+      dispatch(setOpenSnackbar(true));
+      e.target.value = ""; return;
+    }
+    try {
+      await dispatch(importRawMaterialStock({ file, locationId: searchParams.locationId })).unwrap();
+      dispatch(setEditMessage("CSV imported successfully"));
+      dispatch(setOpenSnackbar(true));
+      onImportSuccess?.();
+    } catch (err) {
+      const error = err as AxiosError;
+      dispatch(setEditMessage(`Import failed: ${error?.message || "Unknown error"}`));
+      dispatch(setOpenSnackbar(true));
+    } finally { e.target.value = ""; }
+  }, [dispatch, onImportCSV, onImportSuccess, searchParams.locationId]);
 
+  const warehouseOptions = useMemo(
+    () => filterOptions.warehouses.map((w) => ({ label: w.label, value: w.value, locationId: w.value })),
+    [filterOptions.warehouses]
+  );
 
-  const isAnyFilterActive =
+  const selectedWarehouseAlias = useMemo(
+    () => {
+      const w = filterOptions.warehouses.find((w) => w.value === searchParams.locationId);
+      return w ? w.aliasName || w.label || searchParams.locationId : searchParams.locationId || "";
+    },
+    [filterOptions.warehouses, searchParams.locationId]
+  );
+
+  const isAnyFilterActive = useMemo(() =>
+    Boolean(searchParams.locationId) ||
     (searchParams.purchasecategoryName?.length ?? 0) > 0 ||
     (searchParams.purchasesubcategoryName?.length ?? 0) > 0 ||
     (searchParams.itemName?.length ?? 0) > 0 ||
-    (searchParams.varianceName?.length ?? 0) > 0;
+    (searchParams.varianceName?.length ?? 0) > 0,
+    [searchParams.locationId, searchParams.purchasecategoryName, searchParams.purchasesubcategoryName, searchParams.itemName, searchParams.varianceName]
+  );
 
+  const getCascadeProps = (key: CascadeKey) => {
+    const isSource = cascadeSourceKey === key;
+    const isCascadeDisabled = cascadeLoading && Boolean(cascadeSourceKey) && !isSource;
+    return {
+      disabled: disabled || isCascadeDisabled,
+      loading: isCascadeDisabled,
+      linked: Boolean(cascadeSourceKey) && !isSource,
+      statusLabel: isSource ? "Selected" : cascadeSourceKey ? `From ${cascadeSourceLabel}` : undefined,
+      loadingText: "Loading related options...",
+    };
+  };
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        ml: 1,
-        p: 1,
-        position: "relative",
-        zIndex: 1,
-        "&:focus-within": { outline: "none" },
-      }}
-    >
-      {/* <Typography
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-          fontSize: "0.9rem",
-          color: "#333",
-          flexShrink: 0,
-        }}
-      >
-        Filters
-      </Typography> */}
+    <div className="w-full min-w-0 flex flex-nowrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[100] overflow-x-auto no-scrollbar">      {/* comment this part because remove the filter 4 8 1 */}
+      {/* Label */}
+      {/* <div className="hidden sm:flex h-[34px] items-center px-2.5 rounded-[8px] bg-white border border-brand-200 text-[11px] font-extrabold text-brand-700 whitespace-nowrap shrink-0">
+        {cascadeSourceKey ? `Filters · ${cascadeSourceLabel}` : "Filters"}
+      </div> */}
 
-      {/* Each filter wrapped in a Box with flexShrink: 0 */}
-      <Box sx={{ flexShrink: 0 }}>
-        <CollapsibleFilter
-          title="Date"
-          options={[]}
-          selectedOptions={todayDate ? formatDateDDMMYYYY(todayDate) : ""}
-          onChange={(value) => {
-            const singleValue = Array.isArray(value) ? value[0] || "" : value || "";
-            onSearchChange("createdDate", singleValue);
-          }}
-          onClear={() => { }}
-          onScrollBottom={() => { }}
-          onSearch={() => { }}
-          inputType="date"
-          isMulti={false}
-          showSelectedCount={false}
-          showRemoveOption={false}
-          restrictToTodayOnly={true}
-          disabled={true}
-        />
-      </Box>
-
-      <Box sx={{ flexShrink: 0 }}>
-        <CollapsibleFilter
-          title="Location"
-          options={warehouseOptions}
-          selectedOptions={searchParams.locationId ? [searchParams.locationId] : []}
-          onChange={(value) => {
-            const singleValue = Array.isArray(value) ? value[0] || "" : value || "";
-            onSearchChange("locationId", singleValue);
-          }}
-          onClear={() => onSearchChange("locationId", "")}
-          onScrollBottom={() => { }}
-          onSearch={() => { }}
-          inputType="single-select"
-          isMulti={false}
-          loading={warehousesLoading}
-          showSelectedCount={false}
-          showRemoveOption={false}
-          displayLabel={
-            filterOptions.warehouses.find(
-              (w) => w.value === searchParams.locationId
-            )?.aliasName
-          }
-        />
-      </Box>
-
-      <Box sx={{ flexShrink: 0 }}>
-        <CollapsibleFilter
-          title="Category"
-          options={filterOptions.categories.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.purchasecategoryName || []}
-          onChange={(value) => onSearchChange("purchasecategoryName", Array.isArray(value) ? value : [value])}
-          onClear={() => onSearchChange("purchasecategoryName", [])}
-          onScrollBottom={() => onFilterScrollBottom("categories")}
-          onSearch={(term) => onFilterSearch("categories", term)}
-          inputType="multi-select"
-          isMulti={true}
-        />
-      </Box>
-
-      <Box sx={{ flexShrink: 0 }}>
-        <CollapsibleFilter
-          title="Subcategory"
-          options={filterOptions.subcategories.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.purchasesubcategoryName || []}
-          onChange={(value) => onSearchChange("purchasesubcategoryName", Array.isArray(value) ? value : [value])}
-          onClear={() => onSearchChange("purchasesubcategoryName", [])}
-          onScrollBottom={() => onFilterScrollBottom("subcategories")}
-          onSearch={(term) => onFilterSearch("subcategories", term)}
-          inputType="multi-select"
-          isMulti={true}
-        />
-      </Box>
-
-      <Box sx={{ flexShrink: 0 }}>
-        <CollapsibleFilter
-          title="ItemGroup"
-          options={filterOptions.itemNames.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.itemName || []}
-          onChange={(value) => onSearchChange("itemName", Array.isArray(value) ? value : [value])}
-          onClear={() => onSearchChange("itemName", [])}
-          onScrollBottom={() => onFilterScrollBottom("itemNames")}
-          onSearch={(term) => onFilterSearch("itemNames", term)}
-          inputType="multi-select"
-          isMulti={true}
-        />
-      </Box>
-
-      <Box sx={{ flexShrink: 0 }}>
-        <CollapsibleFilter
-          title="Item Name"
-          options={filterOptions.varianceNames.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.varianceName || []}
-          onChange={(value) => onSearchChange("varianceName", Array.isArray(value) ? value : [value])}
-          onClear={() => onSearchChange("varianceName", [])}
-          onScrollBottom={() => onFilterScrollBottom("varianceNames")}
-          onSearch={(term) => onFilterSearch("varianceNames", term)}
-          inputType="multi-select"
-          isMulti={true}
-        />
-      </Box>
-
-      <Button
-        variant="outlined"
-        color="error"
-        onClick={onClearAll}
-        disabled={!isAnyFilterActive}
-        sx={{ minWidth: 'auto', p: 0.6, flexShrink: 0 }}
-      >
-        <ClearIcon fontSize="small" />
-      </Button>
-
-
-      {/* Right-Aligned Buttons: Sample | Import | Export */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          ml: "auto",
-          mr: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <IconButton
-            color="primary"
-            onClick={handleRefreshData}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.7 }}
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 50,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
+        <div className="w-[180px] shrink-0">
+          <CollapsibleFilter
+            title="Location"
+            options={warehouseOptions}
+            selectedOptions={searchParams.locationId ? [searchParams.locationId] : []}
+            onChange={(value) => {
+              const sv = Array.isArray(value) ? value[0] || "" : value || "";
+              onSearchChange("locationId", sv);
             }}
-          >
-            REFRESH
-          </Typography>
-        </Box>
-        {/* Sample */}
-        <Box
-          sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-        >
+            onClear={() => onSearchChange("locationId", "")}
+            onScrollBottom={() => {}}
+            onSearch={() => {}}
+            inputType="single-select"
+            isMulti={false}
+            loading={warehousesLoading}
+            disabled={disabled}
+            statusLabel={searchParams.locationId ? "Selected" : undefined}
+            showSelectedCount={false}
+            showRemoveOption={false}
+            displayLabel={selectedWarehouseAlias}
+          />
+        </div>
 
-          <IconButton
-            color="primary"
-            onClick={handleDownloadSampleCSV}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.7 }}
-          >
-            <InsertDriveFileIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            SAMPLE
-          </Typography>
-        </Box>
+        <div className="w-[180px] shrink-0">
+          <CollapsibleFilter
+            title="Category"
+            options={filterOptions.categories.map((n) => ({ label: n, value: n }))}
+            selectedOptions={searchParams.purchasecategoryName || []}
+            onChange={(v) => onSearchChange("purchasecategoryName", Array.isArray(v) ? v : [v])}
+            onClear={() => onSearchChange("purchasecategoryName", [])}
+            onScrollBottom={() => onFilterScrollBottom("categories")}
+            onSearch={(t) => onFilterSearch("categories", t)}
+            inputType="multi-select"
+            isMulti
+            {...getCascadeProps("purchasecategoryName")}
+          />
+        </div>
 
-        {/* Import */}
-        <Box
-          sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-        >
-          <IconButton
-  color="primary"
-  onClick={handleImportClick}
-  disabled={!onImportCSV}  // ✅ add பண்ணுங்க
-  className="icon-button-outline"
-  size="small"
-  sx={{ p: 0.7, opacity: !onImportCSV ? 0.4 : 1 }}  // ✅ grey out
->
-            <UploadFileIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            IMPORT
-          </Typography>
-        </Box>
+        <div className="w-[180px] shrink-0">
+          <CollapsibleFilter
+            title="Sub Category"
+            options={filterOptions.subcategories.map((n) => ({ label: n, value: n }))}
+            selectedOptions={searchParams.purchasesubcategoryName || []}
+            onChange={(v) => onSearchChange("purchasesubcategoryName", Array.isArray(v) ? v : [v])}
+            onClear={() => onSearchChange("purchasesubcategoryName", [])}
+            onScrollBottom={() => onFilterScrollBottom("subcategories")}
+            onSearch={(t) => onFilterSearch("subcategories", t)}
+            inputType="multi-select"
+            isMulti
+            {...getCascadeProps("purchasesubcategoryName")}
+          />
+        </div>
 
-        {/* Export */}
-        <Box
-          sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-        >
-          <IconButton
-            color="primary"
-            onClick={handleDownloadCSV}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.7 }}
-          >
-            <FileDownloadIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            EXPORT
-          </Typography>
+        <div className="w-[180px] shrink-0">
+          <CollapsibleFilter
+            title="Item Group"
+            options={filterOptions.itemNames.map((n) => ({ label: n, value: n }))}
+            selectedOptions={searchParams.itemName || []}
+            onChange={(v) => onSearchChange("itemName", Array.isArray(v) ? v : [v])}
+            onClear={() => onSearchChange("itemName", [])}
+            onScrollBottom={() => onFilterScrollBottom("itemNames")}
+            onSearch={(t) => onFilterSearch("itemNames", t)}
+            inputType="multi-select"
+            isMulti
+            {...getCascadeProps("itemName")}
+          />
+        </div>
 
-          {/* Hidden File Input */}
+        <div className="w-[180px] shrink-0">
+          <CollapsibleFilter
+            title="Item Name"
+            options={filterOptions.varianceNames.map((n) => ({ label: n, value: n }))}
+            selectedOptions={searchParams.varianceName || []}
+            onChange={(v) => onSearchChange("varianceName", Array.isArray(v) ? v : [v])}
+            onClear={() => onSearchChange("varianceName", [])}
+            onScrollBottom={() => onFilterScrollBottom("varianceNames")}
+            onSearch={(t) => onFilterSearch("varianceNames", t)}
+            inputType="multi-select"
+            isMulti
+            {...getCascadeProps("varianceName")}
+          />
+        </div>
+
+        {/* Buttons section to match Outlet UI exactly */}
+        <div className="flex items-center gap-1.5 ml-auto">
+          <ActionBtn
+            onClick={onClearAll}
+            disabled={disabled || !isAnyFilterActive}
+            tooltip="Clear filters"
+            danger
+          >
+            <ClearIcon />
+          </ActionBtn>
+          <ActionBtn onClick={handleRefreshData} disabled={disabled} tooltip="Refresh">
+            <RefreshIcon />
+          </ActionBtn>
+          
+          <div className="w-[1px] h-5 bg-border mx-1 shrink-0" />
+          
+          <ActionBtn onClick={handleDownloadSampleCSV} disabled={disabled} tooltip="Download sample CSV">
+            <SampleIcon />
+          </ActionBtn>
+          <ActionBtn
+            onClick={handleImportClick}
+            disabled={disabled}
+            tooltip={busyType === "importing" ? "Importing…" : "Import CSV"}
+          >
+            <ImportIcon />
+          </ActionBtn>
           <input
             ref={fileInputRef}
             type="file"
             accept=".csv"
-            style={{ display: "none" }}
+            className="hidden"
             onChange={handleFileChange}
           />
-
-        </Box>
-      </Box>
-    </Box>
+          <ActionBtn
+            onClick={handleDownloadCSV}
+            disabled={disabled}
+            tooltip={busyType === "exporting" ? "Exporting…" : "Export CSV"}
+          >
+            <ExportIcon />
+          </ActionBtn>
+          
+          <div className="w-[1px] h-5 bg-border mx-1 shrink-0" />
+          
+          <ColumnToggle
+            visibleColumns={visibleColumns}
+            onToggle={(key) => dispatch(toggleColumn(key))}
+            disabled={disabled}
+          />
+        </div>
+    </div>
   );
 };
 

@@ -1,0 +1,95 @@
+/* =========================================================
++   YEN ERP — MASTER ADMIN CSS MANIFEST
++
++   IMPORTANT:
++   - This file is the editable source manifest and controls module order.
++   - The original CSS was split without changing any rule.
++   - Import order intentionally matches the previous single-file
++     cascade exactly, so UI behavior remains unchanged.
++   - Route layouts import masterAdmin.runtime.css (generated single bundle)
++     to preserve the original Next.js runtime cascade exactly.
++   - Add future module-specific styles in the matching module file,
++     then run: node src/styles/master-admin/build-master-admin-runtime.mjs
++   ========================================================= */
+
+/* Shared viewport, headings, toolbars, tables, tabs, pagination, themes and responsive base */
+@import "./core/01-foundation.css";
+
+/* Shared 100% zoom density overrides across legacy Master Admin modules */
+@import "./core/02-zoom-safe-overrides.css";
+
+/* Location Master base page, dialog, responsive and toolbar styles */
+@import "./modules/locations/location.css";
+
+/* UOM Master page and dialog styles */
+@import "./modules/uom/uom.css";
+
+/* Tax Master page and dialogs */
+@import "./modules/tax/tax.css";
+
+/* Vehicle dialog styles */
+@import "./modules/vehicle/dialog.css";
+
+/* Discount Master page/table styles */
+@import "./modules/discount/master.css";
+
+/* Vehicle toolbar styles */
+@import "./modules/vehicle/toolbar.css";
+/* Discount dialog styles */
+@import "./modules/discount/dialog.css";
+
+/* Shared Purchase-style desktop density parity rules */
+@import "./core/03-desktop-density.css";
+
+/* Shared portalled dialog typography/density rules */
+@import "./core/04-portalled-dialog-typography.css";
+
+/* Tax Add/Edit final compact dialog override */
+@import "./modules/tax/dialog-compact.css";
+
+/* MixBox page, dialog, desktop density and mobile styles */
+@import "./modules/mixbox/mixbox.css";
+
+/* Section Master page, dialog and desktop density styles */
+@import "./modules/section/section.css";
+
+/* Recipe internal table scroll behavior */
+@import "./modules/recipe/recipe-table.css";
+
+/* Item Master shared table/list design system at 100% zoom */
+@import "./modules/items/item-master.css";
+
+/* KOT Master UI overrides */
+@import "./modules/kot/kot-master.css";
+
+/* KOT AddOn Add/Edit dialog compact 100% laptop alignment */
+@import "./modules/kot/addon-dialog.css";
+
+/* KOT Variant Add/Edit dialog compact 100% laptop alignment */
+@import "./modules/kot/variant-dialog.css";
+/* Sale Order UI density and table styles */
+@import "./modules/sale-order/sale-order.css";
+
+/* Online Partners master/config compact YEN ERP alignment */
+@import "./modules/online-partners/online-partners.css";
+
+/* YEN POS visual parity styles */
+@import "./modules/yen-pos/yen-pos.css";
+
+/* WhatsApp visual parity styles */
+@import "./modules/whatsapp/whatsapp.css";
+
+/* Warehouse portalled dialog and final laptop compact override */
+@import "./modules/warehouse/warehouse-dialog.css";
+
+/* Location final 100% laptop compact override */
+@import "./modules/locations/location-compact.css";
+
+/* Item Add/Edit original Master Admin alignment and screen fit */
+@import "./modules/items/item-form.css";
+
+/* Category dialog compact alignment */
+@import "./modules/items/category-dialog.css";
+
+/* SubCategory, ItemGroup, InventoryType and OrderType compact dialogs */
+@import "./modules/items/lookup-dialogs.css";

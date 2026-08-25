@@ -14,6 +14,7 @@ import {
   Tooltip,
   Autocomplete
 } from '@mui/material';
+import PurchaseOrderTabs from '@/components/yen-purchase/purchaseorder/PurchaseOrderTabs';
 import { usePermissions } from "@/hooks/usePermissions";
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -80,7 +81,12 @@ const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
 const GrnConvertedPo: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, permissions } = usePermissions();
-
+// const isHoldGrnVisible =
+//   permissions?.yenerp?.grns &&
+//   !(permissions?.yenerp?.grns?.hide === true);
+        const isHoldGrnVisible =
+  permissions?.yenerp?.holdgrn &&
+  !(permissions?.yenerp?.holdgrn?.hide === true);
 // Module visible check
 const isGrnConvertedVisible =
   permissions?.yenerp?.purchaseorders_grn_converted &&
@@ -1336,9 +1342,10 @@ if (!canRead) {
   if (error) return <Typography>Error: {error}</Typography>;
 
   return (
-    <Box>
-      <YenPurchasePage />
-      <Box sx={{ px: 2, py: 1, backgroundColor: 'white' }}>
+<Box className="purchase-page-shell purchase-order-module-page">
+  <YenPurchasePage />
+
+  <Box className="purchase-order-content">
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           {/* Navigation Buttons */}
           <Box
@@ -1349,42 +1356,13 @@ if (!canRead) {
               gap: 1,
             }}
           >
-            <Link href="/yen-purchase/PurchaseOrder" passHref>
-              <Button variant="contained" color="primary">
-                Pending
-              </Button>
-            </Link>
-              {!isApprovedHidden && canViewApproved && (
-            <Link href="/yen-purchase/PurchaseOrder/Approvedpo" passHref>
-              <Button variant="contained" color="primary">
-                Approved
-              </Button>
-            </Link>
-              )}
-             {!hideRejected && canViewRejected && (
-            <Link href="/yen-purchase/PurchaseOrder/RejectedPo" passHref>
-              <Button variant="contained" color="primary">
-                Rejected
-              </Button>
-            </Link>
-             )}
-          {isGrnConvertedVisible && (
-  <Link href="/yen-purchase/PurchaseOrder/GRNConvertedPO" passHref>
-  <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: 'white',
-                  color: 'black',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                  },
-                }}
-              >
-               GRN Converted
-              </Button>
-  </Link>
-)}
-
+<PurchaseOrderTabs
+  activeTab="grn-converted"
+  showApproved={!isApprovedHidden && canViewApproved}
+  showRejected={!hideRejected && canViewRejected}
+  showGrnConverted={Boolean(isGrnConvertedVisible)}
+  showHoldGrn={Boolean(isHoldGrnVisible)}
+/>
           </Box>
           
           {/* Filter Section */}
@@ -1475,15 +1453,15 @@ if (!canRead) {
               
               {/* Filter Icon */}
               <Grid item>
-                <IconButton
-                  onClick={handleFilterClick}
-                  className="icon-button-outline"
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <FilterAltIcon fontSize="small" />
-                </IconButton>
+               <IconButton
+  type="button"
+  onClick={handleFilterClick}
+  className="purchase-order-toolbar-icon is-filter"
+  aria-label="Apply GRN converted PO filters"
+  title="Apply filters"
+>
+  <FilterAltIcon fontSize="small" />
+</IconButton>
                 <Typography
                   variant="caption"
                   align="center"
@@ -1506,14 +1484,14 @@ if (!canRead) {
               {/* Filter Clear Icon */}
               <Grid item>
                 <IconButton
-                  onClick={handleFilterClose}
-                  className="icon-button-outline"
-                  color="primary"
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <ClearIcon fontSize="small" />
-                </IconButton>
+  type="button"
+  onClick={handleFilterClose}
+  className="purchase-order-toolbar-icon is-clear"
+  aria-label="Clear GRN converted PO filters"
+  title="Clear filters"
+>
+  <ClearIcon fontSize="small" />
+</IconButton>
                 <Typography
                   variant="caption"
                   align="center"
@@ -1538,34 +1516,22 @@ if (!canRead) {
               
               {/* Download Button */}
               <Grid item xs="auto">
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <IconButton
-                    onClick={handleClick}
-                    color="primary"
-                    className="icon-button-outline"
-                    size="small"
-                    sx={{ p: 0.3 }}
-                    disabled={!filteredOrders || filteredOrders.length === 0}
-                  >
-                    {loading ? <CircularProgress size={16} /> : <DownloadIcon fontSize="small" />}
-                  </IconButton>
-                  <Typography
-                    variant="caption"
-                    align="center"
-                    sx={{
-                      maxWidth: 60,
-                      wordBreak: 'break-word',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      lineHeight: 1.1,
-                      mt: 0.2,
-                    }}
-                  >
-                    Download
-                  </Typography>
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={
+      loading ? (
+        <CircularProgress size={15} />
+      ) : (
+        <DownloadIcon />
+      )
+    }
+    onClick={handleClick}
+    disabled={!filteredOrders || filteredOrders.length === 0}
+    className="purchase-reference-action-button purchase-order-toolbar-button"
+  >
+    Download
+  </Button>
                   <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
@@ -1576,14 +1542,14 @@ if (!canRead) {
                     <MenuItem onClick={handleVendorwiseClick}>Vendorwise Summary</MenuItem>
                     <MenuItem onClick={handleItemwiseClick}>Itemwise Detailed</MenuItem>
                   </Menu>
-                </Box>
+                
               </Grid>
             </Grid>
           </Box>
         </Box>
         
         {/* Table Section */}
-        <TableContainer component={Paper} sx={{
+        <TableContainer component={Paper} className="purchase-master-table purchase-order-table" sx={{
           maxHeight: 'calc(100vh - 270px)',
           overflowY: 'auto',
           width: '100%',
@@ -1615,7 +1581,9 @@ if (!canRead) {
                   return (
                     <TableRow key={order.purchaseOrderId}>
                       <TableCell className='table-number-right'>{(currentPage - 1) * pageSize + index + 1}</TableCell>
-                      <TableCell>{order.randomId}</TableCell>
+                    <span className="purchase-master-id-pill">
+  {order.randomId || '-'}
+</span>
                       <TableCell>{order.vendorName}</TableCell>
                       <TableCell>
                         {order.orderDate 
@@ -1626,38 +1594,46 @@ if (!canRead) {
                       <TableCell className='table-number-right'>
                         {(order.totalOrderAmount + order.pendingOrderAmount || 0).toFixed(2)}
                       </TableCell>
-                      <TableCell>{order.poStatus}</TableCell>
-                      <TableCell>
-                        <Box display="flex" alignItems="center">
-                          <Tooltip title="View Details">
-                            <IconButton
-                              onClick={() => handleViewDetailsClick(order.purchaseOrderId)}
-                              color="primary"
-                              sx={{ mr: 1 }}
-                            >
-                              <VisibilityIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Download PDF">
-                            <IconButton
-                              color="primary"
-                              onClick={() => handleDownload(order.purchaseOrderId)}
-                            >
-                              <PictureAsPdfIcon />
-                            </IconButton>
-                          </Tooltip>
-                               <Tooltip title="View Stock & Price Update History">
-                                                      <IconButton
-                                                        onClick={() => handleViewStockLogs(order)}
-                                                        color="info"
-                                                        sx={{ mr: 0.5 }}
-                                                        size="small"
-                                                      >
-                                                        <InventoryIcon fontSize="small" />
-                                                      </IconButton>
-                                                    </Tooltip>
-                        </Box>
-                      </TableCell>
+                    <span className="purchase-master-status-pill is-converted">
+  {order.poStatus || 'GRN Converted'}
+</span>
+                    <TableCell>
+  <Box className="purchase-order-actions">
+    <Tooltip title="View Details">
+      <IconButton
+        onClick={() =>
+          handleViewDetailsClick(order.purchaseOrderId)
+        }
+        className="purchase-master-action-button is-view"
+        aria-label="View GRN converted purchase order"
+      >
+        <VisibilityIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <Tooltip title="Download PDF">
+      <IconButton
+        onClick={() =>
+          handleDownload(order.purchaseOrderId)
+        }
+        className="purchase-master-action-button is-download"
+        aria-label="Download GRN converted purchase order"
+      >
+        <PictureAsPdfIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+
+    <Tooltip title="View Stock & Price Update History">
+      <IconButton
+        onClick={() => handleViewStockLogs(order)}
+        className="purchase-master-action-button is-history"
+        aria-label="View stock update history"
+      >
+        <InventoryIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  </Box>
+</TableCell>
                     </TableRow>
                   );
                 })
@@ -1764,6 +1740,8 @@ if (!canRead) {
         }}>
           <TableContainer
             component={Paper}
+            
+            className="purchase-master-table purchase-order-table"
             sx={{
               maxHeight: 'calc(100vh - 230px)',
               overflowY: 'auto',

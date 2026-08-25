@@ -63,8 +63,12 @@ import "jspdf-autotable";
 import { fetchBusinesses, fetchPhoto, selectBusinesses } from '@/features/account-setting/businessSlice';
 import { addDays, format, parse } from 'date-fns';
 import Papa from 'papaparse';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-// import 'react-date-range/dist/styles.css';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
+} from '@mui/icons-material';// import 'react-date-range/dist/styles.css';
 // import 'react-date-range/dist/theme/default.css';
 require('react-date-range/dist/styles.css');
 require('react-date-range/dist/theme/default.css');
@@ -153,6 +157,7 @@ const VerifiedApInvoicePage: React.FC = () => {
 
   // Local state
   const [selectedInvoice, setSelectedInvoice] = useState<ApInvoice | null>(null);
+const isReturnedInvoice = selectedInvoice?.status === "Returned";
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
@@ -164,6 +169,7 @@ const VerifiedApInvoicePage: React.FC = () => {
   const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
   const [filteredAp, setFilteredAp] = useState<ApInvoice[]>([]);
   const { selectedPo, poDialogOpen } = useSelector(selectPurchaseListState);
+  const [selectedPos, setSelectedPos] = useState<PoResponse[]>([]);
   const [selectedService, setSelectedService] = useState<ServiceData | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogDownloadOpen, setDialogDownloadOpen] = useState(false);
@@ -181,6 +187,7 @@ const VerifiedApInvoicePage: React.FC = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedGrn, setSelectedGrn] = useState<GrnResponse | null>(null);
   const [viewItemsDialogOpen, setViewItemsDialogOpen] = useState(false);
+  const [expandedApPoSections, setExpandedApPoSections] = useState<Record<string, boolean>>({});
 
   const debitCreditNotes = useSelector((state: RootState) => selectDebitCreditNote(state).debitCreditNotes);
   const dateField = 'apinvoiceDate';
@@ -301,10 +308,11 @@ useEffect(() => {
   }, [totalItems, currentPage, pageSize, dispatch, dateField, appliedFromDate, appliedToDate, selectedVendorName, invoiceTypeFilter, selectedStatus]);
 
   // View Details handler
-  const handleViewDetails = (invoice: ApInvoice) => {
-    setSelectedInvoice(invoice);
-    setDetailsDialogOpen(true);
-  };
+ const handleViewDetails = (invoice: ApInvoice) => {
+  setSelectedInvoice(invoice);
+  setExpandedApPoSections({});
+  setDetailsDialogOpen(true);
+};
 const refetchWithFilters = useCallback((
     page: number = currentPage,
     fromDateOverride?: string,
@@ -1541,7 +1549,82 @@ const confirmVerification = async () => {
       </Box>
     );
   }
+const isMultiPoApInvoice = (invoice: any) => {
+  return (
+    invoice?.grnSource === "Multi" ||
+    invoice?.poCount > 1 ||
+    Array.isArray(invoice?.poRandomIds) ||
+    invoice?.itemDetails?.some((item: any) => item.sourcePoRandomId)
+  );
+};
 
+const groupMultiPoApItems = (invoice: any) => {
+  const groups: Record<string, any[]> = {};
+
+  (invoice?.itemDetails || []).forEach((item: any) => {
+    const poId =
+      item.sourcePoRandomId ||
+      item.poRandomId ||
+      invoice?.poRandomId ||
+      "Unknown PO";
+
+    if (!groups[poId]) groups[poId] = [];
+    groups[poId].push(item);
+  });
+
+  return Object.entries(groups).map(([poRandomId, items]) => {
+    const subTotal = items.reduce(
+      (sum, item) => sum + Number(item.totalPrice || item.unitPrice * (item.stockQuantity || item.quantity || 0) || 0),
+      0
+    );
+
+    const taxAmount = items.reduce(
+      (sum, item) => sum + Number(item.taxAmount || 0),
+      0
+    );
+
+    const sgst = items.reduce(
+      (sum, item) => sum + Number(item.sgst || 0),
+      0
+    );
+
+    const cgst = items.reduce(
+      (sum, item) => sum + Number(item.cgst || 0),
+      0
+    );
+
+    const igst = items.reduce(
+      (sum, item) => sum + Number(item.igst || 0),
+      0
+    );
+
+    const itemFinalTotal = items.reduce(
+      (sum, item) => sum + Number(item.finalPrice || 0),
+      0
+    );
+
+    return {
+      poRandomId,
+      items,
+      subTotal,
+      sgst,
+      cgst,
+      igst,
+      taxAmount,
+      freightAmount: 0,
+      freightTax: 0,
+      roundOff: 0,
+      finalAmount: itemFinalTotal,
+    };
+  });
+};
+
+const toggleApPoSection = (poRandomId: string) => {
+  setExpandedApPoSections((prev) => ({
+    ...prev,
+    [poRandomId]: !prev[poRandomId],
+  }));
+};
   /* =============================================== */
 
   return (
@@ -1582,14 +1665,22 @@ const confirmVerification = async () => {
             />
           </Grid>
 
-          {/* All Vendors Autocomplete */}
-          <Grid item xs={2}>
-            <VendorSearchAutocomplete
-              value={selectedVendor}
-              onChange={handleVendorChange}
-              label="All Vendors"
-            />
-          </Grid>
+{/* All Vendors Autocomplete */}
+<Grid
+  item
+  xs={2}
+  sx={{
+    '& .MuiInputLabel-root:not(.MuiInputLabel-shrink)': {
+      transform: 'translate(14px, 8px) scale(1) !important',
+    },
+  }}
+>
+  <VendorSearchAutocomplete
+    value={selectedVendor}
+    onChange={handleVendorChange}
+    label="All Vendors"
+  />
+</Grid>
 
           {/* Invoice Type Filter */}
           <Grid item xs={2}>
@@ -1639,16 +1730,21 @@ const confirmVerification = async () => {
                     dispatch(fetchApStatuses({ page: 1 }));
                   }
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Status"
-                    size="small"
-                    InputProps={{
-                      ...params.InputProps,
-                    }}
-                  />
-                )}
+            renderInput={(params) => (
+  <TextField
+    {...params}
+    label="Status"
+    size="small"
+    sx={{
+      '& .MuiInputLabel-root:not(.MuiInputLabel-shrink)': {
+        transform: 'translate(14px, 8px) scale(1) !important',
+      },
+    }}
+    InputProps={{
+      ...params.InputProps,
+    }}
+  />
+)}
                 freeSolo={false}
                 clearOnBlur={false}
                 clearOnEscape={true}
@@ -1750,16 +1846,16 @@ const confirmVerification = async () => {
           </Menu>
         </Grid>
 
-        {/* Table Container */}
-        <Grid container spacing={1} sx={{ pl: 2 }}>
-          <TableContainer
-            component={Paper}
-            sx={{
-              maxHeight: 'calc(100vh - 250px)',
-              overflowY: 'auto',
-              width: '100%',
-            }}
-          >
+       {/* Table Container */}
+<Grid container spacing={1} sx={{ pl: 2 }}>
+  <TableContainer
+    component={Paper}
+    sx={{
+      maxHeight: 'calc(100vh - 130px)',
+      overflowY: 'auto',
+      width: '100%',
+    }}
+  >
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -1832,7 +1928,11 @@ const confirmVerification = async () => {
                             invoice.purchaseOrderId ? (
                               <span
                                 style={{ color: 'purple', cursor: 'pointer', textDecoration: 'underline' }}
-                                onClick={() => handlePoClick(invoice.purchaseOrderId)}
+onClick={() => {
+  if (invoice.purchaseOrderId) {
+    handlePoClick(invoice.purchaseOrderId);
+  }
+}}
                               >
                                 {invoice.poRandomId}
                               </span>
@@ -2001,7 +2101,10 @@ const confirmVerification = async () => {
               <Box>
                 <Box sx={{ display: 'flex', gap: 3, mb: 2, flexWrap: 'wrap' }}>
                   <Typography variant="h6">
-                    <strong>PO ID:</strong> {selectedInvoice.poRandomId}
+                   <strong>PO ID:</strong>{" "}
+{selectedInvoice.poRandomIds?.length
+  ? selectedInvoice.poRandomIds.join(", ")
+  : selectedInvoice.poRandomId || selectedInvoice.poRandomID}
                   </Typography>
                   <Typography variant="h6">
                     <strong>GRN ID:</strong> {selectedInvoice.grnRandomId}
@@ -2031,7 +2134,165 @@ const confirmVerification = async () => {
                     <strong>Total Amount:</strong> {selectedInvoice.invoiceAmount.toFixed(2)}
                   </Typography>
                 </Box>
+{selectedInvoice.invoiceType !== "service" && isMultiPoApInvoice(selectedInvoice) ? (
+  <Box sx={{ mt: 2 }}>
+    {groupMultiPoApItems(selectedInvoice).map((poGroup) => {
+      const expanded = expandedApPoSections[poGroup.poRandomId] === true;
 
+      return (
+        <Paper key={poGroup.poRandomId} variant="outlined" sx={{ mb: 2 }}>
+          <Box
+            onClick={() => toggleApPoSection(poGroup.poRandomId)}
+            sx={{
+              p: 1.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              cursor: "pointer",
+              backgroundColor: "#f5f5f5",
+              borderBottom: expanded ? "1px solid #ddd" : "none",
+            }}
+          >
+            {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            <Typography fontWeight="bold">
+              PO ID: {poGroup.poRandomId}
+            </Typography>
+          </Box>
+
+          {expanded && (
+            <Box sx={{ p: 2 }}>
+              <TableContainer component={Paper}>
+                <Table sx={{ "& .MuiTableCell-root": { borderBottom: "none" } }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>S.No</TableCell>
+                      <TableCell>Item Name</TableCell>
+                      <TableCell>Received Quantity</TableCell>
+                      <TableCell>UOM</TableCell>
+                      <TableCell>Returned Quantity</TableCell>
+                      <TableCell>Pkt Count</TableCell>
+                      <TableCell>Quantity</TableCell>
+                      <TableCell>Stock Quantity</TableCell>
+                      <TableCell>Bef Tax Discount(%)</TableCell>
+                      <TableCell>Af Tax Discount(%)</TableCell>
+                      <TableCell>Tax(%)</TableCell>
+                      <TableCell>Unit Price</TableCell>
+                      <TableCell>Total Price</TableCell>
+                      <TableCell>Final Price</TableCell>
+                    </TableRow>
+                  </TableHead>
+
+                  <TableBody>
+                    {poGroup.items.map((item: any, index: number) => (
+                      <TableRow key={`${poGroup.poRandomId}-${item.itemId}-${index}`}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{item.itemName}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>{item.uom}</TableCell>
+                        <TableCell>{item.returnedQuantity || 0}</TableCell>
+                        <TableCell>{item.nos}</TableCell>
+                        <TableCell>{item.eachQuantity}</TableCell>
+                        <TableCell>{item.stockQuantity}</TableCell>
+                        <TableCell>{item.befTaxDiscount}</TableCell>
+                        <TableCell>{item.afTaxDiscount}</TableCell>
+                        <TableCell>{item.purchasetaxName}</TableCell>
+                        <TableCell>{item.unitPrice}</TableCell>
+                        <TableCell>{Number(item.totalPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell>{Number(item.finalPrice || 0).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>Sub Total:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.subTotal.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>SGST:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.sgst.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>CGST:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.cgst.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>IGST:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.igst.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>Tax Amount:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.taxAmount.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>Freight Amount:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.freightAmount.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>Freight Tax:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.freightTax.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell colSpan={13} align="right">
+                        <strong>Round Off:</strong>
+                      </TableCell>
+                      <TableCell>{poGroup.roundOff.toFixed(2)}</TableCell>
+                    </TableRow>
+
+                    <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                      <TableCell colSpan={13} align="right">
+                        <strong>{poGroup.poRandomId} Final Amount:</strong>
+                      </TableCell>
+                      <TableCell>
+                        <strong>{poGroup.finalAmount.toFixed(2)}</strong>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          )}
+        </Paper>
+      );
+    })}
+
+    <Paper variant="outlined" sx={{ p: 2, mt: 2, backgroundColor: "#f8f8f8" }}>
+      <Typography fontWeight="bold">
+        Total Invoice Amount (All POs Combined)
+      </Typography>
+
+      <Typography>
+        PO Count: {groupMultiPoApItems(selectedInvoice).length}
+      </Typography>
+
+      <Typography fontWeight="bold">
+        Grand Total Invoice Amount: ₹
+        {groupMultiPoApItems(selectedInvoice)
+          .reduce((sum, po) => sum + po.finalAmount, 0)
+          .toFixed(2)}
+      </Typography>
+    </Paper>
+  </Box>
+) : (
                 <TableContainer component={Paper} sx={{ mt: 2 }}>
                   <Table sx={{ '& .MuiTableCell-root': { borderBottom: 'none' } }}>
                     <TableHead>
@@ -2184,6 +2445,7 @@ const confirmVerification = async () => {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                )}
               </Box>
             )}
           </DialogContent>
@@ -2222,8 +2484,12 @@ const confirmVerification = async () => {
   )}
 
   {/* Verify Button */}
-  {canApprove && selectedInvoice?.status !== 'Verified' && selectedInvoice?.status !== 'Fully Paid' && (
-    <Tooltip title="Verify Invoice">
+ {/* Verify Button */}
+{canApprove &&
+  !isReturnedInvoice &&
+  selectedInvoice?.status !== 'Verified' &&
+  selectedInvoice?.status !== 'Fully Paid' && (
+    <Tooltip title={selectedInvoice?.invoiceType === 'service' ? "Verify Service" : "Verify Invoice"}>
       <Button
         variant="contained"
         color="success"
@@ -2232,10 +2498,14 @@ const confirmVerification = async () => {
         sx={{ minWidth: '150px' }}
         disabled={verificationLoading}
       >
-        {verificationLoading ? 'Verifying...' : 'Verify Invoice'}
+        {verificationLoading
+          ? 'Verifying...'
+          : selectedInvoice?.invoiceType === 'service'
+            ? 'Verify Service'
+            : 'Verify Invoice'}
       </Button>
     </Tooltip>
-  )}
+)}
   
   <Button variant="contained" onClick={handleCloseDetailsDialog}>Close</Button>
 </DialogActions>
@@ -2365,13 +2635,15 @@ const confirmVerification = async () => {
           grn={selectedGrn}
         />
 
-        <PODialog
-          open={poDialogOpen}
-          onClose={() => {
-            dispatch(setPoDialogOpen(false));
-          }}
-          po={selectedPo}
-        />
+       <PODialog
+  open={poDialogOpen}
+  onClose={() => {
+    dispatch(setPoDialogOpen(false));
+    setSelectedPos([]);
+  }}
+  po={selectedPo}
+  pos={selectedPos}
+/>
 
         <ServiceDialog
           open={dialogOpen}

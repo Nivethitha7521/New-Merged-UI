@@ -92,7 +92,7 @@ const OutgoingPaymentComponent = React.memo(() => {
   const { randomIdap, apDialogOpen, selectedinvoiceId, itemwiseap } = useSelector(selectApinvoice);
   const { businesses } = useSelector(selectBusinesses);
   const { selectedPo, poDialogOpen, loading } = useSelector(selectPurchaseListState);
-
+const [selectedPos, setSelectedPos] = useState<PoResponse[]>([]);
   const [selectedOutgoing, setSelectedOutgoing] = useState<any>(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
@@ -132,11 +132,11 @@ const OutgoingPaymentComponent = React.memo(() => {
   // Replace your useState for visibleColumns with this:
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const defaultColumns = [
-      { id: 'serialNo', label: 'S.No', align: 'center', sortable: false, visible: true },
+      { id: 'serialNo', label: 'S.No', align: 'center', sortable: false, visible: false },
       { id: 'select', label: 'Select', align: 'center', sortable: false, visible: true },
-      { id: 'poNo', label: 'PO.No/SO.No', align: 'left', sortable: false, visible: true },
-      { id: 'grnNo', label: 'GRN No', align: 'left', sortable: false, visible: true },
-      { id: 'apNo', label: 'AP No', align: 'left', sortable: false, visible: true },
+      { id: 'poNo', label: 'PO.No/SO.No', align: 'left', sortable: false, visible: false },
+      { id: 'grnNo', label: 'GRN No', align: 'left', sortable: false, visible: false },
+      { id: 'apNo', label: 'AP No', align: 'left', sortable: false, visible: false },
       { id: 'outgoingNo', label: 'Outgoing No', align: 'left', sortable: false, visible: true },
       { id: 'vendorName', label: 'Vendor Name', align: 'left', sortable: true, visible: true },
       { id: 'type', label: 'Type', align: 'left', sortable: false, visible: true },
@@ -144,14 +144,14 @@ const OutgoingPaymentComponent = React.memo(() => {
       { id: 'invoiceDate', label: 'Invoice Date', align: 'left', sortable: true, visible: true },
       { id: 'invoiceAmount', label: 'Invoice Amount', align: 'right', sortable: false, visible: true },
       { id: 'taxDetails', label: 'Tax Details', align: 'left', sortable: false, visible: true },
-      { id: 'discountAmount', label: 'Discount Amount', align: 'right', sortable: false, visible: true },
+      { id: 'discountAmount', label: 'Discount Amount', align: 'right', sortable: false, visible: false },
       { id: 'total', label: 'Total', align: 'right', sortable: false, visible: true },
       { id: 'paidAmount', label: 'Paid Amount', align: 'right', sortable: false, visible: true },
       { id: 'remainingAmount', label: 'Remaining Amount', align: 'right', sortable: false, visible: true },
       { id: 'dueDays', label: 'Due Days', align: 'center', sortable: true, visible: true },
       { id: 'paymentTerms', label: 'Payment Terms', align: 'center', sortable: true, visible: true },
-      { id: 'verifiedBy', label: 'Verified By', align: 'left', sortable: false, visible: true },
-      { id: 'verifiedDate', label: 'Verified Date', align: 'center', sortable: false, visible: true },
+      { id: 'verifiedBy', label: 'Verified By', align: 'left', sortable: false, visible: false },
+      { id: 'verifiedDate', label: 'Verified Date', align: 'center', sortable: false, visible: false },
       { id: 'action', label: 'Action', align: 'center', sortable: false, visible: true },
     ];
 
@@ -399,41 +399,61 @@ useEffect(() => {
     dispatch(setSelectedinvoiceId(null));
   };
 
-  const handlePoClick = async (poId: string) => {
-    try {
-      const result = await dispatch(fetchPoById(poId)).unwrap();
-      if (result) {
-        const transformedPo: PoResponse = {
-          purchaseOrderId: result.purchaseOrderId,
-          randomId: result.randomId,
-          vendorName: result.vendorName,
-          orderDate: typeof result.orderDate === 'string' ? result.orderDate : result.orderDate?.toISOString() || null,
-          itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
-            itemId: item.itemId ?? 'N/A',
-            itemName: item.itemName ?? 'Unknown',
-            receivedQuantity: Number(item.receivedQuantity) || 0,
-            poQuantity: Number(item.poQuantity) || 0,
-            newPrice: Number(item.newPrice) || 0,
-            totalPrice: Number(item.totalPrice) || 0,
-            purchasetaxName: Number(item.purchasetaxName) || 0,
-            taxPercentage: Number(item.taxPercentage) || 0,
-            taxAmount: Number(item.taxAmount) || 0,
-            discountAmount: Number(item.discountAmount) || 0,
-            finalPrice: Number(item.finalPrice) || 0,
-          })) as ItemDetailResponsePO[],
-        };
-        dispatch(setSelectedPo(transformedPo));
-        setPoDialogOpen(true);
-      } else {
-        dispatch(setSnackbarMessage('Purchase Order not found.'));
-        dispatch(setSnackbarOpen(true));
-      }
-    } catch (error) {
-      dispatch(setSnackbarMessage('Failed to fetch PO details.'));
+const transformPo = (result: any): PoResponse => ({
+  purchaseOrderId: result.purchaseOrderId,
+  randomId: result.randomId,
+  vendorName: result.vendorName,
+  orderDate:
+    typeof result.orderDate === "string"
+      ? result.orderDate
+      : result.orderDate?.toISOString() || null,
+  itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
+    itemId: item.itemId ?? "N/A",
+    itemName: item.itemName ?? "Unknown",
+    receivedQuantity: Number(item.receivedQuantity) || 0,
+    poQuantity: Number(item.poQuantity) || 0,
+    newPrice: Number(item.newPrice) || 0,
+    totalPrice: Number(item.totalPrice) || 0,
+    purchasetaxName: Number(item.purchasetaxName) || 0,
+    taxPercentage: Number(item.taxPercentage) || 0,
+    taxAmount: Number(item.taxAmount) || 0,
+    discountAmount: Number(item.discountAmount) || 0,
+    finalPrice: Number(item.finalPrice) || 0,
+  })) as ItemDetailResponsePO[],
+});
+
+const handlePoClick = async (poIds: string | string[]) => {
+  const ids = Array.isArray(poIds)
+    ? poIds
+    : poIds.split(",").map((id) => id.trim()).filter(Boolean);
+
+  if (ids.length === 0) {
+    dispatch(setSnackbarMessage("Invalid Purchase Order ID"));
+    dispatch(setSnackbarOpen(true));
+    return;
+  }
+
+  try {
+    const results = await Promise.all(
+      ids.map((id) => dispatch(fetchPoById(id)).unwrap())
+    );
+
+    const transformedPos = results.filter(Boolean).map(transformPo);
+
+    if (transformedPos.length > 0) {
+      setSelectedPos(transformedPos);
+      dispatch(setSelectedPo(transformedPos[0])); // keeps old redux single PO logic safe
+      dispatch(setPoDialogOpen(true));
+    } else {
+      dispatch(setSnackbarMessage("Purchase Order not found."));
       dispatch(setSnackbarOpen(true));
-      console.error('Failed to fetch PO details:', error);
     }
-  };
+  } catch (error) {
+    dispatch(setSnackbarMessage("Failed to fetch PO details."));
+    dispatch(setSnackbarOpen(true));
+    console.error("Failed to fetch PO details:", error);
+  }
+};
 
   const handleCloseServiceDialog = () => {
     setDialogOpen(false);
@@ -1354,9 +1374,37 @@ useEffect(() => {
                                           cursor: 'pointer',
                                           textDecoration: 'underline'
                                         }}
-                                        onClick={() => payment.purchaseOrderId && handlePoClick(payment.purchaseOrderId)}
+  onClick={() => {
+  const ids =
+    payment.purchaseOrderIds && payment.purchaseOrderIds.length > 0
+      ? payment.purchaseOrderIds
+      : payment.purchaseOrderId;
+
+  if (ids) handlePoClick(ids);
+}}
                                       >
-                                        {payment.poRandomId}
+{(() => {
+  const poLabels =
+    payment.poRandomIds && payment.poRandomIds.length > 0
+      ? payment.poRandomIds
+      : payment.poRandomId
+        ? [payment.poRandomId]
+        : [];
+
+  const firstPo = poLabels[0];
+  const remainingCount = poLabels.length - 1;
+
+  return (
+    <>
+      {firstPo}
+      {remainingCount > 0 && (
+        <span style={{ marginLeft: 6, fontWeight: 600 }}>
+          +{remainingCount}
+        </span>
+      )}
+    </>
+  );
+})()}
                                       </span>
                                     ) : payment.serviceId ? (
                                       <span
@@ -1572,7 +1620,15 @@ useEffect(() => {
 
         {/* Dialogs */}
         <DebitCreditNoteDialog />
-        <PODialog open={poDialogOpen} onClose={() => dispatch(setPoDialogOpen(false))} po={selectedPo} />
+       <PODialog
+  open={poDialogOpen}
+  onClose={() => {
+    dispatch(setPoDialogOpen(false));
+    setSelectedPos([]);
+  }}
+  po={selectedPo}
+  pos={selectedPos}
+/>
         <GrnDialog open={viewItemsDialogOpen} onClose={() => setViewItemsDialogOpen(false)} grn={selectedGrn} />
         <ApInvoiceDialog open={apDialogOpen} onClose={handleCloseApDialog} apInvoice={selectedApInvoice} />
         <BulkPaymentDialog open={isBulkPaymentOpen} onClose={() => setIsBulkPaymentOpen(false)} selectedOutgoings={selectedOutgoings} />

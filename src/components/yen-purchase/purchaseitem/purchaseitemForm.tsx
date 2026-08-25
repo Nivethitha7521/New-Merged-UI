@@ -166,7 +166,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
       const stepFields: { [key: number]: string[] } = {
         0: ['itemName', 'purchasesubcategoryName', 'purchasecategoryName', 'itemgroupName', 'itemType', 'supplier',
           'uom', 'purchasePrice', 'purchasetaxName', 'stockQuantity'],
-        1: ['reorderLevel', 'hsnCode', 'locationName', 'shelfLife', 'barcode', 'description'],
+        1: ['reorderLevel', 'targetStockLevel', 'hsnCode', 'locationName', 'shelfLife', 'barcode', 'description'],
       };
 
       const touchedFields = stepFields[activeStep].reduce((acc, field) => ({
@@ -248,6 +248,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
         purchasetaxName: true,
         stockQuantity: true,
         reorderLevel: true,
+        targetStockLevel: true,
         hsnCode: true,
         locationName: true,
         shelfLife: true,
@@ -272,6 +273,7 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
           errorStep = 0;
         } else if (
           errors.reorderLevel ||
+          errors.targetStockLevel ||
           errors.hsnCode ||
           errors.locationName ||
           errors.shelfLife ||
@@ -820,6 +822,44 @@ const PurchaseItemForm: React.FC<PurchaseItemFormProps> = ({
                           required
                         />
                       </Grid>
+                      <Grid item xs={12} sm={6} md={3}>
+  <TextField
+    fullWidth
+    size="small"
+    label="Target Stock Level*"
+    name="targetStockLevel"
+    value={values.targetStockLevel}
+    onChange={handleChange}
+    error={touched.targetStockLevel && Boolean(errors.targetStockLevel)}
+    helperText={
+      touched.targetStockLevel && errors.targetStockLevel
+        ? String(errors.targetStockLevel)
+        : ''
+    }
+    type="number"
+    inputProps={{ min: values.reorderLevel || 0 }}
+    required
+  />
+</Grid>
+                      {/* <Grid item xs={12} sm={6} md={3}>
+  <TextField
+    fullWidth
+    size="small"
+    label="Target Stock Level*"
+    name="targetStockLevel"
+    value={values.targetStockLevel}
+    onChange={handleChange}
+    error={touched.targetStockLevel && Boolean(errors.targetStockLevel)}
+    helperText={
+      touched.targetStockLevel && errors.targetStockLevel
+        ? String(errors.targetStockLevel)
+        : ''
+    }
+    type="number"
+    inputProps={{ min: values.reorderLevel || 0 }}
+    required
+  />
+</Grid> */}
                       <Grid item xs={12} sm={6} md={3}>
                         <TextField
                           fullWidth

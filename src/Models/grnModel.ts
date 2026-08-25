@@ -43,6 +43,10 @@ export interface ItemDetail {
   returnHistory?: ReturnHistory[];
   poPrice: number;
   priceVariance: number;
+   sourcePurchaseOrderId?: string;
+  sourcePoRandomId?: string;
+  taxPercentage?: number;
+
 }
 
 export interface GrnData {
@@ -94,6 +98,10 @@ export interface GrnData {
   totalFreightAmount: number;
   totalFreightTaxAmount: number;
   freights: Freight[];
+  grnSource?: "Single" | "Multi";
+poCount?: number;
+purchaseOrderIds?: string[];
+poRandomIds?: string[];
 }
 
 export interface TaxDetails {
@@ -296,6 +304,7 @@ export interface ItemDetails {
   totalPrice: number;
   finalPrice: number;
   status: string;
+  
 }
 
 export interface ApInvoice {
@@ -460,6 +469,7 @@ export interface GrnState {
   itemDetails: ItemDetail[];
 holdGrns: GrnData[];
 holdGrnTotalItems: number;
+ holdGrnNotificationCount: number;
   // UI state
   searchQuery: string;
   selectedGrnId: string | null;
@@ -535,6 +545,7 @@ holdGrnTotalItems: number;
 export const initialState: GrnState = {
   holdGrns: [],
 holdGrnTotalItems: 0,
+holdGrnNotificationCount: 0,
   grns: [],
   itemwise: [],
   itemDetails: [],
@@ -582,7 +593,8 @@ holdGrnTotalItems: 0,
     returnedCgst: 0,
     grnPrice: 0,
     poPrice: 0,
-    priceVariance: 0
+    priceVariance: 0,
+    
   },
   vendors: [],
   purchaseitems: [],

@@ -1,77 +1,148 @@
 "use client";
+
 import React from "react";
 import Link from "next/link";
-import { Button, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import YenInventoryPage from "../page";
-import { usePermissions } from "@/hooks/usePermissions";
-type SubItem = {
-  label: string;
-  path: string;
-  module: string;
-};
-const subItems: SubItem[] = [
+
+const PRIMARY_BLUE = "#1976d2";
+const PRIMARY_BLUE_DARK = "#0f5fb5";
+const PRIMARY_BLUE_SOFT = "#eef6ff";
+const TAB_BORDER = "#bfdbfe";
+
+const subItems = [
   {
     label: "Physical Stock Modification",
+    shortLabel: "Physical Stock",
     path: "/yen-inventory/WarehouseInventoryManagement/stockModification",
-    module: "warehousephysicalstockmodification",
   },
   {
     label: "Physical Stock Variance Modification",
+    shortLabel: "Variance",
     path: "/yen-inventory/WarehouseInventoryManagement/storeStockModification",
-    module: "warehousephysicalstockvariancemodification",
   },
   {
-    label: "Stock Ledger",
+    label: "Approved Stock",
+    shortLabel: "Approved Stock",
+    path: "/yen-inventory/WarehouseInventoryManagement/ApprovedStock",
+  },
+  {
+    label: "Stock Transaction / Ledger",
+    shortLabel: "Ledger",
     path: "/yen-inventory/WarehouseInventoryManagement/ledger",
-    module: "warehousestockledger",
   },
 ];
+
 const WarehouseInventoryManagementPage = () => {
   const pathname = usePathname();
- const { isModuleVisible } = usePermissions();
 
   return (
-    <div>
+    <Box sx={{ width: "100%" }}>
       <YenInventoryPage />
+
       <Box
         sx={{
+          mx: { xs: 1, sm: 1.5 },
+          px: { xs: 0.75, sm: 1 },
+          py: { xs: 0.65, sm: 0.7 },
           display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          ml: 2,
-          marginTop: 1,
+          alignItems: "center",
+          gap: { xs: 0.6, sm: 0.8 },
+          flexWrap: "wrap",
+          border: "1px solid #cfe2f8",
+          borderTop: "1px solid #e8f2ff",
+          borderRadius: "0 0 12px 12px",
+          background:
+            "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
+          boxShadow: "0 3px 8px rgba(15, 23, 42, 0.03)",
         }}
       >
-       {subItems
-          .filter((item) => isModuleVisible("yenerp", item.module))
-          .map((item) => {
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: { xs: 0.55, sm: 0.7 },
+            flexWrap: "wrap",
+            flex: "1 1 auto",
+            minWidth: 0,
+          }}
+        >
+          {subItems.map((item) => {
             const isActive = pathname?.startsWith(item.path);
 
             return (
-              <Link key={item.label} href={item.path} passHref prefetch={false}>
-                <Button
-                  component="a"
-                  variant="contained"
+              <Link
+                key={item.path}
+                href={item.path}
+                prefetch={false}
+                style={{ textDecoration: "none" }}
+              >
+                <Box
+                  title={item.label}
                   sx={{
-                    backgroundColor: isActive ? "white" : "primary.main",
-                    color: isActive ? "black" : "white",
+                    position: "relative",
+                    minHeight: 32,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    px: { xs: 1.15, sm: 1.45 },
+                    py: 0.55,
+                    borderRadius: "10px",
+                    border: isActive
+                      ? `1px solid ${TAB_BORDER}`
+                      : "1px solid #e2e8f0",
+                    backgroundColor: isActive ? PRIMARY_BLUE_SOFT : "#ffffff",
+                    color: isActive ? PRIMARY_BLUE_DARK : "#334155",
+                    fontSize: { xs: "11.5px", sm: "12px" },
+                    fontWeight: isActive ? 900 : 800,
+                    lineHeight: 1.15,
+                    whiteSpace: "nowrap",
+                    boxShadow: isActive
+                      ? "0 1px 4px rgba(25, 118, 210, 0.10)"
+                      : "0 1px 2px rgba(15, 23, 42, 0.04)",
+                    cursor: "pointer",
+                    transition: "all 0.16s ease",
+                    maxWidth: {
+                      xs: "calc(100vw - 54px)",
+                      sm: "none",
+                    },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    "&::after": isActive
+                      ? {
+                          content: '""',
+                          position: "absolute",
+                          left: 10,
+                          right: 10,
+                          bottom: 3,
+                          height: 2,
+                          borderRadius: "999px",
+                          backgroundColor: PRIMARY_BLUE,
+                        }
+                      : {},
                     "&:hover": {
-                      backgroundColor: isActive
-                        ? "rgba(255, 255, 255, 0.8)"
-                        : "primary.dark",
+                      borderColor: TAB_BORDER,
+                      backgroundColor: isActive ? PRIMARY_BLUE_SOFT : "#f8fbff",
+                      color: PRIMARY_BLUE_DARK,
+                      transform: "translateY(-1px)",
                     },
                   }}
                 >
-                  {item.label}
-                </Button>
+                  <Box sx={{ display: { xs: "none", lg: "inline" } }}>
+                    {item.label}
+                  </Box>
+                  <Box sx={{ display: { xs: "inline", lg: "none" } }}>
+                    {item.shortLabel}
+                  </Box>
+                </Box>
               </Link>
             );
           })}
+        </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 
 export default WarehouseInventoryManagementPage;
-  

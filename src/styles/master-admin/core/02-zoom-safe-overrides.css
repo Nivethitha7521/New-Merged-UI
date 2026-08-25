@@ -1,0 +1,665 @@
+/* =========================================================
+   MASTER ADMIN — ZOOM-SAFE PAGE-SPECIFIC OVERRIDES
+
+   Some Location, Warehouse, UOM, Tax, Discount and Vehicle
+   rules still used fixed pixels and legacy width breakpoints.
+   On a scaled desktop those values doubled at browser 100%,
+   while browser 50% happened to hide the problem. Keep the
+   existing UI and use the shared Purchase density unit here.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* Keep Location and Vehicle in the same desktop toolbar row as Purchase. */
+
+  .erp-master-admin-viewport .location-master-toolbar,
+  .erp-master-admin-viewport .vehicle-master-toolbar {
+    display: grid !important;
+    grid-template-columns:
+      minmax(calc(var(--erp-ui) * 15.625), auto)
+      minmax(calc(var(--erp-ui) * 32.5), calc(var(--erp-ui) * 45))
+      minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: calc(var(--erp-ui) * 2.25) !important;
+    row-gap: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-master-admin-viewport .location-master-search,
+  .erp-master-admin-viewport .vehicle-master-search {
+    width: 100% !important;
+    min-width: calc(var(--erp-ui) * 32.5) !important;
+    max-width: calc(var(--erp-ui) * 45) !important;
+    flex-basis: calc(var(--erp-ui) * 45) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .MuiOutlinedInput-root {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding-left: 0 !important;
+    padding-right: calc(var(--erp-ui) * 1.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .MuiOutlinedInput-input {
+    height: auto !important;
+    min-height: calc(var(--erp-ui) * 2.5) !important;
+    padding: calc(var(--erp-ui) * 1.125) var(--erp-ui) !important;
+    line-height: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .MuiInputAdornment-root {
+    margin: 0 calc(var(--erp-ui) * 0.5) 0
+      calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .purchase-reference-search-icon {
+    width: calc(var(--erp-ui) * 2.2) !important;
+    height: calc(var(--erp-ui) * 2.2) !important;
+    margin: 0 !important;
+    font-size: calc(var(--erp-ui) * 2.2) !important;
+  }
+
+  .erp-master-admin-viewport .location-master-actions,
+  .erp-master-admin-viewport .vehicle-master-actions {
+    grid-column: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: calc(var(--erp-ui) * 1.125) !important;
+    padding: calc(var(--erp-ui) * 0.25)
+      calc(var(--erp-ui) * 0.125)
+      calc(var(--erp-ui) * 0.5) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  /* Match page-specific control specificity so fixed 40px rules cannot win. */
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button {
+    width: auto !important;
+    min-width: calc(var(--erp-ui) * 13.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+    border-width: calc(var(--erp-ui) * 0.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button {
+    font-size: calc(
+      var(--erp-ui) * 1.94 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button
+    .MuiButton-startIcon {
+    margin-left: 0 !important;
+    margin-right: calc(var(--erp-ui) * 0.8) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button
+    svg {
+    width: calc(var(--erp-ui) * 2.15) !important;
+    height: calc(var(--erp-ui) * 2.15) !important;
+    font-size: calc(var(--erp-ui) * 2.15) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.15) 0
+      calc(var(--erp-ui) * 1.65) !important;
+    gap: calc(var(--erp-ui) * 0.9) !important;
+    border-width: calc(var(--erp-ui) * 0.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiTypography-root {
+    font-size: calc(
+      var(--erp-ui) * 1.88 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-root {
+    width: calc(var(--erp-ui) * 5.75) !important;
+    height: calc(var(--erp-ui) * 3.25) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase {
+    padding: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-thumb {
+    width: calc(var(--erp-ui) * 1.875) !important;
+    height: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase.Mui-checked {
+    transform: translateX(calc(var(--erp-ui) * 2.375)) !important;
+  }
+
+  .erp-master-admin-viewport
+    .location-master-actions
+    .purchase-reference-filter-button {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 !important;
+    border-width: calc(var(--erp-ui) * 0.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  .erp-master-admin-viewport
+    .location-master-actions
+    .purchase-reference-filter-button
+    svg {
+    width: calc(var(--erp-ui) * 2.25) !important;
+    height: calc(var(--erp-ui) * 2.25) !important;
+    font-size: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  /*
+   * Table column width hints. Each custom property is the old pixel width
+   * divided by the Purchase base unit, preserving the existing proportions.
+   */
+
+  .erp-master-admin-viewport
+    :is(
+      [class*="warehouse-column-"],
+      [class*="location-column-"],
+      [class*="uom-column-"],
+      [class*="tax-column-"],
+      [class*="dinein-tax-column-"],
+      [class*="discount-column-"]
+    ) {
+    width: calc(var(--erp-ui) * var(--master-admin-column-units)) !important;
+    min-width: calc(
+      var(--erp-ui) * var(--master-admin-column-units)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .location-native-table {
+    min-width: calc(var(--erp-ui) * 152.5) !important;
+  }
+
+  .erp-master-admin-viewport .uom-native-table {
+    min-width: calc(var(--erp-ui) * 112.5) !important;
+  }
+
+  .erp-master-admin-viewport .tax-native-table {
+    min-width: calc(var(--erp-ui) * 131.25) !important;
+  }
+
+  .erp-master-admin-viewport .discount-native-table {
+    min-width: calc(var(--erp-ui) * 116.25) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.warehouse-column-sno, .location-column-sNo, .uom-column-sno, .discount-column-sno) {
+    max-width: calc(
+      var(--erp-ui) * var(--master-admin-column-units)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-sno {
+    --master-admin-column-units: 8;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-warehouseId {
+    --master-admin-column-units: 15;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-warehouseName,
+  .erp-master-admin-viewport .warehouse-column-address {
+    --master-admin-column-units: 26.25;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-aliasName {
+    --master-admin-column-units: 15.625;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-type,
+  .erp-master-admin-viewport .warehouse-column-actions {
+    --master-admin-column-units: 13.125;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-status {
+    --master-admin-column-units: 13.75;
+  }
+
+  .erp-master-admin-viewport
+    :is(.warehouse-column-country, .warehouse-column-state) {
+    --master-admin-column-units: 16.25;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-city {
+    --master-admin-column-units: 16.875;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .warehouse-column-postalCode,
+      .warehouse-column-latitude,
+      .warehouse-column-longitude
+    ) {
+    --master-admin-column-units: 15;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-phoneNumber {
+    --master-admin-column-units: 18.75;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-email {
+    --master-admin-column-units: 27.5;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-description {
+    --master-admin-column-units: 30;
+  }
+
+  .erp-master-admin-viewport
+    :is(.warehouse-column-openingHours, .warehouse-column-closingHours) {
+    --master-admin-column-units: 18.125;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .warehouse-column-managerName,
+      .warehouse-column-managerContact,
+      .warehouse-column-createdDate,
+      .warehouse-column-lastUpdatedDate
+    ) {
+    --master-admin-column-units: 20;
+  }
+
+  .erp-master-admin-viewport .warehouse-column-createdBy {
+    --master-admin-column-units: 17.5;
+  }
+
+  .erp-master-admin-viewport .location-column-sNo {
+    --master-admin-column-units: 8.5;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-column-locationId,
+      .location-column-aliasName,
+      .location-column-postalCode
+    ) {
+    --master-admin-column-units: 15.625;
+  }
+
+  .erp-master-admin-viewport .location-column-branchName,
+  .erp-master-admin-viewport .location-column-email {
+    --master-admin-column-units: 27.5;
+  }
+
+  .erp-master-admin-viewport .location-column-type {
+    --master-admin-column-units: 13.75;
+  }
+
+  .erp-master-admin-viewport .location-column-status {
+    --master-admin-column-units: 14.375;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-column-address, .location-column-description) {
+    --master-admin-column-units: 30;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-column-country, .location-column-state, .location-column-city) {
+    --master-admin-column-units: 17.5;
+  }
+
+  .erp-master-admin-viewport .location-column-phoneNumber {
+    --master-admin-column-units: 18.75;
+  }
+
+  .erp-master-admin-viewport .location-column-salesTypes {
+    --master-admin-column-units: 22.5;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-column-latitude, .location-column-longitude) {
+    --master-admin-column-units: 15;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-column-openingHours, .location-column-closingHours) {
+    --master-admin-column-units: 18.125;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-column-managerName, .location-column-managerContact) {
+    --master-admin-column-units: 20.625;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-column-createdDate, .location-column-lastUpdatedDate) {
+    --master-admin-column-units: 21.25;
+  }
+
+  .erp-master-admin-viewport .location-column-createdBy {
+    --master-admin-column-units: 18.125;
+  }
+
+  .erp-master-admin-viewport .location-column-actions {
+    --master-admin-column-units: 13.125;
+  }
+
+  .erp-master-admin-viewport .uom-column-sno {
+    --master-admin-column-units: 9;
+  }
+
+  .erp-master-admin-viewport .uom-column-id {
+    --master-admin-column-units: 16.875;
+  }
+
+  .erp-master-admin-viewport .uom-column-measurement {
+    --master-admin-column-units: 26.25;
+  }
+
+  .erp-master-admin-viewport .uom-column-name {
+    --master-admin-column-units: 22.5;
+  }
+
+  .erp-master-admin-viewport .uom-column-precision {
+    --master-admin-column-units: 15.625;
+  }
+
+  .erp-master-admin-viewport .uom-column-display {
+    --master-admin-column-units: 19.375;
+  }
+
+  .erp-master-admin-viewport .uom-column-actions {
+    --master-admin-column-units: 13.75;
+  }
+
+  .erp-master-admin-viewport .tax-column-sno {
+    --master-admin-column-units: 8.125;
+  }
+
+  .erp-master-admin-viewport .tax-column-id {
+    --master-admin-column-units: 15;
+  }
+
+  .erp-master-admin-viewport .tax-column-name {
+    --master-admin-column-units: 23.75;
+  }
+
+  .erp-master-admin-viewport .tax-column-percentage {
+    --master-admin-column-units: 18.125;
+  }
+
+  .erp-master-admin-viewport .tax-column-code-group {
+    --master-admin-column-units: 27.5;
+  }
+
+  .erp-master-admin-viewport .tax-column-code-name {
+    --master-admin-column-units: 18.75;
+  }
+
+  .erp-master-admin-viewport .tax-column-code-percentage {
+    --master-admin-column-units: 11.25;
+  }
+
+  .erp-master-admin-viewport .tax-column-actions {
+    --master-admin-column-units: 13.125;
+  }
+
+  .erp-master-admin-viewport .dinein-tax-column-name {
+    --master-admin-column-units: 26.25;
+  }
+
+  .erp-master-admin-viewport .dinein-tax-column-percentage {
+    --master-admin-column-units: 21.875;
+  }
+
+  .erp-master-admin-viewport .dinein-tax-column-hsn {
+    --master-admin-column-units: 18.125;
+  }
+
+  .erp-master-admin-viewport .discount-column-sno {
+    --master-admin-column-units: 8.75;
+  }
+
+  .erp-master-admin-viewport .discount-column-id {
+    --master-admin-column-units: 16.25;
+  }
+
+  .erp-master-admin-viewport .discount-column-sale-type {
+    --master-admin-column-units: 30;
+  }
+
+  .erp-master-admin-viewport .discount-column-name {
+    --master-admin-column-units: 26.25;
+  }
+
+  .erp-master-admin-viewport .discount-column-percentage {
+    --master-admin-column-units: 21.25;
+  }
+
+  .erp-master-admin-viewport .discount-column-actions {
+    --master-admin-column-units: 13.75;
+  }
+}
+
+@media (max-width: 1000px) {
+  .erp-master-admin-viewport
+  .purchase-reference-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-toolbar-spacer {
+    display: none;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-search {
+    width: 100% !important;
+    flex-basis: auto;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-actions {
+    justify-content: flex-start;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .erp-master-admin-viewport {
+    padding: 20px 16px 30px !important;
+  }
+
+  .master-admin-page-title {
+    font-size: 23px !important;
+  }
+
+  .master-admin-submodule-tabs {
+    gap: 6px;
+    margin-bottom: 15px;
+  }
+
+  .master-admin-submodule-tab {
+    min-height: 31px !important;
+    height: 31px !important;
+
+    padding: 6px 12px !important;
+
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .erp-master-admin-viewport {
+    padding: 18px 12px 28px !important;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-native-table,
+  .erp-master-admin-viewport
+  .purchase-reference-table
+  .MuiTable-root,
+  .erp-master-admin-viewport
+  .purchase-master-table
+  .MuiTable-root {
+    min-width: 640px;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-native-table
+  thead
+  th {
+    font-size: 8.5px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-native-table
+  tbody
+  td {
+    height: 54px !important;
+    min-height: 54px !important;
+
+    font-size: 11.5px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .master-admin-page-header {
+    margin-bottom: 15px;
+  }
+
+  .master-admin-page-title {
+    font-size: 21px !important;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-actions {
+    width: 100%;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-action-button {
+    min-height: 38px !important;
+
+    padding: 7px 12px !important;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-active-toggle {
+    min-height: 38px;
+  }
+
+  .erp-master-admin-viewport
+  .purchase-reference-filter-button {
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 38px !important;
+  }
+}
+

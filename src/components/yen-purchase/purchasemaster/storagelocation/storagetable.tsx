@@ -4,7 +4,9 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   IconButton,Box
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import ConfirmationDialog from '@/components/confirmationDialog';
 import { StorageLocationItem } from '@/Models/storagelocation';
 
@@ -50,8 +52,9 @@ const StorageLocationTable: React.FC<StorageLocationTableProps> = ({
   };
 
   return (
-    <>
+    <Box className="purchase-master-table-shell">
       <TableContainer
+      className="purchase-master-table"
         component={Paper}
         sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
@@ -85,14 +88,40 @@ const StorageLocationTable: React.FC<StorageLocationTableProps> = ({
             ) : (
               items.map((loc, index) => (
                 <TableRow key={loc.storageLocationId}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>{loc.randomId}</TableCell>
-                  <TableCell>{loc.locationName}</TableCell>
-                  <TableCell>{loc.status}</TableCell>
+                 <TableCell className="table-number-right">
+  {index + 1}
+</TableCell>
                   <TableCell>
+  <span className="purchase-master-id-pill">
+    {loc.randomId}
+  </span>
+</TableCell>
+                 <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(loc.locationName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{loc.locationName}</span>
+  </Box>
+</TableCell>
+                 <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      loc.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {loc.status}
+  </span>
+</TableCell>
+                  <TableCell>
+                    <Box className="purchase-master-actions">
                     {loc.status === 'active' ? (
                       <>
                         <IconButton 
+                        className="purchase-master-action-button is-edit"
                           onClick={() => handleEdit(loc.storageLocationId)}
                           disabled={!canEdit}
                           sx={{ 
@@ -107,6 +136,7 @@ const StorageLocationTable: React.FC<StorageLocationTableProps> = ({
                         </IconButton>
                         
                          <IconButton 
+                         className="purchase-master-action-button is-delete"
                           onClick={() => handleOpenDialog('deactivate', loc.storageLocationId)}
                           disabled={!canDelete}
                           sx={{ 
@@ -122,6 +152,7 @@ const StorageLocationTable: React.FC<StorageLocationTableProps> = ({
                       </>
                     ) : (
                       <IconButton 
+                      className="purchase-master-action-button is-activate"
                         onClick={() => handleOpenDialog('activate', loc.storageLocationId)}
                         disabled={!canDelete}
                         sx={{ 
@@ -136,6 +167,7 @@ const StorageLocationTable: React.FC<StorageLocationTableProps> = ({
                       </IconButton>
 
                     )}
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -158,7 +190,7 @@ const StorageLocationTable: React.FC<StorageLocationTableProps> = ({
         cancelText="Cancel"
       />
 
-    </>
+    </Box>
   );
 };
 

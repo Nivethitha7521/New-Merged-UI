@@ -17,9 +17,9 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Refresh as RefreshIcon,
+  EditOutlined as EditIcon,
+  DeleteOutlineRounded as DeleteIcon,
+  RestoreRounded as RefreshIcon,
   VisibilityOutlined as ViewIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
@@ -137,14 +137,15 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
   const subcategoryPopoverId = subcategoryPopoverOpen ? 'subcategory-popover' : undefined;
 
   return (
-    <Box>
+    <Box className="purchase-master-table-shell">
        <TableContainer
         component={Paper}
-        sx={{
-          maxHeight: 'calc(100vh - 180px)', // Dynamic height based on viewport
-          overflowY: 'auto',
-          width: '100%',
-        }}
+        className="purchase-master-table"
+       sx={{
+  maxHeight: 'calc(100vh - 360px)',
+  overflowY: 'auto',
+  width: '100%',
+}}
       >
         <Table
           stickyHeader
@@ -170,12 +171,20 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
               displayedCategories.map((category, index) => (
                 <TableRow key={`${category.purchasecategoryId}-${category.randomId}-${index}`}>
                   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{category.randomId}</TableCell>
-                  <TableCell>{category.purchasecategoryName}</TableCell>
+                  <TableCell><span className="purchase-reference-id-pill">{category.randomId}</span></TableCell>
+                  <TableCell>
+                    <Box className="purchase-reference-name-cell">
+                      <span className="purchase-reference-avatar">
+                        {(category.purchasecategoryName || '?').charAt(0).toUpperCase()}
+                      </span>
+                      <span>{category.purchasecategoryName}</span>
+                    </Box>
+                  </TableCell>
                   <TableCell>
                     {Array.isArray(category.subcategories) && category.subcategories.length > 0 ? (
                       <Button
                         size="small"
+                        className="purchase-reference-view-pill"
                         onClick={(e) => handleViewSubcategories(e, category.subcategories, category.purchasecategoryId)}
                       >
                         View ({category.subcategories.length})
@@ -186,7 +195,14 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
                       </Typography>
                     )}
                   </TableCell>
-                  <TableCell>{category.status}</TableCell>
+                  <TableCell>
+                    <span className={`purchase-reference-status-pill ${
+                      category.status === 'active' ? 'is-active' : 'is-inactive'
+                    }`}>
+                      <span />
+                      {category.status}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     {category.status === 'active' ? (
                       <Box sx={{ display: 'flex', gap: 0.5 }}>

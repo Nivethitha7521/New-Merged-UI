@@ -1,0 +1,536 @@
+/* =========================================================
+   KOT MASTER — ADDON DIALOG FINAL COMPACT ALIGNMENT
+   Presentation only. No Add/Edit behavior, validation, Redux,
+   API, selection, remove, search or submit logic is changed.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   DESKTOP / LAPTOP (100% browser zoom)
+   --------------------------------------------------------- */
+@media (min-width: 761px) {
+  /* Keep the modal compact on laptop screens instead of letting
+     MUI maxWidth="lg" stretch it across almost the full viewport. */
+  body .MuiDialog-root.kot-addon-dialog .MuiDialog-paper,
+  body .MuiDialog-root.kot-addon-dialog .dialog-paper-big {
+    width: min(900px, calc(100vw - 28px)) !important;
+    max-width: min(900px, calc(100vw - 28px)) !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: calc(100vh - 28px) !important;
+    margin: 14px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .dialog-title {
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 10px 14px 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+    line-height: 20px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .dialog-content {
+    min-height: 0 !important;
+    padding: 12px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* The original modal is a compact five-column row. Keep the
+     first three controls readable instead of tiny inside a wide modal. */
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-dialog-layout {
+    --kot-addon-field-h: 40px;
+    --kot-addon-select-h: 44px;
+    --kot-addon-panel-h: 300px;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns:
+      minmax(170px, 1.05fr)
+      minmax(120px, .72fr)
+      minmax(220px, 1.38fr)
+      100px
+      minmax(220px, 1.38fr) !important;
+    gap: 10px !important;
+    align-items: start !important;
+    justify-content: stretch !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-column,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field {
+    padding-top: 6px !important;
+  }
+
+  /* -------------------------------------------------------
+     ADDON NAME + VALUE
+     Force the actual MUI TextField/FormControl/Input to occupy
+     the complete grid cell. This defeats legacy fixed widths.
+     ------------------------------------------------------- */
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field > .MuiTextField-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field > .MuiFormControl-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field > .custom-textfield,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field > .MuiTextField-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field > .MuiFormControl-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field > .custom-textfield {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .custom-input,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .custom-input {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kot-addon-field-h) !important;
+    min-height: var(--kot-addon-field-h) !important;
+    max-height: var(--kot-addon-field-h) !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .MuiOutlinedInput-input,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .MuiOutlinedInput-input,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field input,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 12px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 11px !important;
+    line-height: normal !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .custom-label:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .custom-label:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .MuiInputLabel-root:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .MuiInputLabel-root:not(.MuiInputLabel-shrink) {
+    max-width: calc(100% - 24px) !important;
+    transform: translate(12px, 12px) scale(1) !important;
+    transform-origin: top left !important;
+    font-size: 10.5px !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .custom-label.MuiInputLabel-shrink,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .custom-label.MuiInputLabel-shrink,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .MuiInputLabel-root.MuiInputLabel-shrink,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .MuiInputLabel-root.MuiInputLabel-shrink {
+    transform: translate(12px, -7px) scale(.84) !important;
+    transform-origin: top left !important;
+    font-size: 10.5px !important;
+    line-height: 14px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field .MuiFormHelperText-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field .MuiFormHelperText-root {
+    margin: 3px 2px 0 !important;
+    min-height: 12px !important;
+    font-size: 9px !important;
+    line-height: 12px !important;
+  }
+
+  /* -------------------------------------------------------
+     SELECT VARIANCES
+     The panel remains compact, while the Autocomplete input
+     fills the whole inner width like the reference screen.
+     ------------------------------------------------------- */
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-column {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: var(--kot-addon-panel-h) !important;
+    min-height: var(--kot-addon-panel-h) !important;
+    max-height: var(--kot-addon-panel-h) !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel > .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiTextField-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiAutocomplete-inputRoot,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .custom-input {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kot-addon-select-h) !important;
+    min-height: var(--kot-addon-select-h) !important;
+    max-height: var(--kot-addon-select-h) !important;
+    padding: 0 32px 0 10px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiAutocomplete-input,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiOutlinedInput-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    font-size: 10.5px !important;
+    line-height: normal !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .custom-label:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiInputLabel-root:not(.MuiInputLabel-shrink) {
+    max-width: calc(100% - 44px) !important;
+    transform: translate(12px, 13px) scale(1) !important;
+    transform-origin: top left !important;
+    font-size: 10.5px !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .custom-label.MuiInputLabel-shrink,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiInputLabel-root.MuiInputLabel-shrink {
+    transform: translate(12px, -7px) scale(.84) !important;
+    transform-origin: top left !important;
+    font-size: 10.5px !important;
+    line-height: 14px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiAutocomplete-inputRoot > .MuiTypography-root {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: center !important;
+    font-size: 10.5px !important;
+    line-height: 16px !important;
+  }
+
+  /* Transfer buttons centered between the two panels. */
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions {
+    height: var(--kot-addon-panel-h) !important;
+    min-height: var(--kot-addon-panel-h) !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    align-self: start !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions .btn-primary,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions .btn-primary-delete {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 7px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions svg {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 15px !important;
+  }
+
+  /* Selected Items heading + panel. */
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-column > .MuiTypography-root {
+    min-height: 16px !important;
+    margin: 0 0 4px !important;
+    font-size: 10.5px !important;
+    line-height: 16px !important;
+    font-weight: 600 !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: calc(var(--kot-addon-panel-h) - 20px) !important;
+    min-height: calc(var(--kot-addon-panel-h) - 20px) !important;
+    max-height: calc(var(--kot-addon-panel-h) - 20px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-panel .MuiList-root {
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-panel .MuiListItemButton-root {
+    min-height: 34px !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-panel .MuiListItemText-primary {
+    font-size: 10.5px !important;
+  }
+
+  /* Compact footer. */
+  body .MuiDialog-root.kot-addon-dialog .dialog-actions {
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 5px 12px !important;
+    gap: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .dialog-actions .btn-secondary,
+  body .MuiDialog-root.kot-addon-dialog .dialog-actions .btn-primary {
+    min-width: 76px !important;
+    width: auto !important;
+    height: 33px !important;
+    min-height: 33px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+  }
+}
+
+/* ---------------------------------------------------------
+   SMALL LAPTOP WINDOWS
+   Keep the same five-column structure, with slightly tighter gaps.
+   --------------------------------------------------------- */
+@media (min-width: 761px) and (max-width: 980px) {
+  body .MuiDialog-root.kot-addon-dialog .MuiDialog-paper,
+  body .MuiDialog-root.kot-addon-dialog .dialog-paper-big {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .dialog-content {
+    padding: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-dialog-layout {
+    --kot-addon-field-h: 38px;
+    --kot-addon-select-h: 42px;
+    --kot-addon-panel-h: min(280px, 45vh);
+    grid-template-columns:
+      minmax(145px, 1fr)
+      minmax(105px, .72fr)
+      minmax(190px, 1.35fr)
+      92px
+      minmax(190px, 1.35fr) !important;
+    gap: 8px !important;
+  }
+}
+
+/* ---------------------------------------------------------
+   MOBILE / NARROW WINDOW
+   Stack only for usability; functionality is unchanged.
+   --------------------------------------------------------- */
+@media (max-width: 760px) {
+  body .MuiDialog-root.kot-addon-dialog .MuiDialog-paper,
+  body .MuiDialog-root.kot-addon-dialog .dialog-paper-big {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .dialog-content {
+    padding: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-dialog-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-column,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-name-field > .MuiFormControl-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-value-field > .MuiFormControl-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel > .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-select-panel,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-selected-panel {
+    width: 100% !important;
+    height: 230px !important;
+    min-height: 230px !important;
+    max-height: 230px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions {
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions .btn-primary,
+  body .MuiDialog-root.kot-addon-dialog .kot-addon-transfer-actions .btn-primary-delete {
+    flex: 1 1 0 !important;
+    width: auto !important;
+  }
+}
+
+
+/* =========================================================
+   KOT ADDON — SELECT VARIANCES FIELD WIDTH FIX
+   The AddOn JSX Paper does not carry kot-addon-select-panel in
+   the current component, so target the actual Paper directly.
+   Presentation only; no selection/search/business logic changes.
+   ========================================================= */
+@media (min-width: 761px) {
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiFormControl-root,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiTextField-root,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-textfield {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-inputRoot,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    padding: 0 34px 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-input,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiOutlinedInput-input {
+    flex: 1 1 auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: normal !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-endAdornment {
+    right: 8px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiInputLabel-root:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-label:not(.MuiInputLabel-shrink) {
+    max-width: calc(100% - 48px) !important;
+    transform: translate(12px, 13px) scale(1) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}

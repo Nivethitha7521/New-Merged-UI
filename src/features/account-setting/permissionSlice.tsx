@@ -38,7 +38,10 @@ interface UpdatePermissionsPayload {
 export const fetchPermissions = createAsyncThunk(
   'permissions/fetchPermissions',
   async (): Promise<PermissionRecord[]> => {
-    const response = await fetch('https://yenerp.com/purchasetestapi/permissions');
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch('http://127.0.0.1:8000/purchasetestapi/permissions', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     return await response.json();
   }
 );
@@ -46,9 +49,13 @@ export const fetchPermissions = createAsyncThunk(
 export const updatePermissions = createAsyncThunk(
   'permissions/updatePermissions',
   async ({ roleName, permissions }: UpdatePermissionsPayload): Promise<PermissionRecord> => {
-    const response = await fetch(`https://yenerp.com/purchasetestapi/permissions/${roleName}`, {
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${roleName}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({ permissions })
     });
     return await response.json();

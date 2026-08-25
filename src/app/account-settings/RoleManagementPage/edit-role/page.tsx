@@ -6,7 +6,7 @@ import { updateRoleLocally } from '@/features/account-setting/roleSlice';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Slide from '@mui/material/Slide';
-
+import { authFetch } from '@/utils/authFetch';
 import Tooltip from "@mui/material/Tooltip";
 
 // Types
@@ -75,7 +75,19 @@ const HARD_MODULES: AppPermissions[] = [
       id: "po_grn_converted", 
       name: "GRN Converted", 
       actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } 
-    }
+    },
+    {
+  id: "po_hold_grn",
+  name: "Hold GRN",
+  actions: {
+    read: false,
+    add: false,
+    edit: false,
+    delete: false,
+    hide: false,
+    approve: false
+  }
+},
         ]
       },
       {
@@ -817,6 +829,7 @@ const [confirmDialog, setConfirmDialog] = useState<{
     'po_approved': 'purchaseorders_approved',
     'po_rejected': 'purchaseorders_rejected',
     'po_grn_converted': 'purchaseorders_grn_converted',
+    'po_hold_grn': 'holdgrn',
      // SERVICE ORDER
     'so_pending': 'serviceorders_pending',
     'so_approved': 'serviceorders_approved',
@@ -910,7 +923,7 @@ const permissionSource =
           });
         }
 
-        if (permissionData) {
+       if (permissionData) {
           sub.actions = {
             read: Boolean(permissionData.read),
             add: Boolean(permissionData.add),
@@ -920,7 +933,7 @@ const permissionSource =
             approve: Boolean(permissionData.approve || false),
           };
         }
-        if (permissionData.edit_actions) {
+        if (permissionData && permissionData.edit_actions) {
   sub.editSubActions = {
     convert_to_ap: Boolean(permissionData.edit_actions.convert_to_ap),
     return_grn: Boolean(permissionData.edit_actions.return_grn),
@@ -952,7 +965,7 @@ setFormPermissions(applyDefaultHide(JSON.parse(JSON.stringify(HARD_MODULES))));
 
       try {
         // Fetch role
-        const roleRes = await fetch(`https://yenerp.com/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
+        const roleRes = await authFetch(`http://127.0.0.1:8000/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
         if (roleRes.ok) {
           const rolesData = await roleRes.json();
           const roleData = Array.isArray(rolesData) ? rolesData.find((r: any) => r.name === roleName) : rolesData;
@@ -967,7 +980,8 @@ setFormPermissions(applyDefaultHide(JSON.parse(JSON.stringify(HARD_MODULES))));
         }
 
         // Fetch permissions
-        const permRes = await fetch(`https://yenerp.com/purchasetestapi/permissions?role_name=${encodeURIComponent(roleName)}`);
+        // Fetch permissions
+        const permRes = await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions?role_name=${encodeURIComponent(roleName)}`);
         if (permRes.ok) {
           const permData = await permRes.json();
           
@@ -1236,7 +1250,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
       // 2. Update role name if changed
       if (formRoleName !== roleName) {
         try {
-          const roleRes = await fetch(`https://yenerp.com/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
+          const roleRes = await authFetch(`http://127.0.0.1:8000/purchasetestapi/roles?name=${encodeURIComponent(roleName)}`);
           const roleData = await roleRes.json();
           
           let roleToUpdate = null;
@@ -1247,7 +1261,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
           }
           
           if (roleToUpdate && roleToUpdate._id) {
-            await fetch(`https://yenerp.com/purchasetestapi/roles/${roleToUpdate._id}`, {
+            await authFetch(`http://127.0.0.1:8000/purchasetestapi/roles/${roleToUpdate._id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
@@ -1269,7 +1283,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
      
       
       // First try to update existing permissions
-      let response = await fetch(`https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
+      let response = await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -1283,7 +1297,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
           permissions: backendPerms
         };
         
-        response = await fetch("https://yenerp.com/purchasetestapi/permissions", {
+        response = await authFetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(postPayload)
@@ -1301,7 +1315,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
       if (formRoleName !== roleName) {
         try {
           // Try to find permissions with old name
-          const checkResponse = await fetch(`https://yenerp.com/purchasetestapi/permissions?role_name=${encodeURIComponent(formRoleName)}`);
+          const checkResponse = await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions?role_name=${encodeURIComponent(formRoleName)}`);
           const checkData = await checkResponse.json();
           
           if (!checkData || (Array.isArray(checkData) && checkData.length === 0)) {
@@ -1311,14 +1325,14 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
               permissions: backendPerms
             };
             
-            await fetch("https://yenerp.com/purchasetestapi/permissions", {
+            await authFetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(createPayload)
             });
             
             // Delete old permissions
-            await fetch(`https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
+            await authFetch(`http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(roleName)}`, {
               method: "DELETE"
             });
           }
@@ -1439,7 +1453,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
+ <div className="account-settings-role-editor account-role-editor-edit h-screen bg-gray-50 flex flex-col">
       {/* Snackbar component */}
       <Snackbar
         open={snackbar.open}
@@ -1489,20 +1503,18 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
   </div>
 )}
 
-      <div className="flex-1 flex flex-col bg-white overflow-hidden">
+    <div className="account-role-editor-card flex-1 flex flex-col bg-white overflow-hidden">
         {/* Header with Reset All button */}
-        <div className="flex justify-between items-center px-6 py-2 border-b border-gray-200">
-          <button onClick={() => router.push("/account-settings")} className="flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all text-sm font-semibold shadow-sm">
+       <div className="account-role-editor-header flex justify-between items-center px-6 py-2 border-b border-gray-200">
+          <button onClick={() => router.push("/account-settings")} className="account-role-back-button flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all text-sm font-semibold shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </button>
-          <h2 className="text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">Edit Role</h2>
-          <button 
+<h2 className="account-role-editor-title text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">Edit Role</h2>          <button 
             onClick={resetAllPermissions}
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-semibold shadow-sm"
-          >
+className="account-role-reset-button flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-semibold shadow-sm"          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -1511,16 +1523,16 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
         </div>
 
         {/* Role Name section */}
-        <div className="px-6 py-3">
-          <div className="flex gap-3">
-            <div className="w-1/2">
+      <div className="account-role-editor-fields px-6 py-3">
+          <div className="account-role-editor-fields-grid flex gap-3">
+            <div className="account-role-editor-field w-1/2">
               <label className="block text-sm font-bold text-black mb-2">Select Predefined Roles</label>
               <select value={selectedPredefinedRole} onChange={(e) => setSelectedPredefinedRole(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-sm">
                 <option value="">-- Select role --</option>
                 {ROLE_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
-            <div className="w-1/2">
+           <div className="account-role-editor-field w-1/2">
               <label className="block text-sm font-bold text-black mb-2">Custom Role Name</label>
               <input value={customRoleName} onChange={(e) => setCustomRoleName(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-sm" placeholder="Enter custom name..." />
             </div>
@@ -1528,8 +1540,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
         </div>
 
         {/* Table Header */}
-        <div className="grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 px-6 py-2 font-bold text-black text-sm bg-gray-50">
-          <div>Modules / Submodules</div>
+<div className="account-role-permission-grid account-role-permission-header grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 px-6 py-2 font-bold text-black text-sm bg-gray-50">          <div>Modules / Submodules</div>
           <div className="text-center">Read</div>
           <div className="text-center">Add</div>
           <div className="text-center">Edit</div>
@@ -1539,18 +1550,16 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
         </div>
 
         {/* Permissions section */}
-        <div className="flex-1 overflow-y-auto px-6">
-          <div className="space-y-2 py-2">
+       <div className="account-role-permission-scroll flex-1 overflow-y-auto px-6">
+          <div className="account-role-permission-stack space-y-2 py-2">
             {formPermissions.map((app, ai) => (
-              <div key={app.appName} className="mb-3">
-                <div className="text-sm font-bold text-blue-600 bg-blue-50 p-2 rounded">{app.appName}</div>
+          <div key={app.appName} className="account-role-app mb-3">
+                <div className="account-role-app-title text-sm font-bold text-blue-600 bg-blue-50 p-2 rounded">{app.appName}</div>
                 <div className="space-y-2">
                   {app.modules.map((m, mi) => (
-                    <div key={m.id} className="border border-gray-200 rounded bg-white">
-<div
+<div key={m.id} className="account-role-module border border-gray-200 rounded bg-white"><div
   onClick={() => toggleExpand(m.id)}
-  className="font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 text-sm"
->
+className="account-role-module-header font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 text-sm">
                         <div className="flex items-center">
                           <button onClick={(e) => { e.stopPropagation(); toggleAllSubmodules(ai, mi, m.id); }} className={`w-5 h-5 rounded border-2 mr-3 flex items-center justify-center ${moduleCheckboxes[m.id] ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-gray-300"}`}>
                             {moduleCheckboxes[m.id] && "✓"}
@@ -1579,8 +1588,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
                       {expandedModules[m.id] && (
                         <div className="border-t border-gray-100">
                           {m.submodules.map((s, si) => (
-                            <div key={s.id} className="grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm">
-<div className="text-black font-medium pl-8 text-sm flex items-center">
+<div key={s.id} className="account-role-permission-grid account-role-permission-row grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"><div className="text-black font-medium pl-8 text-sm flex items-center">
   <span>{s.name}</span>
 
   {SUBMODULE_INFO[s.id] && (
@@ -1630,8 +1638,7 @@ const backendPerms = transformPermissionsForBackend(sanitizedPermissions);
         {/* Footer */}
        {/* Footer */}
 {!confirmDialog.open && (
-  <div className="fixed bottom-0 left-0 right-0 border-t bg-white px-6 py-4 shadow-lg z-40">
-    <div className="flex justify-end gap-3 max-w-7xl mx-auto">
+<div className="account-role-editor-footer fixed bottom-0 left-0 right-0 border-t bg-white px-6 py-4 shadow-lg z-40">    <div className="flex justify-end gap-3 max-w-7xl mx-auto">
       <button
         onClick={() => router.push("/account-settings")}
         className="px-5 py-2 border-2 border-gray-400 rounded-lg hover:bg-gray-100 text-sm font-semibold text-gray-700"

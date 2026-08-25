@@ -1,19 +1,19 @@
 'use client';
 
-import { DispatchReceiveReport } from '@/redux/reportRegistry'; // Import from your registry file
+import { DispatchRecReport } from '@/redux/reportRegistry'; // Import from your registry file
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { dispatchReceiveConfig } from '../../configs/dispatchReceive.config'; // Import the config
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { dispatchRecConfig } from '@/features/pos/reports/dispatchRec.config';
 
 // Select 'dispatchReceive' (the key defined in your config and registry)
-const selector = (s: RootState) => s.dispatchReceive;
+const selector = (s: RootState) => s.dispatchRec;
 
 export default function DispatchReceivePage() {
   return (
     <ReportPage
-      config={dispatchReceiveConfig}
-      thunks={DispatchReceiveReport.thunks}
-      actions={DispatchReceiveReport.slice.actions}
+      config={dispatchRecConfig}
+      thunks={DispatchRecReport.thunks}
+      actions={DispatchRecReport.slice.actions}
       selector={selector}
     />
   );

@@ -3,19 +3,13 @@ import React, { useRef } from 'react';
 import {
   Box,
   TextField,
-  IconButton,
-  Tooltip,
-  FormControlLabel,
   Switch,
-  Backdrop,
-  CircularProgress,
+  Button,
   Typography,
 } from '@mui/material';
 import {
   Add as AddIcon,
-  InsertDriveFile as InsertDriveFileIcon,
-  GetApp as GetAppIcon,
-  Upload as UploadIcon,
+  SearchRounded as SearchIcon,
 } from '@mui/icons-material';
 
 interface UOMActionsProps {
@@ -41,87 +35,51 @@ const UOMActions: React.FC<UOMActionsProps> = ({
 }) => {
   
 const { add = true } = permissions; // ✅ DESTRUCTURE PERMISSIONS
-  return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1} >
-        <TextField
-          autoComplete="off"
-          label="Search"
-          variant="outlined"
-          value={searchQuery}
-          className='some'
-          onChange={onSearchChange}
-          sx={{ flex: 1 }}
-        />
+return (
+  <Box className="purchase-reference-toolbar-section">
+    <Box className="purchase-reference-toolbar">
+      <TextField
+        autoComplete="off"
+        placeholder="Search by UOM name or ID..."
+        variant="outlined"
+        value={searchQuery}
+        onChange={onSearchChange}
+        className="purchase-reference-search"
+        InputProps={{
+          startAdornment: (
+            <SearchIcon className="purchase-reference-search-icon" />
+          ),
+        }}
+      />
 
-        <Box display="flex" alignItems="center" gap={1} >
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-           <IconButton
-  color="primary"
-  onClick={() => onDialogOpen('add')} // ✅ CORRECT - function reference
-  className="icon-button-outline"
-  size='small'
-  sx={{ p: 0.3,
-    opacity: add ? 1 : 0.5,
-    '&.Mui-disabled': {
-      opacity: 0.5,
-      borderColor: 'grey.400 !important',
-      color: 'grey.500 !important'
-    } }}
-  disabled={!add}
->
-  <AddIcon />
-</IconButton>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-                color: add ? 'text.primary' : 'grey.500', // ✅ ADD COLOR CHANGE
-              }}
-            >
-              Add
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 60,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              {showDeactivated ? 'Deactivated' : 'Activated'}
-            </Typography>
-            <Switch
-              checked={showDeactivated}
-              onChange={onToggleShowDeactivated}
-              name="showDeactivated"
-              size="small"
-              sx={{ height: 24 }}
-            />
-          </Box>
+      <Box className="purchase-reference-actions">
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={() => onDialogOpen('add')}
+          disabled={!add}
+          className="purchase-reference-action-button"
+        >
+          Add New
+        </Button>
+
+        <Box className="purchase-reference-active-toggle">
+          <Typography component="span">
+            Show Active Only
+          </Typography>
+
+          <Switch
+            checked={!showDeactivated}
+            onChange={onToggleShowDeactivated}
+            name="showDeactivated"
+            size="small"
+          />
         </Box>
       </Box>
     </Box>
-
-  );
+  </Box>
+);
 };
 
 export default UOMActions;

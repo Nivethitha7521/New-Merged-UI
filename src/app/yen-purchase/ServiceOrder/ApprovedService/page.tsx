@@ -853,15 +853,26 @@ const handleDialogClose = () => {
     yOffset = doc.autoTable.previous.finalY + 10;
 
     // Total Summary
-    const totalFee = descriptions.reduce((sum, desc) => sum + desc.fee, 0);
-    const totalTax = descriptions.reduce((sum, desc) => sum + (desc.sgst + desc.cgst + desc.igst), 0);
-    const grandTotal = descriptions.reduce((sum, desc) => sum + desc.total, 0);
+   const totalFee = descriptions.reduce((sum, desc) => sum + desc.fee, 0);
+const totalTax = descriptions.reduce((sum, desc) => sum + (desc.sgst + desc.cgst + desc.igst), 0);
+const serviceTotal = descriptions.reduce((sum, desc) => sum + desc.total, 0);
 
-    const summaryRows = [
-      ['Total Fee:', totalFee.toFixed(2)],
-      ['Total Tax:', totalTax.toFixed(2)],
-      ['Grand Total:', grandTotal.toFixed(2)]
-    ];
+// Get freight totals from service object
+const freightAmount = service.totalFreightAmount || 0;
+const freightTaxAmount = service.totalFreightTaxAmount || 0;
+const freightGrandTotal = freightAmount + freightTaxAmount;
+
+const grandTotal = serviceTotal + freightGrandTotal;
+
+const summaryRows = [
+  ['Total Fee:', serviceTotal.toFixed(2)],
+  ['Total Tax:', totalTax.toFixed(2)],
+  ...(freightGrandTotal > 0 ? [
+    ['Freight Amount:', freightAmount.toFixed(2)],
+    ['Freight Tax:', freightTaxAmount.toFixed(2)],
+  ] : []),
+  ['Grand Total:', grandTotal.toFixed(2)]
+];
 
     doc.autoTable({
       body: summaryRows,

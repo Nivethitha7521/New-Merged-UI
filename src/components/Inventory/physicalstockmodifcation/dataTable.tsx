@@ -1,434 +1,674 @@
-"use client";
-import React, { useState, useCallback, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TextField,
-  Box,
-  Typography,
-  useMediaQuery,
-  useTheme,
-  Tooltip,
-} from "@mui/material";
-import { useSelector } from "react-redux";
-import { selectVisibleColumns } from "../../../features/yen_inventory/OuletePhysicalStockSlice";
-import DotLoaderLike from "@/components/Loaders/DotLoaderWrapper";
+// "use client";
 
-export interface Row {
-  index: number;
-  itemCode: string;
-  category: string;
-  subcategory: string;
-  itemName: string;
-  varianceName: string;
-  closingQty: string;
-  systemStock?: number;
-  systemStockSo?: number;
-  physicalStock?: number;
-  previousSystemStock?: number;
-}
+  // /**
+  //  * physicalstockmodifcation/dataTable.tsx — rewritten with pure Tailwind CSS.
+  //  * Replaces 633-line MUI version.
+  //  */
 
-interface DataTableProps {
-  rows: Row[];
-  selectedBranches: string;
-  onPhysicalStockChange: (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    itemName: string,
-    varianceName: string,
-    branchName: string,
-    itemCode: string
-  ) => void;
-  canEdit: boolean;
-  loading: boolean;
-  tableContainerRef: React.RefObject<HTMLDivElement>;
-  inputRefs: React.MutableRefObject<Array<HTMLInputElement | null>>;
-  resetInputs: boolean;
-}
+  // import React, { useState, useCallback, useEffect, useMemo } from "react";
+  // import { useSelector } from "react-redux";
+  // import { selectVisibleColumns } from "../../../features/yen_inventory/OuletePhysicalStockSlice";
+  // import DotLoaderLike from "@/components/Loaders/DotLoaderWrapper";
+  // import { Tooltip } from "@/components/ui/Tooltip";
+  // import { cn } from "@/lib/utils";
+  // import {
+  //   formatInventoryQty,
+  //   getInventoryNumber,
+  //   isMissingInventoryValue,
+  // } from "@/components/Inventory/shared/numberFormat";
+  // import {
+  //   TH_BASE_CLS,
+  //   TD_BASE_CLS,
+  //   tableMinWidth,
+  // } from "@/components/Inventory/shared/tableConfig";
+  // import { useVirtualizedRows } from "@/components/Inventory/shared/useVirtualizedRows";
 
-const DataTable: React.FC<DataTableProps> = ({
-  rows,
-  selectedBranches,
-  onPhysicalStockChange,
-  inputRefs,
-  tableContainerRef,
-  loading,
-  resetInputs,
-  canEdit,
-}) => {
-  const [tempStocks, setTempStocks] = useState<Record<string, number | string>>({});
-  const visibleColumns = useSelector(selectVisibleColumns);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  // export interface Row {
+  //   index: number;
+  //   itemCode: string;
+  //   category: string;
+  //   subcategory: string;
+  //   itemName: string;
+  //   randomId: string;
+  //   varianceName: string;
+  //   closingQty: string;
+  //   systemStock?: number | null;
+  //   systemStockSo?: number | null;
+  //   physicalStock?: number | null;
+  //   previousSystemStock?: number | null;
+  // }
 
-  const isColumnVisible = (columnKey: string) => visibleColumns[columnKey] !== false;
-  const [touchedKeys, setTouchedKeys] = useState<Set<string>>(new Set());
+  // interface DataTableProps {
+  //   rows: Row[];
+  //   selectedBranches: string;
+  //   onPhysicalStockChange: (
+  //     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  //     itemName: string,
+  //     varianceName: string,
+  //     branchName: string,
+  //     itemCode: string
+  //   ) => void;
+  //   loading: boolean;
+  //   tableContainerRef: React.RefObject<HTMLDivElement>;
+  //   inputRefs: React.MutableRefObject<Array<HTMLInputElement | null>>;
+  //   resetInputs: boolean;
+  //   disabled?: boolean;
+  // }
 
-  // Reset inputs when resetInputs prop changes
-  useEffect(() => {
-    if (resetInputs) {
-      setTempStocks({});
-      setTouchedKeys(new Set());
-    }
-  }, [resetInputs]);
 
-  // ✅ FIX: Hide tooltips on scroll by briefly disabling pointer events
-  useEffect(() => {
-    const container = tableContainerRef.current;
-    if (!container) return;
+  // const toTooltip = (value: unknown) => {
+  //   if (value === undefined || value === null || value === "") return "-";
+  //   return String(value);
+  // };
 
-    let rafId: number;
-    const handleScroll = () => {
-      container.style.pointerEvents = "none";
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        container.style.pointerEvents = "";
-      });
+  // const DataTable: React.FC<DataTableProps> = ({
+  //   rows,
+  //   selectedBranches,
+  //   onPhysicalStockChange,
+  //   inputRefs,
+  //   tableContainerRef,
+  //   loading,
+  //   resetInputs,
+  //   disabled = false,
+  // }) => {
+  //   const [tempStocks, setTempStocks] = useState<Record<string, number | string>>({});
+  //   const [touchedKeys, setTouchedKeys] = useState<Set<string>>(new Set());
+
+  //   const visibleColumns = useSelector(selectVisibleColumns) || {
+  //     "S.No": true, "Item Code": true, "Category": false, "Sub Category": false,
+  //     "Item Name": true, "Variance": true, "SO Stock": true, "Prev System": true,
+  //     "System Stock": true, "Physical": true,
+  //   };
+
+  //   const isColumnVisible = useCallback(
+  //     (columnKey: string) => visibleColumns[columnKey] !== false,
+  //     [visibleColumns]
+  //   );
+
+  //   useEffect(() => {
+  //     if (resetInputs) {
+  //       setTempStocks({});
+  //       setTouchedKeys(new Set());
+  //     }
+  //   }, [resetInputs]);
+
+  //   const touchedCount = touchedKeys.size;
+
+  //   const handlePhysicalStockChange = useCallback(
+  //     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, row: Row) => {
+  //       const value = e.target.value;
+  //       const key = `${row.itemName}-${row.varianceName}-${selectedBranches}`;
+
+  //       if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
+  //         setTempStocks((prev) => ({ ...prev, [key]: value }));
+  //         setTouchedKeys((prev) => {
+  //           const next = new Set(prev);
+  //           next.add(key);
+  //           return next;
+  //         });
+
+  //         onPhysicalStockChange(
+  //           e,
+  //           row.itemName,
+  //           row.varianceName,
+  //           selectedBranches,
+  //           row.itemCode
+  //         );
+  //       }
+  //     },
+  //     [onPhysicalStockChange, selectedBranches]
+  //   );
+
+  //   // Column definitions mapping to state/data
+  //   const columns = useMemo(() => [
+  //     { key: "S.No",                label: "S.NO",          align: "center", width: "w-[50px]" },
+  //     { key: "Item Code",           label: "Item Code",      align: "left", width: "w-[120px]" },
+  //     { key: "Item Name",           label: "Item Name",      align: "left", width: "w-[180px]" },
+  //     { key: "Variance",            label: "Variance",       align: "left", width: "w-[180px]" },
+  //     { key: "Category",            label: "Category",       align: "left", width: "w-[150px]" },
+  //     { key: "Subcategory",         label: "Subcategory",    align: "left", width: "w-[150px]" },
+  //     { key: "S.O Stock",           label: "S.O Stock",      align: "right", width: "" },
+  //     { key: "Prev. System Stock",  label: "Prev System",    align: "right", width: "" },
+  //     { key: "System Stock",        label: "System Stock",   align: "right", width: "" },
+  //     { key: "Physical Stock",      label: "Physical Stock", align: "right", width: "" },
+  //   ], []);
+
+  //   const activeColumns = columns.filter(c => isColumnVisible(c.key));
+
+  //   const {
+  //     visibleRows, startIdx, topSpacerHeight, bottomSpacerHeight, handleScroll: handleTableScroll,
+  //   } = useVirtualizedRows(rows, tableContainerRef, { rowHeight: 37 });
+
+  //   return (
+  //     <div className="w-full h-full min-h-0 relative bg-white flex flex-col">
+  //       {touchedCount > 0 && (
+  //         <div className="absolute bottom-4 right-6 z-40 pointer-events-none shadow-md rounded-full">
+  //           <div className="h-[28px] flex items-center px-3 text-[11.5px] font-extrabold text-[#c2410c] bg-[#fffaf2] border border-[#fed7aa] rounded-full">
+  //             {touchedCount} changed
+  //           </div>
+  //         </div>
+  //       )}
+
+  //       <div 
+  //         ref={tableContainerRef}
+  //         onScroll={handleTableScroll}
+  //         className="flex-1 w-full min-w-0 max-h-full overflow-auto border border-border rounded-xl bg-white"
+  //         style={{ scrollbarWidth: "thin", contain: "layout paint" }}
+  //       >
+  //         <table className="w-full border-separate border-spacing-0" style={{ minWidth: tableMinWidth(activeColumns.length), tableLayout: "fixed" }}>
+  //           <thead className="sticky top-0 z-30">
+  //             <tr>
+  //               {activeColumns.map(c => (
+  //                 <th
+  //                   key={c.key}
+  //                   className={cn(
+  //                     TH_BASE_CLS,
+  //                     "whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_0_rgba(226,232,240,0.28)]",
+  //                     c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left",
+  //                     c.width
+  //                   )}
+  //                 >
+  //                   <div className="truncate w-full" title={c.label}>{c.label}</div>
+  //                 </th>
+  //               ))}
+  //             </tr>
+  //           </thead>
+  //           <tbody>
+  //             {loading && rows.length === 0 ? (
+  //               <tr>
+  //                 <td colSpan={activeColumns.length} className="py-20">
+  //                   <DotLoaderLike message="" />
+  //                 </td>
+  //               </tr>
+  //             ) : rows.length === 0 ? (
+  //               <tr>
+  //                 <td colSpan={activeColumns.length} className="py-20 text-center">
+  //                   <div className="inline-flex flex-col items-center gap-1.5">
+  //                     <p className="text-[14px] font-extrabold text-text-primary">No records found</p>
+  //                     <p className="text-[12px] font-semibold text-text-muted">Try changing filters or refresh the data.</p>
+  //                   </div>
+  //                 </td>
+  //               </tr>
+  //             ) : (
+  //               <>
+  //                 {topSpacerHeight > 0 && (
+  //                   <tr style={{ height: topSpacerHeight }}>
+  //                     <td colSpan={activeColumns.length} style={{ padding: 0, height: topSpacerHeight }} />
+  //                   </tr>
+  //                 )}
+  //                 {visibleRows.map((row, index) => {
+  //                   const idx = startIdx + index;
+  //                   const key = `${row.itemName}-${row.varianceName}-${selectedBranches}`;
+  //                   const isChanged = touchedKeys.has(key);
+  //                   const displayPhysical = tempStocks[key] !== undefined ? tempStocks[key] : "";
+
+  //                 return (
+  //                   <tr
+  //                     key={key}
+  //                     className={cn(
+  //                       "group border-b border-surface-subtle transition-colors",
+  //                       isChanged ? "bg-[#fffaf2] hover:bg-[#fff3df]" : "bg-white hover:bg-brand-50/40"
+  //                     )}
+  //                   >
+  //                     {activeColumns.map(c => {
+  //                       let content = null;
+                        
+  //                       if (c.key === "S.No") {
+  //                         content = <div className="text-[12px] font-extrabold text-text-muted text-center">{idx + 1}</div>;
+  //                       } else if (c.key === "Item Code") {
+  //                         content = <Tooltip content={toTooltip(row.randomId)} side="top"><div className="text-[12px] font-extrabold text-text-primary truncate">{row.randomId}</div></Tooltip>;
+  //                       } else if (c.key === "Item Name") {
+  //                         content = <Tooltip content={toTooltip(row.itemName)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate">{row.itemName}</div></Tooltip>;
+  //                       } else if (c.key === "Variance") {
+  //                         content = <Tooltip content={toTooltip(row.varianceName)} side="top"><div className="text-[12px] font-extrabold text-text-primary truncate">{row.varianceName}</div></Tooltip>;
+  //                       } else if (c.key === "Category") {
+  //                         content = <Tooltip content={toTooltip(row.category)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate">{row.category}</div></Tooltip>;
+  //                       } else if (c.key === "Subcategory") {
+  //                         content = <Tooltip content={toTooltip(row.subcategory)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate">{row.subcategory}</div></Tooltip>;
+  //                       }
+  //                        else if (c.key === "S.O Stock") {
+  //                         content = <Tooltip content={toTooltip(row.systemStockSo)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate text-right">{row.systemStockSo ?? "-"}</div></Tooltip>;
+  //                       } 
+  //                       else if (c.key === "Prev. System Stock") {
+  //                         content = <Tooltip content={toTooltip(row.previousSystemStock)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate text-right">{row.previousSystemStock ?? "-"}</div></Tooltip>;
+  //                       } else if (c.key === "System Stock") {
+  //                         content = <Tooltip content={toTooltip(row.systemStock)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate text-right">{row.systemStock ?? "-"}</div></Tooltip>;
+  //                       } else if (c.key === "Physical Stock") {
+  //                         content = (
+  //                           <div className="pr-1.5 w-full flex justify-end">
+  //                             <input
+  //                               ref={(el) => { inputRefs.current[idx] = el; }}
+  //                               value={displayPhysical}
+  //                               onChange={(e) => handlePhysicalStockChange(e, row)}
+  //                               onBlur={(e) => {
+  //                                 if (!e.target.value) {
+  //                                   setTempStocks((prev) => ({ ...prev, [key]: "" }));
+  //                                   onPhysicalStockChange(
+  //                                     { ...e, target: { ...e.target, value: "" } } as React.ChangeEvent<HTMLInputElement>,
+  //                                     row.itemName, row.varianceName, selectedBranches, row.itemCode
+  //                                   );
+  //                                 }
+  //                               }}
+  //                               onFocus={(e) => {
+  //                                 if (e.target.value === "0") {
+  //                                   setTempStocks((prev) => ({ ...prev, [key]: "" }));
+  //                                 }
+  //                               }}
+  //                               onKeyDown={(e) => {
+  //                                 if (e.key === "Enter") {
+  //                                   e.preventDefault();
+  //                                   inputRefs.current[idx + 1]?.focus();
+  //                                 }
+  //                               }}
+  //                               disabled={disabled}
+  //                               inputMode="decimal"
+  //                               maxLength={5}
+  //                                 className={cn(
+  //                                 "h-[29px] w-[100px] bg-white rounded-[9px] text-[12px] text-left px-2 font-extrabold text-text-primary tabular-nums",
+  //                                 "border border-[#d3dfec] focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20",
+  //                                 "hover:border-[#9dccf7] transition-all",
+  //                                 disabled && "bg-[#f8fafc] cursor-not-allowed text-text-disabled"
+  //                               )}
+  //                             />
+  //                           </div>
+  //                         );
+  //                       }
+
+  //                       return (
+  //                         <td
+  //                           key={c.key}
+  //                           className={cn(
+  //                             TD_BASE_CLS,
+  //                             "h-[37px] align-middle",
+  //                             c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left",
+  //                             isChanged ? "bg-[#fffaf2] group-hover:bg-[#fff3df]" : "bg-white group-hover:bg-brand-50/40"
+  //                           )}
+  //                         >
+  //                           {content}
+  //                         </td>
+  //                       );
+  //                     })}
+  //                   </tr>
+  //                 );
+  //               })}
+                
+  //               {bottomSpacerHeight > 0 && (
+  //                 <tr style={{ height: bottomSpacerHeight }}>
+  //                   <td colSpan={activeColumns.length} style={{ padding: 0, height: bottomSpacerHeight }} />
+  //                 </tr>
+  //               )}
+  //             </>
+  //           )}
+
+  //             {loading && rows.length > 0 && (
+  //               <tr>
+  //                 <td colSpan={activeColumns.length} className="py-3 text-center bg-white">
+  //                   <div className="flex items-center justify-center gap-2 text-text-muted">
+  //                     <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+  //                     <span className="text-[12px] font-bold">Loading more items...</span>
+  //                   </div>
+  //                 </td>
+  //               </tr>
+  //             )}
+  //           </tbody>
+  //         </table>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  // export default React.memo(DataTable);
+  // replace the entire part 11 8 2
+  "use client";
+
+  /**
+   * physicalstockmodifcation/dataTable.tsx — rewritten with pure Tailwind CSS.
+   * Replaces 633-line MUI version.
+   */
+
+  import React, { useState, useCallback, useEffect, useMemo } from "react";
+  import { useSelector } from "react-redux";
+  import { selectVisibleColumns } from "../../../features/yen_inventory/OuletePhysicalStockSlice";
+  import DotLoaderLike from "@/components/Loaders/DotLoaderWrapper";
+  import { Tooltip } from "@/components/ui/Tooltip";
+  import { cn } from "@/lib/utils";
+  import {
+    formatInventoryQty,
+    getInventoryNumber,
+    isMissingInventoryValue,
+  } from "@/components/Inventory/shared/numberFormat";
+  import {
+    TH_BASE_CLS,
+    TD_BASE_CLS,
+    tableMinWidth,
+  } from "@/components/Inventory/shared/tableConfig";
+  import { useVirtualizedRows } from "@/components/Inventory/shared/useVirtualizedRows";
+  import { buildColWidthPercents } from "@/components/Inventory/shared/tableConfig";
+
+  // Relative widths (same ratios as the old fixed px widths) used to build a
+  // <colgroup> so all visible columns always sum to exactly 100% under
+  // table-layout:fixed. Without this, columns left with no explicit width
+  // (S.O Stock / Prev. System Stock / System Stock / Physical Stock) get an
+  // equal, oversized share of any leftover space — causing the large uneven
+  // gaps between header labels seen on wide screens.
+  const COL_WEIGHTS: Record<string, number> = {
+    "S.No": 50,
+    "Item Code": 120,
+    "Item Name": 180,
+    "Variance": 180,
+    "Category": 150,
+    "Subcategory": 150,
+    "S.O Stock": 110,
+    "Prev. System Stock": 110,
+    "System Stock": 110,
+    "Physical Stock": 130,
+  };
+
+  export interface Row {
+    index: number;
+    itemCode: string;
+    category: string;
+    subcategory: string;
+    itemName: string;
+    randomId: string;
+    varianceName: string;
+    closingQty: string;
+    systemStock?: number | null;
+    systemStockSo?: number | null;
+    physicalStock?: number | null;
+    previousSystemStock?: number | null;
+  }
+
+  interface DataTableProps {
+    rows: Row[];
+    selectedBranches: string;
+    onPhysicalStockChange: (
+      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      itemName: string,
+      varianceName: string,
+      branchName: string,
+      itemCode: string
+    ) => void;
+    loading: boolean;
+    tableContainerRef: React.RefObject<HTMLDivElement>;
+    inputRefs: React.MutableRefObject<Array<HTMLInputElement | null>>;
+    resetInputs: boolean;
+    disabled?: boolean;
+  }
+
+
+  const toTooltip = (value: unknown) => {
+    if (value === undefined || value === null || value === "") return "-";
+    return String(value);
+  };
+
+  const DataTable: React.FC<DataTableProps> = ({
+    rows,
+    selectedBranches,
+    onPhysicalStockChange,
+    inputRefs,
+    tableContainerRef,
+    loading,
+    resetInputs,
+    disabled = false,
+  }) => {
+    const [tempStocks, setTempStocks] = useState<Record<string, number | string>>({});
+    const [touchedKeys, setTouchedKeys] = useState<Set<string>>(new Set());
+
+    const visibleColumns = useSelector(selectVisibleColumns) || {
+      "S.No": true, "Item Code": true, "Category": false, "Sub Category": false,
+      "Item Name": true, "Variance": true, "SO Stock": true, "Prev System": true,
+      "System Stock": true, "Physical": true,
     };
 
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      container.removeEventListener("scroll", handleScroll);
-      cancelAnimationFrame(rafId);
-    };
-  }, [tableContainerRef]);
+    const isColumnVisible = useCallback(
+      (columnKey: string) => visibleColumns[columnKey] !== false,
+      [visibleColumns]
+    );
 
-  const handlePhysicalStockChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, row: Row) => {
-      const value = e.target.value;
-      const key = `${row.itemName}-${row.varianceName}-${selectedBranches}`;
-      if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
-        setTempStocks((prev) => ({ ...prev, [key]: value }));
-        setTouchedKeys((prev) => new Set(prev).add(key));
-        onPhysicalStockChange(e, row.itemName, row.varianceName, selectedBranches, row.itemCode);
+    useEffect(() => {
+      if (resetInputs) {
+        setTempStocks({});
+        setTouchedKeys(new Set());
       }
-    },
-    [onPhysicalStockChange, selectedBranches]
-  );
+    }, [resetInputs]);
 
-  const getTextFieldSx = (width: string) => ({
-    "& .MuiInputBase-root": {
-      height: "38px",
-      width: width,
-      fontSize: "1rem",
-      backgroundColor: "#fff",
-      transition: "all 0.2s ease-in-out",
-    },
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#ccc",
-    },
-    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#1976d2",
-      borderWidth: "2px",
-    },
-    "& input": {
-      textAlign: "center",
-      p: 0,
-      fontWeight: 700,
-      color: "#333",
-    },
-  });
+    const touchedCount = touchedKeys.size;
 
-  const toTooltip = (value: any): string =>
-    value === null || value === undefined ? "" : String(value);
+    const handlePhysicalStockChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, row: Row) => {
+        const value = e.target.value;
+        const key = `${row.itemName}-${row.varianceName}-${selectedBranches}`;
 
-  return (
-    <Box sx={{ width: "100%", height: "100%", position: "relative" }}>
-      <TableContainer
-        ref={tableContainerRef}
-        component={isMobile ? Box : Paper}
-        elevation={0}
-        sx={{
-          maxHeight: isMobile ? "calc(100vh - 180px)" : "calc(87vh - 170px)",
-          overflow: "auto",
-          border: isMobile ? "none" : "1px solid #e0e0e0",
-          borderRadius: "8px",
-          backgroundColor: isMobile ? "transparent" : "#fff",
-        }}
-      >
-        <Table stickyHeader={!isMobile} sx={{ tableLayout: isMobile ? "auto" : "fixed" }}>
-          {!isMobile && (
-            <TableHead>
-              <TableRow
-                sx={{ "& th": { backgroundColor: "#f5f5f5", fontWeight: "bold", textAlign: "center" } }}
-              >
-                {isColumnVisible("S.No") && <TableCell sx={{ width: 60 }}>S.NO</TableCell>}
-                {isColumnVisible("Item Code") && <TableCell sx={{ width: 100 }}>ITEM CODE</TableCell>}
-                {isColumnVisible("Category") && <TableCell>CATEGORY</TableCell>}
-                {isColumnVisible("Subcategory") && <TableCell>SUB-CATEGORY</TableCell>}
-                {isColumnVisible("Item Name") && <TableCell sx={{ width: 180 }}>ITEM NAME</TableCell>}
-                {isColumnVisible("Variance") && <TableCell>VARIANCE</TableCell>}
-                {isColumnVisible("System Stock") && <TableCell>SO STOCK</TableCell>}
-                {isColumnVisible("Prev. System Stock") && <TableCell>PREV SYSTEM STOCK</TableCell>}
-                {isColumnVisible("System Stock") && <TableCell>SYSTEM STOCK</TableCell>}
-                {isColumnVisible("Physical Stock") && <TableCell sx={{ width: 120 }}>PHYSICAL STOCK</TableCell>}
-              </TableRow>
-            </TableHead>
-          )}
+        if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
+          setTempStocks((prev) => ({ ...prev, [key]: value }));
+          setTouchedKeys((prev) => {
+            const next = new Set(prev);
+            next.add(key);
+            return next;
+          });
 
-          <TableBody sx={{ display: isMobile ? "block" : "table-row-group" }}>
-            {loading && rows.length === 0 ? (
-              <TableRow sx={{ display: isMobile ? "block" : "table-row" }}>
-                <TableCell colSpan={10} sx={{ border: "none" }}>
-                  <DotLoaderLike message="" />
-                </TableCell>
-              </TableRow>
-            ) : rows.length === 0 ? (
-              <TableRow sx={{ display: isMobile ? "block" : "table-row" }}>
-                <TableCell colSpan={10} sx={{ py: 10, textAlign: "center", color: "#999" }}>
-                  No records found
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row, idx) => {
-                const key = `${row.itemName}-${row.varianceName}-${selectedBranches}`;
-                const displayPhysical = tempStocks[key] ?? 0;
-                const soStock = Number(row.systemStockSo ?? 0);
-                const systemStock = Number(row.systemStock ?? 0);
-                const previousSystemStock = Number(row.previousSystemStock ?? 0);
+          onPhysicalStockChange(
+            e,
+            row.itemName,
+            row.varianceName,
+            selectedBranches,
+            row.itemCode
+          );
+        }
+      },
+      [onPhysicalStockChange, selectedBranches]
+    );
 
-                return isMobile ? (
-                  <Box
-                    key={key}
-                    sx={{
-                      mb: 2,
-                      p: 2,
-                      borderRadius: "12px",
-                      border: "1px solid #e0e0e0",
-                      backgroundColor: "#fff",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
-                    }}
+    // Column definitions mapping to state/data
+    const columns = useMemo(() => [
+      { key: "S.No",                label: "S.NO",          align: "center", width: "w-[50px]" },
+      { key: "Item Code",           label: "Item Code",      align: "left", width: "w-[120px]" },
+      { key: "Item Name",           label: "Item Name",      align: "left", width: "w-[180px]" },
+      { key: "Variance",            label: "Variance",       align: "left", width: "w-[180px]" },
+      { key: "Category",            label: "Category",       align: "left", width: "w-[150px]" },
+      { key: "Subcategory",         label: "Subcategory",    align: "left", width: "w-[150px]" },
+      { key: "S.O Stock",           label: "S.O Stock",      align: "right", width: "" },
+      { key: "Prev. System Stock",  label: "Prev System",    align: "right", width: "" },
+      { key: "System Stock",        label: "System Stock",   align: "right", width: "" },
+      { key: "Physical Stock",      label: "Physical Stock", align: "right", width: "" },
+    ], []);
+
+    const activeColumns = columns.filter(c => isColumnVisible(c.key));
+
+    const colWidths = useMemo(
+      () => buildColWidthPercents(COL_WEIGHTS, activeColumns.map(c => c.key)),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [activeColumns.map(c => c.key).join("|")]
+    );
+
+    const {
+      visibleRows, startIdx, topSpacerHeight, bottomSpacerHeight, handleScroll: handleTableScroll,
+    } = useVirtualizedRows(rows, tableContainerRef, { rowHeight: 37 });
+
+    return (
+      <div className="w-full h-full min-h-0 relative bg-white flex flex-col">
+        {touchedCount > 0 && (
+          <div className="absolute bottom-4 right-6 z-40 pointer-events-none shadow-md rounded-full">
+            <div className="h-[28px] flex items-center px-3 text-[11.5px] font-extrabold text-[#c2410c] bg-[#fffaf2] border border-[#fed7aa] rounded-full">
+              {touchedCount} changed
+            </div>
+          </div>
+        )}
+
+        <div 
+          ref={tableContainerRef}
+          onScroll={handleTableScroll}
+          className="flex-1 w-full min-w-0 max-h-full overflow-auto border border-border rounded-xl bg-white"
+          style={{ scrollbarWidth: "thin", contain: "layout paint" }}
+        >
+          <table className="w-full border-separate border-spacing-0" style={{ minWidth: tableMinWidth(activeColumns.length), tableLayout: "fixed" }}>
+            {/* Explicit per-column widths so visible columns always sum to 100% —
+                relying on unset-width columns to auto-share space is not reliable
+                across browsers/render states with table-layout:fixed. */}
+            <colgroup>
+              {activeColumns.map((c) => (
+                <col key={c.key} style={{ width: colWidths[c.key] }} />
+              ))}
+            </colgroup>
+            <thead className="sticky top-0 z-30">
+              <tr>
+                {activeColumns.map(c => (
+                  <th
+                    key={c.key}
+                    className={cn(
+                      TH_BASE_CLS,
+                      "whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_0_rgba(226,232,240,0.28)]",
+                      c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left"
+                    )}
                   >
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                      <Typography variant="caption" color="textSecondary">
-                        {isColumnVisible("S.No") && `#${idx + 1}`}{" "}
-                        {isColumnVisible("Item Code") && `| ${row.itemCode}`}
-                      </Typography>
-                      {isColumnVisible("Category") && (
-                        <Tooltip title={toTooltip(row.category)} arrow disableInteractive followCursor>
-                          <Typography variant="caption" sx={{ fontWeight: "bold", color: "#2e7d32" }}>
-                            {row.category}
-                          </Typography>
-                        </Tooltip>
+                    <div className="truncate w-full" title={c.label}>{c.label}</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading && rows.length === 0 ? (
+                <tr>
+                  <td colSpan={activeColumns.length} className="py-20">
+                    <DotLoaderLike message="" />
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={activeColumns.length} className="py-20 text-center">
+                    <div className="inline-flex flex-col items-center gap-1.5">
+                      <p className="text-[14px] font-extrabold text-text-primary">No records found</p>
+                      <p className="text-[12px] font-semibold text-text-muted">Try changing filters or refresh the data.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  {topSpacerHeight > 0 && (
+                    <tr style={{ height: topSpacerHeight }}>
+                      <td colSpan={activeColumns.length} style={{ padding: 0, height: topSpacerHeight }} />
+                    </tr>
+                  )}
+                  {visibleRows.map((row, index) => {
+                    const idx = startIdx + index;
+                    const key = `${row.itemName}-${row.varianceName}-${selectedBranches}`;
+                    const isChanged = touchedKeys.has(key);
+                    const displayPhysical = tempStocks[key] !== undefined ? tempStocks[key] : "";
+
+                  return (
+                    <tr
+                      key={key}
+                      className={cn(
+                        "group border-b border-surface-subtle transition-colors",
+                        isChanged ? "bg-[#fffaf2] hover:bg-[#fff3df]" : "bg-white hover:bg-brand-50/40"
                       )}
-                    </Box>
-
-                    {isColumnVisible("Item Name") && (
-                      <Tooltip title={toTooltip(row.itemName)} arrow disableInteractive followCursor>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }} noWrap>
-                          {row.itemName}
-                        </Typography>
-                      </Tooltip>
-                    )}
-
-                    {isColumnVisible("Variance") && (
-                      <Tooltip title={toTooltip(row.varianceName)} arrow disableInteractive followCursor>
-                        <Typography
-                          variant="caption"
-                          color="textSecondary"
-                          display="block"
-                          sx={{ mb: 1.5 }}
-                        >
-                          {row.varianceName}
-                        </Typography>
-                      </Tooltip>
-                    )}
-
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(4, 1fr)",
-                        gap: 1,
-                        textAlign: "center",
-                        backgroundColor: "#f9f9f9",
-                        p: 1,
-                        borderRadius: "8px",
-                        alignItems: "center",
-                      }}
                     >
-                      <Box>
-                        <Tooltip title={toTooltip(soStock)} arrow disableInteractive followCursor>
-                          <Box>
-                            <Typography variant="caption" sx={{ fontSize: "0.65rem", color: "#666" }}>
-                              SO
-                            </Typography>
-                            <Typography variant="body2">{soStock}</Typography>
-                          </Box>
-                        </Tooltip>
-                      </Box>
+                      {activeColumns.map(c => {
+                        let content = null;
+                        
+                        if (c.key === "S.No") {
+                          content = <div className="text-[12px] font-extrabold text-text-muted text-center">{idx + 1}</div>;
+                        } else if (c.key === "Item Code") {
+                          content = <Tooltip content={toTooltip(row.itemCode)} side="top"><div className="text-[12px] font-extrabold text-text-primary truncate">{row.itemCode}</div></Tooltip>;
+                        } else if (c.key === "Item Name") {
+                          content = <Tooltip content={toTooltip(row.itemName)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate">{row.itemName}</div></Tooltip>;
+                        } else if (c.key === "Variance") {
+                          content = <Tooltip content={toTooltip(row.varianceName)} side="top"><div className="text-[12px] font-extrabold text-text-primary truncate">{row.varianceName}</div></Tooltip>;
+                        } else if (c.key === "Category") {
+                          content = <Tooltip content={toTooltip(row.category)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate">{row.category}</div></Tooltip>;
+                        } else if (c.key === "Subcategory") {
+                          content = <Tooltip content={toTooltip(row.subcategory)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate">{row.subcategory}</div></Tooltip>;
+                        }
+                        else if (c.key === "S.O Stock") {
+                          content = <Tooltip content={toTooltip(row.systemStockSo)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate text-right">{row.systemStockSo ?? "-"}</div></Tooltip>;
+                        } 
+                        else if (c.key === "Prev. System Stock") {
+                          content = <Tooltip content={toTooltip(row.previousSystemStock)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate text-right">{row.previousSystemStock ?? "-"}</div></Tooltip>;
+                        } else if (c.key === "System Stock") {
+                          content = <Tooltip content={toTooltip(row.systemStock)} side="top"><div className="text-[12px] font-semibold text-text-secondary truncate text-right">{row.systemStock ?? "-"}</div></Tooltip>;
+                        } else if (c.key === "Physical Stock") {
+                          content = (
+                            <div className="pr-1.5 w-full flex justify-end">
+                              <input
+                                ref={(el) => { inputRefs.current[idx] = el; }}
+                                value={displayPhysical}
+                                onChange={(e) => handlePhysicalStockChange(e, row)}
+                                onBlur={(e) => {
+                                  if (!e.target.value) {
+                                    setTempStocks((prev) => ({ ...prev, [key]: "" }));
+                                    onPhysicalStockChange(
+                                      { ...e, target: { ...e.target, value: "" } } as React.ChangeEvent<HTMLInputElement>,
+                                      row.itemName, row.varianceName, selectedBranches, row.itemCode
+                                    );
+                                  }
+                                }}
+                                onFocus={(e) => {
+                                  if (e.target.value === "0") {
+                                    setTempStocks((prev) => ({ ...prev, [key]: "" }));
+                                  }
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    inputRefs.current[idx + 1]?.focus();
+                                  }
+                                }}
+                                disabled={disabled}
+                                inputMode="decimal"
+                                maxLength={5}
+                                  className={cn(
+                                  "h-[29px] w-[100px] bg-white rounded-[9px] text-[12px] text-left px-2 font-extrabold text-text-primary tabular-nums",
+                                  "border border-[#d3dfec] focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20",
+                                  "hover:border-[#9dccf7] transition-all",
+                                  disabled && "bg-[#f8fafc] cursor-not-allowed text-text-disabled"
+                                )}
+                              />
+                            </div>
+                          );
+                        }
 
-                      <Box>
-                        <Box>
-                          <Typography variant="caption" sx={{ fontSize: "0.65rem", color: "#666" }}>
-                            Prev
-                          </Typography>
-                          <Typography variant="body2">{previousSystemStock}</Typography>
-                        </Box>
-                      </Box>
-
-                      <Box>
-                        <Box>
-                          <Typography variant="caption" sx={{ fontSize: "0.65rem", color: "#666" }}>
-                            Sys
-                          </Typography>
-                          <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                            {systemStock}
-                          </Typography>
-                        </Box>
-                      </Box>
-
-                      <Box>
-                        <TextField
-                          disabled={!canEdit}
-                          inputRef={(el) => (inputRefs.current[idx] = el)}
-                          value={displayPhysical}
-                          onChange={(e) => handlePhysicalStockChange(e, row)}
-                          onBlur={(e) => {
-                            if (!e.target.value) {
-                              setTempStocks((p) => ({ ...p, [key]: 0 }));
-                              onPhysicalStockChange(
-                                { ...e, target: { ...e.target, value: "" } } as any,
-                                row.itemName,
-                                row.varianceName,
-                                selectedBranches,
-                                row.itemCode
-                              );
-                            }
-                          }}
-                          onFocus={(e) =>
-                            e.target.value === "0" && setTempStocks((p) => ({ ...p, [key]: "" }))
-                          }
-                          size="small"
-                          autoComplete="off"
-                          inputProps={{ inputMode: "decimal" }}
-                          sx={getTextFieldSx("80px")}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                ) : (
-                  <TableRow key={key} hover>
-                    {isColumnVisible("S.No") && (
-                      <TableCell align="center">
-                        <Tooltip title={toTooltip(idx + 1)} arrow disableInteractive followCursor>
-                          <span>{idx + 1}</span>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Item Code") && (
-                      <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                        <Tooltip title={toTooltip(row.itemCode)} arrow disableInteractive followCursor>
-                          <span>{row.itemCode}</span>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Category") && (
-                      <TableCell align="center">
-                        <Tooltip title={toTooltip(row.category)} arrow disableInteractive followCursor>
-                          <span>{row.category || "-"}</span>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Subcategory") && (
-                      <TableCell align="center">
-                        <Tooltip title={toTooltip(row.subcategory)} arrow disableInteractive followCursor>
-                          <span>{row.subcategory || "-"}</span>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Item Name") && (
-                      <TableCell align="center" sx={{ pl: 2 }}>
-                        <Tooltip title={toTooltip(row.itemName)} arrow disableInteractive followCursor>
-                          <span>{row.itemName || "-"}</span>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Variance") && (
-                      <TableCell align="center">
-                        <Tooltip title={toTooltip(row.varianceName)} arrow disableInteractive followCursor>
-                          <span>{row.varianceName || "-"}</span>
-                        </Tooltip>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("System Stock") && (
-                      <TableCell
-                        align="center"
-                        sx={{
-                          color: soStock < 0 ? "error.main" : "inherit",
-                          fontWeight: 700,
-                        }}
-                      >
-                        <span>{soStock}</span>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Prev. System Stock") && (
-                      <TableCell
-                        align="center"
-                        sx={{
-                          color: previousSystemStock < 0 ? "error.main" : "inherit",
-                          fontWeight: previousSystemStock < 0 ? 600 : 400,
-                        }}
-                      >
-                        <span>{previousSystemStock}</span>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("System Stock") && (
-                      <TableCell
-                        align="center"
-                        sx={{
-                          color: systemStock < 0 ? "error.main" : "inherit",
-                          fontWeight: systemStock < 0 ? 600 : 400,
-                        }}
-                      >
-                        <Box sx={{ fontWeight: 700 }}>{systemStock}</Box>
-                      </TableCell>
-                    )}
-                    {isColumnVisible("Physical Stock") && (
-                      <TableCell align="center">
-                        <TextField
-                          disabled={!canEdit}
-                          inputRef={(el) => (inputRefs.current[idx] = el)}
-                          value={displayPhysical}
-                          onChange={(e) => handlePhysicalStockChange(e, row)}
-                          onBlur={(e) =>
-                            !e.target.value && setTempStocks((p) => ({ ...p, [key]: 0 }))
-                          }
-                          onFocus={(e) =>
-                            e.target.value === "0" && setTempStocks((p) => ({ ...p, [key]: "" }))
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              inputRefs.current[idx + 1]?.focus();
-                            }
-                          }}
-                          size="small"
-                          autoComplete="off"
-                          sx={getTextFieldSx("95px")}
-                        />
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })
+                        return (
+                          <td
+                            key={c.key}
+                            className={cn(
+                              TD_BASE_CLS,
+                              "h-[37px] align-middle",
+                              c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left",
+                              isChanged ? "bg-[#fffaf2] group-hover:bg-[#fff3df]" : "bg-white group-hover:bg-brand-50/40"
+                            )}
+                          >
+                            {content}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+                
+                {bottomSpacerHeight > 0 && (
+                  <tr style={{ height: bottomSpacerHeight }}>
+                    <td colSpan={activeColumns.length} style={{ padding: 0, height: bottomSpacerHeight }} />
+                  </tr>
+                )}
+              </>
             )}
 
-            {loading && rows.length > 0 && (
-              <TableRow>
-                <TableCell colSpan={10} sx={{ border: "none", py: 2 }}>
-                  <DotLoaderLike message="" />
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
-};
+              {loading && rows.length > 0 && (
+                <tr>
+                  <td colSpan={activeColumns.length} className="py-3 text-center bg-white">
+                    <div className="flex items-center justify-center gap-2 text-text-muted">
+                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      <span className="text-[12px] font-bold">Loading more items...</span>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
 
-export default React.memo(DataTable);
+  export default React.memo(DataTable);

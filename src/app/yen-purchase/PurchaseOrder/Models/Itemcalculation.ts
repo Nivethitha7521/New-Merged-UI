@@ -28,6 +28,13 @@ export interface ItemWithCalculations {
   itemName: string;
   uom: string;
   poQuantity: number;
+
+  nos?: number;
+count?: number;
+eachQuantity?: number;
+
+
+
   pendingCount?: number;
   pendingQuantity?: number;
   pendingTotalQuantity: number;

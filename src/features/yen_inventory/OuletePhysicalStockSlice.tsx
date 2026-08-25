@@ -1,14 +1,22 @@
 
 
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import axios, { AxiosError } from "axios";
 import { RootState } from "@/redux/store";
-import purchaseApi from '@/utils/api';
-import { AxiosError } from "axios";
+import { getApiErrorMessage } from "@/components/Inventory/shared/apiError";
+import {
+  downloadBlobSafely,
+  getFilenameFromContentDisposition,
+} from "@/components/Inventory/shared/downloadFile";
 
 export type ItemsSliceState = ItemsState;
 
-// NEXT_PUBLIC_PRODUCTION_URL
-export const API_BASE_URL = process.env.NEXT_PUBLIC_PRODUCTION_URL || "";
+// Uses the production URL for production builds, local URL otherwise —
+// previously always used NEXT_PUBLIC_LOCAL_URL regardless of environment.
+export const API_BASE_URL =
+  (process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_PRODUCTION_URL
+    : process.env.NEXT_PUBLIC_LOCAL_URL) || "";
 
 interface UpdateStockResponse {
   itemCode: string;
@@ -20,6 +28,10 @@ interface UpdateStockResponse {
   adjustedDate: string;
   adjustedTime: string;
 }
+
+
+
+
 
 interface FilterOption {
   values: IdName[];
@@ -36,8 +48,11 @@ interface IdName {
   name?: string;
 }
 
+
 export interface Item {
   id: string;
+  // newly add this part 5 8 1
+  randomId: string;
   itemCode: string;
   category: IdName;
   subCategory: IdName;
@@ -142,15 +157,16 @@ interface FetchItemsResponse {
 
 
 const initialVisibleColumnsState = {
-  sno: true,
-  itemCode: true,
-  category: true,
-  subCategory: true,
-  itemName: true,
-  varianceName: true,
-  previousSystemStock: true,
-  systemStock: true,
-  physicalStock: true,
+  "S.No": true,
+  "Item Code": true,
+  "Category": false,
+  "Subcategory": false,
+  "Item Name": true,
+  "Variance": true,
+  "S.O Stock": true,
+  "Prev. System Stock": true,
+  "System Stock": true,
+  "Physical Stock": true,
 };
 
 
@@ -215,28 +231,17 @@ interface AxiosErrorResponseData {
   [key: string]: unknown;
 }
 
-export const parseAxiosError = (err: AxiosError): AxiosErrorPayload => {
-  const data = err.response?.data as AxiosErrorResponseData | undefined;
-  let message: string;
-
-  if (data && typeof data === "object") {
-    message = data.detail ?? data.message ?? err.message ?? "Unknown error occurred";
-  } else {
-    message = err.message ?? "Unknown error occurred";
-  }
-
-  return {
-    message,
-    status: err.response?.status ?? null,
-    raw: data ?? null,
-  };
-};
+export const parseAxiosError = (err: AxiosError): AxiosErrorPayload => ({
+  message: getApiErrorMessage(err, "Unknown error occurred"),
+  status: err.response?.status ?? null,
+  raw: err.response?.data ?? null,
+});
 
 export const fetchBranches = createAsyncThunk<Branch[], void, { rejectValue: AxiosErrorPayload }>(
   "data/fetchBranches",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get<BranchResponse[]>(`/outletinventory/locations/all`);
+      const response = await axios.get<BranchResponse[]>(`${API_BASE_URL}/outletinventory/locations/all`);
       return response.data.map(({ locationId, locationName, aliasName }) => ({ locationId, locationName, aliasName }));
     } catch (error) {
       return rejectWithValue(parseAxiosError(error as AxiosError));
@@ -250,7 +255,7 @@ export const fetchItems = createAsyncThunk<
   { state: RootState; rejectValue: AxiosErrorPayload }
 >("items/fetchItems", async (arg, { getState, rejectWithValue }) => {
   try {
-    const state = getState() as RootState;
+    const state = getState() as { items: ItemsState };
     let params = { ...state.items.filters };
     let field: keyof FilterOptionsResponse | undefined;
     let append = false;
@@ -294,16 +299,25 @@ export const fetchItems = createAsyncThunk<
 
     const shouldIncludeFilters = includeFilterOptions || field !== undefined;
 
+    // const apiParams = {
+    //   ...cleanParams,
+    //   date: state.items.queryDate, // ✅ ALWAYS PASSED
+
+    //   include_filter_options: shouldIncludeFilters,
+    // };
+    // repalce the part 10 8 1
     const apiParams = {
       ...cleanParams,
-      date: state.items.queryDate, // ✅ ALWAYS PASSED
-
+      queryDate: params.date,
       include_filter_options: shouldIncludeFilters,
     };
 
+    console.log("API_QUERY_DATE:", params.date);
+    console.log("API_PARAMS:", apiParams);
 
-    const response = await purchaseApi.get<FetchItemsResponse>(
-      `/outletinventory/`,
+
+    const response = await axios.get<FetchItemsResponse>(
+      `${API_BASE_URL}/outletinventory/`,
       {
         params: apiParams,
         timeout: 30000,
@@ -349,8 +363,8 @@ export const updateStock = createAsyncThunk<
       if (updatedBy) params.updated_by = updatedBy;
       if (description) params.description = description;
 
-      const response = await purchaseApi.patch<UpdateStockResponse>(
-        `/outletinventory/${itemCode}/update-stock`,
+      const response = await axios.patch<UpdateStockResponse>(
+        `${API_BASE_URL}/outletinventory/${itemCode}/update-stock`,
         {},
         { params, timeout: 30000 }
       );
@@ -394,8 +408,8 @@ export const updateStockBulk = createAsyncThunk<
       }
 
       // call bulk endpoint
-      const response = await purchaseApi.patch(
-        `/outletinventory/update-stock/bulk`,
+      const response = await axios.patch(
+        `${API_BASE_URL}/outletinventory/update-stock/bulk`,
         { updates },
         {
           params: {
@@ -438,8 +452,8 @@ export const importItems = createAsyncThunk<
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await purchaseApi.post<{ message: string }>(
-        `/outletinventory/importstock?locationId=${encodeURIComponent(
+      const response = await axios.post<{ message: string }>(
+        `${API_BASE_URL}/outletinventory/importstock?locationId=${encodeURIComponent(
           branchAlias
         )}&updated_by=${encodeURIComponent(updatedBy)}`,
         formData,
@@ -501,47 +515,47 @@ export const downloadCSV = createAsyncThunk<
       if (searchParams.queryDate)
         params.append("date", searchParams.queryDate);
 
-      const url = `/outletinventory/exportstock-csv?${params.toString()}`;
-      const response = await purchaseApi.get(url, { responseType: "blob" });
+      const url = `${API_BASE_URL}/outletinventory/exportstock-csv?${params.toString()}`;
+      const response = await axios.get(url, { responseType: "blob" });
 
       const today = new Date();
       const dateString = `${today.getDate().toString().padStart(2, "0")}-${(today.getMonth() + 1)
         .toString()
         .padStart(2, "0")}-${today.getFullYear()}`;
 
-      const filename = `${aliasName}_Outletstock_${dateString}.csv`;
-
-
-      const blob = new Blob([response.data], { type: "text/csv" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const fallbackName = `${aliasName}_Outletstock_${dateString}.csv`;
+      const filename = getFilenameFromContentDisposition(
+        response.headers["content-disposition"],
+        fallbackName
+      );
+      await downloadBlobSafely(
+        new Blob([response.data], { type: response.data?.type || "text/csv" }),
+        filename
+      );
 
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-      return thunkAPI.rejectWithValue(errorMessage);
+      return thunkAPI.rejectWithValue(getApiErrorMessage(err, "Export failed. Please try again."));
     }
   }
 );
 
 
 
-export const downloadSampleCSV = createAsyncThunk<void>(
+export const downloadSampleCSV = createAsyncThunk<void, void, { rejectValue: string }>(
   "rawMaterials/downloadSampleCSV",
-  async () => {
-    const url = `/outletinventory/export/sample`;
-    const response = await purchaseApi.get(url, { responseType: "blob" });
-    const blob = new Blob([response.data], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.setAttribute("download", "sample_outletstock.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  async (_, { rejectWithValue }) => {
+    try {
+      const url = `${API_BASE_URL}/outletinventory/export/sample`;
+      const response = await axios.get(url, { responseType: "blob" });
+      const filename = getFilenameFromContentDisposition(
+        response.headers["content-disposition"],
+        "sample_outletstock.csv"
+      );
+      await downloadBlobSafely(new Blob([response.data], { type: response.data?.type || "text/csv" }), filename);
+    } catch (err) {
+      return rejectWithValue(getApiErrorMessage(err, "Sample download failed. Please try again."));
+    }
   }
 );
 
@@ -690,7 +704,11 @@ const itemsSlice = createSlice({
 
         // 3️⃣ Process filtered items
         if (!field && data.filteredItems) {
-          const newItems = data.filteredItems.items.map((item) => ({
+          const sourceItems = Array.isArray(data.filteredItems.items)
+            ? data.filteredItems.items
+            : [];
+
+          const newItems = sourceItems.map((item) => ({
             ...item,
             systemStock: Number(item.systemStock) || 0,
             systemStockSo: Number(item.systemStockSo) || 0,

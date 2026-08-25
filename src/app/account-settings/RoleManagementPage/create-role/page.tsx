@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { addRoleLocally } from '@/features/account-setting/roleSlice';
 import { Snackbar, Alert } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
+import { authFetch } from '@/utils/authFetch';
 import {
   Dialog,
   DialogTitle,
@@ -31,6 +32,7 @@ const getBackendSubmoduleKey = (submoduleId: string, submoduleName: string): str
     'po_approved': 'purchaseorders_approved',
     'po_rejected': 'purchaseorders_rejected',
     'po_grn_converted': 'purchaseorders_grn_converted',
+    'po_hold_grn': 'holdgrn',
     // SERVICE ORDER
     'so_pending': 'serviceorders_pending',
     'so_approved': 'serviceorders_approved',
@@ -243,6 +245,18 @@ const HARD_MODULES: AppPermissions[] = [
   id: "po_grn_converted", 
   name: "GRN Converted", 
   actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } 
+},
+{
+  id: "po_hold_grn",
+  name: "Hold GRN",
+  actions: {
+    read: false,
+    add: false,
+    edit: false,
+    delete: false,
+    hide: false,
+    approve: false
+  }
 },
 
         ]
@@ -469,6 +483,83 @@ const PERMISSION_INFO = {
   delete: "Delete: Allows users to deactivate or remove records.",
   hide: "Hide: Restricts the module from being visible in the menu and screens.",
   approve: "Approve: Allows users to approve the order and move it to the next stage.",
+};
+
+// Maps a frontend appName section to its backend permissions group key.
+// Mirrors the grouping used in transformPermissionsForBackend (the reverse direction).
+const getBackendAppGroup = (appName: string): string => {
+  if (
+    appName === "YEN_PURCHASE" ||
+    appName === "YEN_BOOK" ||
+    appName === "YEN_INVENTORY" ||
+    appName === "YEN_REPORTS" ||
+    appName === "YEN_SETTINGS"
+  ) {
+    return "yenerp";
+  } else if (appName === "YEN_OUTLET_MANAGER") {
+    return "outlet_manager";
+  } else if (appName === "YEN_POS") {
+    return "pos";
+  }
+  return appName.toLowerCase();
+};
+
+// Builds a fresh frontend permissions template pre-filled with a predefined
+// role's actual saved permissions (as returned by GET /permissions/{role_name}).
+// Any submodule the backend has no entry for (e.g. Outlet Manager/POS, which the
+// current predefined roles don't grant) is left at its default all-false / hidden state.
+const buildPermissionsFromBackend = (backendData: Record<string, any> | null | undefined): AppPermissions[] => {
+  const template = cloneModules();
+  if (!backendData) return template;
+
+  template.forEach(app => {
+    const group = getBackendAppGroup(app.appName);
+    const groupData = backendData?.[group];
+    if (!groupData) return;
+
+    app.modules.forEach(module => {
+      module.submodules.forEach(submodule => {
+        const key = getBackendSubmoduleKey(submodule.id, submodule.name);
+        const backendPerm = groupData[key];
+        if (!backendPerm) return;
+
+        submodule.actions = {
+          read: !!backendPerm.read,
+          add: !!backendPerm.add,
+          edit: !!backendPerm.edit,
+          delete: !!backendPerm.delete,
+          hide: !!backendPerm.hide,
+          approve: !!backendPerm.approve,
+        };
+
+        if (submodule.editSubActions !== undefined) {
+          submodule.editSubActions = {
+            convert_to_ap: !!backendPerm.edit_actions?.convert_to_ap,
+            return_grn: !!backendPerm.edit_actions?.return_grn,
+            revert_to_po: !!backendPerm.edit_actions?.revert_to_po,
+          };
+        }
+      });
+    });
+  });
+
+  return template;
+};
+
+// Recomputes each module's "select all" checkbox from the actual permission
+// values, so the header checkbox reflects reality right after an autofill.
+const computeModuleCheckboxes = (permissions: AppPermissions[]): Record<string, boolean> => {
+  const result: Record<string, boolean> = {};
+  permissions.forEach(app => {
+    app.modules.forEach(module => {
+      result[module.id] =
+        module.submodules.length > 0 &&
+        module.submodules.every(
+          s => s.actions.read && s.actions.add && s.actions.edit && s.actions.delete && s.actions.approve
+        );
+    });
+  });
+  return result;
 };
 const SUBMODULE_INFO: Record<string, React.ReactNode> = {
   pm_pc: (
@@ -893,8 +984,91 @@ const [confirmOpen, setConfirmOpen] = useState(false);
   const [formPermissions, setFormPermissions] = useState<AppPermissions[]>(cloneModules());
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const [moduleCheckboxes, setModuleCheckboxes] = useState<Record<string, boolean>>({});
-  const formRoleName = selectedPredefinedRole || customRoleName;
+  // Every role created on this page is a Custom role — a predefined role is only
+  // ever used as a starting template. The final name always comes from the
+  // Custom Role Name field, never from the predefined dropdown.
+  const formRoleName = customRoleName;
  const [isSaving, setIsSaving] = useState(false);
+
+  // Cache of { roleName: backendPermissionsDict } for every predefined role,
+  // fetched once up front so switching the dropdown applies instantly with
+  // no per-selection network wait.
+  const [predefinedPermissionsCache, setPredefinedPermissionsCache] = useState<Record<string, any>>({});
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAllTemplates = async () => {
+      setTemplatesLoading(true);
+      try {
+        const results = await Promise.all(
+          ROLE_OPTIONS.map(async (role) => {
+            try {
+              const res = await authFetch(
+                `http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(role)}`
+              );
+              if (!res.ok) return [role, null] as const;
+              const data = await res.json();
+              return [role, data?.permissions ?? null] as const;
+            } catch {
+              return [role, null] as const;
+            }
+          })
+        );
+
+        if (cancelled) return;
+
+        const cache: Record<string, any> = {};
+        results.forEach(([role, perms]) => {
+          if (perms) cache[role] = perms;
+        });
+        setPredefinedPermissionsCache(cache);
+      } finally {
+        if (!cancelled) setTemplatesLoading(false);
+      }
+    };
+
+    loadAllTemplates();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Applies a predefined role's permissions to the form instantly. Falls back
+  // to an on-demand fetch only if the prefetch cache hasn't warmed up yet
+  // (e.g. the admin picks a role in the first instant the page loads).
+  const applyPredefinedTemplate = async (role: string) => {
+    if (!role) {
+      setFormPermissions(cloneModules());
+      setModuleCheckboxes({});
+      return;
+    }
+
+    const cached = predefinedPermissionsCache[role];
+    if (cached) {
+      const filled = buildPermissionsFromBackend(cached);
+      setFormPermissions(filled);
+      setModuleCheckboxes(computeModuleCheckboxes(filled));
+      return;
+    }
+
+    // Rare fallback: cache not ready yet, fetch this one role directly.
+    try {
+      const res = await authFetch(
+        `http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(role)}`
+      );
+      const data = res.ok ? await res.json() : null;
+      const perms = data?.permissions ?? null;
+      if (perms) setPredefinedPermissionsCache(prev => ({ ...prev, [role]: perms }));
+      const filled = buildPermissionsFromBackend(perms);
+      setFormPermissions(filled);
+      setModuleCheckboxes(computeModuleCheckboxes(filled));
+    } catch {
+      setFormPermissions(cloneModules());
+      setModuleCheckboxes({});
+    }
+  };
 
   useEffect(() => {
     const allExpanded: Record<string, boolean> = {};
@@ -1049,7 +1223,7 @@ const saveRole = async () => {
   if (!formRoleName.trim()) {
    setSnackbar({
   open: true,
-  message: "Please enter or select a role name",
+  message: "Please enter a custom role name",
   severity: "error",
 });
 return;
@@ -1069,7 +1243,7 @@ return;
 
    
 
-    const roleResponse = await fetch("https://yenerp.com/purchasetestapi/roles", {
+    const roleResponse = await authFetch("http://127.0.0.1:8000/purchasetestapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1119,7 +1293,7 @@ return;
 
    
 
-    const permResponse = await fetch("https://yenerp.com/purchasetestapi/permissions", {
+    const permResponse = await authFetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)
@@ -1182,18 +1356,14 @@ const handleConfirmCreate = () => {
   saveRole(); // actual API call
 };
   return (
-    <div className="h-screen bg-gray-50 flex flex-col"> 
-      
-      {/* Main Content - Takes full screen with NO margins */}
-      <div className="flex-1 flex flex-col bg-white m-0 rounded-none overflow-hidden"> 
+<div className="account-settings-role-editor account-role-editor-create h-screen bg-gray-50 flex flex-col">          {/* Main Content - Takes full screen with NO margins */}
+     <div className="account-role-editor-card flex-1 flex flex-col bg-white m-0 rounded-none overflow-hidden"> 
         
         {/* Header - With Back Button */}
-        <div className="flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">
-          {/* Back Button - Left Corner - SAME COLOR AS CREATE ROLE BUTTON */}
+ <div className="account-role-editor-header flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">          {/* Back Button - Left Corner - SAME COLOR AS CREATE ROLE BUTTON */}
           <button
             onClick={() => router.push("/account-settings/")}
-            className="flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 text-sm font-semibold shadow-sm min-w-[110px]"
-          >
+ className="account-role-back-button flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 text-sm font-semibold shadow-sm min-w-[110px]"          >
             {/* Left Arrow Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1209,24 +1379,29 @@ const handleConfirmCreate = () => {
           </button>
           
           {/* Page Title - Centered - UPDATED: Bold and Black */}
-          <h2 className="text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">
-            Create Role
+ <h2 className="account-role-editor-title text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">            Create Role
           </h2>
           
           {/* Empty div for spacing */}
           <div className="min-w-[110px]"></div>
         </div>
 
-        {/* Role Name Section - Compact */}
-        <div className="px-6 py-3 flex-shrink-0">
-          <div className="flex gap-3">
+{/* Role Name Section - Compact */}
+      <div className="account-role-editor-fields px-6 py-3 flex-shrink-0">
+         <div className="account-role-editor-fields-grid flex gap-3">
             {/* Predefined Roles Dropdown */}
-           <div className="w-1/2">
+         <div className="account-role-editor-field w-1/2">
   <label className="block text-sm font-bold text-black mb-0.5">Select Predefined Roles</label>
-  <p className="text-xs text-gray-500 mb-2">Choose a ready-made role template</p>
+  <p className="text-xs text-gray-500 mb-2">
+    Choose a ready-made role template — its permissions fill in below instantly, as a starting point you can adjust.
+  </p>
   <select
                 value={selectedPredefinedRole}
-                onChange={(e) => setSelectedPredefinedRole(e.target.value)}
+                onChange={(e) => {
+                  const role = e.target.value;
+                  setSelectedPredefinedRole(role);
+                  applyPredefinedTemplate(role);
+                }}
                 className="border border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:outline-none transition-all duration-200 w-full text-sm"
               >
                 <option value="">-- Select role --</option>
@@ -1239,9 +1414,13 @@ const handleConfirmCreate = () => {
             </div>
 
             {/* Custom Role Input */}
-            <div className="w-1/2">
-  <label className="block text-sm font-bold text-black mb-0.5">Create a New Custom Role</label>
-  <p className="text-xs text-gray-500 mb-2">Type a unique name for your role</p>
+          <div className="account-role-editor-field w-1/2">
+  <label className="block text-sm font-bold text-black mb-0.5">
+    Create a New Custom Role <span className="text-red-600">*</span>
+  </label>
+  <p className="text-xs text-gray-500 mb-2">
+    Required — this is the name your new role will be saved as, even if you started from a template above.
+  </p>
   <input
                 value={customRoleName}
                 onChange={(e) => setCustomRoleName(e.target.value)}
@@ -1253,8 +1432,7 @@ const handleConfirmCreate = () => {
         </div>
 
         {/* Table Header - ORDER CHANGED: Read, Add, Edit, Delete, Hide, Approve - UPDATED: Bold and Black */}
-     <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr,1fr,1fr] items-center gap-2 px-6 py-2 text-sm flex-shrink-0 bg-gray-50">
-  <div className="text-sm font-bold text-black">Modules / Submodules</div>
+<div className="account-role-permission-grid account-role-permission-header grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 px-6 py-2 text-sm flex-shrink-0 bg-gray-50">  <div className="text-sm font-bold text-black">Modules / Submodules</div>
 
   <HeaderWithHelp label="Read" info={PERMISSION_INFO.read} />
   <HeaderWithHelp label="Add" info={PERMISSION_INFO.add} />
@@ -1266,22 +1444,19 @@ const handleConfirmCreate = () => {
 
 
         {/* Scrollable Permission Section */}
-        <div className="flex-1 overflow-y-auto px-6 min-h-0"> 
-          <div className="space-y-2 py-2">
+       <div className="account-role-permission-scroll flex-1 overflow-y-auto px-6 min-h-0"> 
+          <div className="account-role-permission-stack space-y-2 py-2">
             {formPermissions.map((app, ai) => (
-              <div key={app.appName} className="mb-3">
+            <div key={app.appName} className="account-role-app mb-3">
                 {/* UPDATED: Only YEN_PURCHASE and YEN_BOOK in Blue */}
-                <div className="text-sm font-bold text-blue-600 mb-2 bg-blue-50 p-2 rounded">
-                  {app.appName}
+ <div className="account-role-app-title text-sm font-bold text-blue-600 mb-2 bg-blue-50 p-2 rounded">                  {app.appName}
                 </div>
                 <div className="space-y-2">
                   {app.modules.map((m, mi) => (
-                    <div key={m.id} className="border border-gray-200 rounded bg-white">
-                      {/* Module Header - UPDATED: Checkbox on left, dropdown on right - UPDATED: Bold and Black */}
+ <div key={m.id} className="account-role-module border border-gray-200 rounded bg-white">                      {/* Module Header - UPDATED: Checkbox on left, dropdown on right - UPDATED: Bold and Black */}
 <div
   onClick={() => toggleExpand(m.id)}
-  className="font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 rounded text-sm"
->
+className="account-role-module-header font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 rounded text-sm">
                         <div className="flex items-center">
                           {/* Checkbox for selecting all submodules */}
                           <button
@@ -1336,8 +1511,7 @@ const handleConfirmCreate = () => {
                           {m.submodules.map((s, si) => (
                             <div
   key={s.id}
-  className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr,1fr,1fr] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
->
+className="account-role-permission-grid account-role-permission-row grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm">
                               {/* UPDATED: Bold and Black for Submodule Names */}
                              <div className="text-black font-medium pl-8 text-sm flex items-center">
   <span>{s.name}</span>
@@ -1390,8 +1564,7 @@ const handleConfirmCreate = () => {
         </div>
 
         {/* Fixed Footer - Always visible above taskbar */}
-        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-4 shadow-lg z-50">
-          <div className="flex justify-end gap-3 max-w-7xl mx-auto">
+<div className="account-role-editor-footer fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-4 shadow-lg z-50">          <div className="flex justify-end gap-3 max-w-7xl mx-auto">
             <button 
              onClick={() => router.push("/account-settings/")}
               className="px-5 py-2 rounded-lg border-2 border-gray-400 hover:bg-gray-100 transition-all duration-200 text-sm font-semibold text-gray-700 bg-white shadow-sm hover:shadow-md min-w-[110px]" 
@@ -1399,7 +1572,19 @@ const handleConfirmCreate = () => {
               Cancel
             </button>
 <button 
-onClick={() => setConfirmOpen(true)}
+onClick={() => {
+  if (!customRoleName.trim()) {
+    setSnackbar({
+      open: true,
+      message: selectedPredefinedRole
+        ? `Please enter a custom role name — "${selectedPredefinedRole}" is only used as a starting template.`
+        : "Please enter a custom role name.",
+      severity: "error",
+    });
+    return;
+  }
+  setConfirmOpen(true);
+}}
   disabled={isSaving}
   className={`px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-semibold shadow-sm hover:shadow-md min-w-[110px] ${
     isSaving ? 'opacity-50 cursor-not-allowed' : ''

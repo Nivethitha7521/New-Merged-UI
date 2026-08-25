@@ -1,0 +1,740 @@
+/* =========================================================
+   SECTION MASTER — BASE
+   ========================================================= */
+
+.erp-master-admin-viewport .section-master-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.erp-master-admin-viewport .section-master-toolbar {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    minmax(125px, auto)
+    minmax(260px, 360px)
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  column-gap: 18px;
+  row-gap: 12px;
+
+  margin: 14px 0 18px;
+  padding: 0;
+}
+
+.erp-master-admin-viewport
+.section-master-toolbar-title {
+  margin: 0 !important;
+
+  color: var(--erp-text, #344054) !important;
+
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+
+  white-space: nowrap;
+}
+
+.erp-master-admin-viewport .section-master-search {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 360px !important;
+
+  margin: 0 !important;
+}
+
+.erp-master-admin-viewport .section-master-actions {
+  width: 100%;
+  min-width: 0;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  gap: 9px !important;
+  flex-wrap: wrap !important;
+
+  overflow: visible !important;
+}
+
+.erp-master-admin-viewport
+.section-master-actions
+> * {
+  flex: 0 0 auto;
+}
+
+/* Section table */
+
+.erp-master-admin-viewport .section-native-table {
+  width: 100%;
+  min-width: 1100px;
+
+  table-layout: auto;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th,
+.erp-master-admin-viewport
+.section-native-table
+td {
+  white-space: nowrap;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(1),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(1) {
+  width: 70px;
+  min-width: 70px;
+  max-width: 70px;
+
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(2),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(2) {
+  width: 130px;
+  min-width: 130px;
+
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(3),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(3) {
+  min-width: 240px;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(4),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(4) {
+  width: 130px;
+  min-width: 130px;
+
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(5),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(5) {
+  min-width: 270px;
+
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(6),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(6) {
+  min-width: 190px;
+
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.section-native-table
+th:nth-child(7),
+.erp-master-admin-viewport
+.section-native-table
+td:nth-child(7) {
+  width: 110px;
+  min-width: 110px;
+
+  text-align: center !important;
+}
+
+/* =========================================================
+   SECTION DIALOG — BASE
+   ========================================================= */
+
+.section-form-dialog .section-dialog-paper {
+  width: min(920px, calc(100vw - 32px)) !important;
+  max-width: 920px !important;
+  max-height: 90vh !important;
+
+  margin: 16px !important;
+
+  overflow: hidden;
+
+  color: var(--erp-text, #101828);
+  background: var(--erp-surface, #ffffff) !important;
+
+  border:
+    1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 18px !important;
+
+  box-shadow:
+    0 24px 70px rgba(16, 24, 40, 0.2) !important;
+}
+
+.section-form-dialog .dialog-title {
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-bottom:
+    1px solid var(--erp-border, #e7ecf1) !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 750 !important;
+}
+
+.section-form-dialog .dialog-content {
+  max-height: calc(90vh - 170px) !important;
+
+  overflow-y: auto !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+}
+
+.section-form-dialog .form-section {
+  width: 100% !important;
+
+  margin: 0 !important;
+
+  box-sizing: border-box;
+
+  background: var(--erp-surface, #ffffff) !important;
+
+  border:
+    1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 15px !important;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.03) !important;
+}
+
+.section-form-dialog
+.section-dialog-secondary-fields {
+  margin-top: 16px !important;
+}
+
+.section-form-dialog
+.section-dialog-primary-fields
+.form-grid {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 16px !important;
+}
+
+.section-form-dialog
+.section-dialog-secondary-fields
+.form-grid {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr)) !important;
+
+  gap: 16px !important;
+}
+
+.section-form-dialog .form-field,
+.section-form-dialog .custom-textfield,
+.section-form-dialog .custom-textfield.MuiFormControl-root,
+.section-form-dialog .MuiTextField-root,
+.section-form-dialog .MuiFormControl-root {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+.section-form-dialog .custom-textfield {
+  margin: 0 !important;
+}
+
+.section-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+
+  height: auto !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+}
+
+.section-form-dialog
+.custom-textfield
+.MuiOutlinedInput-notchedOutline {
+  border-color:
+    var(--erp-border-strong, #c5ced8) !important;
+}
+
+.section-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root:hover
+.MuiOutlinedInput-notchedOutline {
+  border-color:
+    var(--erp-accent-border, #9bb9fa) !important;
+}
+
+.section-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root.Mui-focused {
+  box-shadow:
+    0 0 0 3px
+    var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+.section-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root.Mui-focused
+.MuiOutlinedInput-notchedOutline {
+  border-width: 1px !important;
+  border-color:
+    var(--erp-accent, #155eef) !important;
+}
+
+.section-form-dialog .dialog-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-top:
+    1px solid var(--erp-border, #e7ecf1) !important;
+}
+
+.section-form-dialog .btn-primary,
+.section-form-dialog .btn-secondary {
+  width: auto !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-weight: 650 !important;
+
+  cursor: pointer;
+}
+
+.section-form-dialog .btn-secondary {
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border:
+    1px solid var(--erp-border-strong, #c5ced8) !important;
+}
+
+.section-form-dialog .btn-primary {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+
+  border:
+    1px solid var(--erp-accent, #155eef) !important;
+}
+
+.section-form-dialog
+.btn-primary:hover:not(:disabled) {
+  background: var(--erp-accent-hover, #124bc0) !important;
+  border-color: var(--erp-accent-hover, #124bc0) !important;
+}
+
+.section-form-dialog
+.btn-primary:disabled {
+  color: #ffffff !important;
+  background: #aab3c1 !important;
+  border-color: #aab3c1 !important;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   SECTION MASTER — DESKTOP DENSITY
+   ========================================================= */
+
+@media (min-width: 561px) {
+  .erp-master-admin-viewport
+  .section-master-toolbar {
+    grid-template-columns:
+      minmax(calc(var(--erp-ui) * 15.625), auto)
+      minmax(
+        calc(var(--erp-ui) * 32.5),
+        calc(var(--erp-ui) * 45)
+      )
+      minmax(0, 1fr) !important;
+
+    column-gap:
+      calc(var(--erp-ui) * 2.25) !important;
+
+    row-gap:
+      calc(var(--erp-ui) * 1.5) !important;
+
+    margin:
+      calc(var(--erp-ui) * 1.75)
+      0
+      calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .section-master-toolbar-title {
+    font-size:
+      calc(
+        var(--erp-ui) *
+        1.9 *
+        var(--erp-type-scale)
+      ) !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-search {
+    width: 100% !important;
+
+    min-width:
+      calc(var(--erp-ui) * 32.5) !important;
+
+    max-width:
+      calc(var(--erp-ui) * 45) !important;
+
+    flex-basis:
+      calc(var(--erp-ui) * 45) !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-search
+  .MuiOutlinedInput-root {
+    height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    min-height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-actions {
+    gap:
+      calc(var(--erp-ui) * 1.125) !important;
+
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+
+    overflow: visible !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-actions
+  .purchase-reference-action-button {
+    width: auto !important;
+
+    min-width:
+      calc(var(--erp-ui) * 13.25) !important;
+
+    height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    min-height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    padding:
+      0
+      calc(var(--erp-ui) * 1.7) !important;
+
+    border-width: 1px !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .section-master-actions
+  .purchase-reference-action-button {
+    font-size:
+      calc(
+        var(--erp-ui) *
+        1.94 *
+        var(--erp-type-scale)
+      ) !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-actions
+  .purchase-reference-active-toggle {
+    height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    min-height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    padding:
+      0
+      calc(var(--erp-ui) * 1.15)
+      0
+      calc(var(--erp-ui) * 1.65) !important;
+
+    gap:
+      calc(var(--erp-ui) * 0.9) !important;
+
+    border-width: 1px !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+  .erp-master-admin-viewport
+  .section-master-actions
+  .purchase-reference-active-toggle
+  .MuiTypography-root {
+    font-size:
+      calc(
+        var(--erp-ui) *
+        1.88 *
+        var(--erp-type-scale)
+      ) !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-native-table {
+    min-width:
+      calc(var(--erp-ui) * 137.5) !important;
+  }
+
+  /* Density-compatible dialog */
+
+  body
+  .section-form-dialog
+  .section-dialog-paper {
+    width:
+      min(
+        calc(var(--erp-ui) * 115),
+        calc(100vw - (var(--erp-ui) * 4))
+      ) !important;
+
+    max-width:
+      calc(var(--erp-ui) * 115) !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  body
+  .section-form-dialog
+  .dialog-title {
+    padding:
+      calc(var(--erp-ui) * 2.5)
+      calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  body
+  .section-form-dialog
+  .dialog-content {
+    padding:
+      calc(var(--erp-ui) * 1.5)
+      calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  body
+  .section-form-dialog
+  .dialog-actions {
+    min-height: auto !important;
+
+    padding:
+      calc(var(--erp-ui) * 1.75)
+      calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 2.5) !important;
+
+    gap:
+      calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  body
+  .section-form-dialog
+  .form-section {
+    padding:
+      calc(var(--erp-ui) * 2.25) !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  body
+  .section-form-dialog
+  .section-dialog-secondary-fields {
+    margin-top:
+      calc(var(--erp-ui) * 2) !important;
+  }
+
+  body
+  .section-form-dialog
+  .form-grid {
+    gap:
+      calc(var(--erp-ui) * 2) !important;
+  }
+
+  body
+  .section-form-dialog
+  .custom-textfield
+  :is(
+    .MuiInputBase-root,
+    .MuiOutlinedInput-root
+  ) {
+    min-height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  body
+  .section-form-dialog
+  :is(.btn-primary, .btn-secondary) {
+    min-width:
+      calc(var(--erp-ui) * 13.25) !important;
+
+    min-height:
+      calc(var(--erp-ui) * 5.25) !important;
+
+    padding:
+      0
+      calc(var(--erp-ui) * 1.7) !important;
+
+    border-radius:
+      calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+  body
+  .section-form-dialog
+  .dialog-title {
+    font-size:
+      calc(
+        var(--erp-ui) *
+        2.7 *
+        var(--erp-type-scale)
+      ) !important;
+  }
+
+  html[data-erp-font-size]
+  body
+  .section-form-dialog
+  :is(
+    .custom-label,
+    .MuiFormLabel-root,
+    .MuiFormHelperText-root
+  ) {
+    font-size:
+      calc(
+        var(--erp-ui) *
+        1.65 *
+        var(--erp-type-scale)
+      ) !important;
+  }
+
+  html[data-erp-font-size]
+  body
+  .section-form-dialog
+  :is(
+    .custom-input input,
+    .btn-primary,
+    .btn-secondary
+  ) {
+    font-size:
+      calc(
+        var(--erp-ui) *
+        1.9 *
+        var(--erp-type-scale)
+      ) !important;
+  }
+}
+
+/* Move actions below title/search if width is insufficient */
+
+@media (max-width: 1250px) {
+  .erp-master-admin-viewport
+  .section-master-toolbar {
+    grid-template-columns:
+      minmax(125px, auto)
+      minmax(240px, 1fr);
+  }
+
+  .erp-master-admin-viewport
+  .section-master-actions {
+    grid-column: 1 / -1;
+
+    justify-content: flex-end !important;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .erp-master-admin-viewport
+  .section-master-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .erp-master-admin-viewport
+  .section-master-actions {
+    width: 100%;
+
+    justify-content: flex-start !important;
+  }
+
+  .section-form-dialog
+  .section-dialog-primary-fields
+  .form-grid,
+  .section-form-dialog
+  .section-dialog-secondary-fields
+  .form-grid {
+    grid-template-columns:
+      1fr !important;
+  }
+
+  .section-form-dialog .dialog-title {
+    padding: 17px 18px 14px !important;
+  }
+
+  .section-form-dialog .dialog-content {
+    padding: 16px 18px !important;
+  }
+
+  .section-form-dialog .form-section {
+    padding: 14px !important;
+  }
+
+  .section-form-dialog .dialog-actions {
+    padding: 12px 18px 16px !important;
+  }
+}
+
+

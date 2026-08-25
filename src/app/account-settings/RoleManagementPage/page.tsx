@@ -130,8 +130,7 @@ const normalizePermissionsForView = (
 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-      {/* Reduced width and height - properly centered */}
+ <div className="account-settings-role-permission-modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">      {/* Reduced width and height - properly centered */}
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden mx-auto my-auto flex flex-col">
         {/* Modal Header - REDUCED SIZE */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white flex-shrink-0">
@@ -370,7 +369,7 @@ const handleDeleteRole = async (roleName: string) => {
   if (!roleToDelete) return;
 
   await fetch(
-    `https://yenerp.com/purchasetestapi/roles/${roleToDelete.id}/deactivate`,
+    `api/roles/${roleToDelete.id}/deactivate`,
     { method: "PUT" }
   );
 
@@ -389,7 +388,7 @@ const handleRestoreRole = async (roleName: string) => {
   if (!roleToRestore) return;
 
   await fetch(
-    `https://yenerp.com/purchasetestapi/roles/${roleToRestore.id}/restore`,
+    `http://127.0.0.1:8000/purchasetestapi/roles/${roleToRestore.id}/restore`,
     { method: "PUT" }
   );
 
@@ -460,40 +459,41 @@ const getDescription = (role: RoleRecord) => {
 
 
   return (
-  <div className="min-h-screen bg-gray-50 px-6 pt-3 pb-6 text-gray-900">
+ <div className="account-settings-module account-settings-roles min-h-screen bg-gray-50 px-6 pt-3 pb-6 text-gray-900">
+ 
 
       <div className="w-full">
         {/* Role Management Container */}
-<div className="bg-white rounded-lg shadow-sm border border-gray-200 px-6 pt-4 pb-10 w-full">
+<div className="account-settings-panel bg-white rounded-lg shadow-sm border border-gray-200 px-6 pt-4 pb-10 w-full">
+<div className="account-settings-toolbar account-settings-role-toolbar flex justify-between items-center mb-4">
+  <div className="account-settings-role-search w-80">
+    <div className="account-settings-role-search-field relative">
+      <Search className="account-settings-role-search-icon absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 
-<div className="flex justify-between items-center mb-4">
-  <div className="w-80">
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
       <input
         type="text"
         placeholder="Search role..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+        className="account-settings-role-search-input w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
       />
     </div>
   </div>
 
-  <div className="flex items-center gap-4">
+  <div className="account-settings-role-toolbar-actions flex items-center gap-4">
     <button
       onClick={handleCreateRole}
-      className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2 px-4 text-sm"
+      className="account-settings-create-role-button bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2 px-4 text-sm"
     >
       <Plus className="w-4 h-4" />
       Create Role
     </button>
 
-    <div className="flex items-center gap-2">
-      {/* ✅ Toggle text changes based on state */}
-      <span className="text-sm text-gray-600">
+    <div className="account-settings-role-active-filter flex items-center gap-2">
+      <span className="account-settings-role-active-label text-sm text-gray-600">
         {showActive ? "Show Active" : "Show Inactive"}
       </span>
+
       <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
@@ -501,21 +501,24 @@ const getDescription = (role: RoleRecord) => {
           onChange={(e) => setShowActive(e.target.checked)}
           className="sr-only peer"
         />
-        <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
-        <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform peer-checked:translate-x-5 transition"></div>
+
+        <div className="account-settings-role-toggle-track w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 transition-colors"></div>
+
+        <div className="account-settings-role-toggle-thumb absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform peer-checked:translate-x-5 transition"></div>
       </label>
     </div>
   </div>
 </div>
 
           {/* CSS GRID TABLE */}
-          <div className="w-full border border-gray-200 rounded-lg overflow-hidden">
+        <div className="account-settings-grid-table account-settings-role-table w-full border border-gray-200 rounded-lg overflow-hidden">
             {/* Table Header - Fixed */}
-            <div className="grid grid-cols-[60px_1fr_90px_60px_60px_70px_80px_70px_2fr_120px]
- bg-gray-50 border-b border-gray-200 text-xs font-semibold">
+<div className="account-settings-grid-header account-settings-role-grid grid bg-gray-50 border-b border-gray-200 text-xs font-semibold">
               <div className="p-4 text-left text-gray-700 uppercase">S.NO</div>
               <div className="p-4 text-left text-gray-700 uppercase">ROLE NAME</div>
-            <div className="p-4 text-left text-gray-700 uppercase pl-0 -ml-3">STATUS</div>
+            <div className="account-settings-role-status-header p-4 text-left text-gray-700 uppercase">
+  STATUS
+</div>
 
 
               <div className="p-4 text-center text-gray-700 uppercase">ADD</div>
@@ -528,8 +531,7 @@ const getDescription = (role: RoleRecord) => {
             </div>
 
             {/* Table Body - Scrollable Container */}
-<div className="max-h-[calc(100vh-330px)] overflow-y-auto">
-  {filteredRoles.map((role, index) => {
+<div className="account-settings-role-table-body">  {filteredRoles.map((role, index) => {
 const actionSummary = {
   add: getPermissionSummary(role.permissions, "add"),
   edit: getPermissionSummary(role.permissions, "edit"),
@@ -545,10 +547,9 @@ const actionSummary = {
     return (
       <div 
         key={role.id || `role-${index}`} 
-        className={`grid grid-cols-[60px_1fr_90px_60px_60px_70px_70px_60px_2fr_120px]
- border-b border-gray-200 hover:bg-gray-50 text-sm transition-colors ${
-          isDuplicate ? 'bg-yellow-50' : ''
-        }`}
+className={`account-settings-grid-row account-settings-role-grid grid border-b border-gray-200 hover:bg-gray-50 text-sm transition-colors ${
+  isDuplicate ? 'bg-yellow-50' : ''
+}`}
       >
         {/* S.NO */}
         <div className="p-4 flex items-center text-gray-700 font-medium text-sm">
@@ -567,7 +568,7 @@ const actionSummary = {
         </div>
                     
                     {/* STATUS */}
-                <div className="p-4 flex items-center justify-start pl-0 -ml-7">
+               <div className="account-settings-role-status-cell p-4 flex items-center justify-start">
 
 
                       <span
@@ -644,26 +645,25 @@ const actionSummary = {
   </span>
 </div>
                     {/* DESCRIPTION */}
-                    <div className="p-4 flex items-center">
-                      <div 
-                        className="text-gray-600 text-sm leading-tight line-clamp-2 w-full"
-                        title={getDescription(role)}
-                      >
-                        {getDescription(role)}
-                      </div>
-                    </div>
+                  <div className="account-settings-role-description-cell p-4 flex items-center">
+  <div
+    className="text-gray-600 text-sm leading-tight line-clamp-2 w-full"
+    title={getDescription(role)}
+  >
+    {getDescription(role)}
+  </div>
+</div>
                     
                     
                    
 
 {/* ACTIONS */}
-<div className="p-4 flex items-center justify-center">
-  <div className="flex justify-center gap-2">
+<div className="account-settings-role-actions-cell p-4 flex items-center justify-center">
+  <div className="account-settings-role-action-buttons flex justify-center gap-2">
     {/* Eye Icon for Viewing Permissions - SHOW FOR ALL ROLES */}
     <button
       onClick={() => handleViewPermissions(role)}
-      className="p-2 text-green-600 hover:bg-green-50 rounded-lg border border-green-200 transition-colors group"
-      title="View Detailed Permissions"
+className="account-settings-role-action-button p-2 text-green-600 hover:bg-green-50 rounded-lg border border-green-200 transition-colors group"      title="View Detailed Permissions"
     >
       <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
     </button>
@@ -677,8 +677,7 @@ const actionSummary = {
             {/* Edit Button - ONLY FOR CUSTOM ROLES */}
             <button
               onClick={() => handleEditRole(role.roleName)}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-200 transition-colors group"
-              title="Edit Role"
+className="account-settings-role-action-button p-2 text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-200 transition-colors group"              title="Edit Role"
             >
               <Pencil className="w-4 h-4 group-hover:scale-110 transition-transform" />
             </button>
@@ -696,8 +695,7 @@ const actionSummary = {
                   }
                 });
               }}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors group"
-              title="Delete Role"
+className="account-settings-role-action-button p-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors group"              title="Delete Role"
             >
               <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
             </button>
@@ -719,8 +717,7 @@ const actionSummary = {
               }
             });
           }}
-          className="p-2 text-green-600 hover:bg-green-50 rounded-lg border border-green-200 transition-colors group"
-          title="Restore Role"
+className="account-settings-role-action-button p-2 text-green-600 hover:bg-green-50 rounded-lg border border-green-200 transition-colors group"          title="Restore Role"
         >
           <RotateCcw className="w-4 h-4 group-hover:scale-110 transition-transform" />
         </button>
@@ -733,20 +730,20 @@ const actionSummary = {
               })}
               
               {/* Empty State */}
-              {filteredRoles.length === 0 && (
-                <div className="grid grid-cols-[60px_1fr_100px_60px_60px_70px_60px_2fr_120px] border-b border-gray-200">
-                  <div className="p-12 text-center text-gray-500 text-sm col-span-9">
-                    No {showActive ? "active" : "inactive"} roles found.
-                  </div>
-                </div>
-              )}
+{filteredRoles.length === 0 && (
+  <div className="account-settings-grid-row account-settings-role-grid grid border-b border-gray-200">
+    <div className="account-settings-role-empty-state p-12 text-center text-gray-500 text-sm col-span-10">
+      No {showActive ? "active" : "inactive"} roles found.
+    </div>
+  </div>
+)}
             </div>
           </div>
         </div>
 
         {/* Confirmation Dialog */}
         {confirmDialog.open && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 backdrop-blur-sm">
+         <div className="account-settings-custom-modal account-settings-confirm-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50 backdrop-blur-sm">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm text-center animate-fadeIn">
               <p className="text-lg font-medium text-gray-800 mb-6">{confirmDialog.message}</p>
               <div className="flex justify-center gap-4">

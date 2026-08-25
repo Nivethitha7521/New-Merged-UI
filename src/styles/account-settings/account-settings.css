@@ -1,0 +1,5553 @@
+/* =========================================================
+   ACCOUNT SETTINGS — YEN ERP ALIGNMENT
+   Presentation only. No API, Redux, routing, validation or
+   business-logic changes.
+   ========================================================= */
+
+.account-settings-shell,
+.account-settings-module,
+.account-settings-role-editor {
+  width: 100%;
+  min-width: 0;
+  color: var(--erp-text, #101828);
+  font-family: var(--erp-font-family, "Source Sans 3", sans-serif);
+}
+
+/* ---------- Account Settings top tabs ---------- */
+.account-settings-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 12px;
+}
+
+.account-settings-tabs .account-settings-tab.MuiButton-root {
+  width: auto !important;
+  min-width: 98px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 13px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+}
+
+.account-settings-tabs .account-settings-tab.MuiButton-outlined {
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #fff) !important;
+  border-color: var(--erp-border-strong, #c5ced8) !important;
+}
+
+.account-settings-tabs .account-settings-tab.MuiButton-contained {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-content {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+/* ---------- Shared module surface ---------- */
+.account-settings-module.min-h-screen {
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.account-settings-panel {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  background: var(--erp-surface, #fff) !important;
+  border: 1px solid var(--erp-border, #e4e7ec) !important;
+  border-radius: 9px !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
+}
+
+/* ---------- Shared toolbar ---------- */
+.account-settings-toolbar {
+  min-width: 0;
+  margin-bottom: 10px !important;
+  gap: 12px !important;
+}
+
+.account-settings-toolbar > :first-child {
+  min-width: 220px;
+  max-width: 300px;
+}
+
+.account-settings-toolbar input[type="text"],
+.account-settings-toolbar input:not([type]) {
+  width: 100% !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border: 1px solid var(--erp-border-strong, #c5ced8) !important;
+  border-radius: 7px !important;
+  background: #fff !important;
+  color: var(--erp-text, #101828) !important;
+  font-size: 11px !important;
+  line-height: 32px !important;
+  outline: none !important;
+}
+
+.account-settings-toolbar input:focus {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+.account-settings-toolbar button {
+  min-height: 32px !important;
+  padding: 0 11px !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+  border-radius: 7px !important;
+  background: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #fff) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.account-settings-toolbar button:hover {
+  background: var(--erp-accent-hover, #124bc0) !important;
+  border-color: var(--erp-accent-hover, #124bc0) !important;
+}
+
+.account-settings-toolbar button svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.account-settings-toolbar > :last-child,
+.account-settings-toolbar > :last-child > div {
+  min-width: 0;
+}
+
+.account-settings-toolbar span.text-sm {
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+
+/* Native Tailwind-style toggles used by User / Role / Tenant pages.
+   Rebuilt with plain CSS (not dependent on Tailwind sr-only/peer
+   utilities compiling) so the hidden checkbox can never render at
+   native/default size and swallow the switch or the label text. */
+.account-settings-module label:has(> input.peer[type="checkbox"]) {
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  width: 40px !important;
+  height: 22px !important;
+  cursor: pointer !important;
+}
+
+.account-settings-module input.peer[type="checkbox"] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  opacity: 0 !important;
+}
+
+.account-settings-module input.peer[type="checkbox"] + span,
+.account-settings-module input.peer[type="checkbox"] + div {
+  position: static !important;
+  display: block !important;
+  width: 40px !important;
+  height: 22px !important;
+  box-sizing: border-box !important;
+  border-radius: 999px !important;
+  background: #d0d5dd !important;
+  transition: background 0.18s ease !important;
+}
+
+.account-settings-module input.peer[type="checkbox"]:checked + span,
+.account-settings-module input.peer[type="checkbox"]:checked + div {
+  background: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-module input.peer[type="checkbox"] + span + span,
+.account-settings-module input.peer[type="checkbox"] + div + div {
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  width: 18px !important;
+  height: 18px !important;
+  box-sizing: border-box !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.18) !important;
+  transition: transform 0.18s ease !important;
+}
+
+.account-settings-module input.peer[type="checkbox"]:checked + span + span,
+.account-settings-module input.peer[type="checkbox"]:checked + div + div {
+  transform: translateX(18px) !important;
+}
+
+/* ---------- Shared grid tables ---------- */
+.account-settings-grid-table {
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100vh - 280px) !important;
+  overflow: auto !important;
+  background: #fff !important;
+  border: 1px solid var(--erp-border, #e4e7ec) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.account-settings-grid-header {
+  min-width: 850px;
+  min-height: 34px;
+  background: #f2f4f7 !important;
+  border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+}
+
+.account-settings-grid-header > div {
+  min-width: 0;
+  padding: 8px 10px !important;
+  color: #475467 !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  line-height: 17px !important;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.account-settings-grid-row {
+  min-width: 850px;
+  min-height: 38px;
+  background: #fff;
+  border-bottom: 1px solid #eaecf0 !important;
+}
+
+.account-settings-grid-row:last-child {
+  border-bottom: 0 !important;
+}
+
+.account-settings-grid-row:hover {
+  background: #f9fafb !important;
+}
+
+.account-settings-grid-row > div {
+  min-width: 0;
+  min-height: 38px;
+  padding: 7px 10px !important;
+  color: #344054;
+  font-size: 11px !important;
+  line-height: 16px !important;
+}
+
+.account-settings-grid-row button {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+}
+
+.account-settings-grid-row button svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* User Accounts: preserve existing columns, but keep them aligned compactly. */
+.account-settings-users .account-settings-grid-header,
+.account-settings-users .account-settings-grid-row {
+  grid-template-columns: 46px 68px minmax(130px, 1.3fr) 88px minmax(110px, 1fr) minmax(150px, 1.5fr) 88px 104px !important;
+  min-width: 920px;
+}
+
+.account-settings-users .account-settings-grid-row span.rounded-full {
+  padding: 3px 8px !important;
+  font-size: 10px !important;
+}
+
+/* Role Management table: header and body must use the exact same grid. */
+.account-settings-roles .account-settings-grid-header,
+.account-settings-roles .account-settings-grid-row {
+  grid-template-columns: 44px minmax(115px, 1fr) 82px 52px 52px 58px 64px 52px minmax(230px, 2fr) 104px !important;
+  min-width: 1000px;
+}
+
+.account-settings-roles .account-settings-grid-header > div,
+.account-settings-roles .account-settings-grid-row > div {
+  margin-left: 0 !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.account-settings-roles .account-settings-grid-row .text-sm {
+  font-size: 10.5px !important;
+}
+
+.account-settings-roles .account-settings-grid-row .text-xs {
+  font-size: 9.5px !important;
+  margin-top: 0 !important;
+}
+
+.account-settings-roles .account-settings-grid-row span.rounded-full {
+  padding: 3px 7px !important;
+  font-size: 9.5px !important;
+}
+
+/* Tenant */
+.account-settings-tenant {
+  margin-top: 0 !important;
+}
+
+.account-settings-tenant .account-settings-grid-header,
+.account-settings-tenant .account-settings-grid-row {
+  grid-template-columns: 60px 1fr 1.2fr 110px 110px !important;
+  min-width: 720px;
+}
+
+.account-settings-tenant .account-settings-grid-row span.rounded-full {
+  padding: 3px 9px !important;
+  font-size: 10px !important;
+}
+
+/* ---------- Business / Personal MUI pages ---------- */
+.account-settings-business {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+
+.account-settings-business .account-settings-section,
+.account-settings-personal .account-settings-section {
+  position: relative;
+  width: 100%;
+  margin: 0 0 12px !important;
+  padding: 12px !important;
+  background: var(--erp-surface, #fff);
+  border: 1px solid var(--erp-border, #e4e7ec);
+  border-radius: 9px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+.account-settings-business .account-settings-section > .MuiTypography-h5,
+.account-settings-personal .account-settings-section > .MuiTypography-h5 {
+  margin: 0 0 10px !important;
+  color: var(--erp-text, #101828) !important;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+  line-height: 1.3 !important;
+}
+
+.account-settings-business .account-settings-section > .icon-button-outline,
+.account-settings-personal .account-settings-section > .icon-button-outline {
+  position: absolute !important;
+  top: 9px;
+  right: 10px;
+  width: 29px !important;
+  min-width: 29px !important;
+  height: 29px !important;
+  min-height: 29px !important;
+  padding: 0 !important;
+  color: var(--erp-accent, #155eef) !important;
+  background: #fff !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+  border-radius: 6px !important;
+}
+
+.account-settings-business .MuiTableContainer-root,
+.account-settings-personal .MuiTableContainer-root {
+  width: 100% !important;
+  max-width: 900px !important;
+  margin-top: 8px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.account-settings-personal .MuiTableContainer-root {
+  width: min(720px, 100%) !important;
+}
+
+.account-settings-business .MuiTableCell-root,
+.account-settings-personal .MuiTableCell-root {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+  line-height: 16px !important;
+}
+
+.account-settings-business .MuiTableCell-head,
+.account-settings-personal .MuiTableCell-head {
+  background: #f2f4f7 !important;
+  color: #475467 !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-business .MuiTypography-body1,
+.account-settings-personal .MuiTypography-body1,
+.account-settings-personal .MuiTypography-h6 {
+  font-size: 11px !important;
+  line-height: 16px !important;
+}
+
+.account-settings-business .MuiTextField-root,
+.account-settings-personal .MuiTextField-root {
+  width: 100% !important;
+}
+
+.account-settings-business .MuiOutlinedInput-root,
+.account-settings-personal .MuiOutlinedInput-root {
+  min-height: 34px !important;
+  height: 34px !important;
+  border-radius: 7px !important;
+}
+
+.account-settings-business .MuiOutlinedInput-input,
+.account-settings-personal .MuiOutlinedInput-input {
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+}
+
+/* ---------- Account Settings MUI dialogs (portalled) ---------- */
+body .MuiDialog-root.account-settings-dialog .MuiDialog-paper {
+  width: min(520px, calc(100vw - 28px)) !important;
+  max-width: 520px !important;
+  max-height: calc(100vh - 32px) !important;
+  margin: 16px !important;
+  border: 1px solid var(--erp-border, #e4e7ec) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 18px 48px rgba(16, 24, 40, 0.18) !important;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiDialogTitle-root {
+  min-height: 44px !important;
+  padding: 12px 15px !important;
+  border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiDialogContent-root {
+  padding: 14px 15px !important;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiDialogActions-root {
+  min-height: 48px !important;
+  padding: 7px 15px !important;
+  gap: 8px;
+  border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+  background: #f9fafb;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiOutlinedInput-root {
+  min-height: 36px !important;
+  height: 36px !important;
+  border-radius: 7px !important;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiInputBase-input,
+body .MuiDialog-root.account-settings-dialog .MuiOutlinedInput-input {
+  padding: 8px 10px !important;
+  font-size: 11px !important;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiButton-root {
+  min-width: 68px !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 0 11px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+body .MuiDialog-root.account-settings-dialog .MuiButton-root:last-child {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+}
+
+/* ---------- Custom modals ---------- */
+.account-settings-custom-modal,
+.account-settings-role-permission-modal {
+  background: rgba(16, 24, 40, 0.44) !important;
+  backdrop-filter: blur(2px);
+}
+
+.account-settings-custom-modal > div,
+.account-settings-role-permission-modal > div {
+  border: 1px solid var(--erp-border, #e4e7ec) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 18px 48px rgba(16, 24, 40, 0.18) !important;
+}
+
+.account-settings-confirm-modal > div {
+  width: min(360px, calc(100vw - 28px)) !important;
+  padding: 16px !important;
+}
+
+.account-settings-confirm-modal h2,
+.account-settings-confirm-modal h3,
+.account-settings-confirm-modal p.text-lg {
+  margin-bottom: 7px !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.account-settings-confirm-modal p {
+  margin-bottom: 14px !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.account-settings-confirm-modal button {
+  min-height: 31px !important;
+  padding: 0 12px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+}
+
+.account-settings-confirm-modal button:last-child {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-tenant-form-modal > div {
+  width: min(360px, calc(100vw - 28px)) !important;
+  padding: 16px !important;
+  gap: 10px !important;
+}
+
+.account-settings-tenant-form-modal h3 {
+  margin: 0 0 8px !important;
+  font-size: 14px !important;
+}
+
+.account-settings-tenant-form-modal input {
+  height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+}
+
+.account-settings-tenant-form-modal input:focus {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+.account-settings-tenant-form-modal button {
+  min-height: 31px !important;
+  padding: 0 12px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+}
+
+.account-settings-tenant-form-modal button:last-child {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+}
+
+/* User creation modals keep the same content/flow, only compact their density. */
+.account-settings-user-platform-modal > div,
+.account-settings-user-credential-modal > div {
+  max-height: calc(100vh - 28px) !important;
+  border-radius: 10px !important;
+}
+
+.account-settings-user-platform-modal > div {
+  max-width: 500px !important;
+}
+
+.account-settings-user-credential-modal > div {
+  max-width: 470px !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child,
+.account-settings-user-credential-modal > div > :first-child {
+  padding: 14px 16px !important;
+}
+
+.account-settings-user-platform-modal h2,
+.account-settings-user-credential-modal h2 {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+}
+
+.account-settings-user-platform-modal p,
+.account-settings-user-credential-modal p,
+.account-settings-user-platform-modal label,
+.account-settings-user-credential-modal label {
+  font-size: 11px !important;
+}
+
+.account-settings-user-platform-modal > div > :nth-child(2),
+.account-settings-user-credential-modal > div > :nth-child(2) {
+  padding: 14px 16px !important;
+}
+
+.account-settings-user-platform-modal > div > :last-child,
+.account-settings-user-credential-modal > div > :last-child {
+  padding: 10px 16px !important;
+}
+
+.account-settings-user-platform-modal button,
+.account-settings-user-credential-modal button {
+  font-size: 11px !important;
+}
+
+/* Role permission detail modal. */
+.account-settings-role-permission-modal > div {
+  max-width: 760px !important;
+  max-height: 82vh !important;
+}
+
+.account-settings-role-permission-modal > div > :first-child {
+  padding: 12px 16px !important;
+  background: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-role-permission-modal h3 {
+  font-size: 15px !important;
+}
+
+.account-settings-role-permission-modal .text-sm {
+  font-size: 10.5px !important;
+}
+
+.account-settings-role-permission-modal .text-xs {
+  font-size: 9.5px !important;
+}
+
+/* ---------- Create / Edit Role pages ---------- */
+.account-settings-role-editor {
+  height: 100% !important;
+  min-height: 0 !important;
+  background: transparent !important;
+}
+
+.account-settings-role-editor > .flex-1 {
+  min-height: 0;
+  border: 1px solid var(--erp-border, #e4e7ec);
+  border-radius: 9px !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+.account-settings-role-editor > .flex-1 > :first-child {
+  min-height: 46px;
+  padding: 7px 12px !important;
+  border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+}
+
+.account-settings-role-editor h2 {
+  font-size: 15px !important;
+}
+
+.account-settings-role-editor button {
+  min-height: 30px;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+}
+
+.account-settings-role-editor button.bg-blue-600,
+.account-settings-role-editor button[class*="bg-blue-600"] {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-role-editor select,
+.account-settings-role-editor input[type="text"] {
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+}
+
+.account-settings-role-editor label,
+.account-settings-role-editor .text-sm {
+  font-size: 10.5px !important;
+}
+
+.account-settings-role-editor .grid.grid-cols-\[2fr_repeat\(6\,1fr\)\] {
+  font-size: 10.5px !important;
+}
+
+.account-settings-role-editor .fixed.bottom-0.left-0.right-0 {
+  position: sticky !important;
+  bottom: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  width: 100% !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 -5px 14px rgba(16, 24, 40, 0.05) !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .account-settings-tabs {
+    gap: 6px;
+  }
+
+  .account-settings-tabs .account-settings-tab.MuiButton-root {
+    min-width: 92px !important;
+  }
+
+  .account-settings-toolbar {
+    align-items: stretch !important;
+    flex-wrap: wrap !important;
+  }
+
+  .account-settings-toolbar > :first-child {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .account-settings-tabs .account-settings-tab.MuiButton-root {
+    flex: 1 1 130px;
+  }
+
+  .account-settings-panel,
+  .account-settings-business .account-settings-section,
+  .account-settings-personal .account-settings-section {
+    padding: 10px !important;
+  }
+}
+
+/* =========================================================
+   ACCOUNT SETTINGS — CUSTOM MODAL POSITION / LAYOUT FIX
+   ---------------------------------------------------------
+   These dialogs are plain DIV based modals (not MUI Dialogs).
+   Their JSX uses Tailwind utility class names such as fixed,
+   inset-0, flex and items-center. Those utility rules are not
+   guaranteed to exist in this application, so the modal was
+   falling into normal page flow at the bottom-left.
+
+   This block makes the existing modal markup self-contained.
+   Presentation only — no state, API, validation or handlers.
+   ========================================================= */
+
+/* Full-screen overlay for every Account Settings custom modal. */
+.account-settings-custom-modal,
+.account-settings-role-permission-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1600 !important;
+
+  width: 100vw !important;
+  height: 100dvh !important;
+  min-width: 100vw !important;
+  min-height: 100dvh !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  margin: 0 !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+
+  overflow: auto !important;
+  background: rgba(16, 24, 40, 0.46) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+}
+
+/* Modal surface. */
+.account-settings-custom-modal > div,
+.account-settings-role-permission-modal > div {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: auto !important;
+
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border, #e4e7ec) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 18px 48px rgba(16, 24, 40, 0.2) !important;
+}
+
+/* ---------------- User platform chooser ---------------- */
+.account-settings-user-platform-modal > div {
+  width: min(520px, calc(100vw - 32px)) !important;
+  max-width: 520px !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+
+  padding: 14px 16px 12px !important;
+  border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+  background: #ffffff !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child > div {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child h2 {
+  margin: 0 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child p {
+  margin: 4px 0 0 !important;
+  color: #667085 !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child > button,
+.account-settings-user-credential-modal > div > :first-child > button {
+  flex: 0 0 auto !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  color: #667085 !important;
+  background: #ffffff !important;
+  border: 1px solid var(--erp-border, #d0d5dd) !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child > button:hover,
+.account-settings-user-credential-modal > div > :first-child > button:hover {
+  color: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent-border, #9bb9fa) !important;
+  background: var(--erp-accent-soft, #eff4ff) !important;
+}
+
+.account-settings-user-platform-modal > div > :first-child > button svg,
+.account-settings-user-credential-modal > div > :first-child > button svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.account-settings-user-platform-modal > div > :nth-child(2) {
+  min-height: 0 !important;
+  padding: 14px 16px !important;
+  overflow-y: auto !important;
+}
+
+/* Existing information box. */
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :first-child {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  padding: 11px 12px !important;
+
+  background: #fffaeb !important;
+  border: 1px solid #fedf89 !important;
+  border-radius: 8px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :first-child
+  > :first-child {
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  margin: 0 !important;
+  background: #fef0c7 !important;
+  border-radius: 7px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :first-child
+  h3 {
+  margin: 0 !important;
+  color: #93370d !important;
+  font-size: 11.5px !important;
+  font-weight: 650 !important;
+  line-height: 1.35 !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :first-child
+  p {
+  margin: 3px 0 0 !important;
+  color: #b54708 !important;
+  font-size: 10.5px !important;
+  line-height: 1.45 !important;
+}
+
+/* Platform selector block. */
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2) {
+  margin-top: 14px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > label {
+  display: block !important;
+  margin: 0 0 8px !important;
+  color: #344054 !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-top: 0 !important;
+}
+
+/* Existing PlatformCard buttons. */
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 150px !important;
+  padding: 12px !important;
+
+  text-align: left !important;
+  color: #344054 !important;
+  background: #ffffff !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button:hover {
+  border-color: var(--erp-accent-border, #9bb9fa) !important;
+  background: var(--erp-accent-soft, #eff4ff) !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > span:first-child {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1.5px solid #98a2b3 !important;
+  border-radius: 999px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > span:nth-child(2) {
+  width: 34px !important;
+  height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eff4ff) !important;
+  border-radius: 7px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > span:nth-child(2)
+  svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > h3 {
+  margin: 10px 0 0 !important;
+  color: #1d2939 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > p {
+  margin: 4px 0 0 !important;
+  color: #667085 !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > div {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  margin-top: 9px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(2)
+  > div
+  > button
+  > div
+  > span {
+  padding: 2px 5px !important;
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eff4ff) !important;
+  border-radius: 4px !important;
+  font-size: 9px !important;
+  font-weight: 600 !important;
+}
+
+/* Quick comparison. */
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(3) {
+  margin-top: 12px !important;
+  padding: 11px 12px !important;
+  background: #f9fafb !important;
+  border: 1px solid var(--erp-border, #e4e7ec) !important;
+  border-radius: 8px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(3)
+  > h3 {
+  margin: 0 0 8px !important;
+  color: #475467 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(3)
+  > div {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  margin-top: 0 !important;
+  color: #667085 !important;
+  font-size: 9.5px !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :nth-child(2)
+  > :nth-child(3)
+  > div
+  > div {
+  padding: 6px 5px !important;
+  border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+}
+
+.account-settings-user-platform-modal > div > :last-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+
+  padding: 9px 16px !important;
+  background: #f9fafb !important;
+  border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+}
+
+.account-settings-user-platform-modal > div > :last-child button,
+.account-settings-user-credential-modal > div > :last-child button {
+  min-width: 72px !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+.account-settings-user-platform-modal > div > :last-child button:first-child,
+.account-settings-user-credential-modal > div > :last-child button:first-child {
+  color: #475467 !important;
+  background: #ffffff !important;
+  border: 1px solid #d0d5dd !important;
+}
+
+.account-settings-user-platform-modal > div > :last-child button:last-child,
+.account-settings-user-credential-modal > div > :last-child button:last-child {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-user-platform-modal
+  > div
+  > :last-child
+  button:last-child:disabled,
+.account-settings-user-credential-modal
+  > div
+  > :last-child
+  button:last-child:disabled {
+  color: #ffffff !important;
+  background: #98a2b3 !important;
+  border-color: #98a2b3 !important;
+  cursor: not-allowed !important;
+}
+
+/* ---------------- User credential modal ---------------- */
+.account-settings-user-credential-modal > div {
+  width: min(470px, calc(100vw - 32px)) !important;
+  max-width: 470px !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+
+.account-settings-user-credential-modal > div > :first-child {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 9px !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+}
+
+.account-settings-user-credential-modal
+  > div
+  > :first-child
+  > div {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.account-settings-user-credential-modal
+  > div
+  > :first-child
+  > div
+  > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.account-settings-user-credential-modal h2 {
+  margin: 0 !important;
+  color: #1d2939 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-user-credential-modal
+  > div
+  > :first-child
+  p {
+  margin: 3px 0 0 !important;
+  color: #667085 !important;
+  font-size: 10.5px !important;
+}
+
+.account-settings-user-credential-modal > div > :nth-child(2) {
+  min-height: 0 !important;
+  padding: 13px 14px !important;
+  overflow-y: auto !important;
+}
+
+.account-settings-user-credential-modal
+  > div
+  > :nth-child(2)
+  > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.account-settings-user-credential-modal label {
+  display: block !important;
+  margin: 0 0 5px !important;
+  color: #344054 !important;
+  font-size: 10.5px !important;
+  font-weight: 650 !important;
+}
+
+.account-settings-user-credential-modal input,
+.account-settings-user-credential-modal select {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 9px !important;
+  box-sizing: border-box !important;
+
+  color: #344054 !important;
+  background: #ffffff !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 6px !important;
+  outline: none !important;
+  font-size: 10.5px !important;
+}
+
+.account-settings-user-credential-modal input:focus,
+.account-settings-user-credential-modal select:focus {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+.account-settings-user-credential-modal select {
+  appearance: auto !important;
+}
+
+.account-settings-user-credential-modal
+  div:has(> button[tabindex="-1"]) {
+  position: relative !important;
+}
+
+.account-settings-user-credential-modal button[tabindex="-1"] {
+  position: absolute !important;
+  top: 50% !important;
+  right: 8px !important;
+  transform: translateY(-50%) !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #667085 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.account-settings-user-credential-modal
+  > div
+  > :last-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  padding: 9px 14px !important;
+  background: #f9fafb !important;
+  border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+}
+
+/* ---------------- Confirmation / tenant modals ---------------- */
+.account-settings-confirm-modal > div {
+  width: min(360px, calc(100vw - 32px)) !important;
+  max-width: 360px !important;
+  display: block !important;
+  padding: 16px !important;
+  text-align: center !important;
+}
+
+.account-settings-confirm-modal > div > div:last-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.account-settings-tenant-form-modal > div {
+  width: min(380px, calc(100vw - 32px)) !important;
+  max-width: 380px !important;
+  padding: 16px !important;
+}
+
+/* Role permission overlay also relies on the same missing utilities. */
+.account-settings-role-permission-modal > div {
+  width: min(760px, calc(100vw - 32px)) !important;
+  max-width: 760px !important;
+  max-height: calc(100dvh - 32px) !important;
+}
+
+@media (max-width: 640px) {
+  .account-settings-custom-modal,
+  .account-settings-role-permission-modal {
+    align-items: flex-start !important;
+    padding: 10px !important;
+  }
+
+  .account-settings-user-platform-modal > div,
+  .account-settings-user-credential-modal > div,
+  .account-settings-role-permission-modal > div {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 20px) !important;
+  }
+
+  .account-settings-user-platform-modal
+    > div
+    > :nth-child(2)
+    > :nth-child(2)
+    > div {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* =========================================================
+   ACCOUNT SETTINGS — REFERENCE UI PARITY FINAL OVERRIDE
+   ---------------------------------------------------------
+   Matches the supplied original Account Settings screens while
+   keeping the merged YEN ERP shell, accent variables and logic.
+   These selectors intentionally use semantic classes added to
+   the Account Settings JSX so the layout no longer depends on
+   Tailwind utility generation/order.
+   ========================================================= */
+
+/* ---------- Top tabs ---------- */
+.account-settings-shell .account-settings-tabs {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 0 0 14px !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-root {
+  width: auto !important;
+  min-width: 112px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-contained {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+/* ---------- Shared User / Role panels ---------- */
+.account-settings-module .account-settings-panel {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 14px 16px 18px !important;
+  box-sizing: border-box !important;
+  background: #fff !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
+}
+
+.account-settings-module .account-settings-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin: 0 0 14px !important;
+}
+
+.account-settings-module .account-settings-toolbar > :first-child {
+  width: 300px !important;
+  min-width: 220px !important;
+  max-width: 300px !important;
+}
+
+.account-settings-module .account-settings-toolbar input[type="text"],
+.account-settings-module .account-settings-toolbar input:not([type]) {
+  width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 12px 0 36px !important;
+  box-sizing: border-box !important;
+  border: 1px solid #cfd7e3 !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #344054 !important;
+  font-size: 12px !important;
+  line-height: 34px !important;
+}
+
+.account-settings-module .account-settings-toolbar button {
+  min-height: 36px !important;
+  height: 36px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.account-settings-module .account-settings-grid-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 270px !important;
+  max-height: calc(100dvh - 305px) !important;
+  overflow: auto !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+}
+
+.account-settings-module .account-settings-grid-header {
+  min-height: 40px !important;
+  background: #f5f7fa !important;
+  border-bottom: 1px solid var(--erp-border, #dfe5ec) !important;
+}
+
+.account-settings-module .account-settings-grid-header > div {
+  min-height: 40px !important;
+  padding: 0 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: #344054 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.account-settings-module .account-settings-grid-row {
+  min-height: 48px !important;
+  border-bottom: 1px solid #eaecf0 !important;
+}
+
+.account-settings-module .account-settings-grid-row > div {
+  min-height: 48px !important;
+  padding: 7px 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  font-size: 11px !important;
+}
+
+.account-settings-users .account-settings-grid-header,
+.account-settings-users .account-settings-grid-row {
+  display: grid !important;
+  grid-template-columns: 54px 76px minmax(150px, 1.25fr) 92px minmax(110px, .9fr) minmax(180px, 1.55fr) 90px 112px !important;
+  min-width: 980px !important;
+}
+
+/* =========================================================
+   ROLE MANAGEMENT — ALIGNMENT / FULL TABLE FIX
+   Presentation only. No logic changes.
+   ========================================================= */
+
+.account-settings-roles .account-settings-role-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 24px !important;
+  width: 100% !important;
+}
+
+
+/* ---------- Search ---------- */
+
+.account-settings-roles .account-settings-role-search {
+  width: min(320px, 42vw) !important;
+  min-width: 220px !important;
+  max-width: 320px !important;
+  flex: 0 1 320px !important;
+}
+
+.account-settings-roles .account-settings-role-search-field {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.account-settings-roles .account-settings-role-search-icon {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+
+  width: 16px !important;
+  height: 16px !important;
+
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.account-settings-roles .account-settings-role-search-input {
+  width: 100% !important;
+  padding-left: 38px !important;
+  padding-right: 12px !important;
+  box-sizing: border-box !important;
+}
+
+
+/* ---------- Right toolbar ---------- */
+
+.account-settings-roles .account-settings-role-toolbar-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  gap: 24px !important;
+
+  margin-left: auto !important;
+
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-roles .account-settings-create-role-button {
+  flex: 0 0 auto !important;
+  min-width: 112px !important;
+}
+
+.account-settings-roles .account-settings-role-active-filter {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  gap: 10px !important;
+
+  flex: 0 0 auto !important;
+}
+
+.account-settings-roles .account-settings-role-active-label {
+  display: inline-flex !important;
+  align-items: center !important;
+
+  min-height: 22px !important;
+
+  margin: 0 !important;
+
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+
+/* ---------- Complete table container ---------- */
+
+.account-settings-roles .account-settings-role-table {
+  display: block !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  height: calc(100dvh - 300px) !important;
+  min-height: 300px !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.account-settings-roles .account-settings-role-table-body {
+  width: 100% !important;
+  min-height: 0 !important;
+
+  overflow: visible !important;
+}
+
+
+/* ---------- Same grid for HEADER + DATA ---------- */
+
+.account-settings-roles .account-settings-grid-header.account-settings-role-grid,
+.account-settings-roles .account-settings-grid-row.account-settings-role-grid {
+  display: grid !important;
+
+  grid-template-columns:
+    44px
+    minmax(90px, 0.9fr)
+    78px
+    48px
+    48px
+    54px
+    60px
+    48px
+    minmax(150px, 1.8fr)
+    104px !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ---------- Static table header ---------- */
+
+.account-settings-roles
+.account-settings-grid-header.account-settings-role-grid {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 3 !important;
+}
+
+
+/* ---------- Common cell alignment ---------- */
+
+.account-settings-roles .account-settings-grid-header > div,
+.account-settings-roles .account-settings-grid-row > div {
+  min-width: 0 !important;
+
+  margin-left: 0 !important;
+
+  padding-left: 7px !important;
+  padding-right: 7px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ---------- Status ---------- */
+
+.account-settings-roles .account-settings-role-status-header,
+.account-settings-roles .account-settings-role-status-cell {
+  margin-left: 0 !important;
+  padding-left: 7px !important;
+
+  justify-content: flex-start !important;
+}
+
+.account-settings-roles .account-settings-role-status-cell > span {
+  max-width: 100% !important;
+
+  padding: 3px 7px !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* ---------- Permission columns ---------- */
+
+.account-settings-roles .account-settings-grid-row > div:nth-child(4),
+.account-settings-roles .account-settings-grid-row > div:nth-child(5),
+.account-settings-roles .account-settings-grid-row > div:nth-child(6),
+.account-settings-roles .account-settings-grid-row > div:nth-child(7),
+.account-settings-roles .account-settings-grid-row > div:nth-child(8),
+.account-settings-roles .account-settings-grid-header > div:nth-child(4),
+.account-settings-roles .account-settings-grid-header > div:nth-child(5),
+.account-settings-roles .account-settings-grid-header > div:nth-child(6),
+.account-settings-roles .account-settings-grid-header > div:nth-child(7),
+.account-settings-roles .account-settings-grid-header > div:nth-child(8),
+.account-settings-roles .account-settings-grid-header > div:nth-child(10) {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+
+/* ---------- Description ---------- */
+
+.account-settings-roles .account-settings-role-description-cell {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.account-settings-roles .account-settings-role-description-cell > div {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+
+/* ---------- View / Edit / Delete / Restore ---------- */
+
+.account-settings-roles .account-settings-role-actions-cell {
+  padding-left: 5px !important;
+  padding-right: 5px !important;
+
+  justify-content: center !important;
+}
+
+.account-settings-roles .account-settings-role-action-buttons {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 5px !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  flex-wrap: nowrap !important;
+}
+
+.account-settings-roles .account-settings-role-action-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 26px !important;
+  min-width: 26px !important;
+
+  height: 26px !important;
+  min-height: 26px !important;
+
+  flex: 0 0 26px !important;
+
+  padding: 0 !important;
+}
+
+.account-settings-roles .account-settings-role-action-button svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+
+/* ---------- Empty state ---------- */
+
+.account-settings-roles .account-settings-role-empty-state {
+  grid-column: 1 / -1 !important;
+  justify-content: center !important;
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+
+  .account-settings-roles .account-settings-role-toolbar {
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .account-settings-roles .account-settings-role-search {
+    width: min(100%, 320px) !important;
+    flex-basis: 280px !important;
+  }
+
+  .account-settings-roles .account-settings-role-toolbar-actions {
+    gap: 16px !important;
+  }
+
+  .account-settings-roles .account-settings-grid-header.account-settings-role-grid,
+  .account-settings-roles .account-settings-grid-row.account-settings-role-grid {
+    grid-template-columns:
+      40px
+      minmax(80px, 0.8fr)
+      72px
+      44px
+      44px
+      50px
+      54px
+      44px
+      minmax(130px, 1.45fr)
+      96px !important;
+  }
+}
+
+/* =========================================================
+   CREATE USER — PLATFORM CHOOSER
+   ========================================================= */
+body .account-settings-custom-modal.account-settings-user-platform-modal,
+body .account-settings-custom-modal.account-settings-user-credential-modal,
+body .account-settings-custom-modal.account-settings-confirm-modal,
+body .account-settings-role-permission-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1700 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  overflow: auto !important;
+  background: rgba(16, 24, 40, 0.46) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+body .account-settings-user-platform-modal .account-user-platform-card {
+  position: relative !important;
+  width: min(545px, calc(100vw - 32px)) !important;
+  min-width: 0 !important;
+  max-width: 545px !important;
+  max-height: calc(100dvh - 40px) !important;
+  margin: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  color: #1d2939 !important;
+  background: #fff !important;
+  border: 1px solid #e4e7ec !important;
+  border-radius: 14px !important;
+  box-shadow: 0 22px 60px rgba(16, 24, 40, 0.24) !important;
+}
+
+body .account-user-platform-card .account-user-modal-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 22px 26px 18px !important;
+  border-bottom: 1px solid #eaecf0 !important;
+}
+
+body .account-user-platform-card .account-user-modal-header h2 {
+  margin: 0 !important;
+  color: #1d2939 !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+body .account-user-platform-card .account-user-modal-header p {
+  margin: 5px 0 0 !important;
+  color: #667085 !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+body .account-user-platform-card .account-user-modal-header > button {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #667085 !important;
+  background: #fff !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 7px !important;
+}
+
+body .account-user-platform-card .account-user-platform-body {
+  min-height: 0 !important;
+  padding: 18px 26px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+body .account-user-platform-card .account-user-info-box {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  background: #fffaeb !important;
+  border: 1px solid #fdb022 !important;
+  border-radius: 10px !important;
+}
+
+body .account-user-platform-card .account-user-info-box h3 {
+  margin: 0 !important;
+  color: #b54708 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+body .account-user-platform-card .account-user-info-box p {
+  margin: 4px 0 0 !important;
+  color: #b54708 !important;
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+}
+
+body .account-user-platform-card .account-user-platform-section {
+  margin-top: 18px !important;
+}
+
+body .account-user-platform-card .account-user-platform-section > label {
+  display: block !important;
+  margin: 0 0 9px !important;
+  color: #344054 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+body .account-user-platform-card .account-user-platform-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  margin-top: 0 !important;
+}
+
+body .account-user-platform-card .account-user-platform-option {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 205px !important;
+  padding: 16px !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+  color: #344054 !important;
+  background: #fff !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-selected="true"] {
+  border-color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef0ff) !important;
+  box-shadow: 0 0 0 2px var(--erp-accent-ring, rgba(63, 70, 198, .12)) !important;
+}
+
+body .account-user-platform-card .account-user-platform-radio {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 18px !important;
+  height: 18px !important;
+  border: 1.5px solid #98a2b3 !important;
+  border-radius: 999px !important;
+}
+
+body .account-user-platform-card .account-user-platform-icon {
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9px !important;
+}
+
+body .account-user-platform-card .account-user-platform-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+body .account-user-platform-card .account-user-platform-title {
+  margin: 14px 0 0 !important;
+  color: #1d2939 !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+body .account-user-platform-card .account-user-platform-description {
+  margin: 5px 0 0 !important;
+  min-height: 46px !important;
+  color: #667085 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+body .account-user-platform-card .account-user-platform-tags {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  margin-top: 12px !important;
+}
+
+body .account-user-platform-card .account-user-platform-tag {
+  padding: 3px 7px !important;
+  border-radius: 4px !important;
+  font-size: 9.5px !important;
+  font-weight: 600 !important;
+}
+
+body .account-user-platform-card .account-user-comparison {
+  margin-top: 14px !important;
+  padding: 13px 14px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e4e7ec !important;
+  border-radius: 10px !important;
+}
+
+body .account-user-platform-card .account-user-comparison > h3 {
+  margin: 0 0 8px !important;
+  color: #475467 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em !important;
+}
+
+body .account-user-platform-card .account-user-comparison-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  margin: 0 !important;
+  color: #667085 !important;
+  font-size: 9.5px !important;
+}
+
+body .account-user-platform-card .account-user-comparison-grid > div {
+  min-width: 0 !important;
+  padding: 7px 6px !important;
+  border-bottom: 1px solid #e4e7ec !important;
+}
+
+body .account-user-platform-card .account-user-modal-footer,
+body .account-user-credential-card .account-user-modal-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 14px 22px !important;
+  background: #fff !important;
+  border-top: 1px solid #eaecf0 !important;
+}
+
+body .account-user-platform-card .account-user-modal-footer button,
+body .account-user-credential-card .account-user-modal-footer button {
+  min-width: 82px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+body .account-user-platform-card .account-user-modal-footer button:last-child:not(:disabled),
+body .account-user-credential-card .account-user-modal-footer button:last-child:not(:disabled) {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+}
+
+/* =========================================================
+   CREATE WEB / APP USER CREDENTIAL DIALOG
+   ========================================================= */
+body .account-settings-user-credential-modal .account-user-credential-card {
+  position: relative !important;
+  width: min(500px, calc(100vw - 32px)) !important;
+  min-width: 0 !important;
+  max-width: 500px !important;
+  max-height: calc(100dvh - 40px) !important;
+  margin: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: #fff !important;
+  border: 1px solid #e4e7ec !important;
+  border-radius: 14px !important;
+  box-shadow: 0 22px 60px rgba(16, 24, 40, 0.24) !important;
+}
+
+body .account-user-credential-card .account-user-credential-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  padding: 18px 22px !important;
+  border-bottom: 1px solid #eaecf0 !important;
+}
+
+body .account-user-credential-card .account-user-back-button,
+body .account-user-credential-card .account-user-close-button {
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #667085 !important;
+  background: #fff !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 7px !important;
+}
+
+body .account-user-credential-card .account-user-credential-header > div {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+body .account-user-credential-card .account-user-credential-header h2 {
+  margin: 0 !important;
+  color: #1d2939 !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+body .account-user-credential-card .account-user-credential-header p {
+  margin: 4px 0 0 !important;
+  color: #667085 !important;
+  font-size: 11px !important;
+}
+
+body .account-user-credential-card .account-user-credential-body {
+  min-height: 0 !important;
+  padding: 18px 22px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+body .account-user-credential-card .account-user-fields-stack {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+body .account-user-credential-card .account-user-form-field,
+body .account-user-credential-card .account-user-password-wrap,
+body .account-user-credential-card .account-user-role-select-wrap {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body .account-user-credential-card .account-user-form-label {
+  display: block !important;
+  margin: 0 0 7px !important;
+  color: #344054 !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+body .account-user-credential-card .account-user-input,
+body .account-user-credential-card select.account-user-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
+  color: #344054 !important;
+  background: #fff !important;
+  border: 1px solid #cfd7e3 !important;
+  border-radius: 8px !important;
+  outline: 0 !important;
+  font-size: 11px !important;
+  line-height: 40px !important;
+}
+
+body .account-user-credential-card .account-user-input:focus,
+body .account-user-credential-card select.account-user-input:focus {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(63, 70, 198, .12)) !important;
+}
+
+body .account-user-credential-card .account-user-form-helper,
+body .account-user-credential-card .account-user-form-error {
+  margin: 5px 0 0 !important;
+  font-size: 9.5px !important;
+  line-height: 1.35 !important;
+}
+
+body .account-user-credential-card .account-user-phone-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+
+body .account-user-credential-card .account-user-country-code {
+  position: relative !important;
+  flex: 0 0 84px !important;
+  width: 84px !important;
+  min-width: 84px !important;
+}
+
+body .account-user-credential-card .account-user-country-code + input {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+body .account-user-credential-card .account-user-country-code svg,
+body .account-user-credential-card .account-user-role-select-wrap > svg {
+  position: absolute !important;
+  top: 50% !important;
+  right: 10px !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+}
+
+body .account-user-credential-card .account-user-password-wrap {
+  position: relative !important;
+}
+
+body .account-user-credential-card .account-user-password-wrap .account-user-input {
+  padding-right: 42px !important;
+}
+
+body .account-user-credential-card .account-user-password-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  right: 8px !important;
+  transform: translateY(-50%) !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #667085 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+body .account-user-credential-card .account-user-app-access {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 62px !important;
+  padding: 11px 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  background: var(--erp-accent-soft, #eef0ff) !important;
+  border: 1px solid var(--erp-accent-border, #aeb4ff) !important;
+  border-radius: 9px !important;
+}
+
+body .account-user-credential-card .account-user-app-access p {
+  margin: 0 !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
+}
+
+body .account-user-credential-card .account-user-app-access p:first-child {
+  color: var(--erp-accent, #155eef) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+/* =========================================================
+   CREATE / EDIT ROLE — ORIGINAL GRID LAYOUT RESTORED
+   ========================================================= */
+.account-settings-role-editor.account-role-editor-create,
+.account-settings-role-editor.account-role-editor-edit {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: calc(100dvh - 112px) !important;
+  min-height: 600px !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: transparent !important;
+}
+
+.account-settings-role-editor .account-role-editor-card {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .05) !important;
+}
+
+.account-settings-role-editor .account-role-editor-header {
+  position: relative !important;
+  flex: 0 0 52px !important;
+  min-height: 52px !important;
+  padding: 7px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  border-bottom: 1px solid #e4e7ec !important;
+  background: #fff !important;
+}
+
+.account-settings-role-editor .account-role-back-button,
+.account-settings-role-editor .account-role-reset-button {
+  min-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 13px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.account-settings-role-editor .account-role-back-button {
+  color: var(--erp-accent, #155eef) !important;
+  background: #fff !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-role-editor .account-role-reset-button {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-role-editor .account-role-editor-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  color: #101828 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-role-editor .account-role-editor-fields {
+  flex: 0 0 auto !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid #eef0f3 !important;
+  background: #fff !important;
+}
+
+.account-settings-role-editor .account-role-editor-fields-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.account-settings-role-editor .account-role-editor-field {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.account-settings-role-editor .account-role-editor-field label {
+  display: block !important;
+  margin: 0 0 2px !important;
+  color: #101828 !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-role-editor .account-role-editor-field p {
+  min-height: 26px !important;
+  margin: 0 0 5px !important;
+  color: #667085 !important;
+  font-size: 9px !important;
+  line-height: 1.35 !important;
+}
+
+.account-settings-role-editor .account-role-editor-field select,
+.account-settings-role-editor .account-role-editor-field input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  color: #344054 !important;
+  background: #fff !important;
+  border: 1px solid #cfd7e3 !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+}
+
+.account-settings-role-editor .account-role-permission-grid {
+  width: 100% !important;
+  min-width: 900px !important;
+  display: grid !important;
+  grid-template-columns: minmax(260px, 2fr) repeat(6, minmax(70px, 1fr)) !important;
+  align-items: center !important;
+  column-gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.account-settings-role-editor .account-role-permission-header {
+  flex: 0 0 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  background: #f5f7fa !important;
+  border-bottom: 1px solid #e4e7ec !important;
+  color: #344054 !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-role-editor .account-role-permission-header > div:not(:first-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  text-align: center !important;
+}
+
+.account-settings-role-editor .account-role-permission-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 0 16px 8px !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  background: #fff !important;
+}
+
+.account-settings-role-editor .account-role-permission-stack {
+  min-width: 900px !important;
+  padding: 8px 0 72px !important;
+}
+
+.account-settings-role-editor .account-role-app {
+  margin: 0 0 9px !important;
+}
+
+.account-settings-role-editor .account-role-app-title {
+  min-height: 28px !important;
+  margin: 0 0 7px !important;
+  padding: 6px 8px !important;
+  box-sizing: border-box !important;
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef0ff) !important;
+  border-radius: 5px !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-role-editor .account-role-module {
+  width: 100% !important;
+  margin: 0 0 7px !important;
+  overflow: visible !important;
+  border: 1px solid #e4e7ec !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+}
+
+.account-settings-role-editor .account-role-module-header {
+  min-height: 34px !important;
+  padding: 6px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  color: #101828 !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+}
+
+.account-settings-role-editor .account-role-module-header > div {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+
+.account-settings-role-editor .account-role-module-header button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.account-settings-role-editor .account-role-permission-row {
+  min-height: 30px !important;
+  padding: 4px 8px !important;
+  border-top: 1px solid #eef0f3 !important;
+  color: #344054 !important;
+  font-size: 10px !important;
+}
+
+.account-settings-role-editor .account-role-permission-row > div:first-child {
+  min-width: 0 !important;
+  padding-left: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.account-settings-role-editor .account-role-permission-row > div:not(:first-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.account-settings-role-editor .account-role-permission-row button {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 21px !important;
+  min-height: 21px !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  font-size: 10px !important;
+}
+
+.account-settings-role-editor .account-role-editor-footer {
+  position: sticky !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: 0 !important;
+  z-index: 20 !important;
+  flex: 0 0 56px !important;
+  width: 100% !important;
+  min-height: 56px !important;
+  padding: 9px 16px !important;
+  box-sizing: border-box !important;
+  background: #fff !important;
+  border-top: 1px solid #e4e7ec !important;
+  box-shadow: 0 -4px 12px rgba(16, 24, 40, .05) !important;
+}
+
+.account-settings-role-editor .account-role-editor-footer > div {
+  width: 100% !important;
+  max-width: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+.account-settings-role-editor .account-role-editor-footer button {
+  min-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 7px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+}
+
+.account-settings-role-editor .account-role-editor-footer button:last-child {
+  color: var(--erp-accent-contrast, #fff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+/* Keep the spacer from creating a second empty footer band. */
+.account-settings-role-editor .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .account-settings-role-editor .account-role-editor-fields-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .account-settings-role-editor .account-role-editor-field p {
+    min-height: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body .account-settings-user-platform-modal .account-user-platform-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body .account-settings-user-platform-modal,
+  body .account-settings-user-credential-modal {
+    align-items: flex-start !important;
+    padding: 10px !important;
+  }
+
+  body .account-settings-user-platform-modal .account-user-platform-card,
+  body .account-settings-user-credential-modal .account-user-credential-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 20px) !important;
+  }
+}
+
+/* =========================================================
+   POST-MERGE COLOR SAFETY-NET
+   Presentation only — no JSX/logic touched.
+
+   Why this exists: after merging all modules into one app,
+   the Tailwind utility classes already written in
+   UserAccount/page.tsx (bg-blue-600, bg-emerald-600,
+   bg-blue-50, text-blue-700, etc.) are being painted as
+   indigo/violet in the browser instead of blue/green. The
+   JSX className values themselves are correct — this is a
+   Tailwind *build/compile* problem (most likely the merged
+   tailwind.config content/purge globs no longer include this
+   page, or a second Tailwind build from another merged module
+   is shadowing this one), not a mistake in this file.
+
+   Until that config is fixed at the root, these rules pin the
+   exact utility classes used in the User Accounts screen and
+   its "Create User" modals back to real, correct hex colors.
+   Scoped strictly under .account-settings-shell so nothing
+   outside Account Settings is touched.
+   ========================================================= */
+
+.account-settings-shell .bg-blue-50        { background-color: #eff6ff !important; }
+.account-settings-shell .bg-blue-100       { background-color: #dbeafe !important; }
+.account-settings-shell .bg-blue-500       { background-color: #3b82f6 !important; }
+.account-settings-shell .hover\:bg-blue-50:hover  { background-color: #eff6ff !important; }
+
+.account-settings-shell .text-blue-100     { color: #dbeafe !important; }
+.account-settings-shell .text-blue-700     { color: #1d4ed8 !important; }
+.account-settings-shell .text-blue-800     { color: #1e40af !important; }
+
+.account-settings-shell .border-blue-200   { border-color: #bfdbfe !important; }
+.account-settings-shell .border-blue-500   { border-color: #3b82f6 !important; }
+.account-settings-shell .hover\:border-blue-500:hover { border-color: #3b82f6 !important; }
+.account-settings-shell .focus\:border-blue-300:focus { border-color: #93c5fd !important; }
+.account-settings-shell .focus\:border-blue-500:focus { border-color: #3b82f6 !important; }
+.account-settings-shell .focus\:ring-blue-500:focus,
+.account-settings-shell .focus\:ring-blue-500\/15:focus,
+.account-settings-shell .focus\:ring-blue-500\/20:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18) !important;
+}
+
+/* Primary / CTA blue (Add User, Continue, Create Web User, toggle,
+   role-save…) is bound to the Display Settings accent variable
+   instead of a fixed hex, so it always matches whatever accent
+   colour the user has chosen under YEN Settings → Display Settings. */
+.account-settings-shell .bg-blue-600       { background-color: var(--erp-accent, #155eef) !important; }
+.account-settings-shell .hover\:bg-blue-700:hover { background-color: var(--erp-accent-hover, #124fc9) !important; }
+.account-settings-shell .text-blue-600     { color: var(--erp-accent, #155eef) !important; }
+.account-settings-shell .border-blue-600   { border-color: var(--erp-accent, #155eef) !important; }
+.account-settings-shell .focus\:border-blue-600:focus { border-color: var(--erp-accent, #155eef) !important; }
+.account-settings-shell .focus\:ring-blue-600:focus {
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.18)) !important;
+}
+
+.account-settings-shell .from-blue-600,
+.account-settings-shell .to-blue-700 {
+  --tw-gradient-from: var(--erp-accent, #155eef) !important;
+  --tw-gradient-to: var(--erp-accent-hover, #124fc9) !important;
+}
+
+.account-settings-shell input.peer:checked ~ .peer-checked\:bg-blue-600 {
+  background-color: var(--erp-accent, #155eef) !important;
+}
+
+/* Emerald — App User accent */
+.account-settings-shell .bg-emerald-50     { background-color: #ecfdf5 !important; }
+.account-settings-shell .bg-emerald-100    { background-color: #d1fae5 !important; }
+.account-settings-shell .bg-emerald-500    { background-color: #10b981 !important; }
+.account-settings-shell .bg-emerald-600    { background-color: #059669 !important; }
+.account-settings-shell .hover\:bg-emerald-700:hover { background-color: #047857 !important; }
+.account-settings-shell .text-emerald-600  { color: #059669 !important; }
+.account-settings-shell .text-emerald-700  { color: #047857 !important; }
+.account-settings-shell .border-emerald-500 { border-color: #10b981 !important; }
+
+/* Amber — info/warning callouts */
+.account-settings-shell .bg-amber-50       { background-color: #fffbeb !important; }
+.account-settings-shell .bg-amber-100      { background-color: #fef3c7 !important; }
+.account-settings-shell .border-amber-300  { border-color: #fcd34d !important; }
+.account-settings-shell .text-amber-600    { color: #d97706 !important; }
+.account-settings-shell .text-amber-700    { color: #b45309 !important; }
+.account-settings-shell .text-amber-800    { color: #92400e !important; }
+
+/* Slate / gray — neutrals used across the modals and table */
+.account-settings-shell .bg-slate-50       { background-color: #f8fafc !important; }
+.account-settings-shell .bg-slate-300      { background-color: #cbd5e1 !important; }
+.account-settings-shell .bg-slate-400      { background-color: #94a3b8 !important; }
+.account-settings-shell .text-slate-400    { color: #94a3b8 !important; }
+.account-settings-shell .text-slate-500    { color: #64748b !important; }
+.account-settings-shell .text-slate-600    { color: #475569 !important; }
+.account-settings-shell .text-slate-700    { color: #334155 !important; }
+.account-settings-shell .text-slate-800    { color: #1e293b !important; }
+.account-settings-shell .border-slate-200  { border-color: #e2e8f0 !important; }
+.account-settings-shell .border-slate-300  { border-color: #cbd5e1 !important; }
+.account-settings-shell .hover\:bg-slate-50:hover  { background-color: #f8fafc !important; }
+.account-settings-shell .hover\:bg-slate-100:hover { background-color: #f1f5f9 !important; }
+.account-settings-shell .hover\:text-slate-700:hover { color: #334155 !important; }
+
+.account-settings-shell .bg-gray-50        { background-color: #f9fafb !important; }
+.account-settings-shell .bg-gray-100       { background-color: #f3f4f6 !important; }
+.account-settings-shell .bg-gray-200       { background-color: #e5e7eb !important; }
+.account-settings-shell .bg-gray-400       { background-color: #9ca3af !important; }
+.account-settings-shell .text-gray-400     { color: #9ca3af !important; }
+.account-settings-shell .text-gray-500     { color: #6b7280 !important; }
+.account-settings-shell .text-gray-600     { color: #4b5563 !important; }
+.account-settings-shell .text-gray-700     { color: #374151 !important; }
+.account-settings-shell .text-gray-800     { color: #1f2937 !important; }
+.account-settings-shell .text-gray-900     { color: #111827 !important; }
+.account-settings-shell .border-gray-100   { border-color: #f3f4f6 !important; }
+.account-settings-shell .border-gray-200   { border-color: #e5e7eb !important; }
+.account-settings-shell .border-gray-300   { border-color: #d1d5db !important; }
+.account-settings-shell .border-gray-400   { border-color: #9ca3af !important; }
+.account-settings-shell .hover\:bg-gray-50:hover  { background-color: #f9fafb !important; }
+.account-settings-shell .hover\:bg-gray-100:hover { background-color: #f3f4f6 !important; }
+.account-settings-shell .hover\:bg-gray-200:hover { background-color: #e5e7eb !important; }
+.account-settings-shell .hover\:bg-gray-300:hover { background-color: #d1d5db !important; }
+.account-settings-shell .hover\:text-gray-700:hover { color: #374151 !important; }
+
+/* Red — destructive actions / errors */
+.account-settings-shell .bg-red-100        { background-color: #fee2e2 !important; }
+.account-settings-shell .bg-red-600        { background-color: #dc2626 !important; }
+.account-settings-shell .hover\:bg-red-50:hover  { background-color: #fef2f2 !important; }
+.account-settings-shell .hover\:bg-red-700:hover { background-color: #b91c1c !important; }
+.account-settings-shell .text-red-500      { color: #ef4444 !important; }
+.account-settings-shell .text-red-600      { color: #dc2626 !important; }
+.account-settings-shell .text-red-800      { color: #991b1b !important; }
+.account-settings-shell .border-red-200    { border-color: #fecaca !important; }
+.account-settings-shell .border-red-500,
+.account-settings-shell .focus\:border-red-500:focus { border-color: #ef4444 !important; }
+.account-settings-shell .focus\:ring-red-500\/15:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Green / purple — status pills */
+.account-settings-shell .bg-green-100      { background-color: #dcfce7 !important; }
+.account-settings-shell .text-green-600    { color: #16a34a !important; }
+.account-settings-shell .text-green-800    { color: #166534 !important; }
+.account-settings-shell .border-green-200  { border-color: #bbf7d0 !important; }
+.account-settings-shell .border-green-300  { border-color: #86efac !important; }
+.account-settings-shell .hover\:bg-green-50:hover { background-color: #f0fdf4 !important; }
+.account-settings-shell .bg-purple-100     { background-color: #f3e8ff !important; }
+.account-settings-shell .text-purple-800   { color: #6b21a8 !important; }
+
+/* =========================================================
+   USER ACCOUNTS TOOLBAR — LAYOUT SAFETY NET
+   ---------------------------------------------------------
+   Same reasoning as the modal fix above: the toolbar's right
+   side ("Add User" + "Show Active" group) uses plain Tailwind
+   flex/gap utility classes. If those don't compile, the two
+   groups collapse onto each other. These rules make the exact
+   wrapper classes already in the JSX self-sufficient.
+   Presentation only — no state/handlers touched.
+   ========================================================= */
+.account-settings-users .account-settings-toolbar .flex.items-center {
+  display: flex !important;
+  align-items: center !important;
+}
+.account-settings-users .account-settings-toolbar .gap-2 { gap: 8px !important; }
+.account-settings-users .account-settings-toolbar .gap-4 { gap: 16px !important; }
+
+.account-settings-users .account-settings-toolbar span.text-sm.text-gray-700 {
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #475467 !important;
+}
+
+/* ---------- Type badge (WEB / APP) ---------- */
+.account-settings-users .account-settings-grid-row span.uppercase {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 38px !important;
+  height: 20px !important;
+  padding: 0 7px !important;
+  box-sizing: border-box !important;
+  border-radius: 5px !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.03em !important;
+}
+
+/* ---------- App tags — modernised chip look ---------- */
+.account-settings-users .account-settings-grid-row .flex.flex-wrap.gap-2 {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.account-settings-users .account-settings-grid-row .rounded-full.bg-gray-100 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  height: 22px !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  color: #344054 !important;
+  background: #f5f7fa !important;
+  border: 1px solid #e4e7ec !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+.account-settings-users .account-settings-grid-row .rounded-full.bg-gray-100::before {
+  content: "" !important;
+  flex: 0 0 auto !important;
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 999px !important;
+  background: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-users .account-settings-grid-row .rounded-full.bg-gray-100:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+}
+
+/* =========================================================
+   SEARCH BOX — ICON / INPUT ALIGNMENT SAFETY NET
+   ---------------------------------------------------------
+   The search icon is positioned with plain Tailwind utilities
+   (relative / absolute / left-3 / top-1/2). If those utilities
+   don't compile, the icon drops into normal text flow and the
+   whole search field looks misaligned. Rebuilt with plain CSS
+   so it can never depend on Tailwind for this. No JSX/logic
+   touched — same wrapper/icon/input elements are targeted.
+   ========================================================= */
+.account-settings-users .account-settings-toolbar > :first-child {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child > div {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 12px !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: #98a2b3 !important;
+  pointer-events: none !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child input {
+  width: 100% !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 14px 0 38px !important;
+  box-sizing: border-box !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 9px !important;
+  background: #fff !important;
+  color: #344054 !important;
+  font-size: 12px !important;
+  line-height: 36px !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child input:focus {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.14)) !important;
+}
+
+.account-settings-users .account-settings-toolbar .flex.items-center.gap-4 {
+  flex: 0 0 auto !important;
+}
+
+/* =========================================================
+   CREATE NEW USER — PLATFORM CARD: CLEAR SELECTED STATE
+   ---------------------------------------------------------
+   PlatformCard already toggles data-selected + the utility
+   classes border-blue-500/bg-blue-50 (web) or
+   border-emerald-500/bg-emerald-50 (app) via selectedClass —
+   this only makes the selected look unmistakable and ties the
+   web side to the Display Settings accent colour. No JSX
+   changed; same data-selected attribute + classes are used.
+   ========================================================= */
+.account-settings-shell .account-user-platform-option {
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+.account-settings-shell .account-user-platform-option:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(16, 24, 40, 0.08) !important;
+}
+
+.account-settings-shell .account-user-platform-option.border-blue-500 {
+  border-color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.16)) !important;
+}
+
+.account-settings-shell .account-user-platform-option.border-emerald-500 {
+  border-color: #059669 !important;
+  background: #ecfdf5 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16) !important;
+}
+
+.account-settings-shell .account-user-platform-radio.border-blue-500 {
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-shell .account-user-platform-radio.border-emerald-500 {
+  border-color: #059669 !important;
+}
+
+.account-settings-shell .account-user-platform-option.border-blue-500 .account-user-platform-radio span,
+.account-settings-shell .account-user-platform-option.border-blue-500 span.bg-blue-500 {
+  background: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-shell .account-user-platform-option.border-emerald-500 span.bg-emerald-500 {
+  background: #059669 !important;
+}
+
+.account-settings-shell .account-user-platform-option.border-blue-500 .account-user-platform-title,
+.account-settings-shell .account-user-platform-option.border-emerald-500 .account-user-platform-title {
+  color: #101828 !important;
+}
+
+/* Feature tag chips (Email / Phone / Password, Username / Password)
+   get the same modern dot-chip treatment as the App-column tags. */
+.account-settings-shell .account-user-platform-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.account-settings-shell .account-user-platform-tag.bg-blue-100::before {
+  content: "" !important;
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: var(--erp-accent, #155eef) !important;
+}
+
+.account-settings-shell .account-user-platform-tag.bg-emerald-100::before {
+  content: "" !important;
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: #059669 !important;
+}
+
+/* Modernise the platform-chooser modal surface itself. */
+.account-settings-shell .account-user-platform-card {
+  border-radius: 18px !important;
+  overflow: hidden !important;
+}
+
+.account-settings-shell .account-user-platform-card::before {
+  content: "" !important;
+  display: block !important;
+  height: 4px !important;
+  width: 100% !important;
+  background: linear-gradient(
+    90deg,
+    var(--erp-accent, #155eef),
+    #059669
+  ) !important;
+}
+
+.account-settings-shell .account-user-modal-header {
+  background: linear-gradient(
+    180deg,
+    var(--erp-accent-soft, #eef4ff),
+    #ffffff
+  ) !important;
+}
+
+.account-settings-shell .account-user-info-box {
+  border-radius: 12px !important;
+}
+
+/* =========================================================
+   PLATFORM CARD — GUARANTEED SELECTED STATE
+   ---------------------------------------------------------
+   Bound directly to the data-selected/data-platform-accent
+   attributes PlatformCard already sets on click (see
+   PlatformCard() in UserAccount/page.tsx — selected prop and
+   data-selected={selected ? "true" : "false"}). The filled dot
+   is drawn with ::after so it always appears the instant the
+   attribute flips, independent of whichever inner span classes
+   happen to be present. No JSX/state/handlers changed.
+   ========================================================= */
+body .account-user-platform-card .account-user-platform-option {
+  border-width: 2px !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-selected="true"] {
+  border-color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.18)) !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-platform-accent="app"][data-selected="true"] {
+  border-color: #059669 !important;
+  background: #ecfdf5 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-selected="true"] .account-user-platform-radio {
+  border-color: var(--erp-accent, #155eef) !important;
+  background: #fff !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-platform-accent="app"][data-selected="true"] .account-user-platform-radio {
+  border-color: #059669 !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-selected="true"] .account-user-platform-radio::after {
+  content: "" !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  background: var(--erp-accent, #155eef) !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-platform-accent="app"][data-selected="true"] .account-user-platform-radio::after {
+  background: #059669 !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-selected="true"] .account-user-platform-icon {
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--erp-accent-ring, rgba(21, 94, 239, 0.18)) !important;
+}
+
+body .account-user-platform-card .account-user-platform-option[data-platform-accent="app"][data-selected="true"] .account-user-platform-icon {
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(5, 150, 105, 0.18) !important;
+}
+
+/* =========================================================
+   USER CREDENTIAL DIALOG - FINAL ALIGNMENT SAFETY NET
+   ---------------------------------------------------------
+   Presentation only. Keeps the existing Web/App user flow,
+   validation, handlers and field order unchanged.
+   ========================================================= */
+
+/* Keep Web User and App User dialogs on one consistent surface. */
+body .account-settings-custom-modal.account-settings-user-credential-modal {
+  padding: 20px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-credential-card {
+  width: min(500px, calc(100vw - 40px)) !important;
+  max-width: 500px !important;
+  max-height: calc(100dvh - 40px) !important;
+  border-radius: 14px !important;
+}
+
+/* Header: back button, badge/title block and close button stay aligned. */
+body .account-user-credential-card .account-user-credential-header {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) 30px !important;
+  align-items: start !important;
+  column-gap: 12px !important;
+  padding: 18px 22px !important;
+}
+
+body .account-user-credential-card .account-user-credential-header > div {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+body .account-user-credential-card .account-user-credential-header > div > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+body .account-user-credential-card .account-user-credential-header > div > div > span {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  padding: 0 6px !important;
+  border-radius: 4px !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+}
+
+body .account-user-credential-card .account-user-credential-header h2 {
+  min-width: 0 !important;
+  line-height: 1.25 !important;
+}
+
+body .account-user-credential-card .account-user-back-button,
+body .account-user-credential-card .account-user-close-button {
+  margin: 0 !important;
+  align-self: start !important;
+}
+
+/* Only the form body scrolls; header and footer remain steady. */
+body .account-user-credential-card .account-user-credential-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: 18px 22px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body .account-user-credential-card .account-user-fields-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+body .account-user-credential-card .account-user-form-field {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+body .account-user-credential-card .account-user-form-label {
+  margin: 0 0 7px !important;
+  line-height: 1.25 !important;
+}
+
+body .account-user-credential-card .account-user-input,
+body .account-user-credential-card select.account-user-input {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px !important;
+  line-height: normal !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+}
+
+body .account-user-credential-card .account-user-input::placeholder {
+  color: #98a2b3 !important;
+  opacity: 1 !important;
+}
+
+/* Remove the browser's native select arrow: JSX already renders ChevronDown. */
+body .account-settings-user-credential-modal select.account-user-input {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+}
+
+body .account-user-credential-card .account-user-country-code select.account-user-input {
+  padding-right: 32px !important;
+}
+
+body .account-user-credential-card .account-user-role-select-wrap select.account-user-input {
+  padding-right: 38px !important;
+}
+
+body .account-user-credential-card .account-user-country-code svg {
+  right: 10px !important;
+}
+
+body .account-user-credential-card .account-user-role-select-wrap > svg {
+  right: 12px !important;
+}
+
+/* Phone number controls share the same height and baseline. */
+body .account-user-credential-card .account-user-phone-row {
+  display: grid !important;
+  grid-template-columns: 84px minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+}
+
+body .account-user-credential-card .account-user-country-code {
+  width: 84px !important;
+  min-width: 84px !important;
+}
+
+body .account-user-credential-card .account-user-country-code + input {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Password eye stays exactly centered inside the field. */
+body .account-user-credential-card .account-user-password-wrap {
+  position: relative !important;
+}
+
+body .account-user-credential-card .account-user-password-wrap .account-user-input {
+  padding-right: 44px !important;
+}
+
+body .account-user-credential-card .account-user-password-toggle {
+  top: 50% !important;
+  right: 8px !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+}
+
+/* App-access card: prevent generic input/label modal rules from distorting switch. */
+body .account-user-credential-card .account-user-app-access {
+  min-height: 62px !important;
+  padding: 11px 13px !important;
+  align-items: center !important;
+}
+
+body .account-user-credential-card .account-user-app-access > div {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+body .account-user-credential-card .account-user-app-access > label {
+  position: relative !important;
+  flex: 0 0 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body .account-user-credential-card .account-user-app-access input[type="checkbox"] {
+  position: absolute !important;
+  width: 1px !important;
+  min-width: 1px !important;
+  height: 1px !important;
+  min-height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+body .account-user-credential-card .account-user-app-access > label > span:first-of-type {
+  position: relative !important;
+  display: block !important;
+  width: 44px !important;
+  height: 24px !important;
+  border-radius: 999px !important;
+  background: #cbd5e1 !important;
+  transition: background-color 0.18s ease !important;
+}
+
+body .account-user-credential-card .account-user-app-access > label > span:last-of-type {
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.22) !important;
+  transform: translateX(0) !important;
+  transition: transform 0.18s ease !important;
+}
+
+body .account-user-credential-card .account-user-app-access input[type="checkbox"]:checked ~ span:first-of-type {
+  background: var(--erp-accent, #155eef) !important;
+}
+
+body .account-user-credential-card .account-user-app-access input[type="checkbox"]:checked ~ span:last-of-type {
+  transform: translateX(20px) !important;
+}
+
+/* Footer is identical for Web/App and never overlaps the form. */
+body .account-user-credential-card .account-user-modal-footer {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  min-height: 66px !important;
+  padding: 14px 22px !important;
+  background: #ffffff !important;
+}
+
+body .account-user-credential-card .account-user-modal-footer button {
+  min-width: 92px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+}
+
+body .account-user-credential-card .account-user-modal-footer button:last-child {
+  min-width: 118px !important;
+}
+
+@media (max-width: 640px) {
+  body .account-settings-custom-modal.account-settings-user-credential-modal {
+    align-items: flex-start !important;
+    padding: 10px !important;
+  }
+
+  body .account-settings-user-credential-modal .account-user-credential-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 20px) !important;
+  }
+
+  body .account-user-credential-card .account-user-credential-header,
+  body .account-user-credential-card .account-user-credential-body,
+  body .account-user-credential-card .account-user-modal-footer {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* =========================================================
+   USER CREDENTIAL CONTROLS — ICON CENTERING OVERRIDE
+   ---------------------------------------------------------
+   Presentation only. Uses dedicated icon wrappers so select
+   chevrons and password eye icons stay vertically centered
+   regardless of Tailwind/global SVG/button rules.
+   ========================================================= */
+
+body .account-settings-user-credential-modal .account-user-country-code,
+body .account-settings-user-credential-modal .account-user-role-select-wrap,
+body .account-settings-user-credential-modal .account-user-password-wrap {
+  position: relative !important;
+  height: 42px !important;
+  min-height: 42px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-country-code select.account-user-input,
+body .account-settings-user-credential-modal .account-user-role-select-wrap select.account-user-input,
+body .account-settings-user-credential-modal .account-user-password-wrap input.account-user-input {
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body .account-settings-user-credential-modal .account-user-country-code select.account-user-input,
+body .account-settings-user-credential-modal .account-user-role-select-wrap select.account-user-input {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+}
+
+body .account-settings-user-credential-modal .account-user-country-code select.account-user-input {
+  padding-right: 34px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-role-select-wrap select.account-user-input {
+  padding-right: 42px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-select-indicator {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  z-index: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  color: #98a2b3 !important;
+  transform: none !important;
+}
+
+body .account-settings-user-credential-modal .account-user-country-code-indicator {
+  right: 8px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-role-indicator {
+  right: 10px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-select-indicator > svg,
+body .account-settings-user-credential-modal svg.account-user-select-chevron {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  vertical-align: middle !important;
+}
+
+body .account-settings-user-credential-modal .account-user-phone-row {
+  align-items: center !important;
+}
+
+body .account-settings-user-credential-modal .account-user-password-wrap .account-user-input {
+  padding-right: 48px !important;
+}
+
+body .account-settings-user-credential-modal .account-user-password-toggle {
+  position: absolute !important;
+  top: 0 !important;
+  right: 8px !important;
+  bottom: 0 !important;
+  left: auto !important;
+  z-index: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: auto 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  color: #667085 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body .account-settings-user-credential-modal .account-user-password-toggle:hover {
+  color: #344054 !important;
+  background: #f9fafb !important;
+}
+
+body .account-settings-user-credential-modal .account-user-password-toggle > svg,
+body .account-settings-user-credential-modal svg.account-user-password-icon {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+  vertical-align: middle !important;
+}
+
+
+
+/* =========================================================
+   USER CREDENTIAL ROLE SELECT - FINAL CHEVRON ALIGNMENT
+   ---------------------------------------------------------
+   Keep the custom role chevron physically inside the select
+   on both Web User and App User credential dialogs.
+   Presentation only; no form or business logic changes.
+   ========================================================= */
+
+body .account-settings-user-credential-modal .account-user-role-select-wrap {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+body .account-settings-user-credential-modal
+  .account-user-role-select-wrap
+  > select.account-user-input {
+  width: 100% !important;
+  padding-right: 46px !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+}
+
+body .account-settings-user-credential-modal
+  .account-user-role-select-wrap
+  > svg.account-user-role-chevron {
+  position: absolute !important;
+  top: 50% !important;
+  right: 14px !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 6 !important;
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: translateY(-50%) !important;
+  color: #98a2b3 !important;
+  pointer-events: none !important;
+}
+
+/* =========================================================
+   USER ACCOUNTS — ACTIONS COLUMN ALIGNMENT
+   ---------------------------------------------------------
+   Presentation only. Keeps the Actions header, protected
+   "View only" badge and edit/delete/restore icon buttons on
+   the same horizontal/vertical center line without relying
+   on Tailwind flex/icon sizing utilities.
+   ========================================================= */
+.account-settings-users .account-settings-grid-header > div:nth-child(8) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.account-settings-users .account-settings-grid-row > div:nth-child(8) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.account-settings-users .account-settings-grid-row > div:nth-child(8) > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  gap: 6px !important;
+  margin: 0 !important;
+}
+
+/* Super Admin / protected-user action badge. */
+.account-settings-users .account-settings-grid-row > div:nth-child(8) > div > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  min-width: 78px !important;
+  height: 28px !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-users .account-settings-grid-row > div:nth-child(8) > div > span svg {
+  position: static !important;
+  display: block !important;
+  flex: 0 0 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+/* Edit / Delete / Restore buttons. */
+.account-settings-users .account-settings-grid-row > div:nth-child(8) button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 28px !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  line-height: 0 !important;
+}
+
+.account-settings-users .account-settings-grid-row > div:nth-child(8) button svg {
+  position: static !important;
+  display: block !important;
+  flex: 0 0 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+
+/* =========================================================
+   ACCOUNT SETTINGS — 100% ZOOM COMPACT FIT
+   ---------------------------------------------------------
+   Presentation only. Keeps Account Settings tabs compact and
+   makes the User Accounts table fit the available desktop width
+   without horizontal scrolling. No state/API/handlers changed.
+   ========================================================= */
+
+/* Match the compact module-tab density used elsewhere in YEN ERP. */
+.account-settings-shell .account-settings-tabs {
+  gap: 6px !important;
+  margin-bottom: 10px !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-root {
+  width: auto !important;
+  min-width: 90px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-contained {
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08) !important;
+}
+
+/* User Accounts table: consume the panel width instead of forcing a
+   desktop min-width that creates a horizontal scrollbar. */
+.account-settings-users .account-settings-grid-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.account-settings-users .account-settings-grid-header,
+.account-settings-users .account-settings-grid-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns:
+    42px
+    58px
+    minmax(145px, 1.35fr)
+    72px
+    minmax(88px, 0.82fr)
+    minmax(220px, 1.9fr)
+    72px
+    88px !important;
+  box-sizing: border-box !important;
+}
+
+.account-settings-users .account-settings-grid-header {
+  min-height: 36px !important;
+}
+
+.account-settings-users .account-settings-grid-header > div {
+  min-height: 36px !important;
+  padding: 0 7px !important;
+  font-size: 9px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.account-settings-users .account-settings-grid-row {
+  min-height: 44px !important;
+}
+
+.account-settings-users .account-settings-grid-row > div {
+  min-width: 0 !important;
+  min-height: 44px !important;
+  padding: 6px 7px !important;
+  overflow: hidden !important;
+}
+
+/* Username may be long; truncate only visually while title still exposes
+   the complete value from the existing JSX. */
+.account-settings-users .account-settings-grid-row > div:nth-child(3) {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Keep app chips compact so multiple permissions wrap inside the App column
+   instead of increasing the table's intrinsic width. */
+.account-settings-users .account-settings-grid-row > div:nth-child(6) {
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.account-settings-users .account-settings-grid-row > div:nth-child(6) > div {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.account-settings-users .account-settings-grid-row .rounded-full.bg-gray-100 {
+  max-width: 100% !important;
+  height: 20px !important;
+  padding: 0 7px !important;
+  gap: 4px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+
+.account-settings-users .account-settings-grid-row .rounded-full.bg-gray-100::before {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+/* Status and Actions use fixed compact tracks and stay centered. */
+.account-settings-users .account-settings-grid-header > div:nth-child(7),
+.account-settings-users .account-settings-grid-header > div:nth-child(8),
+.account-settings-users .account-settings-grid-row > div:nth-child(7),
+.account-settings-users .account-settings-grid-row > div:nth-child(8) {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.account-settings-users .account-settings-grid-row > div:nth-child(7) > span {
+  max-width: 100% !important;
+  padding-left: 7px !important;
+  padding-right: 7px !important;
+  white-space: nowrap !important;
+}
+
+/* Slightly tighter desktop fallback for narrower content areas/sidebar states. */
+@media (max-width: 1180px) {
+  .account-settings-shell .account-settings-tab.MuiButton-root {
+    min-width: 84px !important;
+    padding-left: 9px !important;
+    padding-right: 9px !important;
+    font-size: 10px !important;
+  }
+
+  .account-settings-users .account-settings-grid-header,
+  .account-settings-users .account-settings-grid-row {
+    grid-template-columns:
+      38px
+      52px
+      minmax(125px, 1.3fr)
+      66px
+      minmax(78px, 0.78fr)
+      minmax(185px, 1.75fr)
+      66px
+      82px !important;
+  }
+
+  .account-settings-users .account-settings-grid-header > div,
+  .account-settings-users .account-settings-grid-row > div {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+}
+
+/* =========================================================
+   ACCOUNT SETTINGS — FINAL COMPACT NAV + USER TOOLBAR
+   ---------------------------------------------------------
+   Presentation only. Keeps the existing Account Settings UI
+   and behavior while matching the compact density used by the
+   YEN Purchase module navigation at 100% browser zoom.
+   ========================================================= */
+
+/* Compact Account Settings tabs. */
+.account-settings-shell .account-settings-tabs {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 3px !important;
+  margin: 0 0 8px !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-root {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-contained {
+  font-weight: 650 !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.07) !important;
+}
+
+/* User Accounts toolbar: search, Add User and Show Active all share
+   one compact 32px control height and one vertical center line. */
+.account-settings-users .account-settings-toolbar {
+  min-height: 32px !important;
+  margin: 0 0 10px !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child {
+  flex: 0 1 260px !important;
+  width: 260px !important;
+  min-width: 210px !important;
+  max-width: 260px !important;
+  height: 32px !important;
+  margin: 0 !important;
+  align-items: center !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child > div {
+  position: relative !important;
+  width: 100% !important;
+  height: 32px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 10px !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child input {
+  display: block !important;
+  width: 100% !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  padding: 0 10px 0 31px !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+  line-height: 30px !important;
+  box-sizing: border-box !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child input:focus {
+  box-shadow: 0 0 0 2px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+/* Right-side toolbar group. */
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+}
+
+/* Add User button. */
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  min-width: 0 !important;
+  padding: 0 11px !important;
+  margin: 0 !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+}
+
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 > button svg {
+  position: static !important;
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+/* Show Active / Show Inactive control. */
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 > div {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar span.text-sm.text-gray-700 {
+  margin: 0 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-users .account-settings-toolbar label:has(> input.peer[type="checkbox"]) {
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 36px !important;
+  align-items: center !important;
+  width: 36px !important;
+  height: 20px !important;
+  min-width: 36px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + span,
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + div {
+  position: static !important;
+  display: block !important;
+  width: 36px !important;
+  height: 20px !important;
+  min-width: 36px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + span + span,
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + div + div {
+  top: 2px !important;
+  left: 2px !important;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"]:checked + span + span,
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"]:checked + div + div {
+  transform: translateX(16px) !important;
+}
+
+/* Keep the toolbar neat when the available content area becomes narrower. */
+@media (max-width: 900px) {
+  .account-settings-users .account-settings-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .account-settings-users .account-settings-toolbar > :first-child {
+    flex: 1 1 240px !important;
+    width: min(260px, 100%) !important;
+    min-width: 200px !important;
+  }
+}
+
+/* =========================================================
+   ACCOUNT SETTINGS — FINAL EXTRA-COMPACT USER TOOLBAR
+   ---------------------------------------------------------
+   Presentation only. No API/state/validation/handler changes.
+   This final scoped override intentionally sits last so older
+   Account Settings density rules cannot enlarge these controls.
+   ========================================================= */
+
+/* Keep Account Settings navigation closer to compact YEN module tabs. */
+.account-settings-shell .account-settings-tabs {
+  gap: 4px !important;
+  margin: 0 0 8px !important;
+  align-items: center !important;
+}
+
+.account-settings-shell .account-settings-tab.MuiButton-root {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 0 8px !important;
+  border-radius: 5px !important;
+  font-size: 9.5px !important;
+  line-height: 1 !important;
+}
+
+/* One clean baseline: compact search on the left, actions on the right. */
+.account-settings-users .account-settings-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 28px !important;
+  margin: 0 0 8px !important;
+  gap: 10px !important;
+}
+
+/* Search wrapper. */
+.account-settings-users .account-settings-toolbar > :first-child {
+  display: flex !important;
+  flex: 0 0 210px !important;
+  align-items: center !important;
+  width: 210px !important;
+  min-width: 210px !important;
+  max-width: 210px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child > div {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+}
+
+/* Search icon is centered by top/bottom anchoring instead of translate. */
+.account-settings-users .account-settings-toolbar > :first-child svg {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 9px !important;
+  width: 13px !important;
+  height: 13px !important;
+  margin: auto 0 !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child input,
+.account-settings-users .account-settings-toolbar input[type="text"] {
+  display: block !important;
+  width: 210px !important;
+  min-width: 210px !important;
+  max-width: 210px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  padding: 0 9px 0 29px !important;
+  border-radius: 6px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+.account-settings-users .account-settings-toolbar > :first-child input:focus {
+  box-shadow: 0 0 0 2px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+/* Right-side Add User + Show Active group. */
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+}
+
+/* Compact Add User button. */
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 9px !important;
+  margin: 0 !important;
+  border-radius: 6px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 > button svg {
+  position: static !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+/* Compact and vertically centered Show Active control. */
+.account-settings-users .account-settings-toolbar > .flex.items-center.gap-4 > div {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 5px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar span.text-sm.text-gray-700 {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px !important;
+  margin: 0 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-users .account-settings-toolbar label:has(> input.peer[type="checkbox"]) {
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 32px !important;
+  align-items: center !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + span,
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + div {
+  position: static !important;
+  display: block !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + span + span,
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"] + div + div {
+  top: 2px !important;
+  left: 2px !important;
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  margin: 0 !important;
+}
+
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"]:checked + span + span,
+.account-settings-users .account-settings-toolbar input.peer[type="checkbox"]:checked + div + div {
+  transform: translateX(14px) !important;
+}
+
+@media (max-width: 900px) {
+  .account-settings-users .account-settings-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .account-settings-users .account-settings-toolbar > :first-child {
+    flex: 1 1 210px !important;
+    width: min(210px, 100%) !important;
+    min-width: 180px !important;
+    max-width: 210px !important;
+  }
+
+
+  .account-settings-users .account-settings-toolbar > :first-child input,
+  .account-settings-users .account-settings-toolbar input[type="text"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+
+/* =========================================================
+   ROLE MANAGEMENT — FINAL COMPACT TOOLBAR
+   Presentation only. No API/state/permission/handler changes.
+   ========================================================= */
+
+.account-settings-roles .account-settings-role-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-height: 28px !important;
+  margin: 0 0 8px !important;
+  gap: 10px !important;
+}
+
+.account-settings-roles .account-settings-role-search {
+  flex: 0 0 210px !important;
+  width: 210px !important;
+  min-width: 210px !important;
+  max-width: 210px !important;
+  height: 28px !important;
+  margin: 0 !important;
+}
+
+.account-settings-roles .account-settings-role-search-field {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+}
+
+.account-settings-roles .account-settings-role-search-icon {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 9px !important;
+  width: 13px !important;
+  height: 13px !important;
+  margin: auto 0 !important;
+  transform: none !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.account-settings-roles .account-settings-role-search-input {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  padding: 0 9px 0 29px !important;
+  border-radius: 6px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+.account-settings-roles .account-settings-role-toolbar-actions {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-roles .account-settings-create-role-button {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  padding: 0 9px !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-roles .account-settings-create-role-button svg {
+  position: static !important;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.account-settings-roles .account-settings-role-active-filter {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  gap: 5px !important;
+}
+
+.account-settings-roles .account-settings-role-active-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.account-settings-roles .account-settings-role-active-filter label:has(> input.peer[type="checkbox"]) {
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 32px !important;
+  align-items: center !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+}
+
+.account-settings-roles .account-settings-role-active-filter input.peer[type="checkbox"] + span,
+.account-settings-roles .account-settings-role-active-filter input.peer[type="checkbox"] + div {
+  position: static !important;
+  display: block !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0 !important;
+}
+
+.account-settings-roles .account-settings-role-active-filter input.peer[type="checkbox"] + span + span,
+.account-settings-roles .account-settings-role-active-filter input.peer[type="checkbox"] + div + div {
+  top: 2px !important;
+  left: 2px !important;
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  margin: 0 !important;
+}
+
+.account-settings-roles .account-settings-role-active-filter input.peer[type="checkbox"]:checked + span + span,
+.account-settings-roles .account-settings-role-active-filter input.peer[type="checkbox"]:checked + div + div {
+  transform: translateX(14px) !important;
+}
+
+@media (max-width: 900px) {
+  .account-settings-roles .account-settings-role-toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .account-settings-roles .account-settings-role-search {
+    flex: 1 1 210px !important;
+    width: min(210px, 100%) !important;
+    min-width: 180px !important;
+    max-width: 210px !important;
+  }
+}
+/* =========================================================
+   ROLE MANAGEMENT TOOLBAR — SPECIFICITY FIX
+   ========================================================= */
+
+.account-settings-roles
+  .account-settings-role-search
+  .account-settings-role-search-field
+  input.account-settings-role-search-input {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 9px 0 29px !important;
+  line-height: 1 !important;
+  font-size: 10px !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+
+.account-settings-roles
+  .account-settings-role-toolbar-actions
+  button.account-settings-create-role-button {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 9px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  border-radius: 6px !important;
+}
+
+
+
+/* =========================================================
+   CREATE ROLE — OLD WORKING UI PARITY (SCOPED)
+   ---------------------------------------------------------
+   Restores the old Create Role presentation without relying
+   on Tailwind utility generation.  This block is intentionally
+   scoped to .account-role-editor-create, so no business logic,
+   API, Redux, routing, Edit Role, or other Account Settings UI
+   is changed.
+   ========================================================= */
+
+.account-settings-role-editor.account-role-editor-create {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: calc(100dvh - 112px) !important;
+  min-height: 560px !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #f9fafb !important;
+  box-sizing: border-box !important;
+}
+
+.account-role-editor-create .account-role-editor-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Old header sizing */
+.account-role-editor-create .account-role-editor-header {
+  position: relative !important;
+  flex: 0 0 58px !important;
+  min-height: 58px !important;
+  padding: 8px 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+.account-role-editor-create .account-role-back-button {
+  min-width: 110px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  color: #2563eb !important;
+  background: #ffffff !important;
+  border: 1px solid #2563eb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-create .account-role-back-button:hover {
+  background: #eff6ff !important;
+}
+
+.account-role-editor-create .account-role-back-button svg {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  flex: 0 0 16px !important;
+}
+
+.account-role-editor-create .account-role-editor-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  color: #000000 !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 28px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* Old two-field section */
+.account-role-editor-create .account-role-editor-fields {
+  flex: 0 0 auto !important;
+  padding: 12px 24px !important;
+  background: #ffffff !important;
+  border-bottom: 0 !important;
+}
+
+.account-role-editor-create .account-role-editor-fields-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.account-role-editor-create .account-role-editor-field {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.account-role-editor-create .account-role-editor-field label {
+  display: block !important;
+  margin: 0 0 2px !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-create .account-role-editor-field p {
+  min-height: 18px !important;
+  margin: 0 0 8px !important;
+  color: #6b7280 !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-create .account-role-editor-field select,
+.account-role-editor-create .account-role-editor-field input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 8px !important;
+  box-sizing: border-box !important;
+  color: #111827 !important;
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  outline: none !important;
+}
+
+.account-role-editor-create .account-role-editor-field select:focus,
+.account-role-editor-create .account-role-editor-field input:focus {
+  border-color: #93c5fd !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35) !important;
+}
+
+/* Old permission table header */
+.account-role-editor-create .account-role-permission-grid {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(300px, 2fr) repeat(6, minmax(72px, 1fr)) !important;
+  align-items: center !important;
+  column-gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.account-role-editor-create .account-role-permission-header {
+  flex: 0 0 42px !important;
+  min-height: 42px !important;
+  padding: 8px 24px !important;
+  color: #000000 !important;
+  background: #f9fafb !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.account-role-editor-create .account-role-permission-header > div:first-child {
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.account-role-editor-create .account-role-permission-header > div:not(:first-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  color: #000000 !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* The old Tailwind w-4/h-4 help icon was lost after merge. */
+.account-role-editor-create .account-role-permission-header > div:not(:first-child) > span:last-child {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: #4b5563 !important;
+  background: transparent !important;
+  border: 1px solid #9ca3af !important;
+  border-radius: 9999px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+.account-role-editor-create .account-role-permission-header > div:not(:first-child) > span:last-child:hover {
+  background: #e5e7eb !important;
+}
+
+/* Scroll body */
+.account-role-editor-create .account-role-permission-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 0 24px 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
+}
+
+.account-role-editor-create .account-role-permission-stack {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 8px 0 72px !important;
+}
+
+.account-role-editor-create .account-role-app {
+  margin: 0 0 12px !important;
+}
+
+.account-role-editor-create .account-role-app-title {
+  min-height: 40px !important;
+  margin: 0 0 8px !important;
+  padding: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  color: #2563eb !important;
+  background: #eff6ff !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-create .account-role-module {
+  width: 100% !important;
+  margin: 0 0 8px !important;
+  overflow: visible !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+}
+
+.account-role-editor-create .account-role-module-header {
+  min-height: 42px !important;
+  padding: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+  cursor: pointer !important;
+}
+
+.account-role-editor-create .account-role-module-header:hover {
+  background: #f9fafb !important;
+}
+
+.account-role-editor-create .account-role-module-header > div {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+
+/* Module select-all checkbox: old w-5 h-5 */
+.account-role-editor-create .account-role-module-header > div > button:first-child {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0 12px 0 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: transparent !important;
+  background: #ffffff !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.account-role-editor-create .account-role-module-header > div > button:first-child.bg-blue-600 {
+  color: #ffffff !important;
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.account-role-editor-create .account-role-module-header > div > button:first-child:hover {
+  border-color: #3b82f6 !important;
+}
+
+/* Module information icon */
+.account-role-editor-create .account-role-module-header span.inline-flex,
+.account-role-editor-create .account-role-permission-row span.inline-flex {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  margin-left: 8px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: #4b5563 !important;
+  background: transparent !important;
+  border: 1px solid #9ca3af !important;
+  border-radius: 9999px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+/* Right-side expand/collapse arrow */
+.account-role-editor-create .account-role-module-header > button:last-child {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #6b7280 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.account-role-editor-create .account-role-module-header > button:last-child:hover {
+  color: #374151 !important;
+  background: transparent !important;
+}
+
+.account-role-editor-create .account-role-module-header > button:last-child svg {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  display: block !important;
+}
+
+.account-role-editor-create .account-role-module-header > button:last-child svg.rotate-180 {
+  transform: rotate(180deg) !important;
+}
+
+/* Old submodule rows */
+.account-role-editor-create .account-role-permission-row {
+  min-height: 42px !important;
+  padding: 8px !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-create .account-role-permission-row:last-child {
+  border-bottom: 0 !important;
+}
+
+.account-role-editor-create .account-role-permission-row:hover {
+  background: #f9fafb !important;
+}
+
+.account-role-editor-create .account-role-permission-row > div:first-child {
+  min-width: 0 !important;
+  padding-left: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Old action cells: w-6 h-5; remove native merged-app button chrome. */
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > button,
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > div > button {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: #4b5563 !important;
+  background: #e5e7eb !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+}
+
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > button.bg-blue-600,
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600 {
+  color: #ffffff !important;
+  background: #2563eb !important;
+}
+
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > button.bg-blue-600:hover,
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600:hover {
+  background: #1d4ed8 !important;
+}
+
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > button.bg-gray-200:hover,
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > div > button.bg-gray-200:hover {
+  background: #d1d5db !important;
+}
+
+/* Edit-action popover: keep the old compact look. */
+.account-role-editor-create .account-role-permission-row .relative {
+  position: relative !important;
+}
+
+.account-role-editor-create .account-role-permission-row .absolute.z-50 {
+  position: absolute !important;
+  z-index: 50 !important;
+  top: 24px !important;
+  left: 50% !important;
+  width: 176px !important;
+  padding: 8px !important;
+  transform: translateX(-50%) !important;
+  color: #111827 !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Old footer spacing/buttons; sticky is used so it remains inside the merged shell. */
+.account-role-editor-create .account-role-editor-footer {
+  position: sticky !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+  flex: 0 0 72px !important;
+  width: 100% !important;
+  min-height: 72px !important;
+  padding: 16px 24px !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+.account-role-editor-create .account-role-editor-footer > div {
+  width: 100% !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button {
+  min-width: 110px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 20px !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button:first-child {
+  color: #374151 !important;
+  background: #ffffff !important;
+  border: 2px solid #9ca3af !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button:first-child:hover {
+  background: #f3f4f6 !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button:last-child {
+  color: #ffffff !important;
+  background: #2563eb !important;
+  border: 1px solid #2563eb !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button:last-child:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Old spacer should not create a second blank band under the footer. */
+.account-role-editor-create .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+@media (max-width: 1100px) {
+  .account-role-editor-create .account-role-permission-grid {
+    grid-template-columns: minmax(260px, 2fr) repeat(6, minmax(68px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .account-role-editor-create .account-role-editor-fields-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .account-role-editor-create .account-role-editor-field p {
+    min-height: 0 !important;
+  }
+
+  .account-role-editor-create .account-role-permission-scroll {
+    overflow-x: auto !important;
+  }
+
+  .account-role-editor-create .account-role-permission-grid {
+    min-width: 900px !important;
+  }
+}
+/* =========================================================
+   CREATE ROLE — LAPTOP 100% COMPACT + REMOVE MODULE DIVIDER
+   Create Role only
+   ========================================================= */
+
+/* 1. Remove black line below Purchase Master */
+.account-role-editor-create .account-role-module > .border-t {
+  border-top: 0 !important;
+}
+
+/* 2. Compact Create Role UI at browser 100% */
+.account-role-editor-create .account-role-editor-header {
+  flex-basis: 48px !important;
+  min-height: 48px !important;
+  padding: 6px 20px !important;
+}
+
+.account-role-editor-create .account-role-back-button {
+  min-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 15px !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-create .account-role-back-button svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+}
+
+.account-role-editor-create .account-role-editor-title {
+  font-size: 17px !important;
+  line-height: 22px !important;
+}
+
+.account-role-editor-create .account-role-editor-fields {
+  padding: 10px 20px !important;
+}
+
+.account-role-editor-create .account-role-editor-fields-grid {
+  gap: 10px !important;
+}
+
+.account-role-editor-create .account-role-editor-field label {
+  margin-bottom: 1px !important;
+  font-size: 12px !important;
+  line-height: 17px !important;
+}
+
+.account-role-editor-create .account-role-editor-field p {
+  min-height: 15px !important;
+  margin-bottom: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create .account-role-editor-field select,
+.account-role-editor-create .account-role-editor-field input {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 6px 8px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-create .account-role-permission-header {
+  flex-basis: 35px !important;
+  min-height: 35px !important;
+  padding: 6px 20px !important;
+  font-size: 12px !important;
+}
+
+.account-role-editor-create .account-role-permission-header > div:first-child,
+.account-role-editor-create .account-role-permission-header > div:not(:first-child) {
+  font-size: 12px !important;
+}
+
+.account-role-editor-create
+  .account-role-permission-header
+  > div:not(:first-child)
+  > span:last-child {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-create .account-role-permission-scroll {
+  padding: 0 20px 6px !important;
+}
+
+.account-role-editor-create .account-role-permission-stack {
+  padding: 6px 0 58px !important;
+}
+
+.account-role-editor-create .account-role-app {
+  margin-bottom: 9px !important;
+}
+
+.account-role-editor-create .account-role-app-title {
+  min-height: 33px !important;
+  margin-bottom: 6px !important;
+  padding: 6px 7px !important;
+  font-size: 12px !important;
+  line-height: 17px !important;
+}
+
+.account-role-editor-create .account-role-module {
+  margin-bottom: 6px !important;
+}
+
+.account-role-editor-create .account-role-module-header {
+  min-height: 35px !important;
+  padding: 6px 7px !important;
+  font-size: 12px !important;
+  line-height: 17px !important;
+}
+
+.account-role-editor-create
+  .account-role-module-header
+  > div
+  > button:first-child {
+  width: 17px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  margin-right: 10px !important;
+  border-width: 1.5px !important;
+  font-size: 10px !important;
+}
+
+.account-role-editor-create .account-role-module-header span.inline-flex,
+.account-role-editor-create .account-role-permission-row span.inline-flex {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  margin-left: 6px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-create .account-role-module-header > button:last-child,
+.account-role-editor-create .account-role-module-header > button:last-child svg {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+}
+
+.account-role-editor-create .account-role-permission-row {
+  min-height: 34px !important;
+  padding: 6px 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-create
+  .account-role-permission-row
+  > div:first-child {
+  padding-left: 26px !important;
+  font-size: 12px !important;
+}
+
+.account-role-editor-create
+  .account-role-permission-row
+  > div:not(:first-child)
+  > button,
+.account-role-editor-create
+  .account-role-permission-row
+  > div:not(:first-child)
+  > div
+  > button {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  font-size: 10px !important;
+}
+
+.account-role-editor-create .account-role-editor-footer {
+  flex-basis: 58px !important;
+  min-height: 58px !important;
+  padding: 10px 20px !important;
+}
+
+.account-role-editor-create .account-role-editor-footer > div {
+  gap: 10px !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button {
+  min-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 15px !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+/* =========================================================
+   CREATE ROLE — 100% LAPTOP COMPACT VIEW + FIXED SMALL FOOTER
+   Scope: Create Role only. Presentation only.
+   ========================================================= */
+
+.account-settings-role-editor.account-role-editor-create {
+  height: calc(100dvh - 112px) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 112px) !important;
+  overflow: hidden !important;
+}
+
+.account-role-editor-create .account-role-editor-card {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.account-role-editor-create .account-role-editor-header {
+  flex: 0 0 40px !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 4px 14px !important;
+}
+
+.account-role-editor-create .account-role-back-button {
+  min-width: 78px !important;
+  width: auto !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create .account-role-back-button svg {
+  width: 12px !important;
+  min-width: 12px !important;
+  height: 12px !important;
+}
+
+.account-role-editor-create .account-role-editor-title {
+  font-size: 14px !important;
+  line-height: 18px !important;
+}
+
+.account-role-editor-create .account-role-editor-fields {
+  padding: 7px 14px 8px !important;
+}
+
+.account-role-editor-create .account-role-editor-fields-grid {
+  gap: 10px !important;
+}
+
+.account-role-editor-create .account-role-editor-field label {
+  margin-bottom: 1px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create .account-role-editor-field p {
+  min-height: 13px !important;
+  margin-top: 1px !important;
+  margin-bottom: 4px !important;
+  font-size: 9.5px !important;
+  line-height: 13px !important;
+}
+
+.account-role-editor-create .account-role-editor-field select,
+.account-role-editor-create .account-role-editor-field input {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create .account-role-permission-header {
+  flex: 0 0 31px !important;
+  min-height: 31px !important;
+  height: 31px !important;
+  padding: 4px 14px !important;
+  font-size: 10.5px !important;
+}
+
+.account-role-editor-create .account-role-permission-header > div:first-child,
+.account-role-editor-create .account-role-permission-header > div:not(:first-child) {
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create
+  .account-role-permission-header
+  > div:not(:first-child)
+  > span:last-child {
+  width: 13px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  min-height: 13px !important;
+  font-size: 8px !important;
+}
+
+.account-role-editor-create .account-role-permission-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 0 14px 4px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.account-role-editor-create .account-role-permission-stack {
+  padding: 5px 0 8px !important;
+}
+
+.account-role-editor-create .account-role-app {
+  margin-bottom: 6px !important;
+}
+
+.account-role-editor-create .account-role-app-title {
+  min-height: 29px !important;
+  margin-bottom: 5px !important;
+  padding: 5px 7px !important;
+  border-radius: 5px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create .account-role-module {
+  margin-bottom: 5px !important;
+}
+
+.account-role-editor-create .account-role-module > .border-t {
+  border-top: 0 !important;
+}
+
+.account-role-editor-create .account-role-module-header {
+  min-height: 31px !important;
+  height: 31px !important;
+  padding: 4px 7px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-create
+  .account-role-module-header
+  > div
+  > button:first-child {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  margin-right: 8px !important;
+  padding: 0 !important;
+  border-width: 1px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-create .account-role-module-header span.inline-flex,
+.account-role-editor-create .account-role-permission-row span.inline-flex {
+  width: 13px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  min-height: 13px !important;
+  margin-left: 5px !important;
+  font-size: 8px !important;
+}
+
+.account-role-editor-create .account-role-module-header > button:last-child,
+.account-role-editor-create .account-role-module-header > button:last-child svg {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+}
+
+.account-role-editor-create .account-role-permission-row {
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 4px 7px !important;
+  font-size: 10px !important;
+  line-height: 13px !important;
+}
+
+.account-role-editor-create
+  .account-role-permission-row
+  > div:first-child {
+  padding-left: 24px !important;
+  font-size: 10px !important;
+}
+
+.account-role-editor-create
+  .account-role-permission-row
+  > div:not(:first-child)
+  > button,
+.account-role-editor-create
+  .account-role-permission-row
+  > div:not(:first-child)
+  > div
+  > button {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-create .account-role-editor-footer {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 50 !important;
+  flex: 0 0 44px !important;
+  width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 6px 14px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  box-shadow: 0 -2px 6px rgba(16, 24, 40, 0.04) !important;
+}
+
+.account-role-editor-create .account-role-editor-footer > div {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  gap: 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button {
+  min-width: 80px !important;
+  width: auto !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+  font-weight: 600 !important;
+}
+
+.account-role-editor-create .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+/* =========================================================
+   CREATE ROLE — USE FULL AVAILABLE ACCOUNT SETTINGS SPACE
+   Scope: Create Role only. No logic / API changes.
+   ========================================================= */
+
+/* Remove the unused outer gap around only the Create Role editor.
+   This expands into the existing top/left/right padding without
+   changing the inner UI structure. */
+.account-settings-content:has(.account-role-editor-create) {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.account-settings-role-editor.account-role-editor-create {
+  width: calc(100% + 32px) !important;
+  max-width: none !important;
+
+  /* consume the unused outer spacing */
+  margin: -16px -16px 0 -16px !important;
+  padding: 0 !important;
+
+  /* use the lower free area too */
+  height: calc(100dvh - 20px) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 20px) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Card must stretch through the entire editor height. */
+.account-role-editor-create .account-role-editor-card {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Header and role fields keep their current compact UI.
+   They must not consume the newly available data height. */
+.account-role-editor-create .account-role-editor-header,
+.account-role-editor-create .account-role-editor-fields,
+.account-role-editor-create .account-role-permission-header,
+.account-role-editor-create .account-role-editor-footer {
+  flex-shrink: 0 !important;
+}
+
+/* Expand the actual data area into all remaining vertical space.
+   Only this area scrolls. */
+.account-role-editor-create .account-role-permission-scroll {
+  flex: 1 1 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Do not reserve artificial empty space below the permission list. */
+.account-role-editor-create .account-role-permission-stack {
+  min-height: 100% !important;
+  padding-bottom: 6px !important;
+}
+
+/* Footer stays visible while the permissions/modules scroll. */
+.account-role-editor-create .account-role-editor-footer {
+  position: relative !important;
+  bottom: auto !important;
+  z-index: 60 !important;
+  flex: 0 0 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 5px 12px !important;
+  margin: 0 !important;
+  background: #fff !important;
+}
+
+/* Keep only the permission list scrolling; remove the old spacer. */
+.account-role-editor-create .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+/* On smaller laptop widths, don't force horizontal overflow. */
+@media (max-width: 1366px) {
+  .account-settings-role-editor.account-role-editor-create {
+    width: calc(100% + 24px) !important;
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    margin-top: -12px !important;
+  }
+}
+

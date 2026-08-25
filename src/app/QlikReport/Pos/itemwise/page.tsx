@@ -2,8 +2,8 @@
 
 import { ItemwiseSalesReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { itemwiseSalesConfig } from '../../configs/itemwiseSales.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { itemwiseSalesConfig } from '@/features/pos/reports/itemwiseSales.config';
 
 // Select 'itemwiseSales' (the key defined in your config)
 const selector = (s: RootState) => s.itemwiseSales;

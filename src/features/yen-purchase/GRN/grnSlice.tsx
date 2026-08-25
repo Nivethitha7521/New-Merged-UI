@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { RootState } from '../../../redux/store';
-import { GrnData, GrnState, ItemDetail, ItemDetails, Vendor, PurchaseItem, PurchaseOrder, ApInvoice, ReturnGRNRequest, FetchGrnsPayload, FetchGrnsArgs, initialState, DebitCreditNote, FetchGrnsReturnPayload, ReturnReason, RevertGrnToPOResponse, CreateDebitNoteRequest, DebitCreditNoteResponse, AmountDebitNoteResponse, AmountDebitNoteRequest,ReturnStockUpdateResult} from '@/Models/grnModel';
+import { GrnData, GrnState, ItemDetail, ItemDetails, Vendor, PurchaseItem, PurchaseOrder, ApInvoice, ReturnGRNRequest, FetchGrnsPayload, FetchGrnsArgs, initialState, DebitCreditNote, FetchGrnsReturnPayload, ReturnReason, RevertGrnToPOResponse, CreateDebitNoteRequest, DebitCreditNoteResponse, AmountDebitNoteResponse, AmountDebitNoteRequest,ReturnStockUpdateResult,RevertStockUpdateItem} from '@/Models/grnModel';
 import { PurchaseRandomId } from '@/Models/purchaseModel';
 import purchaseApi from "@/utils/api";
 
@@ -13,10 +13,25 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'https://yenerp.com/purchasetestapi';
+const BASE_URL = 'http://127.0.0.1:8000/purchasetestapi';
 const customRoundOf = (value: number) => {
   return Math.round(value * 100) / 100; 
 };
+
+
+export const revertMultiGrnToPO = createAsyncThunk(
+  "grn/revertMultiGrnToPO",
+  async (grnId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.patch(`/grns/${grnId}/multi-revert`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || "Failed to revert Multi PO GRN"
+      );
+    }
+  }
+);
 
 // Updated thunk - Fix URL to /grn/ (singular) and handle response
 export const revertGrnToPO = createAsyncThunk<
@@ -39,7 +54,25 @@ export const revertGrnToPO = createAsyncThunk<
     }
   }
 );
-
+export const revertHoldGrnToPOOnly = createAsyncThunk<
+  RevertGrnToPOResponse,
+  string,
+  { rejectValue: string }
+>(
+  'grn/revertHoldGrnToPOOnly',
+  async (grnId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.patch<RevertGrnToPOResponse>(
+        `/grns/${grnId}/revert-hold-to-po`  // NEW endpoint — no stock change
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || 'Failed to revert Hold GRN to PO'
+      );
+    }
+  }
+);
 // Add these new thunks to your grnSlice.ts
 export const createQuantityBasedDebitNote = createAsyncThunk<
   DebitCreditNoteResponse,
@@ -673,8 +706,9 @@ export const fetchHoldGrns = createAsyncThunk<
 );
 
 // Approve Hold GRN
+// இப்படி மாத்து — stockUpdate field add பண்ணு:
 export const approveHoldGrn = createAsyncThunk<
-  { message: string; grnId: string; newPoStatus: string },
+  { message: string; grnId: string; newPoStatus: string; remainingHoldGrns: number; stockUpdate?: { stock_updates: number; price_updates: number; message?: string;success?: boolean;items?: RevertStockUpdateItem[]; } },
   string,
   { rejectValue: string }
 >(
@@ -690,7 +724,23 @@ export const approveHoldGrn = createAsyncThunk<
     }
   }
 );
-
+export const approveHoldMultiGrn = createAsyncThunk<
+  { message: string; grnId: string; updatedPurchaseOrders: any[]; remainingHoldGrns: number; stockUpdate?: any },
+  string,
+  { rejectValue: string }
+>(
+  'grn/approveHoldMultiGrn',
+  async (grnId: string, { rejectWithValue }) => {
+    try {
+      const response = await purchaseApi.patch(`/grns/${grnId}/approve-hold-multi`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || 'Failed to approve Multi PO Hold GRN'
+      );
+    }
+  }
+);
 export const downloadHoldGrnPDF = createAsyncThunk(
   'grn/downloadHoldGrnPDF',
   async (purchaseOrderId: string, { rejectWithValue }) => {
@@ -720,6 +770,7 @@ export const downloadHoldGrnPDF = createAsyncThunk(
     }
   }
 );
+
 export const grnSlice = createSlice({
   name: 'grn',
   initialState,
@@ -791,6 +842,12 @@ export const grnSlice = createSlice({
       state.lastReturnedGrnId = null;
       state.showReturnStockUpdateDialog = false;
     },
+    clearHoldGrnNotification: (state) => {
+  state.holdGrnNotificationCount = 0;
+},
+incrementHoldGrnNotification: (state) => {
+  state.holdGrnNotificationCount += 1;
+},
   },
   extraReducers: builder => {
     builder
@@ -1104,6 +1161,37 @@ export const grnSlice = createSlice({
         state.snackbarMessageGRN = action.payload as string;
         state.snackbarOpenGRN = true;
       })
+      .addCase(revertMultiGrnToPO.pending, (state) => {
+  state.revertLoading = true;
+  state.revertError = null;
+})
+.addCase(revertMultiGrnToPO.fulfilled, (state, action) => {
+  state.revertLoading = false;
+  state.revertError = null;
+
+  const grnIndex = state.grns.findIndex(
+    grn => grn.grnId === action.payload.grnId
+  );
+
+  if (grnIndex !== -1) {
+    state.grns[grnIndex].status = 'ReturnedPO';
+  }
+
+  state.lastRevertStockUpdates = action.payload.stockUpdates;
+  state.lastRevertedGrnId = action.payload.grnId;
+  state.showStockUpdateDialog = true;
+
+  state.snackbarMessageGRN =
+    action.payload.message || 'Multi PO GRN reverted successfully';
+  state.snackbarOpenGRN = true;
+})
+.addCase(revertMultiGrnToPO.rejected, (state, action) => {
+  state.revertLoading = false;
+  state.revertError = action.payload as string;
+  state.snackbarMessageGRN =
+    (action.payload as string) || 'Failed to revert Multi PO GRN';
+  state.snackbarOpenGRN = true;
+})
       .addCase(revertGrnToPO.pending, (state) => {
         state.revertLoading = true;
         state.revertError = null;
@@ -1213,18 +1301,96 @@ export const grnSlice = createSlice({
 .addCase(approveHoldGrn.pending, (state) => {
   state.loading = true;
 })
+// EXISTING approveHoldGrn fulfilled case-ஐ இப்படி மாத்தணும்:
+
 .addCase(approveHoldGrn.fulfilled, (state, action) => {
   state.loading = false;
+  
   // Remove approved GRN from holdGrns list
   state.holdGrns = state.holdGrns.filter(
     (g) => g.grnId !== action.payload.grnId
   );
-  state.snackbarMessageGRN = 'Hold GRN approved! Moved to GRN List.';
+  
+ // இப்படி மாத்து — stockUpdate-ஐ RevertStockUpdateResult shape-க்கு transform பண்ணு:
+const stockUpdate = action.payload.stockUpdate;
+if (stockUpdate && (stockUpdate.stock_updates > 0 || stockUpdate.price_updates > 0)) {
+  state.lastRevertStockUpdates = {
+    success: stockUpdate.success ?? true,
+    totalProcessed: stockUpdate.stock_updates ?? 0,
+    successful: stockUpdate.stock_updates ?? 0,
+    failed: 0,
+    items: stockUpdate.items ?? [],
+    purchaseitem_updates: stockUpdate.price_updates ?? 0,
+    inventory_updates: stockUpdate.stock_updates ?? 0,
+    inventory_creates: 0,
+    inventory_not_found: 0,
+    errors: 0,
+    timestamp: new Date().toISOString(),
+  };
+  state.lastRevertedGrnId = action.payload.grnId;
+  state.showStockUpdateDialog = true;
+}
+  
+  const stockMsg = stockUpdate
+    ? ` Stock: ${stockUpdate.stock_updates ?? 0} updated, ${stockUpdate.price_updates ?? 0} prices updated.`
+    : '';
+  state.snackbarMessageGRN = `Hold GRN approved! Moved to GRN List.${stockMsg}`;
   state.snackbarOpenGRN = true;
 })
 .addCase(approveHoldGrn.rejected, (state, action) => {
   state.loading = false;
   state.snackbarMessageGRN = action.payload as string || 'Failed to approve Hold GRN';
+  state.snackbarOpenGRN = true;
+})
+.addCase(approveHoldMultiGrn.pending, (state) => {
+  state.loading = true;
+})
+.addCase(approveHoldMultiGrn.fulfilled, (state, action) => {
+  state.loading = false;
+  state.holdGrns = state.holdGrns.filter(
+    (g) => g.grnId !== action.payload.grnId
+  );
+  const stockUpdate = action.payload.stockUpdate;
+  if (stockUpdate && (stockUpdate.stock_updates > 0 || stockUpdate.price_updates > 0)) {
+    state.lastRevertStockUpdates = {
+      success: stockUpdate.success ?? true,
+      totalProcessed: stockUpdate.stock_updates ?? 0,
+      successful: stockUpdate.stock_updates ?? 0,
+      failed: 0,
+      items: stockUpdate.items ?? [],
+      purchaseitem_updates: stockUpdate.price_updates ?? 0,
+      inventory_updates: stockUpdate.stock_updates ?? 0,
+      inventory_creates: 0,
+      inventory_not_found: 0,
+      errors: 0,
+      timestamp: new Date().toISOString(),
+    };
+    state.lastRevertedGrnId = action.payload.grnId;
+    state.showStockUpdateDialog = true;
+  }
+  state.snackbarMessageGRN = 'Multi PO Hold GRN approved! Moved to GRN List.';
+  state.snackbarOpenGRN = true;
+})
+.addCase(approveHoldMultiGrn.rejected, (state, action) => {
+  state.loading = false;
+  state.snackbarMessageGRN = action.payload as string || 'Failed to approve Multi PO Hold GRN';
+  state.snackbarOpenGRN = true;
+})
+.addCase(revertHoldGrnToPOOnly.pending, (state) => {
+  state.loading = true;
+})
+.addCase(revertHoldGrnToPOOnly.fulfilled, (state, action) => {
+  state.loading = false;
+  // Remove from holdGrns list
+  state.holdGrns = state.holdGrns.filter(
+    (g) => g.grnId !== action.payload.grnId
+  );
+  state.snackbarMessageGRN = action.payload.message;
+  state.snackbarOpenGRN = true;
+})
+.addCase(revertHoldGrnToPOOnly.rejected, (state, action) => {
+  state.loading = false;
+  state.snackbarMessageGRN = action.payload as string || 'Failed to revert';
   state.snackbarOpenGRN = true;
 });
   },
@@ -1244,6 +1410,8 @@ export const {
   clearSnackbarMessage, setSnackbarOpenGRN, setSnackbarMessageGRN, setPagination, setSelectedHeaders,setShowStockUpdateDialog,
    clearLastRevertData, setShowReturnStockUpdateDialog, // Make sure this is exported
   clearLastReturnData, // Make sure this is exported
+  clearHoldGrnNotification,        // ← add
+  incrementHoldGrnNotification,
 } = grnSlice.actions;
 export const selectInvoiceAvailability = (state: RootState) => state.grn.invoiceAvailability;
 

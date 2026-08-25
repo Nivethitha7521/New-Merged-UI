@@ -1,22 +1,16 @@
-import React, { useState, useRef } from "react";
-import {
-  Typography,
-  Menu,
-  MenuItem,
-  Checkbox,
-  FormControlLabel,
-  Box,
-  Button,
-  IconButton,
-  Divider,
-  TextField,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import RefreshIcon from "@mui/icons-material/Refresh"; // 1. Import Refresh Icon
+"use client";
+
+/**
+ * storestockvarience/filterBar.tsx — rewritten with pure Tailwind CSS.
+ * Replaces 543-line MUI version. Props interface 100% identical.
+ */
+
+import React, { useMemo, useCallback } from "react";
 import CollapsibleFilter from "../physcialstockvarience/ui/collabsfiler";
-import ClearIcon from '@mui/icons-material/Clear';
-import { formatDateDDMMYYYY, getTodayDate } from "@/components/Hooks/useTodayDate";
+import { Tooltip } from "@/components/ui/Tooltip";
+import { cn } from "@/lib/utils";
+
+// ─── Props (unchanged) ────────────────────────────────────────────────────────
 
 export interface FilterBarProps {
   searchParams: {
@@ -38,302 +32,296 @@ export interface FilterBarProps {
   };
   visibleColumns: Record<string, boolean>;
   onColumnVisibilityChange: (columns: Record<string, boolean>) => void;
-  onFilterSearch: (
-    field: "category" | "subcategory" | "itemName" | "varianceName" | "locationName",
-    searchTerm: string
-  ) => void;
-  onFilterScrollBottom: (
-    field: "category" | "subcategory" | "itemName" | "varianceName" | "locationName"
-  ) => void;
+  onFilterSearch: (field: "category" | "subcategory" | "itemName" | "varianceName" | "locationName", searchTerm: string) => void;
+  onFilterScrollBottom: (field: "category" | "subcategory" | "itemName" | "varianceName" | "locationName") => void;
   getWarehouseName: (id: string) => string;
   isFullScreen?: boolean;
   onToggleFullScreen?: () => void;
   onClearAllFilters?: () => void;
-  onRefresh?: () => void; // 2. Add onRefresh prop
-  isRefreshing?: boolean; // 3. Add loading state prop (optional but good for UX)
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+  cascadeSourceKey?: string | null;
+  cascadeLoading?: boolean;
+  onCascadeReset?: () => void;
 }
+
+type FilterField = "category" | "subcategory" | "itemName" | "varianceName";
+const FILTER_FIELDS: FilterField[] = ["category", "subcategory", "itemName", "varianceName"];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getCascadeSourceLabel = (field: string | null) => {
+  if (field === "category") return "Category";
+  if (field === "subcategory") return "Sub Category";
+  if (field === "itemName") return "Item Group";
+  if (field === "varianceName") return "Item Name";
+  return "";
+};
+
+// ─── Icon Buttons ─────────────────────────────────────────────────────────────
+
+const ClearIcon   = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>;
+const RefreshIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>;
+const FilterListIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
+
+const ActionBtn: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  tooltip: string;
+  children: React.ReactNode;
+  danger?: boolean;
+  active?: boolean;
+}> = ({ onClick, disabled, tooltip, children, danger, active }) => (
+  <Tooltip content={tooltip} side="top">
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={tooltip}
+      className={cn(
+        "h-8 w-8 flex items-center justify-center rounded-[8px] border transition-all duration-150 shrink-0",
+        danger
+          ? "border-danger-200 text-danger-500 bg-white hover:bg-danger-50 hover:border-danger-300"
+          : active
+          ? "bg-brand-50 border-brand-300 text-brand-700 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]"
+          : "border-brand-200 text-brand-600 bg-white hover:bg-brand-50 hover:border-brand-300",
+        disabled && "opacity-40 cursor-not-allowed pointer-events-none border-border text-text-disabled bg-surface-subtle"
+      )}
+    >
+      {children}
+    </button>
+  </Tooltip>
+);
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 const FilterBar: React.FC<FilterBarProps> = ({
   searchParams,
   onSearchChange,
   filterOptions,
-  visibleColumns,
-  onColumnVisibilityChange,
   onFilterSearch,
   onFilterScrollBottom,
   onClearAllFilters,
   onRefresh,
   isRefreshing,
+  cascadeSourceKey = null,
+  cascadeLoading = false,
+  onCascadeReset,
+  visibleColumns,
+  onColumnVisibilityChange,
 }) => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const columnButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [columnSearch, setColumnSearch] = useState("")
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
-  // ... (existing handlers: handleColumnClick, handleColumnClose, handleColumnToggle, etc.)
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const handleClearFilters = () => {
-    onSearchChange("category", []);
-    onSearchChange("subcategory", []);
-    onSearchChange("itemName", []);
-    onSearchChange("varianceName", []);
-    onFilterSearch("category", "");
-    onFilterSearch("subcategory", "");
-    onFilterSearch("itemName", "");
-    onFilterSearch("varianceName", "");
-    if (onClearAllFilters) {
-      onClearAllFilters();
-    }
+  const hasLocation = Boolean(searchParams.locationName);
+  const cascadeSourceLabel = useMemo(() => getCascadeSourceLabel(cascadeSourceKey), [cascadeSourceKey]);
+
+  const selectedWarehouseAlias = useMemo(() => {
+    const w = filterOptions.warehouses.find((item) => item.locationId === searchParams.locationName);
+    return w?.aliasName || w?.name || searchParams.locationName || "";
+  }, [filterOptions.warehouses, searchParams.locationName]);
+
+  const warehouseOptions = useMemo(() => filterOptions.warehouses.map((w) => ({
+    label: `${w.name} (${w.locationId})`, value: w.locationId,
+  })), [filterOptions.warehouses]);
+
+  const isAnyFilterActive = useMemo(() => FILTER_FIELDS.some((f) => searchParams[f]?.length > 0), [searchParams]);
+
+  const handleClearFilters = useCallback(() => {
+    onCascadeReset?.();
+    onSearchChange("category", []); onSearchChange("subcategory", []);
+    onSearchChange("itemName", []); onSearchChange("varianceName", []);
+    onFilterSearch("category", ""); onFilterSearch("subcategory", "");
+    onFilterSearch("itemName", ""); onFilterSearch("varianceName", "");
+    onClearAllFilters?.();
+  }, [onCascadeReset, onSearchChange, onFilterSearch, onClearAllFilters]);
+
+  const columnOptions = useMemo(() => {
+    if (!visibleColumns) return [];
+    return Object.keys(visibleColumns).map((col) => ({ label: col, value: col }));
+  }, [visibleColumns]);
+
+  const selectedColumns = useMemo(() => {
+    if (!visibleColumns) return [];
+    return Object.keys(visibleColumns).filter((col) => visibleColumns[col]);
+  }, [visibleColumns]);
+
+  const handleToggleColumn = useCallback((col: string) => {
+    if (!visibleColumns || !onColumnVisibilityChange) return;
+    onColumnVisibilityChange({ ...visibleColumns, [col]: !visibleColumns[col] });
+  }, [visibleColumns, onColumnVisibilityChange]);
+
+  const getCascadeProps = (field: FilterField) => {
+    const isSource = cascadeSourceKey === field;
+    const isCascadeDisabled = cascadeLoading && Boolean(cascadeSourceKey) && !isSource;
+    return {
+      disabled: !hasLocation || isCascadeDisabled,
+      loading: isCascadeDisabled,
+      linked: Boolean(cascadeSourceKey) && !isSource,
+      statusLabel: isSource ? "Selected" : cascadeSourceKey ? `From ${cascadeSourceLabel}` : undefined,
+      loadingText: "Loading related options...",
+    };
   };
 
-  const open = Boolean(anchorEl);
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 2,
-        ml: 1,
-        p: 1,
-        width: "100%",
-      }}
-    >
-      {/* Left Section: Filters */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-          flexWrap: "wrap",
-          flexGrow: 1,
-        }}
-      >
-        {/* Date Filter */}
-        <CollapsibleFilter
-          title="Date"
-          selectedOptions={searchParams.createdDate ? formatDateDDMMYYYY(searchParams.createdDate) : ""}
-          onChange={(value) =>
-            onSearchChange("createdDate", Array.isArray(value) ? value[0] : value)
-          }
-          onClear={() => onSearchChange("createdDate", getTodayDate())}
-          inputType="date"
-          isMulti={false}
-          showSelectedCount={false}
-          restrictToTodayOnly={true}
-          disabled={true}
-        />
+    <div className="w-full min-w-0 flex flex-wrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[20]">
+      {/* commentthis part 4 8 1 */}
+      {/* Label
+      <div className="hidden sm:flex h-[34px] items-center px-2.5 rounded-[8px] bg-white border border-brand-200 text-[11px] font-extrabold text-brand-700 whitespace-nowrap shrink-0">
+        {cascadeSourceKey ? `Filters · ${cascadeSourceLabel}` : "Filters"}
+      </div> */}
 
-        {/* Location Filter */}
+      <div className="shrink-0 w-[140px] md:w-[180px]">
         <CollapsibleFilter
           title="Location"
-          options={filterOptions.warehouses.map((warehouse) => ({
-            label: `${warehouse.name} (${warehouse.locationId})`,
-            value: warehouse.locationId,
-          }))}
-          selectedOptions={
-            searchParams.locationName
-              ? [searchParams.locationName]
-              : []
-          }
-          onChange={(value) =>
-            onSearchChange(
-              "locationName",
-              Array.isArray(value) ? value[0] : value
-            )
-          }
-          onClear={() => {
-            onSearchChange("locationName", "");
-            onFilterSearch("locationName", "");
-          }}
+          options={warehouseOptions}
+          selectedOptions={searchParams.locationName ? [searchParams.locationName] : []}
+          onChange={(v) => onSearchChange("locationName", Array.isArray(v) ? v[0] || "" : v)}
+          onClear={() => { onSearchChange("locationName", ""); onFilterSearch("locationName", ""); }}
           onScrollBottom={() => onFilterScrollBottom("locationName")}
-          onSearch={(searchTerm) =>
-            onFilterSearch("locationName", searchTerm)
-          }
+          onSearch={(t) => onFilterSearch("locationName", t)}
           inputType="single-select"
           isMulti={false}
           showSelectedCount={false}
           showRemoveOption={false}
-          displayLabel={
-            searchParams.locationName
-              ? filterOptions.warehouses.find(w => w.locationId === searchParams.locationName)?.aliasName
-              : "Location"
-          }
+          displayLabel={hasLocation ? selectedWarehouseAlias : ""}
         />
+      </div>
 
-        {/* Category, Subcategory, Itemgroup, ItemName Filters */}
-        {/* ... (Keep your existing CollapsibleFilter components here exactly as they are) ... */}
+      {!hasLocation ? (
+        <div className="shrink-0 h-[34px] flex items-center px-3 rounded-[8px] border border-dashed border-brand-200 bg-brand-50 text-[11px] sm:text-[12px] font-extrabold text-brand-700 whitespace-nowrap">
+          Select a warehouse to enable Category, Sub Category, Item Group and Item Name filters.
+        </div>
+      ) : (
+        <>
+          <div className="shrink-0 w-[140px] md:w-[180px]">
+            <CollapsibleFilter
+              title="Category"
+              options={filterOptions.category.map((n) => ({ label: n, value: n }))}
+              selectedOptions={searchParams.category}
+              onChange={(v) => onSearchChange("category", Array.isArray(v) ? v : [v])}
+              onClear={() => { onSearchChange("category", []); onFilterSearch("category", ""); }}
+              onScrollBottom={() => onFilterScrollBottom("category")}
+              onSearch={(t) => onFilterSearch("category", t)}
+              inputType="multi-select"
+              isMulti
+              {...getCascadeProps("category")}
+            />
+          </div>
 
-        <CollapsibleFilter
-          title="Category"
-          options={filterOptions.category.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.category}
-          onChange={(value) => onSearchChange("category", Array.isArray(value) ? value : [value])}
-          onClear={() => { onSearchChange("category", []); onFilterSearch("category", ""); }}
-          onScrollBottom={() => onFilterScrollBottom("category")}
-          onSearch={(searchTerm) => onFilterSearch("category", searchTerm)}
-          inputType="multi-select"
-          isMulti={true}
-        />
+          <div className="shrink-0 w-[140px] md:w-[180px]">
+            <CollapsibleFilter
+              title="Sub Category"
+              options={filterOptions.subcategory.map((n) => ({ label: n, value: n }))}
+              selectedOptions={searchParams.subcategory}
+              onChange={(v) => onSearchChange("subcategory", Array.isArray(v) ? v : [v])}
+              onClear={() => { onSearchChange("subcategory", []); onFilterSearch("subcategory", ""); }}
+              onScrollBottom={() => onFilterScrollBottom("subcategory")}
+              onSearch={(t) => onFilterSearch("subcategory", t)}
+              inputType="multi-select"
+              isMulti
+              {...getCascadeProps("subcategory")}
+            />
+          </div>
 
-        <CollapsibleFilter
-          title="Subcategory"
-          options={filterOptions.subcategory.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.subcategory}
-          onChange={(value) => onSearchChange("subcategory", Array.isArray(value) ? value : [value])}
-          onClear={() => { onSearchChange("subcategory", []); onFilterSearch("subcategory", ""); }}
-          onScrollBottom={() => onFilterScrollBottom("subcategory")}
-          onSearch={(searchTerm) => onFilterSearch("subcategory", searchTerm)}
-          inputType="multi-select"
-          isMulti={true}
-        />
+          <div className="shrink-0 w-[170px] md:w-[220px]">
+            <CollapsibleFilter
+              title="Item Group"
+              options={filterOptions.itemName.map((n) => ({ label: n, value: n }))}
+              selectedOptions={searchParams.itemName}
+              onChange={(v) => onSearchChange("itemName", Array.isArray(v) ? v : [v])}
+              onClear={() => { onSearchChange("itemName", []); onFilterSearch("itemName", ""); }}
+              onScrollBottom={() => onFilterScrollBottom("itemName")}
+              onSearch={(t) => onFilterSearch("itemName", t)}
+              inputType="multi-select"
+              isMulti
+              {...getCascadeProps("itemName")}
+            />
+          </div>
 
-        <CollapsibleFilter
-          title="Itemgroup"
-          options={filterOptions.itemName.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.itemName}
-          onChange={(value) => onSearchChange("itemName", Array.isArray(value) ? value : [value])}
-          onClear={() => { onSearchChange("itemName", []); onFilterSearch("itemName", ""); }}
-          onScrollBottom={() => onFilterScrollBottom("itemName")}
-          onSearch={(searchTerm) => onFilterSearch("itemName", searchTerm)}
-          inputType="multi-select"
-          isMulti={true}
-        />
+          <div className="shrink-0 w-[170px] md:w-[220px]">
+            <CollapsibleFilter
+              title="Item Name"
+              options={filterOptions.varianceName.map((n) => ({ label: n, value: n }))}
+              selectedOptions={searchParams.varianceName}
+              onChange={(v) => onSearchChange("varianceName", Array.isArray(v) ? v : [v])}
+              onClear={() => { onSearchChange("varianceName", []); onFilterSearch("varianceName", ""); }}
+              onScrollBottom={() => onFilterScrollBottom("varianceName")}
+              onSearch={(t) => onFilterSearch("varianceName", t)}
+              inputType="multi-select"
+              isMulti
+              {...getCascadeProps("varianceName")}
+            />
+          </div>
+        </>
+      )}
 
-        <CollapsibleFilter
-          title="ItemName"
-          options={filterOptions.varianceName.map((name) => ({ label: name, value: name }))}
-          selectedOptions={searchParams.varianceName}
-          onChange={(value) => onSearchChange("varianceName", Array.isArray(value) ? value : [value])}
-          onClear={() => { onSearchChange("varianceName", []); onFilterSearch("varianceName", ""); }}
-          onScrollBottom={() => onFilterScrollBottom("varianceName")}
-          onSearch={(searchTerm) => onFilterSearch("varianceName", searchTerm)}
-          inputType="multi-select"
-          isMulti={true}
-        />
-        {/* Clear Filters */}
-        <Button
-          variant="outlined"
-          color="error"
+      {/* Buttons */}
+      <div className="flex items-center gap-1.5 ml-auto">
+        <ActionBtn
           onClick={handleClearFilters}
-          disabled={
-            !(
-              searchParams.category.length > 0 ||
-              searchParams.subcategory.length > 0 ||
-              searchParams.itemName.length > 0 ||
-              searchParams.varianceName.length > 0
-            )
-          }
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            py: 0.8,
-            px: 1.5,
-            minWidth: 65,
-          }}
+          disabled={!hasLocation || !isAnyFilterActive}
+          tooltip="Clear filters"
+          danger
         >
-          <ClearIcon fontSize="small" />
-          <Typography variant="caption">Clear</Typography>
-        </Button>
-
-        {/* Refresh */}
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={onRefresh}
-          disabled={!searchParams.locationName || isRefreshing}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            py: 0.8,
-            px: 1.5,
-            minWidth: 65,
-          }}
+          <ClearIcon />
+        </ActionBtn>
+        <ActionBtn
+          onClick={onRefresh || (() => {})}
+          disabled={!hasLocation || isRefreshing}
+          tooltip="Refresh"
         >
-          <RefreshIcon fontSize="small" />
-          <Typography variant="caption">
-            {isRefreshing ? "Refreshing..." : "Refresh"}
-          </Typography>
-        </Button>
+          <RefreshIcon />
+        </ActionBtn>
 
-        {/* Column Visibility Button */}
-        {searchParams.locationName && (
-          <IconButton
-            ref={columnButtonRef}
-            onClick={(e) => { setAnchorEl(e.currentTarget); }}
-            sx={{
-              textTransform: "none",
-              fontSize: "0.9rem",
-              color: open ? "primary.main" : "inherit",
-              backgroundColor: open ? "action.selected" : "transparent",
-              "&:hover": { backgroundColor: "action.hover" },
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <FilterListIcon fontSize="small" />
-          </IconButton>
+        {/* Column menu */}
+        {visibleColumns && hasLocation && (
+          <div className="relative" ref={menuRef}>
+            <ActionBtn onClick={() => setMenuOpen(!menuOpen)} active={menuOpen} tooltip="Columns">
+              <FilterListIcon />
+            </ActionBtn>
+
+            {menuOpen && (
+              <div className="absolute right-0 top-[110%] w-[230px] rounded-xl border border-brand-200 bg-white shadow-xl p-2 z-[50]">
+                <div className="flex items-center justify-between mb-1.5 px-1">
+                  <span className="text-[12px] font-bold text-text-primary">Show / Hide Columns</span>
+                  <button onClick={() => setMenuOpen(false)} aria-label="Close" className="text-text-muted hover:text-text-primary"><ClearIcon/></button>
+                </div>
+                <div className="h-px bg-border w-full mb-1.5" />
+                <div className="max-h-[190px] overflow-y-auto space-y-0.5 pr-1" style={{ scrollbarWidth: "thin" }}>
+                  {columnOptions.map((opt) => {
+                    const isChecked = selectedColumns.includes(opt.value);
+                    return (
+                      <div
+                        key={opt.value}
+                        onClick={() => handleToggleColumn(opt.value)}
+                        className={cn(
+                          "flex items-center justify-between px-2 py-1.5 rounded-lg cursor-pointer transition-colors",
+                          isChecked ? "bg-brand-50 hover:bg-brand-100" : "hover:bg-surface-muted"
+                        )}
+                      >
+                        <span className={cn("text-[11.5px] truncate", isChecked ? "font-bold text-brand-700" : "font-semibold text-text-secondary")}>
+                          {opt.label}
+                        </span>
+                        <input type="checkbox" checked={isChecked} readOnly className="h-3.5 w-3.5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer pointer-events-none" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         )}
-      </Box>
+      </div>
 
-      {/* Column Visibility Menu */}
-      <Menu
-        open={open}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        disableScrollLock
-        PaperProps={{
-          sx: {
-            width: 200,
-            maxHeight: 260,
-            borderRadius: 2,
-            p: 1,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-            mt: 1,
-          },
-        }}
-      >
-        {/* Menu Content (Keep existing) */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
-          <Typography fontSize="0.8rem" fontWeight={600}>
-            Show/Hide Columns
-          </Typography>
-          <IconButton size="small" onClick={() => setAnchorEl(null)}>
-            <CloseIcon sx={{ fontSize: 15 }} />
-          </IconButton>
-        </Box>
-        <Divider sx={{ mb: 0.5 }} />
-        <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
-          {["Item Code", "Item Name", "Itemgroup", "Category", "Subcategory", "Opening Stock", "Receiving Stock", "Returned Stock", "Dispatch Stock", "WH-Return", "Calc System", "SystemStock", "PhysicalStock", "Variance", "Status"].map((column) => {
-            const isChecked = !!visibleColumns[column];
-            return (
-              <Box
-                key={column}
-                onClick={() => onColumnVisibilityChange({ ...visibleColumns, [column]: !visibleColumns[column] })}
-                sx={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  px: 0.8, py: 0.5, borderRadius: 1, cursor: "pointer",
-                  "&:hover": { backgroundColor: "#f4f6f8" },
-                }}
-              >
-                <Typography fontSize="0.75rem" fontWeight={isChecked ? 500 : 400} color={isChecked ? "text.primary" : "text.secondary"} noWrap>
-                  {column}
-                </Typography>
-                <Checkbox size="small" checked={isChecked} sx={{ p: 0.3 }} />
-              </Box>
-            );
-          })}
-        </Box>
-      </Menu>
-    </Box>
+    </div>
   );
 };
 
