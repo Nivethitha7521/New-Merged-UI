@@ -104,8 +104,9 @@ const ChargeDialog: React.FC<ChargeDialogProps> = ({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+       className="ma-scope sale-order-master-form-dialog"
       PaperProps={{
-        className: "dialog-paper-small",
+       className: "dialog-paper-small sale-order-master-dialog-paper",
       }}
       TransitionProps={{
         // ← ADD THIS: Fallback focus on transition end

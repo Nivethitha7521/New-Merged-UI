@@ -568,27 +568,64 @@
   }
 
   /* Primary Button */
-  .ma-scope .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.45rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235));
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px 0 rgba(59, 130, 246, 0.3);
-  }
+.ma-scope .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  .ma-scope .btn-primary:hover {
-    background: linear-gradient(to right, rgb(37, 99, 235), rgb(29, 78, 216));
-    box-shadow: 0 4px 8px -1px rgba(59, 130, 246, 0.4);
-    transform: translateY(-1px);
-  }
+  padding: 0.45rem 1rem;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  color: var(--erp-accent-contrast, #ffffff) !important;
+
+  background: var(--erp-accent, #155eef) !important;
+
+  border: 1px solid var(--erp-accent, #155eef) !important;
+  border-radius: 0.5rem;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  box-shadow:
+    0 2px 5px
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+}
+
+.ma-scope .btn-primary:hover:not(:disabled) {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+
+  background: var(--erp-accent-hover, #124bc0) !important;
+
+  border-color: var(--erp-accent-hover, #124bc0) !important;
+
+  box-shadow:
+    0 4px 10px
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.28) !important;
+
+  transform: translateY(-1px);
+}
+
+.ma-scope .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ma-scope .btn-primary:disabled {
+  color: #ffffff !important;
+  background: #98a2b3 !important;
+  border-color: #98a2b3 !important;
+
+  cursor: not-allowed;
+
+  box-shadow: none !important;
+  transform: none !important;
+}
 
   .ma-scope .btn-primary:active {
     transform: translateY(0);

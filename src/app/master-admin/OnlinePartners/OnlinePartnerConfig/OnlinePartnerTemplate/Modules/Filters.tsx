@@ -402,9 +402,8 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
   };
 
   return (
-    <div style={{ marginTop: '20px', padding: '0 16px' }}>
-      {/* First Row - All Fields and Action Buttons */}
-      <div style={{
+<div className="online-partner-filter-bar" style={{ marginTop: '20px', padding: '0 16px' }}>      {/* First Row - All Fields and Action Buttons */}
+    <div className="online-partner-filter-row" style={{
         display: 'flex',
         alignItems: 'flex-start',
         gap: '10px',
@@ -412,7 +411,7 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         flexWrap: 'wrap'
       }}>
         {/* Category */}
-        <div style={{ minWidth: '180px', flex: '1 1 180px', maxWidth: '220px' }}>
+        <div className="online-partner-filter-field online-partner-filter-category" style={{ minWidth: '180px', flex: '1 1 180px', maxWidth: '220px' }}>
           <FormControl fullWidth variant="outlined" size="small" className="custom-textfield">
             <InputLabel className="custom-label" sx={{ fontSize: '0.75rem' }}>Category</InputLabel>
             <Select
@@ -443,7 +442,7 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         </div>
 
         {/* Subcategory */}
-        <div style={{ minWidth: '180px', flex: '1 1 180px', maxWidth: '220px' }}>
+      <div className="online-partner-filter-field online-partner-filter-subcategory" style={{ minWidth: '180px', flex: '1 1 180px', maxWidth: '220px' }}>
           <FormControl fullWidth variant="outlined" size="small" className="custom-textfield">
             <InputLabel className="custom-label" sx={{ fontSize: '0.75rem' }}>Subcategory</InputLabel>
             <Select
@@ -491,7 +490,7 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         </div>
 
         {/* Items Autocomplete */}
-        <div style={{ minWidth: '180px', flex: '1 1 180px', maxWidth: '220px' }}>
+       <div className="online-partner-filter-field online-partner-filter-items" style={{ minWidth: '180px', flex: '1 1 180px', maxWidth: '220px' }}>
           <Autocomplete
             multiple
             disableCloseOnSelect
@@ -587,7 +586,7 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         </div>
 
         {/* Apply Percentage */}
-        <div style={{ minWidth: '120px', flex: '0 0 120px' }}>
+      <div className="online-partner-filter-field online-partner-filter-percentage" style={{ minWidth: '120px', flex: '0 0 120px' }}>
           <TextField
             fullWidth
             size="small"
@@ -614,9 +613,8 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         </div>
 
         {/* Action Buttons Group */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: -6 }}>
-          <button
-            className='btn-primary'
+<div className="online-partner-template-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: -6 }}>          <button
+           className='btn-primary online-partner-apply-button'
             style={{ padding: '7px 14px', fontSize: '0.75rem', height: '36px', whiteSpace: 'nowrap' }}
             onClick={handleSubmit}
             disabled={
@@ -729,7 +727,7 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
       </div>
 
       {/* Second Row - Search (Left) and Assign Partners (Right) */}
-      <div style={{
+      <div className="online-partner-search-row" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -737,7 +735,7 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         marginBottom: '12px'
       }}>
         {/* Search Query - Left Side */}
-        <div style={{ flex: '0 0 auto', width: '100%', maxWidth: '400px',  }}>
+        <div className="online-partner-template-search" style={{ flex: '0 0 auto', width: '100%', maxWidth: '400px',  }}>
           <TextField
             fullWidth
             size="small"
@@ -754,10 +752,10 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         </div>
 
         {/* Assign Partners Button - Right Side */}
-        <div style={{ flex: '0 0 auto' }}>
+       <div className="online-partner-assign-wrap" style={{ flex: '0 0 auto' }}>
           {selectedType === 'template' && !showDeactivated && (
             <button
-              className='btn-primary'
+              className='btn-primary online-partner-assign-button'
               onClick={() => setAssignDialogOpen(true)}
               disabled={isSubmitting || selectedRows.length === 0}
               style={{
@@ -780,7 +778,8 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
         onClose={handleCloseImportResultDialog}
         maxWidth="md"
         fullWidth
-        PaperProps={{ className: 'dialog-paper' }}
+       className="ma-scope online-partner-import-dialog"
+        PaperProps={{ className: 'dialog-paper online-partner-import-dialog-paper' }}
       >
         <DialogTitle className="dialog-title">CSV Import Results</DialogTitle>
         <DialogContent className="dialog-content">
@@ -906,8 +905,9 @@ const FilterActionBar: React.FC<FilterActionBarProps> = ({
       <Dialog
         open={importDialogOpen}
         onClose={handleImportDialogClose}
+        className="ma-scope online-partner-template-dialog online-partner-import-mode-dialog"
         PaperProps={{
-          className: "dialog-paper-small",
+          className: "dialog-paper-small online-partner-template-dialog-paper",
         }}
       >
         <DialogTitle

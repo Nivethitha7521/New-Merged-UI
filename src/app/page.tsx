@@ -52,7 +52,7 @@ const Login: React.FC = () => {
         passwordLength: loginPassword.length,
         passwordValue: JSON.stringify(loginPassword),
       });
-      const response = await fetch('https://yenerp.com/purchasetestapi/login', {
+      const response = await fetch('http://127.0.0.1:8000/purchasetestapi/login', {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${btoa(`${trimmedUsername}:${loginPassword}`)}`,

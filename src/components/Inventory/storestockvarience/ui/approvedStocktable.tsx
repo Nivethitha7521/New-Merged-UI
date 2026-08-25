@@ -532,7 +532,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
     approvedItemsStatus,
     approvedItemsError,
     isLoadingMore,
-  } = useSelector((state: RootState) => state.purchaseItems);
+  } = useSelector((state: RootState) => state.rawMaterialStore);
 
   const isFetchingRef = useRef(false);
 

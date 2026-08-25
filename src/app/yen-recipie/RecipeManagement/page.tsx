@@ -68,7 +68,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { Pagination } from "@mui/material";
 import { PerGramBreakdown, Recipe, RecipeListItem } from "./Models/recipeModels"; // ✅ Import Recipe from models
 import ActivateDeactivateConfirmationDialog from "@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog";
-import { buildPerGramBreakdown } from "./Pages/page";
+import { buildPerGramBreakdown } from "./Pages/perGramBreakdown";
 import "./recipeViewDialog.css";
 
 // ✅ Remove the duplicate IngredientItem interface - use the one from models

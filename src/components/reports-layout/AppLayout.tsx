@@ -109,8 +109,8 @@ const AppLayoutInner: React.FC<{ children: React.ReactNode }> = ({
   }, [pathname]);
 
   const sidebarWidth = isSidebarCollapsed ? 70 : 240;
-  const fallbackTitle = useMemo(() => getFallbackTitle(pathname), [pathname]);
-  const moduleLabel = useMemo(() => getModuleLabel(pathname), [pathname]);
+const fallbackTitle = useMemo(() => getFallbackTitle(pathname ?? ""), [pathname]);
+  const moduleLabel = useMemo(() => getModuleLabel(pathname ?? ""), [pathname]);
 
   const handleToggleSidebar = (collapsed: boolean) => {
     setIsSidebarCollapsed(collapsed);
@@ -254,7 +254,7 @@ const AppLayoutInner: React.FC<{ children: React.ReactNode }> = ({
         />
 
         <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
-          {pathname.startsWith("/QlikReport") ? (
+        {(pathname ?? "").startsWith("/QlikReport") ? (
             <ReportErrorBoundary>{children}</ReportErrorBoundary>
           ) : (
             children

@@ -70,6 +70,9 @@
 /* Sale Order UI density and table styles */
 @import "./modules/sale-order/sale-order.css";
 
+/* Online Partners master/config compact YEN ERP alignment */
+@import "./modules/online-partners/online-partners.css";
+
 /* YEN POS visual parity styles */
 @import "./modules/yen-pos/yen-pos.css";
 

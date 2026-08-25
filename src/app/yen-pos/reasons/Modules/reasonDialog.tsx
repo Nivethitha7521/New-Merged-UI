@@ -173,7 +173,10 @@ const ReasonDialog: React.FC<ReasonDialogProps> = ({
                 onClose={onClose}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{ className: "dialog-paper-small" }}
+                className="ma-scope yen-pos-reason-form-dialog"
+                PaperProps={{
+                    className: "dialog-paper-small yen-pos-reason-dialog-paper",
+                }}
             >
                 <DialogTitle className="dialog-title">
                     {reasonData.id ? "Edit" : "Add"} Reason
@@ -209,7 +212,7 @@ const ReasonDialog: React.FC<ReasonDialogProps> = ({
                             </Typography>
 
                             {editingIndex === null && (
-                                <IconButton color="primary" onClick={handleAddClick} title="Add Reason">
+                                <IconButton className="yen-pos-reason-accent-icon" color="primary" onClick={handleAddClick} title="Add Reason">
                                     <AddCircleOutlineIcon />
                                 </IconButton>
                             )}
@@ -268,7 +271,7 @@ const ReasonDialog: React.FC<ReasonDialogProps> = ({
                                                 fullWidth
                                                 variant="standard"
                                             />
-                                            <IconButton color="primary" onClick={handleSave} title="Save">
+                                            <IconButton className="yen-pos-reason-accent-icon" color="primary" onClick={handleSave} title="Save">
                                                 <CheckCircleIcon />
                                             </IconButton>
                                             <IconButton onClick={handleCancelEdit} title="Cancel">
@@ -308,7 +311,7 @@ const ReasonDialog: React.FC<ReasonDialogProps> = ({
                                         variant="standard"
                                         placeholder="Type a reason..."
                                     />
-                                    <IconButton color="primary" onClick={handleSave} title="Save">
+                                    <IconButton className="yen-pos-reason-accent-icon" color="primary" onClick={handleSave} title="Save">
                                         <CheckCircleIcon />
                                     </IconButton>
                                     <IconButton onClick={handleCancelEdit} title="Cancel">

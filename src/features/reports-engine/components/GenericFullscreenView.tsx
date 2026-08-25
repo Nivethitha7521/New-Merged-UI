@@ -189,8 +189,8 @@ export const GenericFullscreenView = <T extends Record<string, unknown>,>({
             boxShadow:'0 4px 20px rgba(0,0,0,0.06)',
             display:'flex', flexDirection:'column',
           }}>
-            <GenericDataTable
-              ref={containerRef}
+         <GenericDataTable
+              ref={containerRef as React.Ref<HTMLDivElement>}
               config={config}
               data={safeItems as Record<string, unknown>[]}
               visibleColumns={visibleColumns}

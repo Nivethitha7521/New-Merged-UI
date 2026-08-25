@@ -29,7 +29,7 @@ export interface DisplaySettings {
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   theme: 'light',
-  accentColor: '#155eef',
+ accentColor: '#155eef',
   uiStyle: 'modern',
   fontFamily: 'Inter',
   fontSize: 'medium',
@@ -110,6 +110,12 @@ const getReadableTextColor = (value: string) => {
 
   return luminance > 0.63 ? '#101828' : '#ffffff';
 };
+// const PREMIUM_COLOR_PRESETS: Record<string, { light: string; hover: string; text: string }> = {
+//   '#2563EB': { light: '#93C5FD', hover: '#1D4ED8', text: '#FFFFFF' },
+//   '#059669': { light: '#6EE7B7', hover: '#047857', text: '#FFFFFF' },
+//   '#1F2937': { light: '#4B5563', hover: '#111827', text: '#FFFFFF' },
+//   '#4F46E5': { light: '#A5B4FC', hover: '#4338CA', text: '#FFFFFF' },
+// };
 const applySettingsToDocument = (
   settings: DisplaySettings,
 ) => {
@@ -121,6 +127,10 @@ const applySettingsToDocument = (
   );
 
   const { r, g, b } = hexToRgb(accent);
+  //  const preset = PREMIUM_COLOR_PRESETS[accent.toUpperCase()];
+  // const accentText = preset?.text ?? getReadableTextColor(accent);
+  // const accentHover = preset?.hover ?? `color-mix(in srgb, ${accent} 86%, black)`;
+  // const accentLight = preset?.light ?? `color-mix(in srgb, ${accent} 14%, white)`;
 
   root.dataset.erpTheme = settings.theme;
   root.dataset.erpStyle = settings.uiStyle;
@@ -139,12 +149,12 @@ const applySettingsToDocument = (
 
   root.style.setProperty(
     '--erp-accent-contrast',
-    getReadableTextColor(accent),
+   getReadableTextColor(accent),
   );
 
   root.style.setProperty(
     '--erp-accent-hover',
-    `color-mix(in srgb, ${accent} 86%, black)`,
+  `color-mix(in srgb, ${accent} 86%, black)`,
   );
 
   root.style.setProperty(
@@ -182,7 +192,7 @@ const applySettingsToDocument = (
 
   root.style.setProperty(
     '--erp-blue-soft',
-    `color-mix(in srgb, ${accent} 14%, white)`,
+     `color-mix(in srgb, ${accent} 14%, white)`,
   );
 
   root.style.setProperty(

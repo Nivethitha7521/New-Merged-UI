@@ -141,10 +141,11 @@ const MenuPage: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <Box sx={{ px: 3, pt: 2 }}>
+     <Box className="online-partners-layout" sx={{ px: 3, pt: 2 }}>
         {/* Top Buttons */}
         <Box
           component="nav"
+          className="online-partners-submodule-tabs"
           sx={{
             display: "flex",
             gap: 2,
@@ -158,6 +159,7 @@ const MenuPage: React.FC = () => {
           <Button
             variant="contained"
             onClick={handleMasterClick}
+            className={`online-partners-submodule-tab ${isMasterActive ? "is-active" : ""}`}
             sx={{
               textTransform: "none",
               fontSize: "11px",
@@ -184,6 +186,7 @@ const MenuPage: React.FC = () => {
           <Button
             variant="contained"
             onMouseEnter={handleConfigButtonMouseEnter}
+            className={`online-partners-submodule-tab online-partners-config-tab ${isConfigActive ? "is-active" : ""}`}
             onMouseLeave={handleConfigButtonMouseLeave}
             sx={{
               textTransform: "none",
@@ -210,12 +213,14 @@ const MenuPage: React.FC = () => {
           {/* Popover */}
           <Popover
             open={Boolean(anchorEl)}
+            className="online-partners-config-popover"
             anchorEl={anchorEl}
             onClose={() => setAnchorEl(null)}
             anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
             disableRestoreFocus
             PaperProps={{
               onMouseLeave: handlePopoverMouseLeave,
+              className: "online-partners-config-menu",
               sx: { pointerEvents: "auto" },
             }}
           >
@@ -225,6 +230,7 @@ const MenuPage: React.FC = () => {
                 <Button
                   variant="contained"
                   onClick={handleTemplateClick}
+                   className={`online-partners-config-option ${templateSelected ? "is-active" : ""}`}
                   sx={{
                     textTransform: "none",
                     fontSize: "10.5px",
@@ -258,6 +264,7 @@ const MenuPage: React.FC = () => {
                       key={partner.onlinePartnersId}
                       variant="contained"
                       onClick={() => handlePartnerClick(partner)}
+                      className={`online-partners-config-option ${isSelected ? "is-active" : ""}`}
                       sx={{
                         textTransform: "none",
                         fontSize: "10.5px",
@@ -288,7 +295,7 @@ const MenuPage: React.FC = () => {
         </Box>
 
         {/* Page Content */}
-        <Box sx={{ mt: 0 }}>
+        <Box className="online-partners-content" sx={{ mt: 0 }}>
           {isMasterActive ? (
             <OnlinePartnerMasterComponent />
           ) : isConfigActive ? (

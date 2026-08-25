@@ -138,8 +138,9 @@ const WhatsAppDialog: React.FC<WhatsAppDialogProps> = ({ handleClose }) => {
         onClose={handleClose}
         maxWidth="sm"
         fullWidth
+        className="ma-scope whatsapp-admin-form-dialog"
         PaperProps={{
-          className: "dialog-paper-small"
+         className: "dialog-paper-small whatsapp-admin-dialog-paper"
         }}
 
         TransitionProps={{

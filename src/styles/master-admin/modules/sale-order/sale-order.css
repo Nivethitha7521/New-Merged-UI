@@ -614,3 +614,276 @@
 }
 
 
+
+
+/* =========================================================
+   SALE ORDER MASTER — COMPACT ADD / EDIT DIALOGS
+   Scope: Payment Type, Events, Charges, Delivery Type.
+   Restores the original compact Master Admin composition at
+   100% browser zoom and follows the active YEN ERP Display
+   Settings accent. Presentation only — no API, Redux,
+   validation, focus, submit or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.sale-order-master-form-dialog .MuiDialog-container {
+    padding: 12px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .MuiDialog-paper.sale-order-master-dialog-paper {
+    width: min(350px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: 350px !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 18px 42px rgba(16, 24, 40, 0.18) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .dialog-title {
+    min-height: 48px !important;
+    padding: 12px 16px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .dialog-content {
+    padding: 12px !important;
+    max-height: calc(100dvh - 118px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .form-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 2px !important;
+  }
+
+  /* Override the legacy globals.css .custom-textfield width. */
+  body .MuiDialog-root.sale-order-master-form-dialog .custom-textfield,
+  body .MuiDialog-root.sale-order-master-form-dialog .MuiTextField-root,
+  body .MuiDialog-root.sale-order-master-form-dialog .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 4px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root:hover
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #9bb9fa) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.14)) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root {
+    color: var(--erp-text-secondary, #475467) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    transform: translate(12px, 11px) scale(1) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.MuiInputLabel-shrink {
+    color: var(--erp-text, #101828) !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    transform: translate(12px, -6px) scale(0.85) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputBase-input {
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    line-height: 20px !important;
+  }
+
+  /* Keep validation red semantic; normal/focus states use the active accent. */
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-error
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--mui-palette-error-main, #d32f2f) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiFormHelperText-root {
+    margin: 4px 0 0 2px !important;
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .dialog-actions {
+    min-height: 52px !important;
+    padding: 8px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface-muted, #f9fafb) !important;
+    border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-primary,
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-secondary {
+    width: auto !important;
+    min-width: 76px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 7px !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-primary {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border: 1px solid var(--erp-accent, #155eef) !important;
+    box-shadow: 0 2px 5px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-primary:hover:not(:disabled) {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-secondary {
+    color: var(--erp-text, #344054) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border-strong, #cfd6df) !important;
+    box-shadow: none !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-secondary:hover {
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface-muted, #f8fafc) !important;
+    border-color: var(--erp-accent-border, #9bb9fa) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .MuiCircularProgress-root {
+    width: 17px !important;
+    height: 17px !important;
+    color: currentColor !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .MuiDialog-paper.sale-order-master-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+}

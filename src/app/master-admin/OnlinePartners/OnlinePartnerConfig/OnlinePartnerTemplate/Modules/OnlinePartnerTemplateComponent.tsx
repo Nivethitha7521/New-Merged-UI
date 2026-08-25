@@ -739,7 +739,7 @@ const OnlinePartnerTemplateComponent: React.FC<ComponentProps> = ({ selectedType
     });
 
   return (
-    <Box sx={{ mt: -3 }}>
+    <Box className="online-partner-template-view" sx={{ mt: -3 }}>
 
       <FilterActionBar
         selectedType={selectedType}
@@ -796,8 +796,9 @@ const OnlinePartnerTemplateComponent: React.FC<ComponentProps> = ({ selectedType
       <Dialog
         maxWidth="sm"
         fullWidth
+        className="ma-scope online-partner-template-dialog"
         PaperProps={{
-          className: "dialog-paper-small"
+          className: "dialog-paper-small online-partner-template-dialog-paper"
         }}
         open={createTemplateDialogOpen} onClose={() => {
           setCreateTemplateDialogOpen(false);
@@ -824,8 +825,9 @@ const OnlinePartnerTemplateComponent: React.FC<ComponentProps> = ({ selectedType
         onClose={() => setEditItem(null)}
         maxWidth="sm"
         fullWidth
+        className="ma-scope online-partner-template-dialog"
         PaperProps={{
-          className: "dialog-paper-small"
+         className: "dialog-paper-small online-partner-template-dialog-paper"
         }}
       >
         <DialogTitle className='dialog-title'>Edit Percentage</DialogTitle>
@@ -884,7 +886,8 @@ const OnlinePartnerTemplateComponent: React.FC<ComponentProps> = ({ selectedType
         <Alert
           onClose={() => dispatch(setSnackbarOpen(false))}
           severity="info"
-          sx={{ width: '100%', backgroundColor: '#1976d2', color: 'white' }}
+         className="online-partner-snackbar-alert"
+          sx={{ width: '100%', backgroundColor: 'var(--erp-accent, #155eef)', color: 'var(--erp-accent-contrast, #ffffff)' }}
         >
           {snackbarMessage}
         </Alert>

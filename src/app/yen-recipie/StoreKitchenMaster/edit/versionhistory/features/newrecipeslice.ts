@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const BASE_URL = "    https://yenerp.com/purchasetestapi/newrecipe";
+const BASE_URL = "    http://127.0.0.1:8000/purchasetestapi/newrecipe";
 
 export interface SFGMaterial {
   itemCode: string;
@@ -135,7 +135,7 @@ export const fetchPackingMaterials = createAsyncThunk<RawMaterial[], string>(
 
 export const fetchRecipeNames = createAsyncThunk<RecipeName[], string>(
   "recipes/fetchNames", async (search) => {
-    const res = await axios.get<RecipeName[]>(" https://yenerp.com/purchasetestapi/recipenames", { params: { search } });
+    const res = await axios.get<RecipeName[]>(" http://127.0.0.1:8000/purchasetestapi/recipenames", { params: { search } });
     return res.data;
   }
 );

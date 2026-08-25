@@ -170,13 +170,14 @@ const TemplateDialogs: React.FC<TemplateDialogsProps> = ({
         onClose={() => setAssignDialogOpen(false)}
         maxWidth="sm"
         fullWidth
+        className="ma-scope online-partner-template-dialog"
         PaperProps={{
-          className: "dialog-paper-small"
+        className: "dialog-paper-small online-partner-template-dialog-paper"
         }}
       >
         <DialogTitle className='dialog-title'>Assign Partners</DialogTitle>
         <DialogContent className='dialog-content'>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0 }}>
+         <Box className="online-partner-assign-select-all" sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0 }}>
             <button
               onClick={() => setSelectedPartners(partner.map((p) => p.partnerName))}
               disabled={isSubmitting}
@@ -185,10 +186,9 @@ const TemplateDialogs: React.FC<TemplateDialogsProps> = ({
               Select All
             </button>
           </Box>
-          <Box sx={{ mt: -4 }}>
+         <Box className="online-partner-assign-list" sx={{ mt: -4 }}>
             {partner.map((p) => (
-              <Box key={p.onlinePartnersId} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Checkbox
+ <Box className="online-partner-assign-row" key={p.onlinePartnersId} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>                <Checkbox
                   checked={selectedPartners.includes(p.partnerName)}
                   onChange={(e) => {
                     const checked = e.target.checked;
@@ -222,8 +222,9 @@ const TemplateDialogs: React.FC<TemplateDialogsProps> = ({
         onClose={() => setAssignConfirmationDialogOpen(false)}
         maxWidth="sm"
         fullWidth
+        className="ma-scope online-partner-template-dialog"
         PaperProps={{
-          className: "dialog-paper-small"
+          className: "dialog-paper-small online-partner-template-dialog-paper"
         }}
       >
         <DialogTitle className='dialog-title'>Assignment Confirmation</DialogTitle>

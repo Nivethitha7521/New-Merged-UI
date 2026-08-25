@@ -10,7 +10,7 @@ interface Country {
   iso_code: string;
 }
 
-const BACKEND_BASE = 'https://yenerp.com/purchasetestapi/public';
+const BACKEND_BASE = 'http://127.0.0.1:8000/purchasetestapi/public';
 
 const Signup: React.FC = () => {
   const router = useRouter();
@@ -387,7 +387,7 @@ const handleVerifyOtp = async (otpValue?: string) => {
             </div>
           </div>
 
-          <div className="yl-brand-bottom">Â© 2026 YenERP. All rights reserved.</div>
+          <div className="yl-brand-bottom">© 2026 YenERP. All rights reserved.</div>
         </div>
 
         {/* RIGHT: SIGNUP FORM PANEL */}
@@ -582,7 +582,7 @@ const handleVerifyOtp = async (otpValue?: string) => {
             <button type="button" onClick={() => router.push('/')}>Sign In</button>
           </p>
 
-          <p className="yl-foot-note">Secured workspace Â· YenERP by Vmasoft</p>
+          <p className="yl-foot-note">Secured workspace · YenERP by Vmasoft</p>
         </div>
 
       </div>
@@ -590,7 +590,7 @@ const handleVerifyOtp = async (otpValue?: string) => {
       {showSuccessDialog && (
         <div className="yl-modal-overlay">
           <div className="yl-modal">
-            <h2>Almost There! ðŸŽ‰</h2>
+            <h2>Almost There! 🎉</h2>
             <p className="yl-modal-line">We&apos;ve received your details.</p>
             <p className="yl-modal-line">To activate your account, please verify your email at:</p>
             <p className="yl-modal-email">{registeredEmail}</p>

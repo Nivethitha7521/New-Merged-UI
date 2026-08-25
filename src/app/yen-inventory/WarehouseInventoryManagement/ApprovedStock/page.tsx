@@ -38,7 +38,7 @@ const WarehouseApprovedStock: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const { isFullScreen, warehouses, searchParams } = useSelector(
-    (state: RootState) => state.purchaseItems
+   (state: RootState) => state.rawMaterialStore
   );
 
   const selectedWarehouseLabel = React.useMemo(() => {

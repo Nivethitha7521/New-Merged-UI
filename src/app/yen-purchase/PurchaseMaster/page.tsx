@@ -14,6 +14,7 @@ import FreightPage from './Freight/page';
 import ServicePage from './Service/page';
 import BrandPage from './Brands/page';  // ✅ ADD BRAND IMPORT
 import { usePermissions } from "../../../hooks/usePermissions";
+import { useSearchParams } from 'next/navigation';
 
 const PurchaseMasterItemPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -51,7 +52,17 @@ const PurchaseMasterItemPage: React.FC = () => {
       }
     }
   }, []); // runs once on mount
-
+  // Deep-link support: /yen-purchase/PurchaseMaster/?section=purchase-category
+  // lets Global Search jump straight to a specific tab. Declared after the
+  // visibility-check effect above so it wins on mount if both fire.
+const searchParams = useSearchParams();
+React.useEffect(() => {
+  const section = searchParams?.get('section');   // ✅ optional chaining added
+  if (section) {
+    dispatch(setActiveSection(section));
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [searchParams]);
   const handleSectionClick = (section: string) => {
     dispatch(setActiveSection(section));
   };

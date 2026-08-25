@@ -1,4 +1,4 @@
-  // "use client";
+// "use client";
 
   // /**
   //  * physicalstockmodifcation/dataTable.tsx — rewritten with pure Tailwind CSS.
@@ -343,6 +343,26 @@
     tableMinWidth,
   } from "@/components/Inventory/shared/tableConfig";
   import { useVirtualizedRows } from "@/components/Inventory/shared/useVirtualizedRows";
+  import { buildColWidthPercents } from "@/components/Inventory/shared/tableConfig";
+
+  // Relative widths (same ratios as the old fixed px widths) used to build a
+  // <colgroup> so all visible columns always sum to exactly 100% under
+  // table-layout:fixed. Without this, columns left with no explicit width
+  // (S.O Stock / Prev. System Stock / System Stock / Physical Stock) get an
+  // equal, oversized share of any leftover space — causing the large uneven
+  // gaps between header labels seen on wide screens.
+  const COL_WEIGHTS: Record<string, number> = {
+    "S.No": 50,
+    "Item Code": 120,
+    "Item Name": 180,
+    "Variance": 180,
+    "Category": 150,
+    "Subcategory": 150,
+    "S.O Stock": 110,
+    "Prev. System Stock": 110,
+    "System Stock": 110,
+    "Physical Stock": 130,
+  };
 
   export interface Row {
     index: number;
@@ -456,6 +476,12 @@
 
     const activeColumns = columns.filter(c => isColumnVisible(c.key));
 
+    const colWidths = useMemo(
+      () => buildColWidthPercents(COL_WEIGHTS, activeColumns.map(c => c.key)),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [activeColumns.map(c => c.key).join("|")]
+    );
+
     const {
       visibleRows, startIdx, topSpacerHeight, bottomSpacerHeight, handleScroll: handleTableScroll,
     } = useVirtualizedRows(rows, tableContainerRef, { rowHeight: 37 });
@@ -477,6 +503,14 @@
           style={{ scrollbarWidth: "thin", contain: "layout paint" }}
         >
           <table className="w-full border-separate border-spacing-0" style={{ minWidth: tableMinWidth(activeColumns.length), tableLayout: "fixed" }}>
+            {/* Explicit per-column widths so visible columns always sum to 100% —
+                relying on unset-width columns to auto-share space is not reliable
+                across browsers/render states with table-layout:fixed. */}
+            <colgroup>
+              {activeColumns.map((c) => (
+                <col key={c.key} style={{ width: colWidths[c.key] }} />
+              ))}
+            </colgroup>
             <thead className="sticky top-0 z-30">
               <tr>
                 {activeColumns.map(c => (
@@ -485,8 +519,7 @@
                     className={cn(
                       TH_BASE_CLS,
                       "whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_0_rgba(226,232,240,0.28)]",
-                      c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left",
-                      c.width
+                      c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "text-left"
                     )}
                   >
                     <div className="truncate w-full" title={c.label}>{c.label}</div>

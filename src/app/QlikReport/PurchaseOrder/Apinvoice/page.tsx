@@ -6,8 +6,7 @@ import ReportPage from '@/features/reports-engine/ReportPage';
 import { apInvoiceConfig } from '@/features/purchase-order/reports/apInvoice.config'; // Adjust path if needed
 
 // This selector uses the 'key' from your config (key: 'apInvoice')
-const selector = (s: RootState) => s.apInvoice;
-
+const selector = (s: RootState) => s.apInvoiceReport;
 export default function ApInvoicePage() {
   return (
     <ReportPage

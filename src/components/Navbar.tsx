@@ -13,7 +13,9 @@ import {
   FiChevronRight,
   FiLogOut,
 } from 'react-icons/fi';
-import { setManualLogoutFlag } from '@/utils/api';
+import { setManualLogoutFlag } from '@/utils/api';   // ← intha line back add pannunga
+
+import GlobalSearch from './GlobalSearch';
 
 interface NavbarProps {
   moduleName: string;
@@ -120,11 +122,13 @@ const companyLogo = currentBusiness?.imageUrl;
     </Typography>
   </Box>
 
-  <Box className="erp-navbar-right">
-    <Box
-      className="erp-navbar-business"
-      title={companyName}
-    >
+<Box className="erp-navbar-right">
+  <GlobalSearch />
+
+  <Box
+    className="erp-navbar-business"
+    title={companyName}
+  >
       <Box className="erp-navbar-business-logo">
         {companyLogo ? (
 <Image

@@ -73,7 +73,7 @@ export const reportReducers: {
   purchase: Reducer<ReportState>;
   itemDateWise: Reducer<ReportState>;
   grnAgainst: Reducer<ReportState>;
-  apInvoice: Reducer<ReportState>;
+ apInvoiceReport: Reducer<ReportState>;
   outgoing: Reducer<ReportState>;
   outstanding: Reducer<ReportState>;
   storeDispatch: Reducer<ReportState>;
@@ -100,7 +100,7 @@ export const reportReducers: {
   purchase: PurchaseReport.slice.reducer,
   itemDateWise: ItemDateWiseReport.slice.reducer,
   grnAgainst: GrnAgainstReport.slice.reducer,
-  apInvoice: ApInvoiceReport.slice.reducer,
+  apInvoiceReport: ApInvoiceReport.slice.reducer,   
   outgoing: OutgoingReport.slice.reducer,
   outstanding: OutstandingReport.slice.reducer,
   storeDispatch: StoreDispatchReport.slice.reducer,

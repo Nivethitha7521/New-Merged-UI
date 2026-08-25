@@ -104,8 +104,9 @@ const InventoryDialog: React.FC<PrefixDialogProps> = ({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
+      className="ma-scope yen-pos-prefix-form-dialog"
       PaperProps={{
-        className: "dialog-paper-small",
+        className: "dialog-paper-small yen-pos-prefix-dialog-paper",
       }}
       TransitionProps={{
         // ← ADD THIS: Fallback focus on transition end

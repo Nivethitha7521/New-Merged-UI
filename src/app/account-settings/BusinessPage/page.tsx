@@ -282,10 +282,8 @@ const BusinessPage = () => {
   };
 
   return (
-    <Box sx={{ height: '100vh', overflow: 'auto', p: 2 }}> {/* Make the main container scrollable */}
-      {/* Business Details Section */}
-      <Box ref={businessRef} sx={{ mb: 4 }}> {/* Add ref and bottom margin */}
-        <Typography variant="h5">Business Information</Typography>
+<Box className="account-settings-module account-settings-business" sx={{ height: '100vh', overflow: 'auto', p: 2 }}> {/* Make the main container scrollable */}      {/* Business Details Section */}
+<Box className="account-settings-section" ref={businessRef} sx={{ mb: 4 }}> {/* Add ref and bottom margin */}        <Typography variant="h5">Business Information</Typography>
         <Tooltip title="Add New Business" arrow>
           <span>
             <IconButton
@@ -479,8 +477,7 @@ const BusinessPage = () => {
       </Box>
 
       {/* Shipping Details Section */}
-      <Box ref={shippingRef} sx={{ mt: 4 }}> {/* Add ref and top margin */}
-        <Typography variant="h5">Shipping Addresses</Typography>
+<Box className="account-settings-section" ref={shippingRef} sx={{ mt: 4 }}> {/* Add ref and top margin */}        <Typography variant="h5">Shipping Addresses</Typography>
         <Tooltip title="Add New Shipping Address" arrow>
           <span>
             <IconButton
@@ -584,8 +581,7 @@ const BusinessPage = () => {
       </Box>
 
       {/* Add Business Dialog */}
-      <Dialog open={openBusinessDialog} onClose={handleCloseBusinessDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Business</DialogTitle>
+ <Dialog className="account-settings-dialog" open={openBusinessDialog} onClose={handleCloseBusinessDialog} maxWidth="sm" fullWidth>        <DialogTitle>Add New Business</DialogTitle>
         <Formik
           initialValues={{
             companyName: '',
@@ -703,8 +699,7 @@ const BusinessPage = () => {
       </Dialog>
 
       {/* Add Shipping Dialog */}
-      <Dialog open={openShippingDialog} onClose={handleCloseShippingDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Shipping Address</DialogTitle>
+<Dialog className="account-settings-dialog" open={openShippingDialog} onClose={handleCloseShippingDialog} maxWidth="sm" fullWidth>        <DialogTitle>Add New Shipping Address</DialogTitle>
         <Formik
           initialValues={{
             shippingId: '',

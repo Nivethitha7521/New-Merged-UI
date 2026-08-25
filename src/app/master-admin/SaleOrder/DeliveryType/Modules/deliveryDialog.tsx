@@ -129,8 +129,9 @@ const DeliveryDialogs: React.FC<DeliveryTypeProps> = ({
         onClose={handleAttemptClose}
         maxWidth="sm"
         fullWidth
+         className="ma-scope sale-order-master-form-dialog"
         PaperProps={{
-          className: "dialog-paper-small",
+         className: "dialog-paper-small sale-order-master-dialog-paper",
         }}
         TransitionProps={{
           onEntered: () => {

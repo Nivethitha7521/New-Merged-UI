@@ -162,7 +162,7 @@ const MasterAdminModuleSideMenu: React.FC<
           arrow
         >
           <Box className="master-admin-module-brand">
-            <Box className="master-admin-module-brand-icon">
+            <Box className="master-admin-module-logo">
               <AdminPanelSettingsOutlined />
             </Box>
 

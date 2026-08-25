@@ -1665,14 +1665,22 @@ const toggleApPoSection = (poRandomId: string) => {
             />
           </Grid>
 
-          {/* All Vendors Autocomplete */}
-          <Grid item xs={2}>
-            <VendorSearchAutocomplete
-              value={selectedVendor}
-              onChange={handleVendorChange}
-              label="All Vendors"
-            />
-          </Grid>
+{/* All Vendors Autocomplete */}
+<Grid
+  item
+  xs={2}
+  sx={{
+    '& .MuiInputLabel-root:not(.MuiInputLabel-shrink)': {
+      transform: 'translate(14px, 8px) scale(1) !important',
+    },
+  }}
+>
+  <VendorSearchAutocomplete
+    value={selectedVendor}
+    onChange={handleVendorChange}
+    label="All Vendors"
+  />
+</Grid>
 
           {/* Invoice Type Filter */}
           <Grid item xs={2}>
@@ -1722,16 +1730,21 @@ const toggleApPoSection = (poRandomId: string) => {
                     dispatch(fetchApStatuses({ page: 1 }));
                   }
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Status"
-                    size="small"
-                    InputProps={{
-                      ...params.InputProps,
-                    }}
-                  />
-                )}
+            renderInput={(params) => (
+  <TextField
+    {...params}
+    label="Status"
+    size="small"
+    sx={{
+      '& .MuiInputLabel-root:not(.MuiInputLabel-shrink)': {
+        transform: 'translate(14px, 8px) scale(1) !important',
+      },
+    }}
+    InputProps={{
+      ...params.InputProps,
+    }}
+  />
+)}
                 freeSolo={false}
                 clearOnBlur={false}
                 clearOnEscape={true}
@@ -1833,16 +1846,16 @@ const toggleApPoSection = (poRandomId: string) => {
           </Menu>
         </Grid>
 
-        {/* Table Container */}
-        <Grid container spacing={1} sx={{ pl: 2 }}>
-          <TableContainer
-            component={Paper}
-            sx={{
-              maxHeight: 'calc(100vh - 250px)',
-              overflowY: 'auto',
-              width: '100%',
-            }}
-          >
+       {/* Table Container */}
+<Grid container spacing={1} sx={{ pl: 2 }}>
+  <TableContainer
+    component={Paper}
+    sx={{
+      maxHeight: 'calc(100vh - 130px)',
+      overflowY: 'auto',
+      width: '100%',
+    }}
+  >
             <Table stickyHeader>
               <TableHead>
                 <TableRow>

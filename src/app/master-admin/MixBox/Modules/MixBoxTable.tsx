@@ -64,7 +64,7 @@ interface SnackbarState {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_URL = 'https://yenerp.com/purchasetestapi/mixbox';
+const BASE_URL = 'http://127.0.0.1:8000/purchasetestapi/mixbox';
 
 const INITIAL_SNACKBAR: SnackbarState = { open: false, message: '', severity: 'success' };
 

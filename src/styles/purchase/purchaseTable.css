@@ -98,7 +98,20 @@
   white-space: nowrap;
   vertical-align: middle !important;
 }
+/* =========================================================
+   PURCHASE MASTER - STATIC TABLE HEADER
+   Only table rows/body will scroll.
+   Header remains fixed at the top of the table.
+   ========================================================= */
 
+.erp-purchase-viewport
+  .purchase-master-table-shell
+  .MuiTableCell-head {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: #f8fafc !important;
+}
 .erp-purchase-viewport
   .purchase-reference-table
   .MuiTableCell-body,

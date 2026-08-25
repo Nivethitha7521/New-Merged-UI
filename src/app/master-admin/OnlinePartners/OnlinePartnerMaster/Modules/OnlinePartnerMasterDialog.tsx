@@ -63,8 +63,9 @@ const OnlinePartnerDialog: React.FC<OnlinePartnerProbs> = ({
       onClose={handleClose}
       maxWidth="sm"
       fullWidth
+       className="ma-scope online-partner-form-dialog"
       PaperProps={{
-        className: "dialog-paper-small"
+       className: "dialog-paper-small online-partner-dialog-paper"
       }}
       TransitionProps={{
         // ← ADD THIS: Fallback focus on transition end
@@ -81,7 +82,7 @@ const OnlinePartnerDialog: React.FC<OnlinePartnerProbs> = ({
       <DialogTitle className='dialog-title'>{mode === 'edit' ? 'Edit' : 'Add'} Online Partner </DialogTitle>
       <DialogContent className='dialog-content'>
 
-        <div className="form-section">
+        <div className="form-section online-partner-dialog-section">
           <div className="form-field">
             <TextField
               autoComplete="off"

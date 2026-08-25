@@ -2890,7 +2890,7 @@ const StockSummaryPage = () => {
                   bgColor: T.successBg,
                 },
               ].map((card, index) => (
-                <Grid size={{ xs: 6, sm: 3 }} key={index}>
+              <Grid item xs={6} sm={3} key={index}>
                   <StatCard {...card} />
                 </Grid>
               ))}

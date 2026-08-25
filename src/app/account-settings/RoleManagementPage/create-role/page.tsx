@@ -1006,7 +1006,7 @@ const [confirmOpen, setConfirmOpen] = useState(false);
           ROLE_OPTIONS.map(async (role) => {
             try {
               const res = await authFetch(
-                `https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(role)}`
+                `http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(role)}`
               );
               if (!res.ok) return [role, null] as const;
               const data = await res.json();
@@ -1056,7 +1056,7 @@ const [confirmOpen, setConfirmOpen] = useState(false);
     // Rare fallback: cache not ready yet, fetch this one role directly.
     try {
       const res = await authFetch(
-        `https://yenerp.com/purchasetestapi/permissions/${encodeURIComponent(role)}`
+        `http://127.0.0.1:8000/purchasetestapi/permissions/${encodeURIComponent(role)}`
       );
       const data = res.ok ? await res.json() : null;
       const perms = data?.permissions ?? null;
@@ -1243,7 +1243,7 @@ return;
 
    
 
-    const roleResponse = await authFetch("https://yenerp.com/purchasetestapi/roles", {
+    const roleResponse = await authFetch("http://127.0.0.1:8000/purchasetestapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1293,7 +1293,7 @@ return;
 
    
 
-    const permResponse = await authFetch("https://yenerp.com/purchasetestapi/permissions", {
+    const permResponse = await authFetch("http://127.0.0.1:8000/purchasetestapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)
@@ -1356,18 +1356,14 @@ const handleConfirmCreate = () => {
   saveRole(); // actual API call
 };
   return (
-    <div className="h-screen bg-gray-50 flex flex-col"> 
-      
-      {/* Main Content - Takes full screen with NO margins */}
-      <div className="flex-1 flex flex-col bg-white m-0 rounded-none overflow-hidden"> 
+<div className="account-settings-role-editor account-role-editor-create h-screen bg-gray-50 flex flex-col">          {/* Main Content - Takes full screen with NO margins */}
+     <div className="account-role-editor-card flex-1 flex flex-col bg-white m-0 rounded-none overflow-hidden"> 
         
         {/* Header - With Back Button */}
-        <div className="flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">
-          {/* Back Button - Left Corner - SAME COLOR AS CREATE ROLE BUTTON */}
+ <div className="account-role-editor-header flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">          {/* Back Button - Left Corner - SAME COLOR AS CREATE ROLE BUTTON */}
           <button
             onClick={() => router.push("/account-settings/")}
-            className="flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 text-sm font-semibold shadow-sm min-w-[110px]"
-          >
+ className="account-role-back-button flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 text-sm font-semibold shadow-sm min-w-[110px]"          >
             {/* Left Arrow Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1383,8 +1379,7 @@ const handleConfirmCreate = () => {
           </button>
           
           {/* Page Title - Centered - UPDATED: Bold and Black */}
-          <h2 className="text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">
-            Create Role
+ <h2 className="account-role-editor-title text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">            Create Role
           </h2>
           
           {/* Empty div for spacing */}
@@ -1392,10 +1387,10 @@ const handleConfirmCreate = () => {
         </div>
 
 {/* Role Name Section - Compact */}
-        <div className="px-6 py-3 flex-shrink-0">
-          <div className="flex gap-3">
+      <div className="account-role-editor-fields px-6 py-3 flex-shrink-0">
+         <div className="account-role-editor-fields-grid flex gap-3">
             {/* Predefined Roles Dropdown */}
-           <div className="w-1/2">
+         <div className="account-role-editor-field w-1/2">
   <label className="block text-sm font-bold text-black mb-0.5">Select Predefined Roles</label>
   <p className="text-xs text-gray-500 mb-2">
     Choose a ready-made role template — its permissions fill in below instantly, as a starting point you can adjust.
@@ -1419,7 +1414,7 @@ const handleConfirmCreate = () => {
             </div>
 
             {/* Custom Role Input */}
-            <div className="w-1/2">
+          <div className="account-role-editor-field w-1/2">
   <label className="block text-sm font-bold text-black mb-0.5">
     Create a New Custom Role <span className="text-red-600">*</span>
   </label>
@@ -1437,8 +1432,7 @@ const handleConfirmCreate = () => {
         </div>
 
         {/* Table Header - ORDER CHANGED: Read, Add, Edit, Delete, Hide, Approve - UPDATED: Bold and Black */}
-     <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr,1fr,1fr] items-center gap-2 px-6 py-2 text-sm flex-shrink-0 bg-gray-50">
-  <div className="text-sm font-bold text-black">Modules / Submodules</div>
+<div className="account-role-permission-grid account-role-permission-header grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 px-6 py-2 text-sm flex-shrink-0 bg-gray-50">  <div className="text-sm font-bold text-black">Modules / Submodules</div>
 
   <HeaderWithHelp label="Read" info={PERMISSION_INFO.read} />
   <HeaderWithHelp label="Add" info={PERMISSION_INFO.add} />
@@ -1450,22 +1444,19 @@ const handleConfirmCreate = () => {
 
 
         {/* Scrollable Permission Section */}
-        <div className="flex-1 overflow-y-auto px-6 min-h-0"> 
-          <div className="space-y-2 py-2">
+       <div className="account-role-permission-scroll flex-1 overflow-y-auto px-6 min-h-0"> 
+          <div className="account-role-permission-stack space-y-2 py-2">
             {formPermissions.map((app, ai) => (
-              <div key={app.appName} className="mb-3">
+            <div key={app.appName} className="account-role-app mb-3">
                 {/* UPDATED: Only YEN_PURCHASE and YEN_BOOK in Blue */}
-                <div className="text-sm font-bold text-blue-600 mb-2 bg-blue-50 p-2 rounded">
-                  {app.appName}
+ <div className="account-role-app-title text-sm font-bold text-blue-600 mb-2 bg-blue-50 p-2 rounded">                  {app.appName}
                 </div>
                 <div className="space-y-2">
                   {app.modules.map((m, mi) => (
-                    <div key={m.id} className="border border-gray-200 rounded bg-white">
-                      {/* Module Header - UPDATED: Checkbox on left, dropdown on right - UPDATED: Bold and Black */}
+ <div key={m.id} className="account-role-module border border-gray-200 rounded bg-white">                      {/* Module Header - UPDATED: Checkbox on left, dropdown on right - UPDATED: Bold and Black */}
 <div
   onClick={() => toggleExpand(m.id)}
-  className="font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 rounded text-sm"
->
+className="account-role-module-header font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 rounded text-sm">
                         <div className="flex items-center">
                           {/* Checkbox for selecting all submodules */}
                           <button
@@ -1520,8 +1511,7 @@ const handleConfirmCreate = () => {
                           {m.submodules.map((s, si) => (
                             <div
   key={s.id}
-  className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr,1fr,1fr] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
->
+className="account-role-permission-grid account-role-permission-row grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm">
                               {/* UPDATED: Bold and Black for Submodule Names */}
                              <div className="text-black font-medium pl-8 text-sm flex items-center">
   <span>{s.name}</span>
@@ -1574,8 +1564,7 @@ const handleConfirmCreate = () => {
         </div>
 
         {/* Fixed Footer - Always visible above taskbar */}
-        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-4 shadow-lg z-50">
-          <div className="flex justify-end gap-3 max-w-7xl mx-auto">
+<div className="account-role-editor-footer fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-4 shadow-lg z-50">          <div className="flex justify-end gap-3 max-w-7xl mx-auto">
             <button 
              onClick={() => router.push("/account-settings/")}
               className="px-5 py-2 rounded-lg border-2 border-gray-400 hover:bg-gray-100 transition-all duration-200 text-sm font-semibold text-gray-700 bg-white shadow-sm hover:shadow-md min-w-[110px]" 

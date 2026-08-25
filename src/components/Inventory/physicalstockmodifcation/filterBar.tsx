@@ -391,8 +391,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
   return (
     <div className="flex flex-col gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+<div className="flex items-center justify-between flex-nowrap gap-3">
+        <div className="flex items-center gap-2 flex-nowrap flex-1 min-w-0 overflow-x-auto no-scrollbar">
           <div className="w-[180px] shrink-0">
             <CollapsibleFilter
               title="Branch"

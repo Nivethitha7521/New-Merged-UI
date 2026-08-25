@@ -52,7 +52,7 @@ const OnlinePartnersComponent: React.FC = () => {
     snackbarMessage,
     dialogOpen,
     showDeactivated
-  } = useSelector((state: RootState) => state.onlinePartners);
+  } = useSelector((state: RootState) => state.maOnlinePartners);
 
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const [editConfirmationDialogOpen, setEditConfirmationDialogOpen] = useState(false);

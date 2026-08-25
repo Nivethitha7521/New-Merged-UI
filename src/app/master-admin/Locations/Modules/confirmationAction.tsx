@@ -198,7 +198,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
     return (
       <>
         {message}{" "}
-        <strong>"{branchName}"</strong>?
+        <strong>&quot;{branchName}&quot;</strong>?
       </>
     );
   };

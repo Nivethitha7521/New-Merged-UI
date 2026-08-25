@@ -3780,14 +3780,15 @@ function EditItemContent({
 
 
 // Main exported component with Suspense wrapper
-const EditItemPage: React.FC<EditItemPageProps> = (props) => {
+// Main exported component with Suspense wrapper
+const EditItemPage = () => {
   return (
     <Suspense fallback={
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
       </Box>
     }>
-      <EditItemContent {...props} />
+      <EditItemContent selectedItem={null} />
     </Suspense>
   );
 };

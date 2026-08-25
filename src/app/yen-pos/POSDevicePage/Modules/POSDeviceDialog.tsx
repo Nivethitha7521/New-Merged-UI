@@ -1,6 +1,3 @@
-
-
-
 import React, { useEffect, useRef } from 'react';
 import {
   Dialog,
@@ -76,14 +73,14 @@ const POSDeviceDialog: React.FC<POSDeviceDialogProps> = ({
   }, [open, deviceData.id]);
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        className: "dialog-paper-medium",
-      }}
+<Dialog
+  open={isOpen}
+  onClose={handleClose}
+  maxWidth="sm"
+  className="ma-scope pos-device-form-dialog"
+  PaperProps={{
+    className: "dialog-paper-medium pos-device-dialog-paper",
+  }}
       TransitionProps={{
         onEntered: () => {
           inputRef.current?.focus();
@@ -110,19 +107,27 @@ const POSDeviceDialog: React.FC<POSDeviceDialogProps> = ({
             }
             disabled={isSubmitting}
             size="small"
-            sx={{
-              '& .MuiSwitch-switchBase.Mui-checked': {
-                color: '#fff',
-              },
-              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                backgroundColor: '#4caf50',
-              },
-            }}
+         sx={{
+  '& .MuiSwitch-switchBase.Mui-checked': {
+    color: 'var(--erp-accent-contrast, #ffffff)',
+  },
+
+  '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+    backgroundColor: 'var(--erp-accent, #155eef)',
+    opacity: 1,
+  },
+
+  '& .MuiSwitch-switchBase.Mui-focusVisible + .MuiSwitch-track': {
+    boxShadow: '0 0 0 3px var(--erp-accent-ring)',
+  },
+}}
           />
           <span style={{
             fontSize: '12px',
             fontFamily: "'Poppins', sans-serif",
-            color: deviceData.isServer ? '#4caf50' : '#9e9e9e',
+           color: deviceData.isServer
+  ? 'var(--erp-accent, #155eef)'
+  : '#98a2b3',
             minWidth: '52px',
           }}>
             {deviceData.isServer ? 'Enabled' : 'Disabled'}
@@ -180,24 +185,32 @@ const POSDeviceDialog: React.FC<POSDeviceDialogProps> = ({
                 fullWidth
                 //  disabled={isSubmitting}
                 disabled={isSubmitting || mode === 'edit'}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgb(156, 163, 175)',  // ⭐ focus border color
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: 'rgb(156, 163, 175)',  // ⭐ label color on focus
-                  },
-                  '& .MuiInputBase-root': {
-                    height: 45,
-                    fontSize: '12px',
-                  },
-                  '& .MuiInputLabel-root': {
-                    fontSize: '13px',
-                    minHeight: '32px',
-                  },
-                }}
+            sx={{
+  '& .MuiOutlinedInput-root': {
+    '&.Mui-focused': {
+      boxShadow: '0 0 0 3px var(--erp-accent-ring)',
+    },
+
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'var(--erp-accent, #155eef)',
+      borderWidth: '1px',
+    },
+  },
+
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: 'var(--erp-accent, #155eef)',
+  },
+
+  '& .MuiInputBase-root': {
+    height: 45,
+    fontSize: '12px',
+  },
+
+  '& .MuiInputLabel-root': {
+    fontSize: '13px',
+    minHeight: '32px',
+  },
+}}
               >
                 <InputLabel className="custom-label">Branch Name *</InputLabel>
                 <Select

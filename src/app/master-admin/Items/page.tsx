@@ -37,8 +37,7 @@ const ItemMasterPage = () => {
     );
   }
 
-  const isActiveRoute = (itemPath: string) => pathname.startsWith(itemPath);
-
+const isActiveRoute = (itemPath: string) => pathname?.startsWith(itemPath) ?? false;
   return (
     <Box>
       {/* <MasterAdminMenu /> */}

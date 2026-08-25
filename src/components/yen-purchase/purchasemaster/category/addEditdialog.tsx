@@ -388,12 +388,34 @@ const AddEditDialog: React.FC<AddEditDialogProps> = ({ open, onClose, onCategory
                   borderTop: '1px solid #e0e0e0',
                 }}
               >
-                <Button onClick={handleCancelSelection} sx={{ mr: 1 }} size="small">
-                  Cancel
-                </Button>
-                <Button onClick={handleApplySelection} color="primary" size="small">
-                  OK ({tempSubcategories.length} selected)
-                </Button>
+            <Button
+  onClick={handleCancelSelection}
+  size="small"
+  sx={{
+    mr: 1,
+    color: 'var(--erp-accent) !important',
+    '&:hover': {
+      color: 'var(--erp-accent-hover) !important',
+      backgroundColor: 'var(--erp-accent-soft) !important',
+    },
+  }}
+>
+  Cancel
+</Button>
+
+<Button
+  onClick={handleApplySelection}
+  size="small"
+  sx={{
+    color: 'var(--erp-accent) !important',
+    '&:hover': {
+      color: 'var(--erp-accent-hover) !important',
+      backgroundColor: 'var(--erp-accent-soft) !important',
+    },
+  }}
+>
+  OK ({tempSubcategories.length} selected)
+</Button>
               </Box>
             </Select>
             {subcategoriesTouched && categoryData.subcategories.length === 0 && (

@@ -23,7 +23,7 @@ import {
  BusinessOutlined as BusinessOutlinedIcon,
 ChevronRightRounded as ChevronRightRoundedIcon,
 ChevronLeftRounded as ChevronLeftRoundedIcon,
-  PaletteOutlined as PaletteOutlinedIcon,
+  PaletteOutlined as PaletteOutlinedIcon,SatelliteAltOutlined as SatelliteAltOutlinedIcon,
 
 } from '@mui/icons-material';
 import Image from 'next/image';
@@ -54,6 +54,7 @@ export const menuItems: MenuItem[] = [
   { text: 'WHATSAPP', icon: <WhatsAppIcon />, subItems: ['WhatsAppAdmin', 'WhatsAppMaster'], path: '/WhatsApp' },
   { text: 'YEN PURCHASE', icon: <ShoppingCartIcon />, subItems: ['Purchase Master', 'Vendor', 'Purchase Item', 'Purchase Order', 'Service Order', 'GRN Note', 'AP Invoice'], path: '/yen-purchase' },
   { text: 'YEN INVENTORY', icon: <Inventory2Icon />, subItems: ['Outlets Inventory Management', 'Warehouse Inventory Management'], path: '/yen-inventory' },
+    { text: 'INVENTORY CONTROL TOWER', icon: <SatelliteAltOutlinedIcon />, subItems: [], path: '/inventory-control-tower' },
   {
   text: "YEN RECIPE",
   icon: <RestaurantMenuIcon />,
@@ -107,6 +108,7 @@ const SideMenu: React.FC<SideMenuProps> = ({
     if (menuItem.text === 'YEN PURCHASE' && !showPurchaseMenu) return false;
     if (menuItem.text === 'YEN BOOK' && !showBookMenu) return false;
     if (menuItem.text === 'YEN INVENTORY' && !showInventoryMenu) return false;
+        if (menuItem.text === 'INVENTORY CONTROL TOWER' && !showInventoryMenu) return false;
     if (menuItem.text === 'YEN REPORTS' && !showReportsMenu) return false;
     if (menuItem.text === 'ACCOUNT SETTINGS' && !isSuperAdmin) return false;
     if (menuItem.text === 'SETTINGS') return hasSettingsRead;
@@ -124,6 +126,7 @@ const renderItem = (menuItem: MenuItem) => {
     .replace('MASTER-ADMIN', 'Master Admin')
     .replace('YEN PURCHASE', 'YEN Purchase')
     .replace('YEN INVENTORY', 'YEN Inventory')
+     .replace('INVENTORY CONTROL TOWER', 'Inventory Control Tower')
     .replace('YEN BOOK', 'YEN Book')
     .replace('YEN REPORTS', 'YEN Reports')
     .replace('ACCOUNT SETTINGS', 'Account Settings')

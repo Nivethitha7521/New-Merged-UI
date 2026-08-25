@@ -10222,7 +10222,510 @@ html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-area-card,
     width: auto !important;
   }
 }
+
+
 /* =========================================================
+   KOT ADDON — SELECT VARIANCES FIELD WIDTH FIX
+   The AddOn JSX Paper does not carry kot-addon-select-panel in
+   the current component, so target the actual Paper directly.
+   Presentation only; no selection/search/business logic changes.
+   ========================================================= */
+@media (min-width: 761px) {
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiFormControl-root,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiTextField-root,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-textfield {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-inputRoot,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-input {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    padding: 0 34px 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-input,
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiOutlinedInput-input {
+    flex: 1 1 auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: normal !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-endAdornment {
+    right: 8px !important;
+  }
+
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiInputLabel-root:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-addon-dialog
+  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-label:not(.MuiInputLabel-shrink) {
+    max-width: calc(100% - 48px) !important;
+    transform: translate(12px, 13px) scale(1) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}/* =========================================================
+   KOT MASTER — VARIANT DIALOG FINAL 100% LAPTOP ALIGNMENT
+   Presentation only. No Add/Edit behavior, validation, Redux,
+   API, search, selection, remove or submit logic is changed.
+   ========================================================= */
+
+@media (min-width: 761px) {
+  body .MuiDialog-root.kot-variant-dialog .MuiDialog-paper,
+  body .MuiDialog-root.kot-variant-dialog .dialog-paper-big {
+    width: min(1120px, calc(100vw - 48px)) !important;
+    max-width: min(1120px, calc(100vw - 48px)) !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: calc(100vh - 36px) !important;
+    margin: 18px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .dialog-title {
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 11px 16px 9px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .dialog-content {
+    min-height: 0 !important;
+    padding: 14px 16px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Match the original Master Admin proportion:
+     readable Variant field, wide Select Variances input,
+     centered action buttons and a balanced Selected Items panel. */
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-dialog-layout {
+    --kot-variant-field-h: 44px;
+    --kot-variant-select-h: 54px;
+    --kot-variant-panel-h: min(330px, 48vh);
+
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    display: grid !important;
+    grid-template-columns:
+      minmax(220px, 1fr)
+      minmax(340px, 1.55fr)
+      130px
+      minmax(300px, 1.35fr) !important;
+    gap: 14px !important;
+    align-items: start !important;
+    justify-content: stretch !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-selected-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Variant Name: override the old inline 180px visual shrink. */
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field {
+    padding-top: 7px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field > .MuiFormControl-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field > .MuiTextField-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field > .custom-textfield {
+    display: block !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .custom-input {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kot-variant-field-h) !important;
+    min-height: var(--kot-variant-field-h) !important;
+    max-height: var(--kot-variant-field-h) !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    border-radius: 6px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .MuiOutlinedInput-input,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    font-size: 12px !important;
+    line-height: normal !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .MuiInputLabel-root:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .custom-label:not(.MuiInputLabel-shrink) {
+    max-width: calc(100% - 28px) !important;
+    transform: translate(14px, 14px) scale(1) !important;
+    transform-origin: top left !important;
+    font-size: 11.5px !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .MuiInputLabel-root.MuiInputLabel-shrink,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .custom-label.MuiInputLabel-shrink {
+    transform: translate(14px, -7px) scale(.84) !important;
+    transform-origin: top left !important;
+    font-size: 11px !important;
+    line-height: 14px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field .MuiFormHelperText-root {
+    margin: 3px 2px 0 !important;
+    min-height: 12px !important;
+    font-size: 9.5px !important;
+    line-height: 12px !important;
+  }
+
+  /* Select Variances panel + Autocomplete field. */
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column > .MuiPaper-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: var(--kot-variant-panel-h) !important;
+    min-height: var(--kot-variant-panel-h) !important;
+    max-height: var(--kot-variant-panel-h) !important;
+    padding: 12px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    border-radius: 6px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel > .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column > .MuiPaper-root > .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel .MuiTextField-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel .MuiFormControl-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiTextField-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiFormControl-root {
+    display: block !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel .MuiAutocomplete-inputRoot,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiAutocomplete-inputRoot,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiOutlinedInput-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .custom-input {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kot-variant-select-h) !important;
+    min-height: var(--kot-variant-select-h) !important;
+    max-height: var(--kot-variant-select-h) !important;
+    padding: 0 38px 0 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    box-sizing: border-box !important;
+    border-radius: 6px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiAutocomplete-input,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiOutlinedInput-input {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    font-size: 12px !important;
+    line-height: normal !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiAutocomplete-endAdornment {
+    right: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiInputLabel-root:not(.MuiInputLabel-shrink),
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .custom-label:not(.MuiInputLabel-shrink) {
+    max-width: calc(100% - 52px) !important;
+    transform: translate(14px, 17px) scale(1) !important;
+    transform-origin: top left !important;
+    font-size: 11.5px !important;
+    line-height: 16px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiInputLabel-root.MuiInputLabel-shrink,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .custom-label.MuiInputLabel-shrink {
+    transform: translate(14px, -7px) scale(.84) !important;
+    transform-origin: top left !important;
+    font-size: 11px !important;
+    line-height: 14px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiAutocomplete-inputRoot > .MuiTypography-root {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-self: center !important;
+    font-size: 11.5px !important;
+    line-height: 16px !important;
+  }
+
+  /* Transfer buttons. */
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions {
+    height: var(--kot-variant-panel-h) !important;
+    min-height: var(--kot-variant-panel-h) !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 9px !important;
+    align-self: start !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions .btn-primary,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions .btn-primary-delete {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 7px !important;
+    box-sizing: border-box !important;
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions svg {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 16px !important;
+  }
+
+  /* Selected Items panel. */
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-selected-column > .MuiTypography-root {
+    min-height: 17px !important;
+    margin: 0 0 5px !important;
+    font-size: 11px !important;
+    line-height: 17px !important;
+    font-weight: 600 !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-selected-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: calc(var(--kot-variant-panel-h) - 22px) !important;
+    min-height: calc(var(--kot-variant-panel-h) - 22px) !important;
+    max-height: calc(var(--kot-variant-panel-h) - 22px) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    border-radius: 6px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-selected-panel .MuiList-root {
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .dialog-actions {
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 6px 16px !important;
+    gap: 9px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    box-sizing: border-box !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .dialog-actions .btn-secondary,
+  body .MuiDialog-root.kot-variant-dialog .dialog-actions .btn-primary {
+    min-width: 80px !important;
+    width: auto !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 7px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+}
+
+/* Smaller laptop windows: same structure, tighter widths. */
+@media (min-width: 761px) and (max-width: 1180px) {
+  body .MuiDialog-root.kot-variant-dialog .MuiDialog-paper,
+  body .MuiDialog-root.kot-variant-dialog .dialog-paper-big {
+    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-dialog-layout {
+    --kot-variant-field-h: 42px;
+    --kot-variant-select-h: 50px;
+    --kot-variant-panel-h: min(300px, 46vh);
+    grid-template-columns:
+      minmax(190px, 1fr)
+      minmax(285px, 1.45fr)
+      112px
+      minmax(250px, 1.28fr) !important;
+    gap: 10px !important;
+  }
+}
+
+/* Mobile / narrow windows. */
+@media (max-width: 760px) {
+  body .MuiDialog-root.kot-variant-dialog .MuiDialog-paper,
+  body .MuiDialog-root.kot-variant-dialog .dialog-paper-big {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .dialog-content {
+    padding: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-dialog-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-selected-column {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-name-field > .MuiFormControl-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiAutocomplete-root,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-column .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-select-panel,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-selected-panel {
+    width: 100% !important;
+    height: 230px !important;
+    min-height: 230px !important;
+    max-height: 230px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions {
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+  }
+
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions .btn-primary,
+  body .MuiDialog-root.kot-variant-dialog .kot-variant-transfer-actions .btn-primary-delete {
+    flex: 1 1 0 !important;
+    width: auto !important;
+  }
+}/* =========================================================
    SALE ORDER — YEN PURCHASE EXACT DENSITY @ 100% ZOOM
    Presentation only.
    No API, Redux, routing, handler or business logic changes.
@@ -10838,7 +11341,1036 @@ html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-area-card,
 }
 
 
+
+
 /* =========================================================
+   SALE ORDER MASTER — COMPACT ADD / EDIT DIALOGS
+   Scope: Payment Type, Events, Charges, Delivery Type.
+   Restores the original compact Master Admin composition at
+   100% browser zoom and follows the active YEN ERP Display
+   Settings accent. Presentation only — no API, Redux,
+   validation, focus, submit or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.sale-order-master-form-dialog .MuiDialog-container {
+    padding: 12px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .MuiDialog-paper.sale-order-master-dialog-paper {
+    width: min(350px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: 350px !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 18px 42px rgba(16, 24, 40, 0.18) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .dialog-title {
+    min-height: 48px !important;
+    padding: 12px 16px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .dialog-content {
+    padding: 12px !important;
+    max-height: calc(100dvh - 118px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .form-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 2px !important;
+  }
+
+  /* Override the legacy globals.css .custom-textfield width. */
+  body .MuiDialog-root.sale-order-master-form-dialog .custom-textfield,
+  body .MuiDialog-root.sale-order-master-form-dialog .MuiTextField-root,
+  body .MuiDialog-root.sale-order-master-form-dialog .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 4px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root:hover
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #9bb9fa) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.14)) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root {
+    color: var(--erp-text-secondary, #475467) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    transform: translate(12px, 11px) scale(1) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.MuiInputLabel-shrink {
+    color: var(--erp-text, #101828) !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    transform: translate(12px, -6px) scale(0.85) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiInputBase-input {
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    line-height: 20px !important;
+  }
+
+  /* Keep validation red semantic; normal/focus states use the active accent. */
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-error
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--mui-palette-error-main, #d32f2f) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .custom-textfield
+    .MuiFormHelperText-root {
+    margin: 4px 0 0 2px !important;
+    font-size: 9.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  body .MuiDialog-root.sale-order-master-form-dialog .dialog-actions {
+    min-height: 52px !important;
+    padding: 8px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface-muted, #f9fafb) !important;
+    border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-primary,
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-secondary {
+    width: auto !important;
+    min-width: 76px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 7px !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    line-height: 1 !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-primary {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border: 1px solid var(--erp-accent, #155eef) !important;
+    box-shadow: 0 2px 5px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-primary:hover:not(:disabled) {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-secondary {
+    color: var(--erp-text, #344054) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border-strong, #cfd6df) !important;
+    box-shadow: none !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .btn-secondary:hover {
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface-muted, #f8fafc) !important;
+    border-color: var(--erp-accent-border, #9bb9fa) !important;
+  }
+
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .dialog-actions
+    .MuiCircularProgress-root {
+    width: 17px !important;
+    height: 17px !important;
+    color: currentColor !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body
+    .MuiDialog-root.sale-order-master-form-dialog
+    .MuiDialog-paper.sale-order-master-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+}
+/* =========================================================
+   ONLINE PARTNERS — YEN ERP COMPACT ALIGNMENT @ 100% ZOOM
+   Presentation only.
+   No API, Redux, validation, routing, handler or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* ---------- Module shell ---------- */
+  .erp-master-admin-viewport .online-partners-layout {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partners-content {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ---------- Master / Config tabs ---------- */
+  .erp-master-admin-viewport .online-partners-submodule-tabs {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  .erp-master-admin-viewport .online-partners-submodule-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+.erp-master-admin-viewport .online-partners-submodule-tab {
+  width: auto !important;
+  min-width: 101px !important;
+  height: 27px !important;
+  min-height: 27px !important;
+  padding: 0 11px !important;
+
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border-strong, #c5ced8) !important;
+
+  border-radius: 7px !important;
+
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
+
+  font-family: inherit !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+.erp-master-admin-viewport .online-partners-config-tab {
+  min-width: 124px !important;
+  max-width: min(360px, 42vw) !important;
+}
+
+  .erp-master-admin-viewport .online-partners-submodule-tab:hover {
+    color: var(--erp-text, #101828) !important;
+    background: #f8fafc !important;
+    border-color: var(--erp-accent-border, #b8cbf8) !important;
+  }
+
+  .erp-master-admin-viewport .online-partners-submodule-tab.is-active {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border-color: var(--erp-accent, #155eef) !important;
+    font-weight: 700 !important;
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.08),
+      0 5px 12px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.18) !important;
+  }
+
+  .erp-master-admin-viewport .online-partners-submodule-tab.is-active:hover {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  /* ---------- Partner master toolbar ---------- */
+  .erp-master-admin-viewport .online-partner-master-toolbar {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 0 12px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-title {
+    margin: 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-actions {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-actions .icon-action-wrapper {
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle {
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle .MuiFormControlLabel-label {
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    font-weight: 550 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle .MuiSwitch-switchBase.Mui-checked {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+    background: var(--erp-accent, #155eef) !important;
+    opacity: 0.48 !important;
+  }
+
+  /* ---------- Partner master table ---------- */
+  .erp-master-admin-viewport .online-partner-master-table-container,
+  .erp-master-admin-viewport .online-partner-template-table-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table-container {
+    max-height: calc(100vh - 290px) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table,
+  .erp-master-admin-viewport .online-partner-template-table {
+    width: 100% !important;
+    min-width: 760px !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    table-layout: fixed !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table thead,
+  .erp-master-admin-viewport .online-partner-template-table thead {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #f1f4f8 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th,
+  .erp-master-admin-viewport .online-partner-template-table th {
+    height: 38px !important;
+    padding: 8px 10px !important;
+    color: var(--erp-text, #344054) !important;
+    background: #f1f4f8 !important;
+    border-bottom: 1px solid var(--erp-border, #dfe5ec) !important;
+    font-family: inherit !important;
+    font-size: 10.5px !important;
+    font-weight: 750 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table td,
+  .erp-master-admin-viewport .online-partner-template-table td {
+    height: 40px !important;
+    padding: 7px 10px !important;
+    color: var(--erp-text, #344054) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid #eef1f5 !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table tbody tr:hover td,
+  .erp-master-admin-viewport .online-partner-template-table tbody tr:hover td {
+    background: #f8fafc !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th:nth-child(1),
+  .erp-master-admin-viewport .online-partner-master-table td:nth-child(1) {
+    width: 16% !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th:nth-child(2),
+  .erp-master-admin-viewport .online-partner-master-table td:nth-child(2) {
+    width: 64% !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th:nth-child(3),
+  .erp-master-admin-viewport .online-partner-master-table td:nth-child(3) {
+    width: 20% !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table-container h2,
+  .erp-master-admin-viewport .online-partner-template-table-container .empty-state h2 {
+    margin: 0 !important;
+    padding: 22px 12px !important;
+    color: var(--erp-text-muted, #667085) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+  }
+
+  /* ---------- Template/config view ---------- */
+  .erp-master-admin-viewport .online-partner-template-view {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-bar {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-row {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns:
+      minmax(150px, 190px)
+      minmax(150px, 190px)
+      minmax(210px, 1fr)
+      130px
+      auto !important;
+    align-items: start !important;
+    gap: 10px !important;
+    margin: 0 0 10px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  /* Critical legacy-width override: globals.css has .custom-textfield { width: 70px !important; } */
+  .erp-master-admin-viewport .online-partners-layout .custom-textfield,
+  .erp-master-admin-viewport .online-partners-layout .MuiTextField-root,
+  .erp-master-admin-viewport .online-partners-layout .MuiFormControl-root,
+  .erp-master-admin-viewport .online-partners-layout .MuiAutocomplete-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-notchedOutline,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+    border-width: 1px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #b8cbf8) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root.Mui-focused,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiInputLabel-root,
+  .erp-master-admin-viewport .online-partner-template-search .MuiInputLabel-root {
+    color: var(--erp-text-muted, #667085) !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiInputBase-input,
+  .erp-master-admin-viewport .online-partner-filter-field .MuiSelect-select,
+  .erp-master-admin-viewport .online-partner-template-search .MuiInputBase-input {
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiFormHelperText-root {
+    min-height: 12px !important;
+    margin: 2px 0 0 2px !important;
+    font-family: inherit !important;
+    font-size: 9.5px !important;
+    line-height: 1.15 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-apply-button,
+  .erp-master-admin-viewport .online-partner-assign-button {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 14px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-wrapper {
+    min-width: 42px !important;
+    margin: 0 !important;
+    gap: 2px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-button {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    color: var(--erp-accent, #155eef) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-accent, #155eef) !important;
+    border-radius: 8px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-button:hover:not(.Mui-disabled) {
+    color: var(--erp-accent-hover, #124bc0) !important;
+    background: var(--erp-accent-soft, #eef4ff) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-button.Mui-disabled {
+    color: #98a2b3 !important;
+    border-color: #d0d5dd !important;
+    background: #f8fafc !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-label {
+    margin: 2px 0 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 9.5px !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-search-row {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 0 12px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-search {
+    flex: 0 1 360px !important;
+    width: min(360px, 100%) !important;
+    min-width: 220px !important;
+    max-width: 360px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-assign-wrap {
+    flex: 0 0 auto !important;
+  }
+
+  /* ---------- Template table ---------- */
+  .erp-master-admin-viewport .online-partner-template-table-container {
+    max-height: calc(100vh - 360px) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table {
+    min-width: 940px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table .MuiCheckbox-root {
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table .MuiCheckbox-root .MuiSvgIcon-root {
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 17px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table .edit-btn,
+  .erp-master-admin-viewport .online-partner-template-table .deactivate-btn,
+  .erp-master-admin-viewport .online-partner-template-table .activate-btn,
+  .erp-master-admin-viewport .online-partner-master-table .edit-btn,
+  .erp-master-admin-viewport .online-partner-master-table .deactivate-btn,
+  .erp-master-admin-viewport .online-partner-master-table .activate-btn {
+    margin: 0 3px !important;
+  }
+}
+
+/* ---------- Config popover is portalled under body ---------- */
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-menu {
+  min-width: 210px !important;
+  max-width: 280px !important;
+  padding: 8px !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 34px rgba(16, 24, 40, 0.16) !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-menu > .MuiBox-root {
+  padding: 0 !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-option {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  justify-content: flex-start !important;
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-option:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-option.is-active {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  font-weight: 700 !important;
+}
+
+/* =========================================================
+   PORTALLED ONLINE PARTNER DIALOGS
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.online-partner-form-dialog .MuiDialog-paper.online-partner-dialog-paper {
+    width: min(360px, calc(100vw - 32px)) !important;
+    max-width: 360px !important;
+    max-height: calc(100vh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  body .MuiDialog-root.online-partner-template-dialog .MuiDialog-paper.online-partner-template-dialog-paper {
+    width: min(470px, calc(100vw - 32px)) !important;
+    max-width: 470px !important;
+    max-height: calc(100vh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  body .MuiDialog-root.online-partner-import-dialog .MuiDialog-paper.online-partner-import-dialog-paper {
+    width: min(850px, calc(100vw - 32px)) !important;
+    max-width: 850px !important;
+    max-height: calc(100vh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .dialog-title {
+    min-height: 46px !important;
+    padding: 12px 16px !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e5e7eb) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .dialog-content {
+    padding: 12px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .form-section,
+  body .online-partner-dialog-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 8px !important;
+  }
+
+  /* Critical portal override for legacy globals.css 70px width. */
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .custom-textfield,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .MuiTextField-root,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .custom-textfield .MuiOutlinedInput-root,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 40px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 8px !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .dialog-actions {
+    min-height: 50px !important;
+    padding: 8px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    background: #f8fafc !important;
+    border-top: 1px solid var(--erp-border, #e5e7eb) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .btn-primary,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .btn-secondary {
+    min-width: 74px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+  }
+
+  body .online-partner-snackbar-alert {
+    background: var(--erp-accent, #155eef) !important;
+    color: var(--erp-accent-contrast, #ffffff) !important;
+  }
+}
+
+/* ---------- Mid-size laptops/tablets ---------- */
+@media (max-width: 1180px) and (min-width: 701px) {
+  .erp-master-admin-viewport .online-partner-filter-row {
+    grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions {
+    grid-column: 1 / -1 !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 700px) {
+  .online-partners-layout {
+    padding: 0 !important;
+  }
+
+  .online-partners-submodule-tabs {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    margin-bottom: 12px !important;
+  }
+
+  .online-partners-submodule-tab {
+    flex: 0 0 auto !important;
+  }
+
+  .online-partner-master-toolbar,
+  .online-partner-search-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .online-partner-master-actions {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  .online-partner-filter-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .online-partner-filter-field,
+  .online-partner-template-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .online-partner-template-actions {
+    display: flex !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+  }
+
+  body .MuiDialog-root.online-partner-form-dialog .MuiDialog-paper.online-partner-dialog-paper,
+  body .MuiDialog-root.online-partner-template-dialog .MuiDialog-paper.online-partner-template-dialog-paper,
+  body .MuiDialog-root.online-partner-import-dialog .MuiDialog-paper.online-partner-import-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+}
+
+/* ---------- Online Partner secondary dialog details ---------- */
+body .online-partner-template-dialog .online-partner-assign-select-all {
+  margin: 0 0 10px !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-list {
+  margin: 0 !important;
+  padding: 4px 0 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-row {
+  min-height: 36px !important;
+  margin: 0 !important;
+  padding: 4px 6px !important;
+  border-bottom: 1px solid #eef1f5 !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-row .MuiCheckbox-root {
+  padding: 4px !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-row .MuiTypography-root {
+  color: var(--erp-text, #344054) !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+}
+
+body .online-partner-import-mode-dialog .MuiDialogContent-root .MuiButton-root {
+  width: 100% !important;
+  max-width: 280px !important;
+  min-height: 48px !important;
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border-strong, #c5ced8) !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+}
+
+body .online-partner-import-mode-dialog .MuiDialogContent-root .MuiButton-contained {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+body .online-partner-import-mode-dialog .MuiDialogContent-root .MuiButton-root:hover {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}/* =========================================================
    YEN POS — YEN PURCHASE / ITEM MASTER VISUAL PARITY
    Presentation only. No API, Redux, handler or business logic changes.
    ========================================================= */
@@ -11004,6 +12536,829 @@ html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-area-card,
   }
 }
 /* =========================================================
+   POS DEVICE ADD / EDIT DIALOG
+   Exact compact 3-column layout
+   ========================================================= */
+
+@media (min-width: 701px) {
+
+  /* ---------------------------------------------------------
+     Dialog
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .MuiDialog-container {
+    padding: 16px !important;
+  }
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .MuiDialog-paper.pos-device-dialog-paper {
+    width: min(605px, calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    max-width: 605px !important;
+
+    max-height: calc(100vh - 32px) !important;
+
+    margin: 0 !important;
+
+    overflow: hidden !important;
+
+    border-radius: 4px !important;
+
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Header
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-title {
+    min-height: 46px !important;
+
+    padding: 10px 16px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    font-family: "Poppins", sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-title > span:first-child {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
+
+
+  /* Is Server text */
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-title
+    span {
+    font-size: 10.5px !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Content
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-content {
+    padding: 10px 12px !important;
+
+    max-height: none !important;
+
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+
+    background: #ffffff !important;
+  }
+
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-section {
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 10px !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid #e1e5ea !important;
+    border-radius: 2px !important;
+
+    background: #ffffff !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     THREE EQUAL COLUMNS
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-grid-manager {
+    width: 100% !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr)) !important;
+
+    column-gap: 10px !important;
+    row-gap: 0 !important;
+
+    margin-bottom: 10px !important;
+
+    align-items: center !important;
+  }
+
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-grid-manager:last-child {
+    margin-bottom: 0 !important;
+  }
+
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field {
+    width: 100% !important;
+
+    min-width: 0 !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field-span-2 {
+    grid-column: span 2 !important;
+  }
+
+
+  /* =========================================================
+     IMPORTANT FIX
+     Override legacy .custom-textfield { width: 70px !important }
+     ========================================================= */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    > .MuiTextField-root.custom-textfield,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    > .MuiFormControl-root,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .custom-textfield {
+    width: 100% !important;
+
+    min-width: 0 !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Actual input box
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiInputBase-root,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiOutlinedInput-root {
+    width: 100% !important;
+
+    min-width: 0 !important;
+    max-width: none !important;
+
+    height: 38px !important;
+    min-height: 38px !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 4px !important;
+
+    background: #ffffff !important;
+  }
+
+
+  /* Read-only fields */
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiOutlinedInput-root.Mui-disabled {
+    height: 38px !important;
+    min-height: 38px !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Input text
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    input.MuiInputBase-input,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiOutlinedInput-input {
+    height: auto !important;
+
+    padding: 9px 11px !important;
+
+    box-sizing: border-box !important;
+
+    font-family: "Poppins", sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 400 !important;
+    line-height: 18px !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Select
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiSelect-select {
+    width: 100% !important;
+
+    min-height: 0 !important;
+
+    padding: 9px 32px 9px 11px !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    font-family: "Poppins", sans-serif !important;
+    font-size: 10.5px !important;
+    line-height: 18px !important;
+
+    text-align: left !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Labels
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiInputLabel-root,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .custom-label {
+    font-family: "Poppins", sans-serif !important;
+
+    font-size: 10.5px !important;
+    font-weight: 400 !important;
+
+    transform:
+      translate(12px, 9px)
+      scale(1) !important;
+  }
+
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .MuiInputLabel-root.MuiInputLabel-shrink,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field
+    .custom-label.MuiInputLabel-shrink {
+    font-size: 10px !important;
+    font-weight: 500 !important;
+
+    transform:
+      translate(12px, -6px)
+      scale(0.82) !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Description
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field-span-2
+    .MuiTextField-root {
+    width: 100% !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Generate button - same size as field
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-grid-manager:last-child
+    .btn-primary {
+    width: 100% !important;
+
+    min-width: 0 !important;
+
+    height: 38px !important;
+    min-height: 38px !important;
+
+    padding: 0 10px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 4px !important;
+
+    font-family: "Poppins", sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+
+    white-space: nowrap !important;
+  }
+
+
+  /* ---------------------------------------------------------
+     Footer
+     --------------------------------------------------------- */
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-actions {
+    min-height: 48px !important;
+
+    padding: 7px 16px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    gap: 10px !important;
+
+    border-top: 1px solid #e5e7eb !important;
+
+    background: #f9fafb !important;
+  }
+
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-actions
+    .btn-primary,
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .dialog-actions
+    .btn-secondary {
+    width: auto !important;
+
+    min-width: 72px !important;
+
+    height: 34px !important;
+    min-height: 34px !important;
+
+    padding: 0 12px !important;
+
+    border-radius: 6px !important;
+
+    font-family: "Poppins", sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+  }
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .MuiDialog-paper.pos-device-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+  }
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-grid-manager {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  body
+    .MuiDialog-root.pos-device-form-dialog
+    .form-field-span-2 {
+    grid-column: span 1 !important;
+  }
+}
+/* =========================================================
+   YEN POS — REASON ADD / EDIT DIALOG
+   Restores compact Master Admin dialog styling inside the
+   MUI portal and follows the Display Settings accent color.
+   Presentation only: no API / Redux / validation changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.yen-pos-reason-form-dialog .MuiDialog-container {
+    padding: 12px !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .MuiDialog-paper.yen-pos-reason-dialog-paper {
+    width: min(350px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: 350px !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 4px !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .dialog-title {
+    padding: 12px 16px 10px !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    font-weight: 650 !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .dialog-content {
+    padding: 12px !important;
+    max-height: calc(100dvh - 118px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .form-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 0 10px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 2px !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .form-section:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Override the legacy global .custom-textfield { width: 70px !important; }. */
+  body .MuiDialog-root.yen-pos-reason-form-dialog .custom-textfield,
+  body .MuiDialog-root.yen-pos-reason-form-dialog .MuiTextField-root,
+  body .MuiDialog-root.yen-pos-reason-form-dialog .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    border-radius: 4px !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root:hover
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #b8cbf8) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.17)) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .yen-pos-reason-accent-icon {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .yen-pos-reason-accent-icon:hover {
+    color: var(--erp-accent-hover, #124bc0) !important;
+    background: var(--erp-accent-soft, #eef4ff) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .edit-btn {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .dialog-actions {
+    min-height: 52px !important;
+    padding: 8px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface-muted, #f9fafb) !important;
+    border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .dialog-actions .btn-primary,
+  body .MuiDialog-root.yen-pos-reason-form-dialog .dialog-actions .btn-secondary {
+    min-width: 76px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 7px !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    font-family: inherit !important;
+  }
+
+  body .MuiDialog-root.yen-pos-reason-form-dialog .dialog-actions .btn-primary {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border-color: var(--erp-accent, #155eef) !important;
+    box-shadow: 0 2px 5px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .dialog-actions
+    .btn-primary:hover:not(:disabled) {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body
+    .MuiDialog-root.yen-pos-reason-form-dialog
+    .MuiDialog-paper.yen-pos-reason-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+}
+
+
+/* =========================================================
+   YEN POS — INVOICE PREFIX ADD / EDIT DIALOG
+   Compact YEN ERP alignment inside the MUI portal.
+   Follows the Display Settings accent color.
+   Presentation only: no API / Redux / validation changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .MuiDialog-container {
+    padding: 12px !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .MuiDialog-paper.yen-pos-prefix-dialog-paper {
+    width: min(350px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    max-width: 350px !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 4px !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .dialog-title {
+    min-height: 48px !important;
+    padding: 12px 16px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e4e7ec) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .dialog-content {
+    padding: 12px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .form-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 2px !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .form-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Override legacy globals.css: .custom-textfield { width: 70px !important; } */
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .custom-textfield,
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .MuiTextField-root,
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .custom-textfield {
+    margin: 0 !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    border-radius: 4px !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root:hover
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #b8cbf8) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.17)) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-input {
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .dialog-actions {
+    min-height: 52px !important;
+    padding: 8px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface-muted, #f9fafb) !important;
+    border-top: 1px solid var(--erp-border, #e4e7ec) !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .dialog-actions .btn-primary,
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .dialog-actions .btn-secondary {
+    width: auto !important;
+    min-width: 76px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 7px !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+  }
+
+  body .MuiDialog-root.yen-pos-prefix-form-dialog .dialog-actions .btn-primary {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border-color: var(--erp-accent, #155eef) !important;
+    box-shadow: 0 2px 5px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+  }
+
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .dialog-actions
+    .btn-primary:hover:not(:disabled) {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body
+    .MuiDialog-root.yen-pos-prefix-form-dialog
+    .MuiDialog-paper.yen-pos-prefix-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+}
+/* =========================================================
    WHATSAPP — YEN PURCHASE / ITEM MASTER VISUAL PARITY
    Presentation only. No API, Redux, handler or business logic changes.
    ========================================================= */
@@ -11060,6 +13415,227 @@ html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-area-card,
     > tr
     > :nth-child(4) {
     width: 20% !important;
+  }
+}
+/* =========================================================
+   WHATSAPP ADMIN — COMPACT ADD / EDIT DIALOG
+   Match the original Master Admin composition at 100% zoom,
+   while using the active YEN ERP Display Settings accent.
+   Presentation only: no API, Redux, validation or handler changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.whatsapp-admin-form-dialog .MuiDialog-container {
+    padding: 16px !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .MuiDialog-paper.whatsapp-admin-dialog-paper {
+    width: min(350px, calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    max-width: 350px !important;
+    max-height: calc(100dvh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 4px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    box-shadow: 0 18px 42px rgba(16, 24, 40, 0.18) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .dialog-title {
+    min-height: 46px !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e7ecf1) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 12px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .dialog-content {
+    padding: 12px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .form-section {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 2px !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .form-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Override globals.css legacy .custom-textfield { width: 70px !important; }. */
+  body .MuiDialog-root.whatsapp-admin-form-dialog .form-field > .custom-textfield,
+  body .MuiDialog-root.whatsapp-admin-form-dialog .custom-textfield,
+  body .MuiDialog-root.whatsapp-admin-form-dialog .MuiTextField-root,
+  body .MuiDialog-root.whatsapp-admin-form-dialog .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 42px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root:hover
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #9bb9fa) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.14)) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiOutlinedInput-root.Mui-focused
+    .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root {
+    color: var(--erp-text-secondary, #475467) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    transform: translate(12px, 11px) scale(1) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.MuiInputLabel-shrink {
+    color: var(--erp-text, #101828) !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    transform: translate(12px, -6px) scale(0.85) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-input
+    input {
+    padding: 10px 12px !important;
+    color: var(--erp-text, #101828) !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 11px !important;
+    line-height: 20px !important;
+    box-sizing: border-box !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .custom-textfield
+    .MuiFormHelperText-root {
+    margin: 4px 0 0 2px !important;
+    font-size: 9.5px !important;
+    line-height: 1.35 !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .dialog-actions {
+    min-height: 48px !important;
+    padding: 7px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    background: var(--erp-surface-muted, #f9fafb) !important;
+    border-top: 1px solid var(--erp-border, #e7ecf1) !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .dialog-actions .btn-secondary,
+  body .MuiDialog-root.whatsapp-admin-form-dialog .dialog-actions .btn-primary {
+    width: auto !important;
+    min-width: 72px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+    font-family: var(--erp-font-family, "Poppins", sans-serif) !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+  }
+
+  body .MuiDialog-root.whatsapp-admin-form-dialog .dialog-actions .btn-primary {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border-color: var(--erp-accent, #155eef) !important;
+    box-shadow: 0 2px 5px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+  }
+
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .dialog-actions
+    .btn-primary:hover:not(:disabled) {
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body
+    .MuiDialog-root.whatsapp-admin-form-dialog
+    .MuiDialog-paper.whatsapp-admin-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
   }
 }
 /* =========================================================
@@ -12621,95 +15197,5 @@ html[data-erp-theme='dark'] .erp-master-admin-viewport .kot-table-area-card,
   body .MuiDialog-root.item-lookup-form-dialog .dialog-actions {
     padding: 9px 14px !important;
     gap: 8px !important;
-  }
-}
-
-
-/* =========================================================
-   KOT ADDON — SELECT VARIANCES FIELD WIDTH FIX
-   The AddOn JSX Paper does not carry kot-addon-select-panel in
-   the current component, so target the actual Paper directly.
-   Presentation only; no selection/search/business logic changes.
-   ========================================================= */
-@media (min-width: 761px) {
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root {
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiFormControl-root,
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiTextField-root,
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-textfield {
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-inputRoot,
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiOutlinedInput-root,
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-input {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: 44px !important;
-    min-height: 44px !important;
-    max-height: 44px !important;
-    padding: 0 34px 0 12px !important;
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    box-sizing: border-box !important;
-  }
-
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-input,
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiOutlinedInput-input {
-    flex: 1 1 auto !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    line-height: normal !important;
-  }
-
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiAutocomplete-endAdornment {
-    right: 8px !important;
-  }
-
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .MuiInputLabel-root:not(.MuiInputLabel-shrink),
-  body .MuiDialog-root.kot-addon-dialog
-  .kot-addon-select-column > .MuiPaper-root > .MuiAutocomplete-root .custom-label:not(.MuiInputLabel-shrink) {
-    max-width: calc(100% - 48px) !important;
-    transform: translate(12px, 13px) scale(1) !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
   }
 }

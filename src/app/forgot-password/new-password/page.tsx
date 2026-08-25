@@ -69,7 +69,7 @@ export default function NewPassword() {
     setLoading(true);
     try {
       const res = await fetch(
-        `https://yenerp.com/purchasetestapi/auth/reset-password`,
+        `http://127.0.0.1:8000/purchasetestapi/auth/reset-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -25,7 +25,7 @@ import {
 } from "@/features/account-setting/userSlice";
 import { authFetch } from "@/utils/authFetch";
 
-const API_BASE = "https://yenerp.com/purchasetestapi";
+const API_BASE = "http://127.0.0.1:8000/purchasetestapi";
 
 const PREDEFINED_ROLES = [
   "Admin",
@@ -781,10 +781,10 @@ phone:
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 pt-3 pb-6 text-gray-900">
+  <div className="account-settings-module account-settings-users min-h-screen bg-gray-50 px-6 pt-3 pb-6 text-gray-900">
       <div className="w-full">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-6 pt-4 pb-10 w-full">
-      <div className="mb-6 flex items-center justify-between">
+        <div className="account-settings-panel bg-white rounded-lg shadow-sm border border-gray-200 px-6 pt-4 pb-10 w-full">
+      <div className="account-settings-toolbar mb-6 flex items-center justify-between">
         <div className="w-80">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -858,8 +858,8 @@ phone:
         </Alert>
       </Snackbar>
 
-      <div className="max-h-[calc(100vh-260px)] overflow-y-auto">
-        <div className="sticky top-0 z-10 grid grid-cols-[60px_90px_1.3fr_110px_1fr_1.6fr_110px_130px] border-b border-gray-200 bg-gray-50 text-xs font-semibold">
+     <div className="account-settings-grid-table max-h-[calc(100vh-260px)] overflow-y-auto">
+        <div className="account-settings-grid-header sticky top-0 z-10 grid grid-cols-[60px_90px_1.3fr_110px_1fr_1.6fr_110px_130px] border-b border-gray-200 bg-gray-50 text-xs font-semibold">
           <div className="p-4 text-left uppercase text-gray-700">S.No</div>
           <div className="p-4 text-left uppercase text-gray-700">Type</div>
           <div className="p-4 text-left uppercase text-gray-700">Username</div>
@@ -879,8 +879,7 @@ phone:
             filteredUsers.map((user, index) => (
               <div
                 key={user.id}
-                className="grid grid-cols-[60px_90px_1.3fr_110px_1fr_1.6fr_110px_130px] border-b border-gray-200 text-sm transition hover:bg-gray-50"
-              >
+className="account-settings-grid-row grid grid-cols-[60px_90px_1.3fr_110px_1fr_1.6fr_110px_130px] border-b border-gray-200 text-sm transition hover:bg-gray-50"              >
                 <div className="flex items-center px-3 py-2 font-medium text-gray-700">
                   {index + 1}
                 </div>
@@ -1019,9 +1018,8 @@ phone:
       </div>
 
       {platformModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]">
-          <div className="flex max-h-[calc(100vh-40px)] w-full max-w-[545px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-gray-100 px-7 py-6">
+<div className="account-settings-custom-modal account-settings-user-platform-modal fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]">          <div className="account-user-platform-card flex max-h-[calc(100vh-40px)] w-full max-w-[545px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="account-user-modal-header flex items-start justify-between border-b border-gray-100 px-7 py-6">
               <div>
                 <h2 className="text-[22px] font-bold text-slate-800">
                   Create New User
@@ -1039,8 +1037,8 @@ phone:
               </button>
             </div>
 
-            <div className="overflow-y-auto px-7 py-5">
-              <div className="flex gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-4">
+         <div className="account-user-platform-body overflow-y-auto px-7 py-5">
+              <div className="account-user-info-box flex gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-4">
                 <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100">
                   <Info className="h-4 w-4 text-amber-600" />
                 </div>
@@ -1058,12 +1056,12 @@ phone:
                 </div>
               </div>
 
-              <div className="mt-6">
+             <div className="account-user-platform-section mt-6">
                 <label className="text-sm font-semibold text-slate-700">
                   Select Platform Type <span className="text-red-500">*</span>
                 </label>
 
-                <div className="mt-3 grid grid-cols-2 gap-4">
+                <div className="account-user-platform-grid mt-3 grid grid-cols-2 gap-4">
                   <PlatformCard
                     selected={selectedPlatform === "web"}
                     icon={<Laptop className="h-6 w-6 text-blue-600" />}
@@ -1088,12 +1086,12 @@ phone:
                 </div>
               </div>
 
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="account-user-comparison mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <h3 className="text-xs font-bold uppercase tracking-wide text-slate-600">
                   Quick Comparison
                 </h3>
 
-                <div className="mt-3 grid grid-cols-[1fr_1fr_1fr] text-[12px] text-slate-600">
+                <div className="account-user-comparison-grid mt-3 grid grid-cols-[1fr_1fr_1fr] text-[12px] text-slate-600">
                   <div className="border-b border-slate-200 pb-2 font-medium">
                     Feature
                   </div>
@@ -1124,7 +1122,7 @@ phone:
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-100 px-7 py-5">
+          <div className="account-user-modal-footer flex justify-end gap-3 border-t border-gray-100 px-7 py-5">
               <button
                 onClick={closeAllUserModals}
                 className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
@@ -1149,13 +1147,11 @@ phone:
       )}
 
       {credentialModalOpen && selectedPlatform && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]">
-          <div className="flex max-h-[calc(100vh-40px)] w-full max-w-[500px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-start border-b border-gray-100 px-6 py-5">
+<div className="account-settings-custom-modal account-settings-user-credential-modal fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]">          <div className="account-user-credential-card flex max-h-[calc(100vh-40px)] w-full max-w-[500px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="account-user-credential-header flex items-start border-b border-gray-100 px-6 py-5">
               <button
                 onClick={goBackToPlatform}
-                className="mr-3 mt-1 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-              >
+className="account-user-back-button mr-3 mt-1 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"              >
                 <ArrowLeft className="h-5 w-5" />
               </button>
 
@@ -1185,14 +1181,13 @@ phone:
 
               <button
                 onClick={closeAllUserModals}
-                className="ml-3 mt-1 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-              >
+className="account-user-close-button ml-3 mt-1 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="overflow-y-auto px-6 py-5">
-              <div className="space-y-5">
+<div className="account-user-credential-body overflow-y-auto px-6 py-5">
+              <div className="account-user-fields-stack space-y-5">
                 {selectedPlatform === "web" && (
                   <>
                     <FormField
@@ -1233,8 +1228,8 @@ phone:
                           : ""
                       }
                     >
-                      <div className="flex gap-2">
-                        <div className="relative w-[84px] shrink-0">
+                     <div className="account-user-phone-row flex gap-2">
+                       <div className="account-user-country-code relative w-[84px] shrink-0">
                           <select
                             value={formUser.countryCode}
                             onChange={(event) =>
@@ -1251,7 +1246,12 @@ phone:
                             <option value="+971">+971</option>
                             <option value="+65">+65</option>
                           </select>
-                          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <span
+                            className="account-user-select-indicator account-user-country-code-indicator"
+                            aria-hidden="true"
+                          >
+                            <ChevronDown className="account-user-select-chevron" />
+                          </span>
                         </div>
 
                         <input
@@ -1407,7 +1407,7 @@ phone:
                   required
                   error={fieldError.role ? "Please select a role" : ""}
                 >
-                  <div className="relative">
+                 <div className="account-user-role-select-wrap relative">
                     <select
                       value={formUser.role}
                       onBlur={() =>
@@ -1431,7 +1431,10 @@ phone:
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <ChevronDown
+                      className="account-user-role-chevron"
+                      aria-hidden="true"
+                    />
                   </div>
 
                   {roles.length === 0 && (
@@ -1443,8 +1446,7 @@ phone:
                 </FormField>
 
                 {selectedPlatform === "web" && !isEditMode && (
-                  <div className="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-4">
-                    <div>
+ <div className="account-user-app-access flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-4">                    <div>
                       <p className="text-sm font-semibold text-blue-700">
                         Also grant App access?
                       </p>
@@ -1477,7 +1479,7 @@ phone:
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-100 px-6 py-5">
+           <div className="account-user-modal-footer flex justify-end gap-3 border-t border-gray-100 px-6 py-5">
               <button
                 onClick={goBackToPlatform}
                 className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
@@ -1532,8 +1534,7 @@ phone:
       )}
 
       {confirmDialog.open && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
+ <div className="account-settings-custom-modal account-settings-confirm-modal fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">          <div className="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
             <h3 className="mb-2 text-lg font-semibold text-gray-800">
               {confirmDialog.title}
             </h3>
@@ -1608,34 +1609,34 @@ function PlatformCard({
     <button
       type="button"
       onClick={onClick}
-      className={`relative min-h-[250px] rounded-xl border-2 p-5 text-left transition hover:shadow-sm ${
-        selected ? selectedClass : "border-slate-200 bg-white"
+data-platform-accent={accent}
+      data-selected={selected ? "true" : "false"}
+      className={`account-user-platform-option relative min-h-[250px] rounded-xl border-2 p-5 text-left transition hover:shadow-sm ${        selected ? selectedClass : "border-slate-200 bg-white"
       }`}
     >
       <span
-        className={`absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-          selected ? ringClass : "border-slate-300"
+className={`account-user-platform-radio absolute right-4 top-4 flex h-5 w-5 items-center justify-center rounded-full border-2 ${          selected ? ringClass : "border-slate-300"
         }`}
       >
         {selected && <span className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />}
       </span>
 
       <span
-        className={`flex h-12 w-12 items-center justify-center rounded-xl ${iconClassName}`}
+       className={`account-user-platform-icon flex h-12 w-12 items-center justify-center rounded-xl ${iconClassName}`}
       >
         {icon}
       </span>
 
-      <h3 className="mt-4 text-lg font-bold text-slate-800">{title}</h3>
-      <p className="mt-1 text-[13px] leading-5 text-slate-500">
+      <h3 className="account-user-platform-title mt-4 text-lg font-bold text-slate-800">{title}</h3>
+      <p className="account-user-platform-description mt-1 text-[13px] leading-5 text-slate-500">
         {description}
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-1.5">
+    <div className="account-user-platform-tags mt-4 flex flex-wrap gap-1.5">
         {tags.map((tag) => (
           <span
             key={tag}
-            className={`rounded px-2 py-1 text-[11px] font-medium ${tagClass}`}
+          className={`account-user-platform-tag rounded px-2 py-1 text-[11px] font-medium ${tagClass}`}
           >
             {tag}
           </span>
@@ -1660,9 +1661,9 @@ function ComparisonRow({
 
   return (
     <>
-      <div className={`${borderClass} py-2`}>{label}</div>
-      <div className={`${borderClass} py-2 pr-2`}>{web}</div>
-      <div className={`${borderClass} py-2`}>{app}</div>
+      <div className={`account-user-comparison-cell ${borderClass} py-2`}>{label}</div>
+      <div className={`account-user-comparison-cell ${borderClass} py-2 pr-2`}>{web}</div>
+      <div className={`account-user-comparison-cell ${borderClass} py-2`}>{app}</div>
     </>
   );
 }
@@ -1683,17 +1684,17 @@ function FormField({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
+   <div className="account-user-form-field">
+      <label className="account-user-form-label mb-2 block text-sm font-semibold text-slate-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
 
       {children}
 
       {error ? (
-        <p className="mt-1.5 text-xs text-red-500">{error}</p>
+      <p className="account-user-form-error mt-1.5 text-xs text-red-500">{error}</p>
       ) : helper ? (
-        <p className={`mt-1.5 text-xs ${helperClassName}`}>{helper}</p>
+       <p className={`account-user-form-helper mt-1.5 text-xs ${helperClassName}`}>{helper}</p>
       ) : null}
     </div>
   );
@@ -1717,7 +1718,7 @@ function PasswordInput({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="relative">
+   <div className="account-user-password-wrap relative">
       <input
         type={visible ? "text" : "password"}
         value={value}
@@ -1731,17 +1732,20 @@ function PasswordInput({
         type="button"
         onClick={onToggle}
         tabIndex={-1}
-        className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 transition hover:text-slate-700"
+        className="account-user-password-toggle"
       >
-        {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        {visible ? (
+          <EyeOff className="account-user-password-icon" />
+        ) : (
+          <Eye className="account-user-password-icon" />
+        )}
       </button>
     </div>
   );
 }
 
 function inputClass(hasError: boolean) {
-  return `h-11 w-full rounded-lg border bg-white px-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${
-    hasError
+return `account-user-input h-11 w-full rounded-lg border bg-white px-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${    hasError
       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/15"
       : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15"
   }`;

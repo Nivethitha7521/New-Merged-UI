@@ -46,7 +46,7 @@ const ACCENT_COLORS = [
   { name: 'Red', value: '#d92d20' },
   { name: 'Pink', value: '#dd2590' },
   { name: 'Yellow', value: '#eaaa08' },
-  { name: 'Teal', value: '#0e9384' },
+  { name: 'Teal', value: '#094a42' },
   { name: 'Indigo', value: '#444ce7' },
   { name: 'Gray', value: '#667085' },
 ];

@@ -12,12 +12,15 @@ import YenPosModuleSideMenu from '@/components/YenPosModuleSideMenu';
 import WhatsAppModuleSideMenu from '@/components/WhatsAppModuleSideMenu';
 // import KOTMasterSubMenu from '@/components/KOTMasterSubMenu';
 import BookModuleSideMenu from '@/components/BookModuleSideMenu';
+import InventoryModuleSideMenu from '@/components/InventoryModuleSideMenu';
+import ControlTowerModuleSideMenu from '@/components/ControlTowerModuleSideMenu';
 import { Toaster } from "react-hot-toast";
 import { fetchBusinesses } from '@/features/account-setting/businessSlice';
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import SideMenu from '@/components/SideMenu';
 import Navbar from '@/components/Navbar';
+import SearchHighlightWatcher from '@/components/SearchHighlightWatcher';
 import RecipeModuleSideMenu from '@/components/RecipeModuleSideMenu';
 import ModuleNavigationTabs from '@/components/ModuleNavigationTabs';
 import type { ModuleNavigationKey } from '@/components/ModuleNavigationTabs';
@@ -74,6 +77,8 @@ const [
 const [isRecipeSubMenuOpen, setIsRecipeSubMenuOpen] = useState(false);
 const [isPosSubMenuOpen, setIsPosSubMenuOpen] = useState(false);
 const [isWhatsAppSubMenuOpen, setIsWhatsAppSubMenuOpen] = useState(false);
+const [isInventorySubMenuOpen, setIsInventorySubMenuOpen] = useState(false);
+const [isControlTowerSubMenuOpen, setIsControlTowerSubMenuOpen] = useState(false);
 const [pendingBookPath, setPendingBookPath] =
   useState<string | null>(null);
 
@@ -210,7 +215,7 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
     // isUserActive = false → fallback check மட்டும் → TTL refresh வேண்டாம்
     const sendPing = async (isUserActive: boolean = false) => {
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://yenerp.com"
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
         const res = await fetch(`${API_BASE}/purchasetestapi/ping`, {
@@ -362,9 +367,15 @@ const isRecipeRoute =
   const isPosRoute =
   pathname === '/yen-pos' ||
   pathname?.startsWith('/yen-pos/');
-  const isWhatsAppRoute =
+const isWhatsAppRoute =
   pathname === '/WhatsApp' ||
   pathname?.startsWith('/WhatsApp/');
+const isInventoryRoute =
+  pathname === '/yen-inventory' ||
+  pathname?.startsWith('/yen-inventory/');
+  const isInventoryControlTowerRoute =
+  pathname === '/inventory-control-tower' ||
+  pathname?.startsWith('/inventory-control-tower/');
 // const isKotMasterRoute =
 //   pathname === '/master-admin/KOTMaster' ||
 //   pathname?.startsWith('/master-admin/KOTMaster/');
@@ -422,18 +433,74 @@ if (isLoggedIn && isReportsRoute) {
     },
   ) => {
     setSelectedModule(menuItem.text);
- if (menuItem.path === '/QlikReport') {
-    window.open(REPORTS_APP_URL, '_blank', 'noopener,noreferrer');
+if (menuItem.path === '/QlikReport') {
+    (async () => {
+      const ssoUsername = username || sessionStorage.getItem('username') || '';
+      let reportsUrl = REPORTS_APP_URL;
+
+      try {
+        if (token && ssoUsername) {
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://yenerp.com';
+          const res = await fetch(`${API_BASE}/purchasetestapi/sso/reports-ticket`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (res.ok) {
+            const { ticket } = await res.json();
+            const url = new URL(REPORTS_APP_URL);
+            url.searchParams.set('sso_token', ticket);
+            url.searchParams.set('sso_user', ssoUsername);
+            reportsUrl = url.toString();
+          }
+        }
+      } catch (e) {
+        console.error('SSO ticket fetch failed', e);
+      }
+
+      window.open(reportsUrl, '_blank', 'noopener,noreferrer');
+    })();
     return;
-  }
+}
 if (menuItem.path === '/yen-purchase') {
   setSelectedModule(menuItem.text);
   setIsBookSubMenuOpen(false);
   setIsMasterAdminSubMenuOpen(false);
 setIsPosSubMenuOpen(false);
 setIsWhatsAppSubMenuOpen(false);
+setIsInventorySubMenuOpen(false);
   if (!pathname?.startsWith('/yen-purchase')) {
     router.push('/yen-purchase');
+  }
+
+  return;
+}
+
+if (menuItem.path === '/yen-inventory') {
+  setSelectedModule(menuItem.text);
+  setIsPurchaseSubMenuOpen(false);
+  setIsBookSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
+  setIsPosSubMenuOpen(false);
+  setIsWhatsAppSubMenuOpen(false);
+  setIsControlTowerSubMenuOpen(false);
+  if (!pathname?.startsWith('/yen-inventory')) {
+    router.push('/yen-inventory');
+  }
+
+  return;
+}
+
+if (menuItem.path === '/inventory-control-tower') {
+  setSelectedModule(menuItem.text);
+  setIsPurchaseSubMenuOpen(false);
+  setIsBookSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
+  setIsPosSubMenuOpen(false);
+  setIsWhatsAppSubMenuOpen(false);
+  setIsInventorySubMenuOpen(false);
+  if (!pathname?.startsWith('/inventory-control-tower')) {
+    router.push('/inventory-control-tower');
   }
 
   return;
@@ -445,6 +512,7 @@ if (menuItem.path === '/yen-book') {
   setIsMasterAdminSubMenuOpen(false);
 setIsPosSubMenuOpen(false);
  setIsWhatsAppSubMenuOpen(false);
+ setIsInventorySubMenuOpen(false);
   if (!pathname?.startsWith('/yen-book')) {
     router.push('/yen-book');
   }
@@ -456,6 +524,7 @@ if (menuItem.path === '/master-admin') {
   setIsPurchaseSubMenuOpen(false);
   setIsBookSubMenuOpen(false);
 setIsPosSubMenuOpen(false);
+setIsInventorySubMenuOpen(false);
   if (!pathname?.startsWith('/master-admin')) {
     router.push('/master-admin');
   }
@@ -469,6 +538,7 @@ if (menuItem.path === '/yen-pos') {
   setIsMasterAdminSubMenuOpen(false);
   setIsRecipeSubMenuOpen(false);
   setIsWhatsAppSubMenuOpen(false);
+  setIsInventorySubMenuOpen(false);
 
   if (!pathname?.startsWith('/yen-pos')) {
     router.push('/yen-pos/CashManagement/OpeningCash');
@@ -482,6 +552,7 @@ if (menuItem.path === '/WhatsApp') {
   setIsMasterAdminSubMenuOpen(false);
   setIsRecipeSubMenuOpen(false);
   setIsPosSubMenuOpen(false);
+  setIsInventorySubMenuOpen(false);
 
   if (!pathname?.startsWith('/WhatsApp')) {
     router.push('/WhatsApp/WhatsappAdmin');
@@ -494,6 +565,8 @@ if (menuItem.path === '/WhatsApp') {
     setIsPosSubMenuOpen(false);
     setIsWhatsAppSubMenuOpen(false);
      setIsWhatsAppSubMenuOpen(false);
+      setIsInventorySubMenuOpen(false);
+      setIsControlTowerSubMenuOpen(false);
     router.push(menuItem.path);
   }}
   activePath={pathname || '/yen-purchase'}
@@ -508,12 +581,49 @@ if (menuItem.path === '/WhatsApp') {
   username={username || 'User'}
 />
 
-<div className={`erp-module-layout ${useTabNavigation ? 'is-tab-navigation' : ''}`}>
-    {!useTabNavigation && isPurchaseRoute && (
+<div className={`erp-module-layout ${useTabNavigation ? 'is-tab-navigation' : ''} ${isInventoryRoute ? 'erp-inventory-viewport' : ''}`}>    {!useTabNavigation && isPurchaseRoute && (
   <PurchaseModuleSideMenu
     expanded={isPurchaseSubMenuOpen}
     onToggle={() =>
       setIsPurchaseSubMenuOpen((previous) => !previous)
+    }
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
+
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
+{!useTabNavigation && isInventoryRoute && (
+  <InventoryModuleSideMenu
+    expanded={isInventorySubMenuOpen}
+    onToggle={() =>
+      setIsInventorySubMenuOpen((previous) => !previous)
+    }
+    onNavigate={(menuItem) => {
+      setSelectedModule(menuItem.text);
+
+      const pageAlreadyOpen =
+        pathname === menuItem.path ||
+        pathname?.startsWith(`${menuItem.path}/`);
+
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
+      }
+    }}
+  />
+)}
+{!useTabNavigation && isInventoryControlTowerRoute && (
+  <ControlTowerModuleSideMenu
+    expanded={isControlTowerSubMenuOpen}
+    onToggle={() =>
+      setIsControlTowerSubMenuOpen((previous) => !previous)
     }
     onNavigate={(menuItem) => {
       setSelectedModule(menuItem.text);
@@ -669,6 +779,7 @@ if (menuItem.path === '/WhatsApp') {
 </div>
         </div>
         {snackbarElement}
+        <SearchHighlightWatcher />
       </>
     );
   }
@@ -678,6 +789,7 @@ if (menuItem.path === '/WhatsApp') {
       <Toaster position="top-right" />
       {children}
       {snackbarElement}
+      <SearchHighlightWatcher />
     </>
   );
 };

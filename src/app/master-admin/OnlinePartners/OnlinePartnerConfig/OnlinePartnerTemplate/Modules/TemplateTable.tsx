@@ -34,12 +34,12 @@ const TemplateTable: React.FC<TemplateTableProps> = ({
   renderAssignedPartners,
 }) => {
   return (
-    <div className="table-container" style={{ 
+   <div className="table-container online-partner-template-table-container" style={{ 
       maxHeight: 'calc(75.5vh - 170px)', 
       overflowX: 'auto',
       overflowY: 'auto'
     }}>
-      <table className="custom-table" style={{
+     <table className="custom-table online-partner-template-table" style={{
         width: '100%',
         borderCollapse: 'collapse',
         minWidth: '800px'

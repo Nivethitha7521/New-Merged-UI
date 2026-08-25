@@ -13,7 +13,7 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'https://yenerp.com/purchasetestapi';
+const BASE_URL = 'http://127.0.0.1:8000/purchasetestapi';
 const customRoundOf = (value: number) => {
   return Math.round(value * 100) / 100; 
 };

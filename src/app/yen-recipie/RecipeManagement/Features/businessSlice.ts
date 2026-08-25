@@ -90,13 +90,13 @@ export const fetchShipping = createAsyncThunk('shipping/fetchShipping', async ()
 
 // Async thunk to add a new Business item
 export const addShipping = createAsyncThunk<ShippingAddress, ShippingAddress>('shipping/addShipping', async (shippingaddress) => {
-  const response = await axios.post('https://yenerp.com/purchasetestapi/poshippingaddress/', shippingaddress); // Adjust API endpoint as needed
+  const response = await axios.post('http://127.0.0.1:8000/purchasetestapi/poshippingaddress/', shippingaddress); // Adjust API endpoint as needed
   return response.data;
 });
 
 // Async thunk to update an existing Business item
 export const updateShipping = createAsyncThunk<ShippingAddress, ShippingAddress>('shipping/updateBusiness', async (shippingaddress) => {
-  const response = await axios.patch(`https://yenerp.com/purchasetestapi/poshippingaddress/${shippingaddress.shippingId}`, shippingaddress); // Adjust API endpoint as needed
+  const response = await axios.patch(`http://127.0.0.1:8000/purchasetestapi/poshippingaddress/${shippingaddress.shippingId}`, shippingaddress); // Adjust API endpoint as needed
   return response.data;
 });
 

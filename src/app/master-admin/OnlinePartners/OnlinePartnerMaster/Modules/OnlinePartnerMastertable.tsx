@@ -64,7 +64,7 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
     items: partners,
     deactivatedItems,
     loading,
-  } = useSelector((state: RootState) => state.onlinePartners);
+  } = useSelector((state: RootState) => state.maOnlinePartners);
 
   const displayedPartners = showDeactivated ? deactivatedItems : partners;
   const label = showDeactivated ? 'Show Activated' : 'Show Deactivated';
@@ -76,6 +76,7 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
 
 
       <Box
+      className="online-partner-master-toolbar"
         display="flex"
         flexDirection={{ xs: "column", sm: "row" }}
         alignItems={{ xs: "flex-start", sm: "center" }}
@@ -86,7 +87,7 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
         px={{ xs: 2, sm: 3 }}
         sx={{ width: "99%", boxSizing: "border-box", mt: -2 }}
       >
-        <Typography className='icon-action-label'
+        <Typography className='icon-action-label online-partner-master-title'
           sx={{
             fontFamily: "'Poppins', sans-serif",
             fontWeight: 750,
@@ -100,7 +101,7 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
           {showDeactivated ? "Deactivated Partners" : "Active Partners"}
         </Typography>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 online-partner-master-actions">
           {!showDeactivated && (
             <>
               <div className="icon-action-wrapper">
@@ -119,6 +120,7 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
             </>
           )}
           <FormControlLabel
+          className="online-partner-master-toggle"
             control={
               <Switch
                 checked={showDeactivated}
@@ -141,8 +143,8 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
       </Box>
 
 
-      <div className="table-container my-1" style={{ maxHeight: 'calc(90.5vh - 170px)' }}>
-        <table className="custom-table">
+     <div className="table-container my-1 online-partner-master-table-container" style={{ maxHeight: 'calc(90.5vh - 170px)' }}>
+        <table className="custom-table online-partner-master-table">
           <thead>
             <tr>
               <th style={{ textAlign: 'center' }}>S.NO</th>

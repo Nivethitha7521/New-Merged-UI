@@ -153,8 +153,7 @@ const GenericColumnFilterPanel: React.FC<GenericColumnFilterPanelProps> = ({
         {filteredColumns.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[var(--app-border)] bg-[var(--app-surface)] py-8 text-center">
             <HiMagnifyingGlass size={22} className="text-[var(--app-text-muted)]" />
-            <p className="mt-2 text-xs font-semibold text-[var(--app-text-muted)]">No columns match "{searchTerm}"</p>
-          </div>
+          <p className="mt-2 text-xs font-semibold text-[var(--app-text-muted)]">No columns match &quot;{searchTerm}&quot;</p>          </div>
         ) : (
           <div
             className={

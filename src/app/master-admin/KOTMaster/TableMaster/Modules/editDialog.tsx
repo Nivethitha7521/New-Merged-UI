@@ -494,8 +494,8 @@ const EditBranchDialog: React.FC<EditBranchDialogProps> = ({
         </ConfirmDialogTitle>
         <ConfirmDialogContent>
           <Box sx={{ pt: 2 }}>
-            Are you sure you want to delete the area "
-            {areaToDelete !== null ? selectedBranch.areas[areaToDelete]?.areaName : ''}"?
+          Are you sure you want to delete the area &quot;
+            {areaToDelete !== null ? selectedBranch.areas[areaToDelete]?.areaName : ''}&quot;?
           </Box>
         </ConfirmDialogContent>
         <ConfirmDialogActions className="dialog-actions">

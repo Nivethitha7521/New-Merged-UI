@@ -198,8 +198,7 @@ const FilterBarComponent: React.FC<FilterBarProps> = ({
   })), [branches]);
 
   return (
-    <div className="w-full min-w-0 flex flex-wrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[20]">
-   
+    <div className="w-full min-w-0 flex flex-nowrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[20] overflow-x-auto no-scrollbar">   
       {/* Label  4 8 1*/}
       {/* <div className="hidden sm:flex h-[34px] items-center px-2.5 rounded-[8px] bg-white border border-brand-200 text-[11px] font-extrabold text-brand-700 whitespace-nowrap shrink-0">
         {cascadeSourceKey ? `Filters · ${cascadeSourceLabel}` : "Filters"}

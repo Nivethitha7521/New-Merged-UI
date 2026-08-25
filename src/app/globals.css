@@ -3,7 +3,147 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Explicitly tell Tailwind v4 to scan the whole src/ tree.
+   Without this, new files added under src/app or src/features
+   sometimes get missed by content auto-detection and their
+   className utilities silently compile to nothing (unstyled UI). */
+@source "../";
 
+/* ===== Inventory module design tokens (CSS only, no logic) ===== */
+@theme {
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #155eef;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  --color-surface:        #ffffff;
+  --color-surface-muted:  #f8fafc;
+  --color-surface-subtle: #f1f5f9;
+
+  --color-text-primary:   #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted:     #64748b;
+  --color-text-disabled:  #94a3b8;
+
+  --color-border:         #e2e8f0;
+  --color-border-muted:   #f1f5f9;
+  --color-border-focus:   #3b82f6;
+
+  --color-success-50:  #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+
+  --color-warning-50:  #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-300: #fcd34d;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+  --color-warning-800: #92400e;
+
+  --color-danger-50:  #fef2f2;
+  --color-danger-200: #fecaca;
+  --color-danger-300: #fca5a5;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+  --color-danger-800: #991b1b;
+
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.inventory-data-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.inventory-data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.inventory-data-table thead th {
+  background: #f8fafc;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1.5px solid #e2e8f0;
+  white-space: nowrap;
+  user-select: none;
+  text-align: center;
+}
+.inventory-data-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 100ms;
+}
+.inventory-data-table tbody tr:last-child { border-bottom: none; }
+.inventory-data-table tbody tr:hover { background-color: #eff6ff; }
+.inventory-data-table tbody tr:nth-child(even) { background-color: #fafafa; }
+.inventory-data-table tbody tr:nth-child(even):hover { background-color: #eff6ff; }
+.inventory-data-table tbody td {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #334155;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scaleIn var(--transition-normal) forwards; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.ct-card {
+  background: rgba(255, 255, 255, .96);
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(15, 23, 42, .055);
+}
+.ct-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border-radius: 999px;
+  padding: .32rem .66rem;
+  font-size: .69rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.ct-filter-bar > input,
+.ct-filter-bar > select { width: 100%; min-width: 0; }
+.ct-filter-bar > button { flex: 1 1 0%; }
+@media (min-width: 640px) {
+  .ct-filter-bar > input { width: auto; min-width: 14rem; }
+  .ct-filter-bar > select { width: auto; }
+  .ct-filter-bar > button { flex: 0 0 auto; }
+}
+.ct-scrollbar-thin::-webkit-scrollbar { height: 7px; width: 7px; }
+.ct-scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+.ct-scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+.erp-inventory-viewport {
+  zoom: 0.67;
+}
 /* Define global custom properties */
 :root {
   --foreground-rgb: 0, 0, 0; /* Black text */
@@ -541,7 +681,7 @@ table.MuiTable-root td:nth-child(1) {
   font-size: 18px !important;
 }
 /* =========================================================
-   YEN ERP 2026 visual system — shared across every screen
+   YEN ERP 2026 visual system â€” shared across every screen
    ========================================================= */
 :root {
   --erp-bg: #f3f6fa;
@@ -713,7 +853,21 @@ table th.MuiTableCell-head, .MuiTableCell-head {
   font-weight: 700 !important;
   letter-spacing: .14em !important;
   text-transform: uppercase !important;
-  position: static !important;
+  /* position: static !important; */
+}
+/* =========================================================
+   GLOBAL STATIC TABLE HEADER
+   Applies to every MUI table rendered inside TableContainer.
+   Keeps the header fixed while only the table body scrolls.
+   No table data, API, pagination, sorting, or business logic changes.
+   ========================================================= */
+
+.MuiTableContainer-root .MuiTableHead-root .MuiTableCell-head {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: #f8fafc !important;
+  background-clip: padding-box !important;
 }
 table td.MuiTableCell-root, .MuiTableCell-body {
   min-height: 58px !important;
@@ -775,7 +929,7 @@ table td.MuiTableCell-root, .MuiTableCell-body {
 }
 
 /* =========================================================
-   Purchase workspace — reference-matched shared UI
+   Purchase workspace â€” reference-matched shared UI
    Scoped to /yen-purchase so business behavior is untouched.
    ========================================================= */
 .erp-purchase-viewport {
@@ -1615,7 +1769,7 @@ button.primary,
 }
 
 /* =========================================================
-   Dark mode — deep, high-contrast palette
+   Dark mode â€” deep, high-contrast palette
    ========================================================= */
 html[data-erp-theme='dark'] {
   --erp-bg: #0a0f1c;
@@ -1782,7 +1936,7 @@ html[data-erp-style='classic'] .erp-navbar {
 }
 
 /* =========================================================
-   Glassmorphism — premium frosted surfaces
+   Glassmorphism â€” premium frosted surfaces
    ========================================================= */
 html[data-erp-style='glass'] {
   --glass-bg: color-mix(in srgb, var(--erp-surface) 55%, transparent);
@@ -1890,7 +2044,7 @@ html[data-erp-style='glass'] .MuiPopover-paper {
   box-shadow: 0 25px 60px rgba(15, 23, 42, .25) !important;
 }
 
-/* DARK + GLASS combo — deeper tints */
+/* DARK + GLASS combo â€” deeper tints */
 html[data-erp-theme='dark'][data-erp-style='glass'] {
   --glass-bg: color-mix(in srgb, var(--erp-surface) 60%, transparent);
   --glass-border: color-mix(in srgb, #ffffff 10%, transparent);
@@ -2558,7 +2712,7 @@ a:not(.MuiButton-root):hover,
 }
 
 /* =========================================================
-   DARK MODE — Missing element color fixes
+   DARK MODE â€” Missing element color fixes
    ========================================================= */
 
 /* Sidebar labels, icons, brand text */
@@ -2573,7 +2727,7 @@ html[data-erp-theme='dark'] .erp-sidebar-brand * {
   color: var(--erp-text) !important;
 }
 
-/* Sidebar active item — keep accent color */
+/* Sidebar active item â€” keep accent color */
 html[data-erp-theme='dark'] .erp-sidebar-item.is-active,
 html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-label,
 html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-icon,
@@ -2607,7 +2761,7 @@ html[data-erp-theme='dark'] .erp-breadcrumb-item {
   color: var(--erp-muted) !important;
 }
 
-/* Purchase submodule tab buttons (Purchase Category, SubCategory, UOM…) */
+/* Purchase submodule tab buttons (Purchase Category, SubCategory, UOMâ€¦) */
 html[data-erp-theme='dark'] .purchase-submodule-tab {
   background: var(--erp-surface-2) !important;
   color: var(--erp-text) !important;
@@ -2645,7 +2799,7 @@ html[data-erp-theme='dark'] .purchase-reference-summary-label {
 }
 
 
-/* Toolbar action buttons (Add New, Import, Export) — outlined variant already covered,
+/* Toolbar action buttons (Add New, Import, Export) â€” outlined variant already covered,
    but the "Add New" contained blue button needs proper text */
 html[data-erp-theme='dark'] .purchase-reference-action-button {
   background: var(--erp-surface-2) !important;
@@ -2715,7 +2869,7 @@ html[data-erp-theme='dark'] .MuiTypography-root:not(.purchase-reference-summary-
 
 
 /* =========================================================
-   DARK MODE — Secondary/module sidebar (Purchase, Book, Inventory)
+   DARK MODE â€” Secondary/module sidebar (Purchase, Book, Inventory)
    ========================================================= */
 
 /* The panel/drawer itself */
@@ -2748,7 +2902,7 @@ html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiTypography-caption {
   color: var(--erp-muted) !important;
 }
 
-/* Menu list items (Purchase Master, Vendor, Purchase Item…) */
+/* Menu list items (Purchase Master, Vendor, Purchase Itemâ€¦) */
 html[data-erp-theme='dark'] .purchase-module-item,
 html[data-erp-theme='dark'] .book-module-item,
 html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root,
@@ -2785,7 +2939,7 @@ html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root:ho
   color: var(--erp-accent) !important;
 }
 
-/* ACTIVE item — clean accent, no pink gradient */
+/* ACTIVE item â€” clean accent, no pink gradient */
 html[data-erp-theme='dark'] .purchase-module-item.is-active,
 html[data-erp-theme='dark'] .book-module-item.is-active,
 html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root.Mui-selected,
@@ -2832,7 +2986,7 @@ html[data-erp-theme='dark'] .purchase-module-sidebar .MuiIconButton-root:hover {
 }
 
 /* =========================================================
-   GLASS style — Secondary/module sidebar
+   GLASS style â€” Secondary/module sidebar
    ========================================================= */
 html[data-erp-style='glass'] .purchase-module-sidebar,
 html[data-erp-style='glass'] .book-module-sidebar,
@@ -2848,7 +3002,7 @@ html[data-erp-style='glass'] [class*="module-sidebar"] .MuiDrawer-paper {
     12px 0 40px rgba(15, 23, 42, .18) !important;
 }
 
-/* Glass active item — gradient glow */
+/* Glass active item â€” gradient glow */
 html[data-erp-style='glass'] .purchase-module-item.is-active,
 html[data-erp-style='glass'] .book-module-item.is-active,
 html[data-erp-style='glass'] [class*="module-sidebar"] .Mui-selected {
@@ -2876,4 +3030,58 @@ html[data-erp-theme='dark'][data-erp-style='glass'] [class*="module-sidebar"],
 html[data-erp-theme='dark'][data-erp-style='glass'] .purchase-module-sidebar .MuiDrawer-paper {
   background: color-mix(in srgb, var(--erp-surface) 60%, transparent) !important;
   border-right: 1px solid color-mix(in srgb, #ffffff 8%, transparent) !important;
+}
+
+/* ============================================================
+   Global Search â€” result highlight styles
+   Used by SearchHighlightWatcher.tsx (mounted once in
+   ClientLayout.tsx) to flash the table row or form field that a
+   search result navigated to. Applies app-wide, no per-page CSS
+   needed.
+   ============================================================ */
+.search-row-highlight {
+  animation: search-row-flash 1.4s ease-in-out 2;
+}
+
+.search-row-highlight td {
+  position: relative;
+}
+
+.search-row-highlight td:first-of-type::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: #ff8a00;
+}
+
+@keyframes search-row-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  35%,
+  65% {
+    background-color: rgba(255, 176, 32, 0.42);
+  }
+}
+
+.search-focus-highlight {
+  outline: 3px solid #ff8a00 !important;
+  outline-offset: 2px;
+  border-radius: 8px;
+  animation: search-focus-pulse 1.4s ease-in-out 2;
+}
+
+@keyframes search-focus-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 138, 0, 0);
+    background-color: rgba(255, 176, 32, 0.2);
+  }
 }

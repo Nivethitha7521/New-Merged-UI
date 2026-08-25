@@ -60,42 +60,6 @@ const WarehouseInventoryManagementPage = () => {
       >
         <Box
           sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.55,
-            height: 32,
-            px: 0.5,
-            color: "#334155",
-            fontSize: { xs: "11px", sm: "12px" },
-            fontWeight: 900,
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              width: 6,
-              height: 6,
-              borderRadius: "999px",
-              backgroundColor: PRIMARY_BLUE,
-            }}
-          />
-          Warehouse
-        </Box>
-
-        <Box
-          sx={{
-            width: "1px",
-            height: 24,
-            backgroundColor: "#dbeafe",
-            display: { xs: "none", sm: "block" },
-            flexShrink: 0,
-          }}
-        />
-
-        <Box
-          sx={{
             display: "flex",
             alignItems: "center",
             gap: { xs: 0.55, sm: 0.7 },

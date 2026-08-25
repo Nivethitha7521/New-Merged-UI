@@ -2,10 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import onlinePartnersReducer from '../features/onlinePartnersSlice';
 import billReceiptsReducer from '../features/billReceiptsSlice';
 import purchaseOrderReducer from '../features/yen-purchase/PurchaseOrder/purchaseOrderSlice';
+import dispatchStoreReducer from '../features/purchase-order/raw-materials/redux/storedispatch';
 import grnReducer from '../features/yen-purchase/GRN/grnSlice';
 import dataReducer from '../features/yen_inventory/OutletPhysicalVarianceSlice';
 import debitNoteReducer from '../features/debitNotesAllSlice';
 import apInvoiceReducer from '../features/yen-purchase/AP/apInvoiceSlice';
+import dailyActivitiesReducer from '../features/purchase-order/raw-materials/redux/branchesSlice';
 import outgoingPaymentReducer from '../features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import vendorReducer from '../features/yen-purchase/PurchaseMaster/vendorSlice';
 import purchaseItemReducer from '../features/yen-purchase/PurchaseMaster/purchaseItemSlice';
@@ -240,6 +242,9 @@ const store = configureStore({
 
 
     dateFilter: dateFilterReducer,
+    dailyActivities: dailyActivitiesReducer,
+    dispatches: dispatchStoreReducer,
+    apInvoice: apInvoiceReducer,
     ...reportReducers,
         expenseCategory: expenseCategoryReducer,
     expenseName: expenseNameReducer,

@@ -58,7 +58,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
     return (
       <>
         {message}{" "}
-        <strong>"{locationName}"</strong>?
+        <strong>&quot;{locationName}&quot;</strong>?
       </>
     );
   };

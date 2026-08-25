@@ -108,33 +108,36 @@ if (!isSuperAdmin) {
 
 
   return (
-    <div>
+   <div className="account-settings-shell">
      
 
-      <div className="flex flex-start gap-2 mt-4 ml-4 items-center justify-start">
+     <div className="account-settings-tabs">
       {subItems.map((item) => {
   const isActive = activeContent === item.component;
 
   return (
     <Button
       key={item.label}
+      className="account-settings-tab"
       variant={isActive ? 'contained' : 'outlined'}
       color="primary"
       size="medium"
       onClick={() => handleButtonClick(item)}
       sx={{
         textTransform: 'none',
-        fontWeight: isActive ? 'bold' : 'normal',
-        fontSize: isActive ? '16px' : '15px',
-        borderRadius: '4px',
-        padding: '10px 20px',
-        width: isActive ? '550px' : '150px',
-        height: isActive ? '50px' : '30px',
+        fontWeight: isActive ? 700 : 600,
+        fontSize: '10.5px',
+        borderRadius: '6px',
+        padding: '0 11px',
+        width: 'auto',
+        minWidth: '90px',
+        height: '30px',
+        minHeight: '30px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         transition: 'all 0.2s ease',
-        boxShadow: isActive ? '0px 0px 10px rgba(0, 0, 0, 0.1)' : 'none',
+        boxShadow: isActive ? '0 1px 3px rgba(16, 24, 40, 0.08)' : 'none',
       }}
     >
       {item.label}
@@ -145,6 +148,7 @@ if (!isSuperAdmin) {
       </div>
 
       <div className="mt-4">
+         <div className="account-settings-content"></div>
         {renderActiveContent()}
       </div>
     </div>

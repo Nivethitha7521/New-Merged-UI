@@ -107,7 +107,7 @@ const UomTable: React.FC<UomTableProps> = ({
    * uses the Master Admin reducer key.
    */
   const { loading } = useSelector(
-    (state: RootState) => state.mauoms
+    (state: RootState) => state.maUoms
   );
 
   if (isSubmitting) {

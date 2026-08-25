@@ -150,8 +150,7 @@ const WarehouseRawMaterialsStockModification: React.FC = () => {
     visibleColumns,
     approveAllBranchLoading,
     loadingPendingCodes,
-  } = useSelector((state: RootState) => state.purchaseItems);
-
+} = useSelector((state: RootState) => state.rawMaterialStore);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const approvedTableContainerRef = useRef<HTMLDivElement>(null);
   const activeFilterRequestRef = useRef<{ abort: () => void } | null>(null);
