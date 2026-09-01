@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './verify-email.css';
 
-const BACKEND_BASE = 'http://127.0.0.1:8000/purchasetestapi/public';
+const BACKEND_BASE = 'http://127.0.0.1:8000/yenerpapi/public';
 
 
 function VerifyEmailContent() {

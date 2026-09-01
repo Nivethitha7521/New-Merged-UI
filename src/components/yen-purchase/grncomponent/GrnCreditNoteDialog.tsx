@@ -42,7 +42,7 @@ const toggleFullScreen = () => {
   };
   const handleDownloadPdf = async (noteId: string) => {
     try {
-      await downloadPdf(`http://127.0.0.1:8000/purchasetestapi/grns/returnprocess/DebitCreditNote/pdf/${noteId}`, `DebitCreditNote_${noteId}.pdf`);
+      await downloadPdf(`http://127.0.0.1:8000/yenerpapi/grns/returnprocess/DebitCreditNote/pdf/${noteId}`, `DebitCreditNote_${noteId}.pdf`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
     }

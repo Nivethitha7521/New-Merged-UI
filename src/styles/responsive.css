@@ -1,0 +1,760 @@
+/* =========================================================
+   YEN ERP - GLOBAL RESPONSIVE OVERRIDE
+   ---------------------------------------------------------
+   Purpose:
+   - Preserve existing desktop UI and business logic.
+   - Add mobile/tablet/small-laptop responsiveness.
+   - Avoid changing existing component designs wherever possible.
+   - Prefer safe wrapping/scrolling/reflow over destructive overrides.
+
+   Recommended import order:
+   globals.css
+   existing component/module CSS
+   desktopDensity.css
+   responsive.css        <-- this file
+   yenDialog.css         <-- keep last if your project requires it
+
+   Breakpoints:
+   <= 480px        : small phones
+   481px - 600px   : mobile
+   601px - 900px   : tablet
+   901px - 1199px  : small laptop
+   >= 1200px       : existing desktop UI (left untouched)
+   ========================================================= */
+
+
+/* =========================================================
+   1. GLOBAL SAFETY
+   ========================================================= */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+picture,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+svg {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   2. YEN ERP APP SHELL
+   These selectors are intentionally non-visual.
+   They only allow flex/grid children to shrink correctly.
+   ========================================================= */
+
+.erp-app-shell,
+.erp-app-main,
+.erp-module-layout,
+.erp-page-viewport,
+.erp-purchase-viewport {
+  min-width: 0;
+}
+
+.erp-app-shell {
+  width: 100%;
+}
+
+.erp-app-main {
+  flex: 1 1 auto;
+}
+
+.erp-module-layout {
+  min-width: 0;
+}
+
+.erp-page-viewport,
+.erp-purchase-viewport {
+  width: 100%;
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   3. CONTAINER QUERY FOUNDATION
+   Based on the responsive tutorial concept.
+   Existing page UI is not changed by this declaration alone.
+   ========================================================= */
+
+.erp-page-viewport,
+.erp-purchase-viewport {
+  container-type: inline-size;
+}
+
+.erp-page-viewport {
+  container-name: erp-page;
+}
+
+.erp-purchase-viewport {
+  container-name: erp-purchase-page;
+}
+
+
+/* =========================================================
+   4. GENERIC CONTENT SHRINK SAFETY
+   ========================================================= */
+
+.erp-page-viewport > *,
+.erp-purchase-viewport > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.erp-page-viewport main,
+.erp-page-viewport section,
+.erp-page-viewport article,
+.erp-page-viewport header,
+.erp-page-viewport footer,
+.erp-purchase-viewport main,
+.erp-purchase-viewport section,
+.erp-purchase-viewport article,
+.erp-purchase-viewport header,
+.erp-purchase-viewport footer {
+  min-width: 0;
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   5. MUI / COMMON LIBRARY SAFETY
+   ========================================================= */
+
+.erp-page-viewport .MuiBox-root,
+.erp-page-viewport .MuiStack-root,
+.erp-page-viewport .MuiGrid-root,
+.erp-page-viewport .MuiPaper-root,
+.erp-page-viewport .MuiCard-root,
+.erp-purchase-viewport .MuiBox-root,
+.erp-purchase-viewport .MuiStack-root,
+.erp-purchase-viewport .MuiGrid-root,
+.erp-purchase-viewport .MuiPaper-root,
+.erp-purchase-viewport .MuiCard-root {
+  min-width: 0;
+}
+
+.erp-page-viewport .MuiGrid-container,
+.erp-purchase-viewport .MuiGrid-container {
+  max-width: 100%;
+}
+
+.erp-page-viewport .MuiTypography-root,
+.erp-purchase-viewport .MuiTypography-root {
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   6. TABLE / DATAGRID FOUNDATION
+   Keep desktop table design intact.
+   On smaller screens the wrapper scrolls horizontally.
+   ========================================================= */
+
+.erp-page-viewport .MuiTableContainer-root,
+.erp-purchase-viewport .MuiTableContainer-root,
+.erp-page-viewport .table-container,
+.erp-purchase-viewport .table-container,
+.erp-page-viewport .table-wrapper,
+.erp-purchase-viewport .table-wrapper,
+.erp-page-viewport .data-table-wrapper,
+.erp-purchase-viewport .data-table-wrapper {
+  max-width: 100%;
+}
+
+.erp-page-viewport .MuiDataGrid-root,
+.erp-purchase-viewport .MuiDataGrid-root {
+  min-width: 0;
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   7. REUSABLE OPTIONAL RESPONSIVE HELPERS
+   Add these classes only to screens that need them.
+   Existing UI remains unchanged until the class is used.
+   ========================================================= */
+
+.erp-responsive-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.erp-responsive-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.erp-responsive-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+
+.erp-responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(240px, 100%), 1fr)
+  );
+  gap: 16px;
+  min-width: 0;
+}
+
+.erp-responsive-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+
+.erp-responsive-scroll-x {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.erp-responsive-full-width {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+
+/* =========================================================
+   8. CONTAINER-BASED FORM/CARD REFLOW
+   Only affects elements where the helper class is added.
+   ========================================================= */
+
+@container erp-page (max-width: 1100px) {
+  .erp-responsive-form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container erp-page (max-width: 850px) {
+  .erp-responsive-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .erp-responsive-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container erp-page (max-width: 520px) {
+  .erp-responsive-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container erp-purchase-page (max-width: 1100px) {
+  .erp-responsive-form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container erp-purchase-page (max-width: 850px) {
+  .erp-responsive-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .erp-responsive-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container erp-purchase-page (max-width: 520px) {
+  .erp-responsive-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   9. SMALL LAPTOP
+   901px - 1199px
+   Desktop look is preserved; only available-space handling
+   and page gutters are reduced.
+   ========================================================= */
+
+@media (min-width: 901px) and (max-width: 1199px) {
+
+  .erp-app-main,
+  .erp-module-layout,
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    min-width: 0;
+  }
+
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+  }
+
+  .erp-page-viewport .MuiTableContainer-root,
+  .erp-purchase-viewport .MuiTableContainer-root,
+  .erp-page-viewport .table-container,
+  .erp-purchase-viewport .table-container,
+  .erp-page-viewport .table-wrapper,
+  .erp-purchase-viewport .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+}
+
+
+/* =========================================================
+   10. TABLET
+   601px - 900px
+   ========================================================= */
+
+@media (min-width: 601px) and (max-width: 900px) {
+
+  html,
+  body {
+    max-width: 100vw;
+  }
+
+  .erp-app-shell {
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .erp-app-main,
+  .erp-module-layout {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    padding-bottom: 30px !important;
+  }
+
+  /* Allow toolbars and filter rows to wrap */
+  .erp-page-viewport .MuiToolbar-root,
+  .erp-purchase-viewport .MuiToolbar-root {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  /* Tables scroll instead of forcing page width */
+  .erp-page-viewport .MuiTableContainer-root,
+  .erp-purchase-viewport .MuiTableContainer-root,
+  .erp-page-viewport .table-container,
+  .erp-purchase-viewport .table-container,
+  .erp-page-viewport .table-wrapper,
+  .erp-purchase-viewport .table-wrapper,
+  .erp-page-viewport .data-table-wrapper,
+  .erp-purchase-viewport .data-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Dialogs fit inside tablet viewport */
+  .MuiDialog-paper {
+    max-width: calc(100vw - 32px) !important;
+  }
+
+  .MuiPopover-paper,
+  .MuiMenu-paper {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  /* Inputs must never force horizontal overflow */
+  .erp-page-viewport .MuiFormControl-root,
+  .erp-page-viewport .MuiTextField-root,
+  .erp-purchase-viewport .MuiFormControl-root,
+  .erp-purchase-viewport .MuiTextField-root {
+    max-width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   11. MOBILE
+   <= 600px
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-width: 0;
+  }
+
+  .erp-app-shell {
+    width: 100%;
+    max-width: 100vw;
+    min-width: 0;
+  }
+
+  .erp-app-main {
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .erp-module-layout {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    padding-bottom: 24px !important;
+
+    overflow-x: hidden;
+  }
+
+
+  /* -------------------------------------------------------
+     Generic page children
+     ------------------------------------------------------- */
+
+  .erp-page-viewport > *,
+  .erp-purchase-viewport > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     Media / charts
+     ------------------------------------------------------- */
+
+  .erp-page-viewport img,
+  .erp-page-viewport video,
+  .erp-page-viewport canvas,
+  .erp-purchase-viewport img,
+  .erp-purchase-viewport video,
+  .erp-purchase-viewport canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .erp-page-viewport .recharts-responsive-container,
+  .erp-purchase-viewport .recharts-responsive-container {
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     Form controls
+     ------------------------------------------------------- */
+
+  .erp-page-viewport .MuiFormControl-root,
+  .erp-page-viewport .MuiTextField-root,
+  .erp-purchase-viewport .MuiFormControl-root,
+  .erp-purchase-viewport .MuiTextField-root {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .erp-page-viewport input,
+  .erp-page-viewport textarea,
+  .erp-page-viewport select,
+  .erp-purchase-viewport input,
+  .erp-purchase-viewport textarea,
+  .erp-purchase-viewport select {
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     Toolbar / filter / action rows
+     ------------------------------------------------------- */
+
+  .erp-page-viewport .MuiToolbar-root,
+  .erp-purchase-viewport .MuiToolbar-root {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .erp-responsive-toolbar,
+  .erp-responsive-actions {
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
+  }
+
+
+  /* -------------------------------------------------------
+     Tables
+     Preserve columns, allow swipe/scroll.
+     ------------------------------------------------------- */
+
+  .erp-page-viewport .MuiTableContainer-root,
+  .erp-purchase-viewport .MuiTableContainer-root,
+  .erp-page-viewport .table-container,
+  .erp-purchase-viewport .table-container,
+  .erp-page-viewport .table-wrapper,
+  .erp-purchase-viewport .table-wrapper,
+  .erp-page-viewport .data-table-wrapper,
+  .erp-purchase-viewport .data-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .erp-page-viewport table,
+  .erp-purchase-viewport table {
+    max-width: none;
+  }
+
+  .erp-page-viewport .MuiDataGrid-root,
+  .erp-purchase-viewport .MuiDataGrid-root {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     Cards / papers
+     ------------------------------------------------------- */
+
+  .erp-page-viewport .MuiPaper-root,
+  .erp-page-viewport .MuiCard-root,
+  .erp-purchase-viewport .MuiPaper-root,
+  .erp-purchase-viewport .MuiCard-root {
+    max-width: 100%;
+  }
+
+
+  /* -------------------------------------------------------
+     Dialogs / modals
+     ------------------------------------------------------- */
+
+  .MuiDialog-root .MuiDialog-container {
+    padding: 10px;
+  }
+
+  .MuiDialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    margin: 10px !important;
+  }
+
+  .MuiDialogContent-root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .MuiPopover-paper,
+  .MuiMenu-paper {
+    max-width: calc(100vw - 16px) !important;
+  }
+
+
+  /* -------------------------------------------------------
+     Tabs
+     Preserve appearance; allow scrolling when too many tabs.
+     ------------------------------------------------------- */
+
+  .erp-page-viewport .MuiTabs-root,
+  .erp-purchase-viewport .MuiTabs-root {
+    max-width: 100%;
+  }
+
+  .erp-page-viewport .MuiTabs-scroller,
+  .erp-purchase-viewport .MuiTabs-scroller {
+    overflow-x: auto !important;
+  }
+
+
+  /* -------------------------------------------------------
+     Breadcrumb / long text safety
+     ------------------------------------------------------- */
+
+  .erp-page-viewport h1,
+  .erp-page-viewport h2,
+  .erp-page-viewport h3,
+  .erp-page-viewport h4,
+  .erp-page-viewport h5,
+  .erp-page-viewport h6,
+  .erp-page-viewport p,
+  .erp-purchase-viewport h1,
+  .erp-purchase-viewport h2,
+  .erp-purchase-viewport h3,
+  .erp-purchase-viewport h4,
+  .erp-purchase-viewport h5,
+  .erp-purchase-viewport h6,
+  .erp-purchase-viewport p {
+    overflow-wrap: anywhere;
+  }
+
+}
+
+
+/* =========================================================
+   12. SMALL PHONE
+   <= 480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .erp-responsive-form-grid,
+  .erp-responsive-two-column {
+    grid-template-columns: 1fr;
+  }
+
+  .erp-responsive-toolbar,
+  .erp-responsive-actions {
+    gap: 8px;
+  }
+
+  .MuiDialog-paper {
+    width: calc(100vw - 12px) !important;
+    max-width: calc(100vw - 12px) !important;
+    margin: 6px !important;
+  }
+
+}
+
+
+/* =========================================================
+   13. VERY SMALL PHONE
+   <= 360px
+   Only overflow protection; no visual redesign.
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .erp-responsive-toolbar,
+  .erp-responsive-actions {
+    gap: 6px;
+  }
+
+}
+
+
+/* =========================================================
+   14. LANDSCAPE MOBILE / SHORT VIEWPORT
+   ========================================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+  .MuiDialog-paper {
+    max-height: calc(100dvh - 16px) !important;
+  }
+
+}
+
+
+/* =========================================================
+   15. TOUCH DEVICE QUALITY-OF-LIFE
+   Does not alter desktop mouse behaviour.
+   ========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+  .erp-page-viewport .MuiIconButton-root,
+  .erp-purchase-viewport .MuiIconButton-root {
+    touch-action: manipulation;
+  }
+
+  .erp-responsive-scroll-x,
+  .erp-page-viewport .MuiTableContainer-root,
+  .erp-purchase-viewport .MuiTableContainer-root {
+    -webkit-overflow-scrolling: touch;
+  }
+
+}
+
+
+/* =========================================================
+   16. PRINT SAFETY
+   Responsive overrides should not affect ERP print layouts.
+   ========================================================= */
+
+@media print {
+
+  .erp-page-viewport,
+  .erp-purchase-viewport {
+    overflow: visible !important;
+    max-width: none !important;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+  body {
+    outline: 8px solid red !important;
+  }
+}

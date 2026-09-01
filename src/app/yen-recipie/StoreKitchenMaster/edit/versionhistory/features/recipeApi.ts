@@ -3,12 +3,12 @@ import axios from "axios";
 import { RecipeItem, RecipeMeta } from "../models/versionhistortmodel";
 /* GET APIs (already existing) */
 //  const HISTORY_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}viewrecipehistory`
-const HISTORY_BASE_URL = "  http://127.0.0.1:8000/purchasetestapi/viewrecipehistory"
+const HISTORY_BASE_URL = "  http://127.0.0.1:8000/yenerpapi/viewrecipehistory"
   //"viewrecipehistory";
 
 /* POST API (already exists in backend) */
 // const CREATE_RECIPE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}storekitchenmaster`
-const CREATE_RECIPE_URL = "  http://127.0.0.1:8000/purchasetestapi/storekitchenmaster"
+const CREATE_RECIPE_URL = "  http://127.0.0.1:8000/yenerpapi/storekitchenmaster"
   //"storekitchenmaster/materials/newrecipe";
 
 
@@ -20,7 +20,7 @@ const CREATE_RECIPE_URL = "  http://127.0.0.1:8000/purchasetestapi/storekitchenm
    GET METHODS
 ====================== */
 export const fetchLatestVersion = (recipeId: string) =>
-  axios.get(` http://127.0.0.1:8000/purchasetestapi/allrecipes/${recipeId}/latest-version`);
+  axios.get(` http://127.0.0.1:8000/yenerpapi/allrecipes/${recipeId}/latest-version`);
 
 export const fetchVersions = (recipeId: string) =>
   axios.get(`${HISTORY_BASE_URL}/${recipeId}/versions`);

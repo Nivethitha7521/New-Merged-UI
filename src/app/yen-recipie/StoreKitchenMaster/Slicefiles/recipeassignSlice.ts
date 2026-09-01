@@ -89,17 +89,17 @@ const initialState: RecipesState = {
   excelExportError: null,
 }
 
-const API_BASE_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/all-versions";
-const FULL_DETAILS_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/full-details";
+const API_BASE_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/all-versions";
+const FULL_DETAILS_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/full-details";
 
 // ✅ NEW: PDF export endpoints (existing router, unchanged prefix)
-const EXPORT_PDF_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/export-pdf";
-const EXPORT_ALL_PDF_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/export-all-pdf";
+const EXPORT_PDF_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/export-pdf";
+const EXPORT_ALL_PDF_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/export-all-pdf";
 
 // ✅ NEW: Excel export endpoints — registered in main.py under its own prefix:
 // {"module": "skmRecipeExport.excelexportrouter.router", "prefix": "/recipeapi/viewrecipehistory/excel", ...}
-const EXPORT_EXCEL_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/excel/export-excel";
-const EXPORT_ALL_EXCEL_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/excel/export-all-excel";
+const EXPORT_EXCEL_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/excel/export-excel";
+const EXPORT_ALL_EXCEL_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/excel/export-all-excel";
 
 // ── Response type for fetchRecipes ──
 interface FetchRecipesResponse {

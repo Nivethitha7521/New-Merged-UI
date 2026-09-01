@@ -50,7 +50,7 @@ export const setupApiInterceptors = () => {
   axios.interceptors.request.use(
     (config) => {
       // Add auth token to requests if available
-      const token = localStorage.getItem('accessToken');
+      const token = sessionStorage.getItem('accessToken');
       if (token && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${token}`;
       }

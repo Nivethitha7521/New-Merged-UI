@@ -388,7 +388,7 @@ const handleRestoreRole = async (roleName: string) => {
   if (!roleToRestore) return;
 
   await fetch(
-    `http://127.0.0.1:8000/purchasetestapi/roles/${roleToRestore.id}/restore`,
+    `http://127.0.0.1:8000/yenerpapi/roles/${roleToRestore.id}/restore`,
     { method: "PUT" }
   );
 

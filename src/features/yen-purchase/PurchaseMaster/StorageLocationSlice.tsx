@@ -10,7 +10,7 @@ export const fetchStorageLocations = createAsyncThunk('storageLocations/fetchSto
   return response.data;
 });
 export const fetchLocations = createAsyncThunk('locations/fetchLocations', async () => {
-  const response = await axios.get('http://127.0.0.1:8000/purchasetestapi/devicecode/service-location');
+  const response = await axios.get('http://127.0.0.1:8000/yenerpapi/devicecode/service-location');
   return response.data; // Returns array of {locationId, branchName, aliasName}
 });
 export const addStorageLocation = createAsyncThunk<StorageLocationItem, StorageLocationItem>('storageLocations/addStorageLocation', async (locationData, { rejectWithValue }) => {

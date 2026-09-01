@@ -13,7 +13,7 @@ export interface ItemUpdate {
   afTaxDiscount?: number;
   expiryDate?: Date | null;
 }
-const BASE_URL = 'http://127.0.0.1:8000/purchasetestapi';
+const BASE_URL = 'http://127.0.0.1:8000/yenerpapi';
 const customRoundOf = (value: number) => {
   return Math.round(value * 100) / 100; 
 };

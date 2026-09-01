@@ -25,7 +25,7 @@ const initialState: OutletPhysicalStockState = {
 };
 
 export const fetchItems = createAsyncThunk('outletPhysicalStock/fetchItems', async () => {
-  const response = await axios.get<ItemData[]>('http://127.0.0.1:8000/purchasetestapi/items'); // Adjust the URL based on your FastAPI endpoint
+  const response = await axios.get<ItemData[]>('http://127.0.0.1:8000/yenerpapi/items'); // Adjust the URL based on your FastAPI endpoint
   return response.data.map(item => ({
     ...item,
     modifiedPhysicalStock: item.currentSystemStock,

@@ -13,7 +13,7 @@ import {
   SFGMaterial,
 } from "../Models/newrecipeModels";
 
-const BASE_URL = "    http://127.0.0.1:8000/purchasetestapi/newrecipe";
+const BASE_URL = "    http://127.0.0.1:8000/yenerpapi/newrecipe";
 
 export const fetchSFGMaterials = createAsyncThunk<SFGMaterial[], string>(
   "materials/fetchSFG", async (search) => {
@@ -38,7 +38,7 @@ export const fetchPackingMaterials = createAsyncThunk<RawMaterial[], string>(
 
 export const fetchRecipeNames = createAsyncThunk<RecipeName[], string>(
   "recipes/fetchNames", async (search) => {
-    const res = await axios.get<RecipeName[]>(" http://127.0.0.1:8000/purchasetestapi/recipenames", { params: { search } });
+    const res = await axios.get<RecipeName[]>(" http://127.0.0.1:8000/yenerpapi/recipenames", { params: { search } });
     return res.data;
   }
 );

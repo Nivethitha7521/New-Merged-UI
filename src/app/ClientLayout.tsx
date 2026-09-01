@@ -218,7 +218,7 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
         const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
-        const res = await fetch(`${API_BASE}/purchasetestapi/ping`, {
+        const res = await fetch(`${API_BASE}/yenerpapi/ping`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -440,8 +440,8 @@ if (menuItem.path === '/QlikReport') {
 
       try {
         if (token && ssoUsername) {
-          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://yenerp.com';
-          const res = await fetch(`${API_BASE}/purchasetestapi/sso/reports-ticket`, {
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/yenerpapi';
+          const res = await fetch(`${API_BASE}/yenerpapi/sso/reports-ticket`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
           });

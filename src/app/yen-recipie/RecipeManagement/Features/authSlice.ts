@@ -44,7 +44,7 @@
 //       } else {
 //         // Normal (all-over) login → JSON payload
 //         response = await axios.post(
-//           "http://127.0.0.1:8000/purchasetestapi/login/",
+//           "http://127.0.0.1:8000/yenerpapi/login/",
 //           { username, password },
 //           { headers: { "Content-Type": "application/json" } }
 //         );
@@ -190,7 +190,7 @@ export const login = createAsyncThunk(
         );
       } else {
         response = await axios.post(
-          "http://127.0.0.1:8000/purchasetestapi/login/",
+          "http://127.0.0.1:8000/yenerpapi/login/",
           { username, password },
           { headers: { "Content-Type": "application/json" } }
         );

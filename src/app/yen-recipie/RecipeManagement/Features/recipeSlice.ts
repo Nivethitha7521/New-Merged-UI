@@ -7,18 +7,18 @@ import { RootState } from "../../../../redux/store";
 import { Recipe, Consumable, DateTime, BranchwiseItems, POItems, initialState, initialRecipe, FetchRecipeResponse, FetchRecipeArgs, VarianceResponse, FetchRecipe, KitUsingSubkit, RecipeVersionDoc, } from "../Models/recipeModels";
 
 
-const RECIPE_API_URL = "http://127.0.0.1:8000/purchasetestapi/recipe/";
-const VARIANCE_API_URL = "http://127.0.0.1:8000/purchasetestapi/recipe/recipe-variance";
-const PURCHASE_ITEM = "http://127.0.0.1:8000/purchasetestapi/recipe/PO/limited";
-const CONSUMABLES_API_URL = "http://127.0.0.1:8000/purchasetestapi/consumable/";
-const EXPORT_URL = "http://127.0.0.1:8000/purchasetestapi/recipe/export-csv";
-const IMPORT_URL = "http://127.0.0.1:8000/purchasetestapi/recipe/import";
-const PDF_EXPORT_URL = "http://127.0.0.1:8000/purchasetestapi/recipe/export-pdf";
+const RECIPE_API_URL = "http://127.0.0.1:8000/yenerpapi/recipe/";
+const VARIANCE_API_URL = "http://127.0.0.1:8000/yenerpapi/recipe/recipe-variance";
+const PURCHASE_ITEM = "http://127.0.0.1:8000/yenerpapi/recipe/PO/limited";
+const CONSUMABLES_API_URL = "http://127.0.0.1:8000/yenerpapi/consumable/";
+const EXPORT_URL = "http://127.0.0.1:8000/yenerpapi/recipe/export-csv";
+const IMPORT_URL = "http://127.0.0.1:8000/yenerpapi/recipe/import";
+const PDF_EXPORT_URL = "http://127.0.0.1:8000/yenerpapi/recipe/export-pdf";
 const DATETIME_URL = "https://yenerp.com/liveapi/datetime";
-const PDF_EXPORT_ALL_URL = "http://127.0.0.1:8000/purchasetestapi/recipe/export-all-pdf"
+const PDF_EXPORT_ALL_URL = "http://127.0.0.1:8000/yenerpapi/recipe/export-all-pdf"
 
-const VARIANCE_NOTIFICATION_URL = "http://127.0.0.1:8000/purchasetestapi/variance";
-const SCHEDULER_API_URL = "http://127.0.0.1:8000/purchasetestapi/scheduler";
+const VARIANCE_NOTIFICATION_URL = "http://127.0.0.1:8000/yenerpapi/variance";
+const SCHEDULER_API_URL = "http://127.0.0.1:8000/yenerpapi/scheduler";
 
 
 // Fetch All Consumables
@@ -126,7 +126,7 @@ export const fetchRecipeById = createAsyncThunk<Recipe, string>(
   "Recipe/fetchById",
   async (recipeId) => {
     const response = await axios.get(
-      `http://127.0.0.1:8000/purchasetestapi/recipe/${recipeId}`
+      `http://127.0.0.1:8000/yenerpapi/recipe/${recipeId}`
     );
     console.log("Fetched recipe by ID: ", response.data);
     return response.data;
@@ -334,7 +334,7 @@ export const Exportheader = createAsyncThunk<void, void>(
   "ExportRecipeheader/fetch",
   async (_, { dispatch }) => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/purchasetestapi/recipe/export-csv-template', {
+      const response = await axios.get('http://127.0.0.1:8000/yenerpapi/recipe/export-csv-template', {
         responseType: "blob",
       });
 

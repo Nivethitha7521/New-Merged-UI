@@ -2,7 +2,7 @@
 import { useState, useCallback } from "react"
 import axios from "axios"
 
-const EXPORT_PDF_URL = "http://127.0.0.1:8000/purchasetestapi/viewrecipehistory/export-pdf"
+const EXPORT_PDF_URL = "http://127.0.0.1:8000/yenerpapi/viewrecipehistory/export-pdf"
 
 export interface PrintTarget {
   recipeId: string

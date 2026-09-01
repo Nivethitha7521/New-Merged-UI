@@ -14,6 +14,7 @@ import '@/styles/desktopDensity.css';
 import '@/styles/account-settings/account-settings.css';
 /* MUST BE LAST - global dialog override */
 import '@/styles/yenDialog.css';
+import '@/styles/responsive.css';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
