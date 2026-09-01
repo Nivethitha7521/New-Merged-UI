@@ -12,6 +12,8 @@ import {
   RadioGroup,
   Switch,
   Typography,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   DarkModeOutlined,
@@ -23,17 +25,26 @@ import {
   TuneOutlined,
   LanguageOutlined,
   PaymentsOutlined,
-  CheckCircleRounded,ViewSidebarOutlined,TabOutlined,
+  CheckCircleRounded,ViewSidebarOutlined,TabOutlined,AccessTimeOutlined,
+CalendarMonthOutlined,
+PublicOutlined,
 } from '@mui/icons-material';
+import {
+  formatDateTime
+} from '@/utils/dateTimeFormatter';
 import {
   DEFAULT_DISPLAY_SETTINGS,
   DisplayCurrency,
   DisplayFont,
   DisplayFontSize,
-  DisplayLanguage,NavigationLayout,
+  DisplayLanguage,
+  NavigationLayout,
   DisplaySettings,
   DisplayStyle,
   DisplayTheme,
+  DisplayTimezone,
+  DisplayDateFormat,
+  DisplayTimeFormat,
   useDisplaySettings,
 } from '@/contexts/DisplaySettingsContext';
 import './DisplaySettings.css';
@@ -73,6 +84,62 @@ const FONT_SIZE_PREVIEWS: Record<DisplayFontSize, string> = {
   medium: '15px',
   large: '17px',
 };
+const TIMEZONE_OPTIONS = [
+  {
+    value: 'Asia/Kolkata',
+    label: 'India (Kolkata)',
+    helper: 'UTC +05:30',
+  },
+  {
+    value: 'Asia/Dubai',
+    label: 'United Arab Emirates (Dubai)',
+    helper: 'UTC +04:00',
+  },
+  {
+    value: 'Asia/Singapore',
+    label: 'Singapore',
+    helper: 'UTC +08:00',
+  },
+  {
+    value: 'Europe/London',
+    label: 'United Kingdom (London)',
+    helper: 'Automatic daylight saving',
+  },
+  {
+    value: 'America/New_York',
+    label: 'United States (New York)',
+    helper: 'Automatic daylight saving',
+  },
+  {
+    value: 'UTC',
+    label: 'UTC',
+    helper: 'Coordinated Universal Time',
+  },
+] as const;
+
+
+const DATE_FORMAT_OPTIONS = [
+  {
+    value: 'DD/MM/YYYY',
+    example: '01/09/2026',
+  },
+  {
+    value: 'DD-MM-YYYY',
+    example: '01-09-2026',
+  },
+  {
+    value: 'YYYY-MM-DD',
+    example: '2026-09-01',
+  },
+  {
+    value: 'DD MMM YYYY',
+    example: '01 Sep 2026',
+  },
+  {
+    value: 'MMM DD, YYYY',
+    example: 'Sep 01, 2026',
+  },
+] as const;
 const optionClass = (active: boolean) => `display-option ${active ? 'is-active' : ''}`;
 
 export default function DisplaySettingsPage() {
@@ -89,11 +156,21 @@ export default function DisplaySettingsPage() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    saveSettings(draft);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2200);
-  };
+const handleSave = async () => {
+  const success = await saveSettings(draft);
+
+  if (!success) {
+    alert('Unable to save display settings');
+    return;
+  }
+
+  setSaved(true);
+
+  window.setTimeout(
+    () => setSaved(false),
+    2200
+  );
+};
 
   const handleReset = () => {
     resetSettings();
@@ -155,6 +232,228 @@ export default function DisplaySettingsPage() {
             </Box>
           </CardContent>
         </Card>
+        <Card className="display-settings-card display-settings-card-wide">
+  <CardContent>
+
+    <Box className="display-section-title">
+      <AccessTimeOutlined />
+
+      <Box>
+        <Typography>
+          Date & Time
+        </Typography>
+
+        <span>
+          Control how dates and times appear
+          across this tenant workspace.
+        </span>
+      </Box>
+    </Box>
+
+
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: '1fr',
+          md: '1fr 1fr',
+        },
+        gap: 3,
+        mt: 2,
+      }}
+    >
+
+      <Box>
+        <Typography fontWeight={600} mb={1}>
+          Timezone
+        </Typography>
+
+        <FormControl fullWidth>
+          <Select
+            value={draft.timezone}
+            onChange={(event) =>
+              update(
+                'timezone',
+                event.target.value as DisplayTimezone
+              )
+            }
+          >
+            {TIMEZONE_OPTIONS.map((item) => (
+              <MenuItem
+                key={item.value}
+                value={item.value}
+              >
+                <Box>
+                  <Typography fontWeight={600}>
+                    {item.label}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                  >
+                    {item.helper}
+                  </Typography>
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+
+      <Box>
+        <Typography fontWeight={600} mb={1}>
+          Date Format
+        </Typography>
+
+        <FormControl fullWidth>
+          <Select
+            value={draft.dateFormat}
+            onChange={(event) =>
+              update(
+                'dateFormat',
+                event.target.value as DisplayDateFormat
+              )
+            }
+          >
+            {DATE_FORMAT_OPTIONS.map((item) => (
+              <MenuItem
+                key={item.value}
+                value={item.value}
+              >
+                {item.value} — {item.example}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+
+      <Box>
+        <Typography fontWeight={600} mb={1}>
+          Time Format
+        </Typography>
+
+        <RadioGroup
+          row
+          value={draft.timeFormat}
+          onChange={(event) =>
+            update(
+              'timeFormat',
+              event.target.value as DisplayTimeFormat
+            )
+          }
+        >
+          <FormControlLabel
+            value="12h"
+            control={<Radio />}
+            label="12 Hour — 02:30 PM"
+          />
+
+          <FormControlLabel
+            value="24h"
+            control={<Radio />}
+            label="24 Hour — 14:30"
+          />
+        </RadioGroup>
+      </Box>
+
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box>
+          <Typography fontWeight={600}>
+            Show Seconds
+          </Typography>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+          >
+            Show seconds in displayed time.
+          </Typography>
+        </Box>
+
+        <Switch
+          checked={draft.showSeconds}
+          onChange={(event) =>
+            update(
+              'showSeconds',
+              event.target.checked
+            )
+          }
+        />
+      </Box>
+
+    </Box>
+
+
+    <Box
+      sx={{
+        mt: 3,
+        p: 2.5,
+        borderRadius: 2,
+        border: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: 'action.hover',
+      }}
+    >
+
+      <Typography
+        variant="caption"
+        color="text.secondary"
+      >
+        LIVE PREVIEW
+      </Typography>
+
+      <Typography
+        sx={{
+          fontSize: {
+            xs: '20px',
+            md: '26px',
+          },
+          fontWeight: 700,
+          mt: 1,
+        }}
+      >
+        {formatDateTime(
+          new Date(),
+          draft
+        )}
+      </Typography>
+
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mt: 1 }}
+      >
+        This is how timestamps will appear
+        across your workspace.
+      </Typography>
+
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{
+          display: 'block',
+          mt: 1,
+        }}
+      >
+        Changing timezone only changes the
+        display. Existing saved timestamps are
+        not modified.
+      </Typography>
+
+    </Box>
+
+  </CardContent>
+</Card>
         <Card className="display-settings-card display-theme-card">
           <CardContent>
             <Box className="display-section-title"><TuneOutlined /><Box><Typography>Theme</Typography><span>Choose the application brightness.</span></Box></Box>
