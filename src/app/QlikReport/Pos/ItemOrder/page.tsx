@@ -2,8 +2,8 @@
 
 import { ItemOrderReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { itemOrderConfig } from '../../configs/itemOrder.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { itemOrderConfig } from '@/features/pos/reports/itemOrder.config';
 
 // Select 'itemOrder' (the key defined in your config)
 const selector = (s: RootState) => s.itemOrder;

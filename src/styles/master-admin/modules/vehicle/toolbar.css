@@ -1,0 +1,92 @@
+/* =========================================================
+   VEHICLE MASTER TOOLBAR
+   Fixes Search bar hiding Add New button
+   ========================================================= */
+
+.erp-master-admin-viewport .vehicle-master-toolbar {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    minmax(125px, auto)
+    minmax(260px, 360px)
+    minmax(0, 1fr);
+
+  align-items: center;
+  column-gap: 18px;
+  row-gap: 12px;
+
+  margin: 14px 0 18px;
+}
+
+.erp-master-admin-viewport .vehicle-master-search {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 360px !important;
+}
+
+.erp-master-admin-viewport .vehicle-master-actions {
+  width: 100%;
+  min-width: 0;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  gap: 9px !important;
+
+  /* Overrides location-master-actions nowrap */
+  flex-wrap: wrap !important;
+
+  /* Prevents Add New from being clipped */
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+
+  padding: 2px 1px 4px;
+}
+
+.erp-master-admin-viewport
+.vehicle-master-actions
+.purchase-reference-action-button,
+.erp-master-admin-viewport
+.vehicle-master-actions
+.purchase-reference-active-toggle {
+  flex: 0 0 auto;
+}
+
+/* Move buttons below title/search when width becomes insufficient */
+@media (max-width: 1550px) {
+  .erp-master-admin-viewport .vehicle-master-toolbar {
+    grid-template-columns:
+      minmax(125px, auto)
+      minmax(260px, 360px);
+  }
+
+  .erp-master-admin-viewport .vehicle-master-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .erp-master-admin-viewport .vehicle-master-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 10px;
+  }
+
+  .erp-master-admin-viewport .vehicle-master-search {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .erp-master-admin-viewport .vehicle-master-actions {
+    width: 100%;
+    justify-content: flex-start !important;
+  }
+}
+

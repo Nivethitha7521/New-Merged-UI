@@ -1,0 +1,151 @@
+/* =========================================================
+   DISCOUNT DIALOG
+   ========================================================= */
+
+.discount-form-dialog .form-section {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.discount-form-dialog .form-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.discount-form-dialog .custom-textfield,
+.discount-form-dialog .custom-textfield.MuiFormControl-root {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* =========================================================
++   DISCOUNT MASTER — COMPACT ADD / EDIT DIALOG
++
++   Scope:
++   - Discount Add dialog
++   - Discount Edit dialog
++
++   Purpose:
++   - Match the compact Master Admin dialog proportions at 100% zoom.
++   - Keep the existing YEN ERP visual language and all component behavior.
++   - CSS-only: no validation, API, Redux, handler or form logic changes.
++   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.discount-form-dialog .dialog-paper-small {
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: 300px !important;
+    margin: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .dialog-title {
+    padding: 12px 14px 10px !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .dialog-content {
+    padding: 10px 12px 12px !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .form-section {
+    margin: 0 !important;
+    padding: 10px !important;
+    border-radius: 7px !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .form-field {
+    margin: 0 !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .custom-textfield,
+ body .MuiDialog-root.discount-form-dialog .custom-textfield.MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+  }
+
+  body
+    .MuiDialog-root.discount-form-dialog
+    .custom-textfield
+    :is(.MuiInputBase-root, .MuiOutlinedInput-root) {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 5px !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .custom-input input {
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  body
+    .MuiDialog-root.discount-form-dialog
+    .MuiInputLabel-root.custom-label:not(.MuiInputLabel-shrink) {
+    transform: translate(14px, 10px) scale(1) !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  body
+    .MuiDialog-root.discount-form-dialog
+    .MuiInputLabel-root.custom-label.MuiInputLabel-shrink {
+   transform: translate(14px, -8px) scale(0.85) !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .MuiFormHelperText-root {
+    margin: 2px 4px 0 !important;
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .dialog-actions {
+    min-height: auto !important;
+    padding: 8px 12px 10px !important;
+    gap: 8px !important;
+  }
+
+  body
+    .MuiDialog-root.discount-form-dialog
+    .dialog-actions
+    :is(.btn-primary, .btn-secondary) {
+    min-width: 76px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+   line-height: 1 !important;
+  }
+
+  body
+    .MuiDialog-root.discount-form-dialog
+    .dialog-actions
+    .MuiCircularProgress-root {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body .MuiDialog-root.discount-form-dialog .dialog-paper-small {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px !important;
+  }
+
+  body .MuiDialog-root.discount-form-dialog .dialog-content {
+    max-height: calc(100vh - 140px) !important;
+    overflow-y: auto !important;
+  }
+}

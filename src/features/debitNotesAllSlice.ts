@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import purchaseApi from "@/utils/api";
 import { RootState } from '@/redux/store';
 
-const BASE_URL = 'https://yenerp.com/purchasetestapi'; // Adjust as needed for local testing
+const BASE_URL = 'http://127.0.0.1:8000/yenerpapi'; // Adjust as needed for local testing
 
 // ============================================
 // INTERFACES

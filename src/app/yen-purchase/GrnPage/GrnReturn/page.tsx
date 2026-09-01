@@ -878,7 +878,7 @@ const GrnReturn: React.FC = () => {
                   </Button>
                 </Link>
               )}
-                {!returnGrnPermission.hide && (
+                {/* {!returnGrnPermission.hide && (
     <Link href={"/yen-purchase/GrnPage/HoldGrn"}>
       <Button
         variant="contained"
@@ -888,7 +888,7 @@ const GrnReturn: React.FC = () => {
         HOLD GRN
       </Button>
     </Link>
-  )}
+  )} */}
               {!returnGrnPermission.hide && (
                 <Link href={"/yen-purchase/GrnPage/GrnReturn"}>
                   <Button

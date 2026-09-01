@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { API_BASE_URL } from "./OuletePhysicalStockSlice";
-import purchaseApi from '@/utils/api';
+
 // ================== Interfaces ==================
 export interface UpdateResponse {
   varianceName: string;
@@ -27,17 +27,95 @@ export interface Branch {
   aliasName: string;
 }
 
+export type ApprovalStatus =
+  | "approved"
+  | "pendingApproval"
+  | "noVariance"
+  | "notAvailable"
+  | "error"
+  | "invalid"
+  | string;
+
 export interface ApproveItemParams {
-  itemId?: string;
-  branch: string;
+  itemCode: string;
+  locationId: string;
   queryDate?: string;
   approvedBy?: string;
   description?: string;
-  varianceName?: string;
-  itemName?: string;
-  currentSystemQty?: string;
-  physicalClosingQty?: string;
-  reason?: string;
+  adjustmentMode?: "ADJUST_SYSTEM" | "KEEP_SYSTEM";
+}
+
+export interface BulkApproveItemsParams {
+  itemCodes: string[];
+  locationId: string;
+  queryDate?: string;
+  approvedBy?: string;
+  description?: string;
+  adjustmentMode?: "ADJUST_SYSTEM" | "KEEP_SYSTEM";
+}
+
+export interface ApproveApiResult {
+  itemCode?: string;
+  locationId?: string;
+  success?: boolean;
+  message?: string;
+  approvalStatus?: ApprovalStatus;
+  approvalButton?: boolean;
+  status?: string;
+  updatedSystemStock?: number;
+  varianceAfterApproval?: number;
+  data?: unknown;
+  [key: string]: unknown;
+}
+
+export interface BulkApproveApiResult {
+  message: string;
+  locationId: string;
+  queryDate: string;
+  totalRequested: number;
+  approvedCount: number;
+  alreadyApprovedCount: number;
+  noVarianceCount: number;
+  notAvailableCount: number;
+  errorCount: number;
+  results: ApproveApiResult[];
+}
+
+export interface ApproveAllBranchParams {
+  locationId: string;
+  queryDate?: string;
+  approvedBy?: string;
+  description?: string;
+  adjustmentMode?: "ADJUST_SYSTEM" | "KEEP_SYSTEM";
+  varianceThresholdPct?: number;
+  varianceThresholdUnits?: number;
+}
+
+export interface ApproveAllBranchResult {
+  success: boolean;
+  message: string;
+  locationId: string;
+  closingDocId?: string;
+  totalInClosing: number;
+  alreadyApproved: number;
+  autoVerified: number;
+  approved: number;
+  skipped: number;
+  flagged: number;
+  failed: number;
+  flaggedItems: Array<{ itemCode: string; variance: number; systemQty: number; reason: string }>;
+  failedItems: Array<{ itemCode: string; error: string }>;
+}
+
+export interface PendingCodesResult {
+  locationId: string;
+  itemCodes: string[];
+  total: number;
+  totalInClosing?: number;
+  alreadyApproved?: number;
+  closingDocId?: string | null;
+  closingDate?: string;
+  message?: string;
 }
 
 export interface SearchFilters {
@@ -65,7 +143,10 @@ export interface SearchFilters {
   itemNameSearch?: string;
   varianceNameSearch?: string;
   include_filter_options?: boolean;
-  only_filter_options?: boolean; // ← NEW: when true, only fetch filter options (no table data)
+  only_filter_options?: boolean;
+  // newly add this 14 8 1
+  sortField?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface Branchitem {
@@ -75,6 +156,7 @@ export interface Branchitem {
   itemName: string;
   varianceName: string;
   itemCode: string;
+
   closingStockQty: string;
   openingStockQty: string;
   stockStatus: "available" | "out_of_stock" | "unknown";
@@ -86,20 +168,41 @@ export interface Branchitem {
   warehouseReturnQty: string;
   stockTransferInQty: string;
   stockTransferOutQty: string;
+
+  // Existing UI compatibility fields
   currentSystemQty: string;
   stockVariance: string;
-  approvalStatus: "Approved" | "Pending" | "Not Available";
   physicalVariance: string;
   updatedCurrentSystemQty: string;
   physicalClosingQty: string;
+
+  // New backend fields
+  approvalStatus: ApprovalStatus;
+  status?: string;
+  approveButton?: boolean;
+  canApprove?: boolean;
+  stockSource?: string;
+
+  currentInventorySystemStock?: string | number;
+  currentInventoryPhysicalStock?: string | number;
+  systemStock?: string | number | null;
+  physicalStock?: string | number | null;
+  updatedCurrentSystem?: string | number | null;
+  physicalClosing?: string | number | null;
+  variance?: string | number | null;
+  systemStockAfter?: string | number | null;
+
   adjustedDate?: string;
   adjustedTime?: string;
   approvedBy?: string;
   description?: string;
-  approveButton?: string | number | undefined;
+
   receivedQty?: string | number;
   salesReturnQty?: string | number;
-  [key: string]: string | number | undefined;
+  // newly add this line 13 8 2
+  hasEditHistory?: boolean;
+
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 interface Change {
@@ -122,7 +225,7 @@ interface FilterFieldState {
   total: number;
   loading: boolean;
   searchFilter?: string;
-  search?: string
+  search?: string;
   hasMore?: boolean;
 }
 
@@ -132,7 +235,6 @@ export interface FilterOptionsState {
   subCategory: FilterFieldState;
   itemName: FilterFieldState;
   varianceName: FilterFieldState;
-
 }
 
 export interface StockAdjustment {
@@ -164,6 +266,36 @@ export interface SearchParams {
   queryDate?: string;
 }
 
+// export interface FetchParams {
+//   page?: number;
+//   limit?: number;
+//   locationId: string;
+//   category?: string[];
+//   subCategory?: string[];
+//   itemName?: string[];
+//   varianceName?: string[];
+//   queryDate?: string;
+//   include_filter_options?: boolean;
+//   only_filter_options?: boolean;
+//   categoryPage?: number;
+//   subCategoryPage?: number;
+//   itemNamePage?: number;
+//   varianceNamePage?: number;
+//   categoryLimit?: number;
+//   subCategoryLimit?: number;
+//   itemNameLimit?: number;
+//   varianceNameLimit?: number;
+//   categorySearch?: string;
+//   subCategorySearch?: string;
+//   itemNameSearch?: string;
+//   varianceNameSearch?: string;
+//   currentCategory?: string[];
+//   currentSubCategory?: string[];
+//   currentItemName?: string[];
+//   currentVarianceName?: string[];
+//   resetFilterOptions?: boolean;
+// }
+// replace the part 14 8 1
 export interface FetchParams {
   page?: number;
   limit?: number;
@@ -174,26 +306,34 @@ export interface FetchParams {
   varianceName?: string[];
   queryDate?: string;
   include_filter_options?: boolean;
-  only_filter_options?: boolean; // ← NEW: skips table fetch, only returns filterOptions
+  only_filter_options?: boolean;
+
   categoryPage?: number;
   subCategoryPage?: number;
   itemNamePage?: number;
   varianceNamePage?: number;
+
   categoryLimit?: number;
   subCategoryLimit?: number;
   itemNameLimit?: number;
   varianceNameLimit?: number;
+
   categorySearch?: string;
   subCategorySearch?: string;
   itemNameSearch?: string;
   varianceNameSearch?: string;
+
   currentCategory?: string[];
   currentSubCategory?: string[];
   currentItemName?: string[];
   currentVarianceName?: string[];
-  resetFilterOptions?: boolean;
-}
 
+  resetFilterOptions?: boolean;
+
+  // Backend sorting
+  sortField?: string;
+  sortOrder?: "asc" | "desc";
+}
 export interface ApprovedItem {
   _id: string;
   itemCode: string;
@@ -203,10 +343,16 @@ export interface ApprovedItem {
   physicalClosing: number;
   actualVariance: number;
   systemStockAfter: number;
-  approvedBy: string;
-  description: string;
+  // approvedBy: string;
+  // description: string;
+  // approvedAt: string;
+  // [key: string]: string | number | undefined;
+  // replace the part 11 8 2
+  approvedBy?: string | null;
+  description?: string;
   approvedAt: string;
-  [key: string]: string | number | undefined;
+  status?: string;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 export interface ApprovedItemsResponse {
@@ -218,11 +364,17 @@ export interface ApprovedItemsResponse {
 }
 
 interface DataState {
+  // newly add this 11 8 2
+  showOnlyPending: boolean;
   branches: Branch[];
   branchwise: Branchitem[];
   updatedStocks: UpdateResponse[];
   stockAdjustments: StockAdjustment[];
   loading: boolean;
+  approving: boolean;
+  bulkApproving: boolean;
+  approveAllBranchLoading: boolean;
+  loadingPendingCodes: boolean;
   error: string | null;
   total: number;
   page: number;
@@ -255,6 +407,8 @@ interface DataState {
   isFullScreen: boolean;
   tableView: "Stock" | "Approved";
   searchParams: SearchParams;
+  lastApproveResult: ApproveApiResult | null;
+  lastBulkApproveResult: BulkApproveApiResult | null;
   approvedItems: {
     items: ApprovedItem[];
     page: number;
@@ -274,6 +428,116 @@ export interface FetchError {
   raw?: unknown;
 }
 
+// ================== Helpers ==================
+const toStringValue = (value: unknown, fallback = "0") => {
+  if (value === undefined || value === null || value === "") return fallback;
+  return String(value);
+};
+
+const toBool = (value: unknown) => value === true || value === "true" || value === 1 || value === "1";
+
+const getErrorMessage = (value: unknown, fallback: string) => {
+  if (typeof value === "string" && value.trim()) return value;
+  if (value && typeof value === "object" && "message" in value) {
+    const msg = (value as { message?: unknown }).message;
+    if (typeof msg === "string" && msg.trim()) return msg;
+  }
+  return fallback;
+};
+
+// In: features/yen_inventory/OutletPhysicalVarianceSlice.ts
+// Find the mapApiItemToBranchItem function and update these specific lines:
+
+const mapApiItemToBranchItem = (item: any): Branchitem => {
+  const approvalButton = toBool(item.approvalButton ?? item.canApprove ?? false);
+  const approvalStatus = String(item.approvalStatus ?? "notAvailable") as ApprovalStatus;
+
+  const updatedCurrentSystem = item.updatedCurrentSystem ?? item.systemStock ?? null;
+  const physicalClosing = item.physicalClosing ?? item.physicalStock ?? null;
+
+  // FIX: Ensure variance falls back correctly from the backend payload
+  const variance = item.variance ?? item.stockVariance ?? null;
+
+  return {
+    id: item.id || item._id || item.itemCode || "",
+    category: typeof item.category === "object" ? item.category?.name ?? "" : item.category ?? "",
+    subCategory: typeof item.subCategory === "object" ? item.subCategory?.name ?? "" : item.subCategory ?? "",
+    itemName: typeof item.itemName === "object" ? item.itemName?.name ?? "" : item.itemName ?? "",
+    varianceName: typeof item.varianceName === "object" ? item.varianceName?.name ?? "" : item.varianceName ?? "",
+    itemCode: item.itemCode ?? "",
+
+    closingStockQty: toStringValue(item.closingStockQty),
+    openingStockQty: toStringValue(item.openingStockQty),
+    stockStatus: item.stockStatus ?? "unknown",
+    received: toStringValue(item.receivedQty),
+    dispatchedQty: toStringValue(item.dispatchedQty),
+    salesQty: toStringValue(item.salesQty),
+    salesReturn: toStringValue(item.salesReturnQty),
+
+    // FIX: Change wastageReceivedQty to wastageReturnQty to match the backend
+    wastageReturnQty: toStringValue(item.wastageReturnQty),
+
+    warehouseReturnQty: toStringValue(item.warehouseReturnQty),
+    stockTransferInQty: toStringValue(item.stockTransferInQty),
+    stockTransferOutQty: toStringValue(item.stockTransferOutQty),
+
+    currentSystemQty: toStringValue(
+      item.currentInventorySystemStock ?? item.currentSystemQty ?? item.systemStock
+    ),
+    stockVariance: toStringValue(variance ?? item.stockVariance),
+    physicalVariance: toStringValue(variance ?? item.physicalVariance),
+    updatedCurrentSystemQty: toStringValue(updatedCurrentSystem),
+    physicalClosingQty: toStringValue(physicalClosing),
+
+    approvalStatus,
+    status: String(item.status ?? ""),
+    approvalButton,
+    canApprove: toBool(item.canApprove ?? approvalButton),
+    stockSource: String(item.stockSource ?? ""),
+
+    currentInventorySystemStock: item.currentInventorySystemStock ?? 0,
+    currentInventoryPhysicalStock: item.currentInventoryPhysicalStock ?? 0,
+    systemStock: item.systemStock ?? null,
+    physicalStock: item.physicalStock ?? null,
+    updatedCurrentSystem,
+    physicalClosing,
+    variance,
+    systemStockAfter: item.systemStockAfter ?? null,
+
+    approvedBy: item.approvedBy,
+    description: item.description,
+    // newly add this line 13 8 2
+    hasEditHistory: Boolean(item.hasEditHistory),
+  };
+};
+
+const updateApprovedRowInList = (
+  items: Branchitem[],
+  result: ApproveApiResult
+): Branchitem[] => {
+  const itemCode = String(result.itemCode || "");
+  if (!itemCode) return items;
+
+  return items.map((item) => {
+    if (item.itemCode !== itemCode) return item;
+
+    const nextPhysical =
+      result.updatedSystemStock ??
+      (result.data as any)?.systemStockAfter ??
+      item.physicalClosing ??
+      item.physicalClosingQty;
+
+    return {
+      ...item,
+      approvalStatus: String(result.approvalStatus ?? "approved"),
+      status: String(result.status ?? "approved"),
+      approveButton: false,
+      canApprove: false,
+      systemStockAfter: nextPhysical as any,
+    };
+  });
+};
+
 // ================== Initial State ==================
 const initialFilterField: FilterFieldState = {
   values: [],
@@ -285,11 +549,17 @@ const initialFilterField: FilterFieldState = {
 };
 
 export const initialState: DataState = {
+  // newly add this 11 8 2
+  showOnlyPending: false,
   branches: [],
   branchwise: [],
   updatedStocks: [],
   stockAdjustments: [],
   loading: false,
+  approving: false,
+  bulkApproving: false,
+  approveAllBranchLoading: false,
+  loadingPendingCodes: false,
   error: null,
   total: 0,
   page: 1,
@@ -306,14 +576,15 @@ export const initialState: DataState = {
   },
   visibleColumns: {
     "S.No": true,
-    "Item Name": false,
+    Select: true,
+    "Item Name": true,
     "Variance Name": true,
     itemCode: true,
     Category: false,
     Subcategory: false,
-    "Sales Return": false,
+    "Sales Return": true,
     Wastages: true,
-    "Warehouse Return": false,
+    "Warehouse Return": true,
     "Opening-Stock": true,
     "Receiving-Stock": true,
     "Stock IN": true,
@@ -324,9 +595,8 @@ export const initialState: DataState = {
     "Physical Stock": true,
     Action: true,
     Variance: true,
-    "Status": false,
+    Status: true,
   },
-
   totalCurrentSystemQty: 0,
   sortField: undefined,
   sortOrder: undefined,
@@ -356,6 +626,8 @@ export const initialState: DataState = {
     subCategory: [],
     queryDate: "",
   },
+  lastApproveResult: null,
+  lastBulkApproveResult: null,
   approvedItems: {
     items: [],
     page: 1,
@@ -374,16 +646,27 @@ export const fetchBranches = createAsyncThunk<Branch[], void, { rejectValue: Fet
   "data/fetchBranches",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(`/outletinventory/locations`);
-      const data = response.data;
+      const response = await fetch(`${API_BASE_URL}/outletinventory/locations`);
+      if (!response.ok) {
+        const text = await response.text();
+        return rejectWithValue({
+          message: text || "Failed to fetch branches",
+          status: response.status,
+        });
+      }
 
-      return data.map(({ locationId, locationName, aliasName }: any) => ({
+      const data: { locationId: string; locationName: string; aliasName?: string }[] =
+        await response.json();
+
+      return data.map(({ locationId, locationName, aliasName }) => ({
         locationId,
         locationName,
         aliasName: aliasName || locationName,
       }));
-    } catch (error: any) {
-      return rejectWithValue({ message: error?.response?.data?.detail || "Failed to fetch branches" });
+    } catch (error) {
+      return rejectWithValue({
+        message: error instanceof Error ? error.message : "Unknown fetch error",
+      });
     }
   }
 );
@@ -415,14 +698,9 @@ export const fetchItems = createAsyncThunk<
   try {
     const queryParams = new URLSearchParams();
 
-    // Pagination
     if (!params.only_filter_options) {
-      if (params.page !== undefined) {
-        queryParams.set("page", String(params.page));
-      }
-      if (params.limit !== undefined) {
-        queryParams.set("limit", String(params.limit));
-      }
+      if (params.page !== undefined) queryParams.set("page", String(params.page));
+      if (params.limit !== undefined) queryParams.set("limit", String(params.limit));
     }
 
     queryParams.set("branch", params.locationId);
@@ -431,216 +709,369 @@ export const fetchItems = createAsyncThunk<
       String(params.include_filter_options ?? true)
     );
 
-    if (params.only_filter_options) {
-      queryParams.set("only_filter_options", "true");
-    }
+    if (params.only_filter_options) queryParams.set("only_filter_options", "true");
 
-    // Filters
-    if (params.category?.length) {
-      queryParams.set("category", params.category.join(","));
-    }
-
-    if (params.subCategory?.length) {
+    if (params.category?.length) queryParams.set("category", params.category.join(","));
+    if (params.subCategory?.length)
       queryParams.set("subCategory", params.subCategory.join(","));
-    }
-
-    if (params.itemName?.length) {
-      queryParams.set("itemName", params.itemName.join(","));
-    }
-
-    if (params.varianceName?.length) {
+    if (params.itemName?.length) queryParams.set("itemName", params.itemName.join(","));
+    // newly add this part 14 8 1
+    if (params.varianceName?.length)
       queryParams.set("varianceName", params.varianceName.join(","));
+
+    if (params.queryDate) queryParams.set("queryDate", params.queryDate);
+
+    if (params.sortField) {
+      queryParams.set("sortField", params.sortField);
     }
 
-    if (params.queryDate) {
-      queryParams.set("queryDate", params.queryDate);
+    if (params.sortOrder) {
+      queryParams.set("sortOrder", params.sortOrder);
     }
-
-    // Filter pagination
     if (params.categoryPage !== undefined) {
       queryParams.set("categoryPage", String(params.categoryPage));
       queryParams.set("categoryLimit", String(params.categoryLimit ?? 50));
-
-      if (params.categorySearch) {
-        queryParams.set("categorySearch", params.categorySearch);
-      }
+      if (params.categorySearch) queryParams.set("categorySearch", params.categorySearch);
     }
 
     if (params.subCategoryPage !== undefined) {
       queryParams.set("subCategoryPage", String(params.subCategoryPage));
       queryParams.set("subCategoryLimit", String(params.subCategoryLimit ?? 50));
-
-      if (params.subCategorySearch) {
+      if (params.subCategorySearch)
         queryParams.set("subCategorySearch", params.subCategorySearch);
-      }
     }
 
     if (params.itemNamePage !== undefined) {
       queryParams.set("itemNamePage", String(params.itemNamePage));
       queryParams.set("itemNameLimit", String(params.itemNameLimit ?? 50));
-
-      if (params.itemNameSearch) {
-        queryParams.set("itemNameSearch", params.itemNameSearch);
-      }
+      if (params.itemNameSearch) queryParams.set("itemNameSearch", params.itemNameSearch);
     }
 
     if (params.varianceNamePage !== undefined) {
       queryParams.set("varianceNamePage", String(params.varianceNamePage));
       queryParams.set("varianceNameLimit", String(params.varianceNameLimit ?? 50));
-
-      if (params.varianceNameSearch) {
+      if (params.varianceNameSearch)
         queryParams.set("varianceNameSearch", params.varianceNameSearch);
-      }
     }
 
-    // API CALL
-    const response = await purchaseApi.get(
-      `/outletinventoryvariance/?${queryParams.toString()}`
-    );
+    const url = `${API_BASE_URL}/outletinventoryvariance/?${queryParams.toString()}`;
+    const response = await fetch(url);
 
-    const data = response.data;
+    if (!response.ok) {
+      const text = await response.text();
+      return rejectWithValue({
+        message: text || "Failed to fetch items",
+        status: response.status,
+      });
+    }
 
-    // Mapping
+    const data = await response.json();
+
     const branchwise: Branchitem[] = params.only_filter_options
       ? []
-      : (data.filteredItems?.items || []).map((item: any) => ({
-          id: item.id || item._id,
-          category:
-            typeof item.category === "object"
-              ? item.category?.name ?? ""
-              : item.category ?? "",
-          subCategory:
-            typeof item.subCategory === "object"
-              ? item.subCategory?.name ?? ""
-              : item.subCategory ?? "",
-          itemName:
-            typeof item.itemName === "object"
-              ? item.itemName?.name ?? ""
-              : item.itemName ?? "",
-          varianceName:
-            typeof item.varianceName === "object"
-              ? item.varianceName?.name ?? ""
-              : item.varianceName ?? "",
-          itemCode: item.itemCode ?? "",
-          closingStockQty: String(item.closingStockQty ?? "0"),
-          openingStockQty: String(item.openingStockQty ?? "0"),
-          stockStatus: item.stockStatus ?? "unknown",
-          received: String(item.receivedQty ?? "0"),
-          dispatchedQty: String(item.dispatchedQty ?? "0"),
-          salesQty: String(item.salesQty ?? "0"),
-          salesReturn: String(item.salesReturnQty ?? "0"),
-          wastageReturnQty: String(item.wastageReturnQty ?? "0"),
-          warehouseReturnQty: String(item.warehouseReturnQty ?? "0"),
-          stockTransferInQty: String(item.stockTransferInQty ?? "0"),
-          stockTransferOutQty: String(item.stockTransferOutQty ?? "0"),
-          currentSystemQty: String(item.currentSystemQty ?? "0"),
-          stockVariance: String(item.stockVariance ?? "0"),
-          approvalStatus: item.approvalStatus ?? "Pending",
-          physicalVariance: String(item.physicalVariance ?? "0"),
-          updatedCurrentSystemQty: String(item.updatedCurrentSystemQty ?? "0"),
-          physicalClosingQty: String(item.physicalClosingQty ?? "0"),
-          approveButton: item.approveButton,
-        }));
+      : (data.filteredItems?.items || []).map(mapApiItemToBranchItem);
+
+    let filterOptions:
+      | {
+        category: FilterFieldState;
+        subCategory: FilterFieldState;
+        itemName: FilterFieldState;
+        varianceName: FilterFieldState;
+      }
+      | undefined;
+
+    if (data.filterOptions) {
+      filterOptions = {
+        category: {
+          values: (data.filterOptions?.category?.values ?? []).map(
+            (v: { id: string; name: string }) => ({ id: v.id, name: v.name })
+          ),
+          page: data.filterOptions?.category?.page || params.categoryPage || 1,
+          total: data.filterOptions?.category?.total || 0,
+          loading: false,
+          searchFilter: data.filterOptions?.category?.searchFilter || params.categorySearch,
+          hasMore: data.filterOptions?.category?.hasMore ?? true,
+        },
+        subCategory: {
+          values: data.filterOptions?.subCategory?.values || [],
+          page: data.filterOptions?.subCategory?.page || params.subCategoryPage || 1,
+          total: data.filterOptions?.subCategory?.total || 0,
+          loading: false,
+          searchFilter:
+            data.filterOptions?.subCategory?.searchFilter || params.subCategorySearch,
+          hasMore: data.filterOptions?.subCategory?.hasMore ?? true,
+        },
+        itemName: {
+          values: data.filterOptions?.itemName?.values || [],
+          page: data.filterOptions?.itemName?.page || params.itemNamePage || 1,
+          total: data.filterOptions?.itemName?.total || 0,
+          loading: false,
+          searchFilter: data.filterOptions?.itemName?.searchFilter || params.itemNameSearch,
+          hasMore: data.filterOptions?.itemName?.hasMore ?? true,
+        },
+        varianceName: {
+          values: data.filterOptions?.varianceName?.values || [],
+          page: data.filterOptions?.varianceName?.page || params.varianceNamePage || 1,
+          total: data.filterOptions?.varianceName?.total || 0,
+          loading: false,
+          searchFilter:
+            data.filterOptions?.varianceName?.searchFilter || params.varianceNameSearch,
+          hasMore: data.filterOptions?.varianceName?.hasMore ?? true,
+        },
+      };
+    }
 
     return {
       branchwise,
       total: data.filteredItems?.total || 0,
-      page: data.filteredItems?.page || (params.page ?? 1),
-      limit: data.filteredItems?.limit || (params.limit ?? 50),
-      totalCurrentSystemQty:
-        data.filteredItems?.totalCurrentSystemQty || 0,
-filterOptions: data.filterOptions
-    ? {
-        category: {
-          values: data.filterOptions.category?.values || [],
-          page: params.categoryPage || 1,
-          total: data.filterOptions.category?.total || 0,
-          loading: false,
-          hasMore: (data.filterOptions.category?.values?.length || 0) > 0,
-        },
-        subCategory: {
-          values: data.filterOptions.subCategory?.values || [],
-          page: params.subCategoryPage || 1,
-          total: data.filterOptions.subCategory?.total || 0,
-          loading: false,
-          hasMore: (data.filterOptions.subCategory?.values?.length || 0) > 0,
-        },
-        itemName: {
-          values: data.filterOptions.itemName?.values || [],
-          page: params.itemNamePage || 1,
-          total: data.filterOptions.itemName?.total || 0,
-          loading: false,
-          hasMore: (data.filterOptions.itemName?.values?.length || 0) > 0,
-        },
-        varianceName: {
-          values: data.filterOptions.varianceName?.values || [],
-          page: params.varianceNamePage || 1,
-          total: data.filterOptions.varianceName?.total || 0,
-          loading: false,
-          hasMore: (data.filterOptions.varianceName?.values?.length || 0) > 0,
-        },
-      }
-    : undefined,
-
+      page: data.filteredItems?.page || params.page || 1,
+      limit: data.filteredItems?.limit || params.limit || 50,
+      totalCurrentSystemQty: data.filteredItems?.totalCurrentSystemQty || 0,
+      filterOptions,
       stockInfo: data.stockInfo || { date: null, branch: params.locationId },
-      dispatchInfo:
-        data.dispatchInfo || { date: null, branch: params.locationId },
+      dispatchInfo: data.dispatchInfo || { date: null, branch: params.locationId },
       salesInfo: data.salesInfo || { totalSalesQty: 0, branch: params.locationId },
-      salesReturnInfo:
-        data.salesReturnInfo || { totalReturnQty: 0, branch: params.locationId },
-      wastageReturnInfo:
-        data.wastageReturnInfo || { totalReturnQty: 0, branch: params.locationId },
-      stockTransferInfo:
-        data.stockTransferInfo || {
-          totalInQty: 0,
-          totalOutQty: 0,
-          branch: params.locationId,
-        },
+      salesReturnInfo: data.salesReturnInfo || {
+        totalReturnQty: 0,
+        branch: params.locationId,
+      },
+      wastageReturnInfo: data.wastageReturnInfo || {
+        totalReturnQty: 0,
+        branch: params.locationId,
+      },
+      stockTransferInfo: data.stockTransferInfo || {
+        totalInQty: 0,
+        totalOutQty: 0,
+        branch: params.locationId,
+      },
       isFilterOnlyFetch: !!params.only_filter_options,
     };
-  } catch (err: any) {
+  } catch (err) {
     return rejectWithValue({
-      message: err?.response?.data?.detail || "Failed to fetch items",
+      message: err instanceof Error ? err.message : "Unknown fetch error",
     });
   }
 });
-export const approveItem = createAsyncThunk<
-  { message: string; item: Branchitem },
-  { itemCode: string; locationId: string; approvedBy?: string; description?: string },
-  { rejectValue: FetchError }
->("data/approveItem", async ({ itemCode, locationId, approvedBy, description }, { rejectWithValue }) => {
-  try {
-    const response = await purchaseApi.patch(
-      `/outletinventoryvariance/${itemCode}/approve`,
-      { approved_by: approvedBy, description },
-      { params: { locationId } }
-    );
 
-    return response.data;
-  } catch (err: any) {
-    return rejectWithValue({ message: err?.response?.data?.detail || "Failed to approve item" });
+export const approveItem = createAsyncThunk<
+  ApproveApiResult,
+  ApproveItemParams,
+  { rejectValue: FetchError }
+>(
+  "data/approveItem",
+  async (
+    { itemCode, locationId, queryDate, approvedBy, description, adjustmentMode },
+    { rejectWithValue }
+  ) => {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.set("locationId", locationId);
+      if (queryDate) queryParams.set("queryDate", queryDate);
+
+      const response = await fetch(
+        `${API_BASE_URL}/outletinventoryvariance/${encodeURIComponent(
+          itemCode
+        )}/approve?${queryParams.toString()}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            approved_by: approvedBy || "Inventory",
+            description: description || "",
+            adjustmentMode: adjustmentMode || "ADJUST_SYSTEM",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        return rejectWithValue({
+          message: text || "Failed to approve item",
+          status: response.status,
+        });
+      }
+
+      return await response.json();
+    } catch (err) {
+      return rejectWithValue({
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
   }
-});
+);
+
+export const approveBulkItems = createAsyncThunk<
+  BulkApproveApiResult,
+  BulkApproveItemsParams,
+  { rejectValue: FetchError }
+>(
+  "data/approveBulkItems",
+  async (
+    { itemCodes, locationId, queryDate, approvedBy, description, adjustmentMode },
+    { rejectWithValue }
+  ) => {
+    try {
+      const cleanItemCodes = Array.from(
+        new Set(itemCodes.map((x) => String(x || "").trim()).filter(Boolean))
+      );
+
+      if (cleanItemCodes.length === 0) {
+        return rejectWithValue({
+          message: "No variance items selected for approval",
+          status: 400,
+        });
+      }
+
+      const queryParams = new URLSearchParams();
+      queryParams.set("locationId", locationId);
+      if (queryDate) queryParams.set("queryDate", queryDate);
+
+      const response = await fetch(
+        `${API_BASE_URL}/outletinventoryvariance/approve/bulk?${queryParams.toString()}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            itemCodes: cleanItemCodes,
+            approved_by: approvedBy || "Inventory",
+            description: description || "",
+            adjustmentMode: adjustmentMode || "ADJUST_SYSTEM",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        return rejectWithValue({
+          message: text || "Failed to approve selected items",
+          status: response.status,
+        });
+      }
+
+      return await response.json();
+    } catch (err) {
+      return rejectWithValue({
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  }
+);
+
+// ─── Approve ALL items for a branch from its closing doc ──────────────────────
+export const approveAllBranch = createAsyncThunk<
+  ApproveAllBranchResult,
+  ApproveAllBranchParams,
+  { rejectValue: FetchError }
+>(
+  "data/approveAllBranch",
+  async (
+    { locationId, queryDate, approvedBy, description, adjustmentMode, varianceThresholdPct, varianceThresholdUnits },
+    { rejectWithValue }
+  ) => {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.set("branch", locationId);
+      if (queryDate) queryParams.set("queryDate", queryDate);
+
+      const response = await fetch(
+        `${API_BASE_URL}/outletinventoryvariance/approve/all?${queryParams.toString()}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            approved_by: approvedBy || "Inventory",
+            description: description || "Branch bulk approval",
+            adjustmentMode: adjustmentMode || "ADJUST_SYSTEM",
+            ...(varianceThresholdPct !== undefined && { varianceThresholdPct }),
+            ...(varianceThresholdUnits !== undefined && { varianceThresholdUnits }),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        return rejectWithValue({ message: text || "Failed to approve branch", status: response.status });
+      }
+
+      return await response.json();
+    } catch (err) {
+      return rejectWithValue({ message: err instanceof Error ? err.message : "Unknown error" });
+    }
+  }
+);
+
+// ─── Fetch pending item codes for a branch (for Select All Pending) ──────────
+export const fetchPendingCodes = createAsyncThunk<
+  PendingCodesResult,
+  { locationId: string; queryDate?: string },
+  { rejectValue: FetchError }
+>(
+  "data/fetchPendingCodes",
+  async ({ locationId, queryDate }, { rejectWithValue }) => {
+    try {
+      const queryParams = new URLSearchParams();
+      queryParams.set("branch", locationId);
+      if (queryDate) queryParams.set("queryDate", queryDate);
+
+      const response = await fetch(
+        `${API_BASE_URL}/outletinventoryvariance/pending-codes?${queryParams.toString()}`
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        return rejectWithValue({ message: text || "Failed to fetch pending codes", status: response.status });
+      }
+
+      return await response.json();
+    } catch (err) {
+      return rejectWithValue({ message: err instanceof Error ? err.message : "Unknown error" });
+    }
+  }
+);
 
 export const fetchApprovedItems = createAsyncThunk<
   ApprovedItemsResponse,
-  { page?: number; limit?: number; branch?: string; date?: string; isLoadMore?: boolean },
+  // { page?: number; limit?: number; branch?: string; date?: string; isLoadMore?: boolean },
+  // replace the line 11 8 2
+  { page?: number; limit?: number; branch?: string; date?: string; status?: string; itemName?: string; approvedBy?: string; fromDate?: string; toDate?: string; isLoadMore?: boolean },
   { rejectValue: FetchError }
 >(
   "data/fetchApprovedItems",
-  async ({ page = 1, limit = 30, branch, date, isLoadMore = false }, { rejectWithValue }) => {
+  // async ({ page = 1, limit = 30, branch, date, isLoadMore = false }, { rejectWithValue }) => {
+  //   try {
+  //     const queryParams = new URLSearchParams();
+  //     queryParams.set("page", String(page));
+  //     queryParams.set("limit", String(limit));
+  //     if (branch && branch.trim() !== "") queryParams.set("branch", branch);
+  //     if (date && date.trim() !== "") queryParams.set("date", date);
+
+  //     const url = `${API_BASE_URL}/outletinventoryvariance/approved?${queryParams.toString()}`;
+  // replace the part 11 8 2
+  async ({ page = 1, limit = 30, branch, date, status, itemName, approvedBy, fromDate, toDate, isLoadMore = false }, { rejectWithValue }) => {
     try {
-      const params: any = { page, limit };
+      const queryParams = new URLSearchParams();
+      queryParams.set("page", String(page));
+      queryParams.set("limit", String(limit));
+      if (branch && branch.trim() !== "") queryParams.set("branch", branch);
+      if (date && date.trim() !== "") queryParams.set("date", date);
+      if (status) queryParams.set("status", status);
+      if (itemName && itemName.trim() !== "") queryParams.set("itemName", itemName);
+      if (approvedBy && approvedBy.trim() !== "") queryParams.set("approvedBy", approvedBy);
+      if (fromDate) queryParams.set("fromDate", fromDate);
+      if (toDate) queryParams.set("toDate", toDate);
 
-      if (branch && branch.trim() !== "") params.branch = branch;
-      if (date && date.trim() !== "") params.date = date;
+      const url = `${API_BASE_URL}/outletinventoryvariance/approved?${queryParams.toString()}`;
+      const response = await fetch(url);
 
-      const response = await purchaseApi.get(
-        `/outletinventoryvariance/approved`,
-        { params }
-      );
+      if (!response.ok) {
+        const text = await response.text();
+        return rejectWithValue({
+          message: text || "Failed to fetch approved items",
+          status: response.status,
+        });
+      }
 
-      const result = response.data;
+      const result = await response.json();
 
       return {
         data: result.data || [],
@@ -649,10 +1080,9 @@ export const fetchApprovedItems = createAsyncThunk<
         total: result.total || 0,
         isLoadMore,
       };
-
-    } catch (err: any) {
+    } catch (err) {
       return rejectWithValue({
-        message: err?.response?.data?.detail || "Failed to fetch approved items",
+        message: err instanceof Error ? err.message : "Unknown error",
       });
     }
   }
@@ -673,15 +1103,38 @@ const dataSlice = createSlice({
       state.page = 1;
       state.totalPages = 1;
     },
-    setSelectedLocation: (state, action: PayloadAction<string>) => { state.selectedLocation = action.payload; },
-    setEditableRows: (state, action: PayloadAction<Record<string, EditableRow>>) => { state.editableRows = action.payload; },
-    setChanges: (state, action: PayloadAction<Change[]>) => { state.changes = action.payload; },
-    setVisibleColumns: (state, action: PayloadAction<Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)>) => {
-      if (typeof action.payload === "function") state.visibleColumns = action.payload(state.visibleColumns);
-      else state.visibleColumns = action.payload;
+    // newly add this 11 8 2
+    setShowOnlyPending: (state, action: PayloadAction<boolean>) => {
+      state.showOnlyPending = action.payload;
     },
-    toggleColumn: (state, action: PayloadAction<string>) => { state.visibleColumns[action.payload] = !state.visibleColumns[action.payload]; },
-    setFilterSearch: (state, action: PayloadAction<{ field: keyof FilterOptionsState; searchFilter: string }>) => {
+    setSelectedLocation: (state, action: PayloadAction<string>) => {
+      state.selectedLocation = action.payload;
+    },
+    setEditableRows: (state, action: PayloadAction<Record<string, EditableRow>>) => {
+      state.editableRows = action.payload;
+    },
+    setChanges: (state, action: PayloadAction<Change[]>) => {
+      state.changes = action.payload;
+    },
+    setVisibleColumns: (
+      state,
+      action: PayloadAction<
+        Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)
+      >
+    ) => {
+      if (typeof action.payload === "function") {
+        state.visibleColumns = action.payload(state.visibleColumns);
+      } else {
+        state.visibleColumns = action.payload;
+      }
+    },
+    toggleColumn: (state, action: PayloadAction<string>) => {
+      state.visibleColumns[action.payload] = !state.visibleColumns[action.payload];
+    },
+    setFilterSearch: (
+      state,
+      action: PayloadAction<{ field: keyof FilterOptionsState; searchFilter: string }>
+    ) => {
       const { field, searchFilter } = action.payload;
       if (field !== "location") {
         state.filterOptions[field].searchFilter = searchFilter;
@@ -699,36 +1152,96 @@ const dataSlice = createSlice({
       state.sortField = action.payload.field;
       state.sortOrder = action.payload.order;
     },
-    clearSort: (state) => { state.sortField = undefined; state.sortOrder = undefined; },
-    setOpenFirstDialog: (state, action: PayloadAction<boolean>) => { state.openFirstDialog = action.payload; },
-    setOpenAdjustmentDialog: (state, action: PayloadAction<boolean>) => { state.openAdjustmentDialog = action.payload; },
-    setOpenApproveDialog: (state, action: PayloadAction<boolean>) => { state.openApproveDialog = action.payload; },
-    setSelectedItem: (state, action: PayloadAction<Branchitem | null>) => { state.selectedItem = action.payload; },
-    setSelectedApproveItem: (state, action: PayloadAction<Branchitem | null>) => { state.selectedApproveItem = action.payload; },
-    setAdjustmentReason: (state, action: PayloadAction<string>) => { state.adjustmentReason = action.payload; },
-    setAdjustedPhysicalStock: (state, action: PayloadAction<string>) => { state.adjustedPhysicalStock = action.payload; },
-    setApproveDescription: (state, action: PayloadAction<string>) => { state.approveDescription = action.payload; },
-    setOpenSnackbar: (state, action: PayloadAction<boolean>) => { state.openSnackbar = action.payload; },
-    setSnackbarMessage: (state, action: PayloadAction<string>) => { state.snackbarMessage = action.payload; },
-    setCurrentPage: (state, action: PayloadAction<number>) => { state.currentPage = action.payload; },
-    setHasMoreData: (state, action: PayloadAction<boolean>) => { state.hasMoreData = action.payload; },
-    setAllItems: (state, action: PayloadAction<Branchitem[]>) => { state.allItems = action.payload; },
-    setTotalItems: (state, action: PayloadAction<number>) => { state.totalItems = action.payload; },
-    setTotalPages: (state, action: PayloadAction<number>) => { state.totalPages = action.payload; },
-    setIsLoadingMore: (state, action: PayloadAction<boolean>) => { state.isLoadingMore = action.payload; },
-    setIsFullScreen: (state, action: PayloadAction<boolean>) => { state.isFullScreen = action.payload; },
-    setTableView: (state, action: PayloadAction<"Stock" | "Approved">) => { state.tableView = action.payload; },
-    setSearchParams: (state, action: PayloadAction<SearchParams>) => { state.searchParams = action.payload; },
-    setApprovedItemsFilters: (state, action: PayloadAction<{ branch?: string; date?: string }>) => {
+    clearSort: (state) => {
+      state.sortField = undefined;
+      state.sortOrder = undefined;
+    },
+    setOpenFirstDialog: (state, action: PayloadAction<boolean>) => {
+      state.openFirstDialog = action.payload;
+    },
+    setOpenAdjustmentDialog: (state, action: PayloadAction<boolean>) => {
+      state.openAdjustmentDialog = action.payload;
+    },
+    setOpenApproveDialog: (state, action: PayloadAction<boolean>) => {
+      state.openApproveDialog = action.payload;
+    },
+    setSelectedItem: (state, action: PayloadAction<Branchitem | null>) => {
+      state.selectedItem = action.payload;
+    },
+    setSelectedApproveItem: (state, action: PayloadAction<Branchitem | null>) => {
+      state.selectedApproveItem = action.payload;
+    },
+    setAdjustmentReason: (state, action: PayloadAction<string>) => {
+      state.adjustmentReason = action.payload;
+    },
+    setAdjustedPhysicalStock: (state, action: PayloadAction<string>) => {
+      state.adjustedPhysicalStock = action.payload;
+    },
+    setApproveDescription: (state, action: PayloadAction<string>) => {
+      state.approveDescription = action.payload;
+    },
+    setOpenSnackbar: (state, action: PayloadAction<boolean>) => {
+      state.openSnackbar = action.payload;
+    },
+    setSnackbarMessage: (state, action: PayloadAction<string>) => {
+      state.snackbarMessage = action.payload;
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.currentPage = action.payload;
+    },
+    setHasMoreData: (state, action: PayloadAction<boolean>) => {
+      state.hasMoreData = action.payload;
+    },
+    setAllItems: (state, action: PayloadAction<Branchitem[]>) => {
+      state.allItems = action.payload;
+    },
+    setTotalItems: (state, action: PayloadAction<number>) => {
+      state.totalItems = action.payload;
+    },
+    setTotalPages: (state, action: PayloadAction<number>) => {
+      state.totalPages = action.payload;
+    },
+    setIsLoadingMore: (state, action: PayloadAction<boolean>) => {
+      state.isLoadingMore = action.payload;
+    },
+    setIsFullScreen: (state, action: PayloadAction<boolean>) => {
+      state.isFullScreen = action.payload;
+    },
+    setTableView: (state, action: PayloadAction<"Stock" | "Approved">) => {
+      state.tableView = action.payload;
+    },
+    setSearchParams: (state, action: PayloadAction<SearchParams>) => {
+      state.searchParams = action.payload;
+    },
+    setApprovedItemsFilters: (
+      state,
+      action: PayloadAction<{ branch?: string; date?: string }>
+    ) => {
       state.approvedItems.filters.branch = action.payload.branch ?? "";
       state.approvedItems.filters.date = action.payload.date ?? "";
     },
-    setApprovedItemsPage: (state, action: PayloadAction<number>) => { state.approvedItems.page = action.payload; },
-    resetApprovedItems: (state) => {
-      state.approvedItems = { items: [], page: 1, limit: 10, total: 0, loading: false, error: null, filters: { branch: "", date: "" }, hasMore: true, isLoadingMore: false };
+    setApprovedItemsPage: (state, action: PayloadAction<number>) => {
+      state.approvedItems.page = action.payload;
     },
-    setApprovedItemsHasMore: (state, action: PayloadAction<boolean>) => { state.approvedItems.hasMore = action.payload; },
-    setApprovedItemsIsLoadingMore: (state, action: PayloadAction<boolean>) => { state.approvedItems.isLoadingMore = action.payload; },
+    resetApprovedItems: (state) => {
+      state.approvedItems = {
+        items: [],
+        page: 1,
+        limit: 30,
+        total: 0,
+        loading: false,
+        error: null,
+        filters: { branch: "", date: "" },
+        hasMore: true,
+        isLoadingMore: false,
+      };
+    },
+    setApprovedItemsHasMore: (state, action: PayloadAction<boolean>) => {
+      state.approvedItems.hasMore = action.payload;
+    },
+    setApprovedItemsIsLoadingMore: (state, action: PayloadAction<boolean>) => {
+      state.approvedItems.isLoadingMore = action.payload;
+    },
     appendApprovedItems: (state, action: PayloadAction<ApprovedItem[]>) => {
       state.approvedItems.items = [...state.approvedItems.items, ...action.payload];
     },
@@ -738,23 +1251,35 @@ const dataSlice = createSlice({
       state.approvedItems.hasMore = true;
       state.approvedItems.isLoadingMore = false;
     },
-    setDataLoading: (state, action: PayloadAction<boolean>) => { state.loading = action.payload; },
+    setDataLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    clearApprovalResults: (state) => {
+      state.lastApproveResult = null;
+      state.lastBulkApproveResult = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchBranches.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(fetchBranches.fulfilled, (state, action) => { state.loading = false; state.branches = action.payload; })
-      .addCase(fetchBranches.rejected, (state, action) => { state.loading = false; state.error = action.error.message || "Failed to fetch branches"; })
+      .addCase(fetchBranches.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBranches.fulfilled, (state, action) => {
+        state.loading = false;
+        state.branches = action.payload;
+      })
+      .addCase(fetchBranches.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.payload?.message || action.error.message || "Failed to fetch branches";
+      })
 
-      // ─────────────────────────────────────────────────────────────
-      // fetchItems.pending
-      // ─────────────────────────────────────────────────────────────
       .addCase(fetchItems.pending, (state, action) => {
         const params = action.meta.arg;
         const isFilterOnly = !!params.only_filter_options;
 
         if (!isFilterOnly) {
-          // Normal table fetch loading
           if (params.page === 1) {
             state.loading = true;
             state.error = null;
@@ -763,22 +1288,17 @@ const dataSlice = createSlice({
           }
         }
 
-        // Filter-specific loading flags (always set regardless of filter-only)
         if (params.categoryPage !== undefined) state.filterOptions.category.loading = true;
         if (params.subCategoryPage !== undefined) state.filterOptions.subCategory.loading = true;
         if (params.itemNamePage !== undefined) state.filterOptions.itemName.loading = true;
-        if (params.varianceNamePage !== undefined) state.filterOptions.varianceName.loading = true;
+        if (params.varianceNamePage !== undefined)
+          state.filterOptions.varianceName.loading = true;
       })
-
-      // ─────────────────────────────────────────────────────────────
-      // fetchItems.fulfilled
-      // ─────────────────────────────────────────────────────────────
       .addCase(fetchItems.fulfilled, (state, action) => {
         const params = action.meta.arg;
         const response = action.payload;
         const isFilterOnly = response.isFilterOnlyFetch;
 
-        // ── 1. Handle Filter Options (always, regardless of filter-only) ──
         if (response.filterOptions) {
           const handleFilterField = (
             field: "category" | "subCategory" | "itemName" | "varianceName",
@@ -786,13 +1306,13 @@ const dataSlice = createSlice({
             searchParam?: string
           ) => {
             if (pageParam === undefined) return;
+
             const incoming = response.filterOptions![field];
             const isSearch = !!searchParam;
             const requestedPage = pageParam;
             const currentPage = state.filterOptions[field]?.page || 1;
 
             if (isSearch) {
-              // Search: replace values entirely, reset page
               state.filterOptions[field] = {
                 ...incoming,
                 values: incoming.values,
@@ -804,13 +1324,16 @@ const dataSlice = createSlice({
             }
 
             if (requestedPage > 1) {
-              // Scroll load-more: append unique values
               const existingIds = new Set(
-                state.filterOptions[field].values.map((v: any) => (typeof v === "object" ? v.id : v))
+                state.filterOptions[field].values.map((v: any) =>
+                  typeof v === "object" ? v.id : v
+                )
               );
+
               const newValues = incoming.values.filter((v: any) =>
                 typeof v === "object" ? !existingIds.has(v.id) : !existingIds.has(v)
               );
+
               state.filterOptions[field] = {
                 ...incoming,
                 values: [...state.filterOptions[field].values, ...newValues],
@@ -818,8 +1341,7 @@ const dataSlice = createSlice({
                 page: requestedPage,
                 hasMore: newValues.length > 0,
               };
-            } else if (action.meta.arg.resetFilterOptions) {
-              // Full reset
+            } else if (params.resetFilterOptions) {
               state.filterOptions[field] = {
                 ...incoming,
                 values: incoming.values,
@@ -828,7 +1350,6 @@ const dataSlice = createSlice({
                 hasMore: incoming.values.length > 0,
               };
             } else {
-              // Regular page-1 refresh (search/filter changed)
               state.filterOptions[field] = {
                 ...state.filterOptions[field],
                 values: incoming.values,
@@ -842,10 +1363,13 @@ const dataSlice = createSlice({
           handleFilterField("category", params.categoryPage, params.categorySearch);
           handleFilterField("subCategory", params.subCategoryPage, params.subCategorySearch);
           handleFilterField("itemName", params.itemNamePage, params.itemNameSearch);
-          handleFilterField("varianceName", params.varianceNamePage, params.varianceNameSearch);
+          handleFilterField(
+            "varianceName",
+            params.varianceNamePage,
+            params.varianceNameSearch
+          );
         }
 
-        // ── 2. Handle Table Data (SKIP entirely for filter-only fetches) ──
         if (!isFilterOnly && params.page !== undefined) {
           if (params.page === 1) {
             state.branchwise = response.branchwise;
@@ -854,6 +1378,7 @@ const dataSlice = createSlice({
             state.branchwise = [...state.branchwise, ...response.branchwise];
             state.allItems = [...state.allItems, ...response.branchwise];
           }
+
           state.total = response.total;
           state.totalItems = response.total;
           state.page = response.page;
@@ -862,22 +1387,15 @@ const dataSlice = createSlice({
           state.totalPages = Math.ceil(response.total / response.limit);
           state.totalCurrentSystemQty = response.totalCurrentSystemQty;
           state.hasMoreData = state.allItems.length < response.total;
-
-          // Reset main loading flags only for table fetches
           state.loading = false;
           state.isLoadingMore = false;
         } else if (isFilterOnly) {
-          // Filter-only: just clear filter loading flags
           state.filterOptions.category.loading = false;
           state.filterOptions.subCategory.loading = false;
           state.filterOptions.itemName.loading = false;
           state.filterOptions.varianceName.loading = false;
         }
       })
-
-      // ─────────────────────────────────────────────────────────────
-      // fetchItems.rejected
-      // ─────────────────────────────────────────────────────────────
       .addCase(fetchItems.rejected, (state, action) => {
         const params = action.meta.arg;
         const isFilterOnly = !!params.only_filter_options;
@@ -887,7 +1405,9 @@ const dataSlice = createSlice({
           else if (params.page && params.page > 1) state.isLoadingMore = false;
         }
 
-        state.error = action.error.message || "Failed to fetch items";
+        state.error =
+          action.payload?.message || action.error.message || "Failed to fetch items";
+
         state.filterOptions.category.loading = false;
         state.filterOptions.subCategory.loading = false;
         state.filterOptions.itemName.loading = false;
@@ -899,19 +1419,68 @@ const dataSlice = createSlice({
         if (params.varianceNamePage) state.filterOptions.varianceName.hasMore = false;
       })
 
-      .addCase(approveItem.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(approveItem.pending, (state) => {
+        state.approving = true;
+        state.error = null;
+      })
       .addCase(approveItem.fulfilled, (state, action) => {
-        state.loading = false;
-        const updatedItem = action.payload.item;
-        if (!updatedItem) return;
-        state.allItems = state.allItems.map((item) =>
-          item.itemCode === updatedItem.itemCode ? { ...item, ...updatedItem } : item
-        );
+        state.approving = false;
+        state.lastApproveResult = action.payload;
+
+        if (action.payload.approvalStatus === "approved") {
+          state.allItems = updateApprovedRowInList(state.allItems, action.payload);
+          state.branchwise = updateApprovedRowInList(state.branchwise, action.payload);
+        }
       })
       .addCase(approveItem.rejected, (state, action) => {
-        state.loading = false;
+        state.approving = false;
         state.error = action.payload?.message || "Failed to approve item";
       })
+
+      .addCase(approveBulkItems.pending, (state) => {
+        state.bulkApproving = true;
+        state.error = null;
+      })
+      .addCase(approveBulkItems.fulfilled, (state, action) => {
+        state.bulkApproving = false;
+        state.lastBulkApproveResult = action.payload;
+
+        const approvedResults = action.payload.results.filter(
+          (r) => r.success === true && r.approvalStatus === "approved"
+        );
+
+        for (const result of approvedResults) {
+          state.allItems = updateApprovedRowInList(state.allItems, result);
+          state.branchwise = updateApprovedRowInList(state.branchwise, result);
+        }
+      })
+      .addCase(approveBulkItems.rejected, (state, action) => {
+        state.bulkApproving = false;
+        state.error = action.payload?.message || "Failed to approve selected items";
+      })
+
+      .addCase(approveAllBranch.pending, (state) => {
+        state.approveAllBranchLoading = true;
+        state.error = null;
+      })
+      .addCase(approveAllBranch.fulfilled, (state) => {
+        state.approveAllBranchLoading = false;
+      })
+      .addCase(approveAllBranch.rejected, (state, action) => {
+        state.approveAllBranchLoading = false;
+        state.error = action.payload?.message || "Failed to approve branch";
+      })
+
+      .addCase(fetchPendingCodes.pending, (state) => {
+        state.loadingPendingCodes = true;
+      })
+      .addCase(fetchPendingCodes.fulfilled, (state) => {
+        state.loadingPendingCodes = false;
+      })
+      .addCase(fetchPendingCodes.rejected, (state) => {
+        state.loadingPendingCodes = false;
+      })
+
       .addCase(fetchApprovedItems.pending, (state, action) => {
         const { isLoadMore } = action.meta.arg;
         if (isLoadMore) state.approvedItems.isLoadingMore = true;
@@ -921,6 +1490,7 @@ const dataSlice = createSlice({
       .addCase(fetchApprovedItems.fulfilled, (state, action) => {
         const { data, page, limit, total } = action.payload;
         const { isLoadMore } = action.meta.arg;
+
         if (isLoadMore) {
           state.approvedItems.items = [...state.approvedItems.items, ...data];
           state.approvedItems.isLoadingMore = false;
@@ -928,6 +1498,7 @@ const dataSlice = createSlice({
           state.approvedItems.items = data;
           state.approvedItems.loading = false;
         }
+
         state.approvedItems.page = page;
         state.approvedItems.limit = limit;
         state.approvedItems.total = total;
@@ -937,64 +1508,138 @@ const dataSlice = createSlice({
         const { isLoadMore } = action.meta.arg;
         if (isLoadMore) state.approvedItems.isLoadingMore = false;
         else state.approvedItems.loading = false;
-        state.approvedItems.error = action.payload?.message || "Failed to load approved items";
+        state.approvedItems.error =
+          action.payload?.message || "Failed to load approved items";
       });
   },
 });
 
 // ================== Export Actions ==================
 export const {
-  resetData, setSelectedLocation, setEditableRows, setChanges, setVisibleColumns, toggleColumn, setFilterSearch,
-  clearFilterSearch, setSort, clearSort, setOpenFirstDialog, setOpenAdjustmentDialog, setOpenApproveDialog,
-  setSelectedItem, setSelectedApproveItem, setAdjustmentReason, setAdjustedPhysicalStock, setApproveDescription,
-  setOpenSnackbar, setSnackbarMessage, setCurrentPage, setHasMoreData, setAllItems, setTotalItems, setTotalPages,
-  setIsLoadingMore, setIsFullScreen, setTableView, setSearchParams, setApprovedItemsFilters, setApprovedItemsPage,
-  resetApprovedItems, setApprovedItemsHasMore, setApprovedItemsIsLoadingMore, appendApprovedItems, resetApprovedItemsPagination,
+  resetData,
+  setSelectedLocation,
+  setEditableRows,
+  setChanges,
+  setVisibleColumns,
+  toggleColumn,
+  setFilterSearch,
+  clearFilterSearch,
+  setSort,
+  clearSort,
+  setOpenFirstDialog,
+  setOpenAdjustmentDialog,
+  setOpenApproveDialog,
+  setSelectedItem,
+  setSelectedApproveItem,
+  setAdjustmentReason,
+  setAdjustedPhysicalStock,
+  setApproveDescription,
+  setOpenSnackbar,
+  setSnackbarMessage,
+  setCurrentPage,
+  setHasMoreData,
+  setAllItems,
+  setTotalItems,
+  setTotalPages,
+  setIsLoadingMore,
+  setIsFullScreen,
+  setTableView,
+  setSearchParams,
+  setApprovedItemsFilters,
+  setApprovedItemsPage,
+  resetApprovedItems,
+  setApprovedItemsHasMore,
+  setApprovedItemsIsLoadingMore,
+  appendApprovedItems,
+  resetApprovedItemsPagination,
   setDataLoading,
+  clearApprovalResults,
+  // newly add this 11 8 2
+  setShowOnlyPending,
 } = dataSlice.actions;
 
 // ================== Selectors ==================
 export const selectBranches = (state: { data: DataState }) => state.data.branches;
 export const selectItems = (state: { data: DataState }) => state.data.branchwise;
 export const selectUpdatedStocks = (state: { data: DataState }) => state.data.updatedStocks;
-export const selectStockAdjustments = (state: { data: DataState }) => state.data.stockAdjustments;
+export const selectStockAdjustments = (state: { data: DataState }) =>
+  state.data.stockAdjustments;
 export const selectDataLoading = (state: { data: DataState }) => state.data.loading;
 export const selectDataError = (state: { data: DataState }) => state.data.error;
-export const selectEditableRows = (state: { data: DataState }) => state.data.editableRows;
+export const selectApproving = (state: { data: DataState }) => state.data.approving;
+export const selectBulkApproving = (state: { data: DataState }) =>
+  state.data.bulkApproving;
+export const selectEditableRows = (state: { data: DataState }) =>
+  state.data.editableRows;
 export const selectChanges = (state: { data: DataState }) => state.data.changes;
-export const selectSelectedLocation = (state: { data: DataState }) => state.data.selectedLocation;
-export const selectFilterOptions = (state: { data: DataState }) => state.data.filterOptions;
-export const selectVisibleColumns = (state: { data: DataState }) => state.data.visibleColumns;
-export const selectTotalCurrentSystemQty = (state: { data: DataState }) => state.data.totalCurrentSystemQty;
+export const selectSelectedLocation = (state: { data: DataState }) =>
+  state.data.selectedLocation;
+export const selectFilterOptions = (state: { data: DataState }) =>
+  state.data.filterOptions;
+export const selectVisibleColumns = (state: { data: DataState }) =>
+  state.data.visibleColumns;
+export const selectTotalCurrentSystemQty = (state: { data: DataState }) =>
+  state.data.totalCurrentSystemQty;
 export const selectSortField = (state: { data: DataState }) => state.data.sortField;
 export const selectSortOrder = (state: { data: DataState }) => state.data.sortOrder;
-export const selectOpenFirstDialog = (state: { data: DataState }) => state.data.openFirstDialog;
-export const selectOpenAdjustmentDialog = (state: { data: DataState }) => state.data.openAdjustmentDialog;
-export const selectOpenApproveDialog = (state: { data: DataState }) => state.data.openApproveDialog;
+export const selectOpenFirstDialog = (state: { data: DataState }) =>
+  state.data.openFirstDialog;
+export const selectOpenAdjustmentDialog = (state: { data: DataState }) =>
+  state.data.openAdjustmentDialog;
+export const selectOpenApproveDialog = (state: { data: DataState }) =>
+  state.data.openApproveDialog;
 export const selectSelectedItem = (state: { data: DataState }) => state.data.selectedItem;
-export const selectSelectedApproveItem = (state: { data: DataState }) => state.data.selectedApproveItem;
-export const selectAdjustmentReason = (state: { data: DataState }) => state.data.adjustmentReason;
-export const selectAdjustedPhysicalStock = (state: { data: DataState }) => state.data.adjustedPhysicalStock;
-export const selectApproveDescription = (state: { data: DataState }) => state.data.approveDescription;
-export const selectOpenSnackbar = (state: { data: DataState }) => state.data.openSnackbar;
-export const selectSnackbarMessage = (state: { data: DataState }) => state.data.snackbarMessage;
+export const selectSelectedApproveItem = (state: { data: DataState }) =>
+  state.data.selectedApproveItem;
+export const selectAdjustmentReason = (state: { data: DataState }) =>
+  state.data.adjustmentReason;
+export const selectAdjustedPhysicalStock = (state: { data: DataState }) =>
+  state.data.adjustedPhysicalStock;
+export const selectApproveDescription = (state: { data: DataState }) =>
+  state.data.approveDescription;
+export const selectOpenSnackbar = (state: { data: DataState }) =>
+  state.data.openSnackbar;
+export const selectSnackbarMessage = (state: { data: DataState }) =>
+  state.data.snackbarMessage;
 export const selectCurrentPage = (state: { data: DataState }) => state.data.currentPage;
 export const selectHasMoreData = (state: { data: DataState }) => state.data.hasMoreData;
 export const selectAllItems = (state: { data: DataState }) => state.data.allItems;
 export const selectTotalItems = (state: { data: DataState }) => state.data.totalItems;
 export const selectTotalPages = (state: { data: DataState }) => state.data.totalPages;
-export const selectIsLoadingMore = (state: { data: DataState }) => state.data.isLoadingMore;
-export const selectIsFullScreen = (state: { data: DataState }) => state.data.isFullScreen;
+export const selectIsLoadingMore = (state: { data: DataState }) =>
+  state.data.isLoadingMore;
+export const selectIsFullScreen = (state: { data: DataState }) =>
+  state.data.isFullScreen;
 export const selectTableView = (state: { data: DataState }) => state.data.tableView;
-export const selectSearchParams = (state: { data: DataState }) => state.data.searchParams;
-export const selectApprovedItems = (state: { data: DataState }) => state.data.approvedItems.items;
-export const selectApprovedItemsPage = (state: { data: DataState }) => state.data.approvedItems.page;
-export const selectApprovedItemsLimit = (state: { data: DataState }) => state.data.approvedItems.limit;
-export const selectApprovedItemsTotal = (state: { data: DataState }) => state.data.approvedItems.total;
-export const selectApprovedItemsLoading = (state: { data: DataState }) => state.data.approvedItems.loading;
-export const selectApprovedItemsError = (state: { data: DataState }) => state.data.approvedItems.error;
-export const selectApprovedItemsFilters = (state: { data: DataState }) => state.data.approvedItems.filters;
-export const selectApprovedItemsHasMore = (state: { data: DataState }) => state.data.approvedItems.hasMore;
-export const selectApprovedItemsIsLoadingMore = (state: { data: DataState }) => state.data.approvedItems.isLoadingMore;
+export const selectSearchParams = (state: { data: DataState }) =>
+  state.data.searchParams;
+export const selectLastApproveResult = (state: { data: DataState }) =>
+  state.data.lastApproveResult;
+export const selectLastBulkApproveResult = (state: { data: DataState }) =>
+  state.data.lastBulkApproveResult;
+
+export const selectApprovedItems = (state: { data: DataState }) =>
+  state.data.approvedItems.items;
+export const selectApprovedItemsPage = (state: { data: DataState }) =>
+  state.data.approvedItems.page;
+export const selectApprovedItemsLimit = (state: { data: DataState }) =>
+  state.data.approvedItems.limit;
+export const selectApprovedItemsTotal = (state: { data: DataState }) =>
+  state.data.approvedItems.total;
+export const selectApprovedItemsLoading = (state: { data: DataState }) =>
+  state.data.approvedItems.loading;
+export const selectApprovedItemsError = (state: { data: DataState }) =>
+  state.data.approvedItems.error;
+export const selectApprovedItemsFilters = (state: { data: DataState }) =>
+  state.data.approvedItems.filters;
+export const selectApprovedItemsHasMore = (state: { data: DataState }) =>
+  state.data.approvedItems.hasMore;
+export const selectApprovedItemsIsLoadingMore = (state: { data: DataState }) =>
+  state.data.approvedItems.isLoadingMore;
+export const selectApproveAllBranchLoading = (state: { data: DataState }) =>
+  state.data.approveAllBranchLoading;
+export const selectLoadingPendingCodes = (state: { data: DataState }) =>
+  state.data.loadingPendingCodes;
+// newly add this 11 8 2
 
 export default dataSlice.reducer;

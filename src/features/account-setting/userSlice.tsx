@@ -39,13 +39,16 @@ interface UpdateUserStatusPayload {
   active: boolean;
 }
 
-// API calls with proper typing
 export const createUser = createAsyncThunk(
   'users/createUser',
   async (userData: CreateUserPayload): Promise<User> => {
-    const response = await fetch('https://yenerp.com/purchasetestapi/users', {
+    const token = sessionStorage.getItem('accessToken');
+    const response = await fetch('http://127.0.0.1:8000/yenerpapi/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify(userData)
     });
     return await response.json();
@@ -55,7 +58,8 @@ export const createUser = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   'users/loginUser',
   async (loginData: LoginPayload): Promise<User> => {
-    const response = await fetch('https://yenerp.com/purchasetestapi/users/login', {
+    // Note: this is employee-level login, no token exists yet — leave as-is
+    const response = await fetch('http://127.0.0.1:8000/yenerpapi/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(loginData)

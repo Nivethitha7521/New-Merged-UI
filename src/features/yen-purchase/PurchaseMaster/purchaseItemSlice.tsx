@@ -23,7 +23,7 @@ import { fetchCategories } from './PurchaseCategorySlice';
 
 
 
-const EXPORT_CSV_URL = 'https://yenerp.com/purchasetestapi/rawMaterials/export_csv';
+const EXPORT_CSV_URL = 'http://127.0.0.1:8000/yenerpapi/rawMaterials/export_csv';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // ---------- EXPORT (OLD) ----------
@@ -87,7 +87,7 @@ export const fetchPurchaseItems = createAsyncThunk(
 
     try {
       
-      const response = await purchaseApi.get('https://yenerp.com/purchasetestapi/rawMaterials/', { 
+      const response = await purchaseApi.get('http://127.0.0.1:8000/yenerpapi/rawMaterials/', { 
         params,
         
 
@@ -126,7 +126,7 @@ export const fetchUom = createAsyncThunk('uom/fetch', async () => {
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    const response = await purchaseApi.get<UOM[]>('https://yenerp.com/purchasetestapi/purchaseuoms/', {
+    const response = await axios.get<UOM[]>('http://127.0.0.1:8000/yenerpapi/uoms/', {
     
 
     });
@@ -147,7 +147,7 @@ export const fetchPurchaseItemtype = createAsyncThunk('itemtype/fetch', async ()
     // Get the username from your auth state or localStorage
     const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
     
-    const response = await purchaseApi.get<PurchaseItemType[]>('https://yenerp.com/purchasetestapi/itemtypes/', {
+    const response = await purchaseApi.get<PurchaseItemType[]>('http://127.0.0.1:8000/yenerpapi/itemtypes/', {
     
 
     });
@@ -172,14 +172,14 @@ export const fetchPurchaseTaxes = createAsyncThunk('purchaseTaxes/fetch', async 
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    const response = await purchaseApi.get('https://yenerp.com/purchasetestapi/purchasetaxes/', {
+    const response = await axios.get('http://127.0.0.1:8000/yenerpapi/taxes/', {
      
 
     });
     
     
     const tax = (response.data as any[]).map((item) => ({
-      purchasetaxPercentage: item.purchasetaxPercentage,
+      purchasetaxPercentage: item.taxPercentage,
     }));
     return tax;
   } catch (error: any) {
@@ -194,7 +194,7 @@ export const fetchStorageLocationItems = createAsyncThunk('storageLocations/fetc
   try {
     const username = localStorage.getItem('username') || 'default_user';
     
-    const response = await purchaseApi.get<StorageLocationItem[]>('https://yenerp.com/purchasetestapi/storagelocations/', {
+    const response = await purchaseApi.get<StorageLocationItem[]>('http://127.0.0.1:8000/yenerpapi/storagelocations/', {
       
 
     });
@@ -212,7 +212,7 @@ export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', asyn
   try {
     const username = localStorage.getItem('username') || 'default_user'; // Adjust based on your auth
     
-    const response = await purchaseApi.get('https://yenerp.com/purchasetestapi/itemgroups/', {
+    const response = await purchaseApi.get('http://127.0.0.1:8000/yenerpapi/itemgroups/', {
      
 
     });
@@ -233,7 +233,7 @@ export const fetchPurchaseGroupItems = createAsyncThunk('groupItems/fetch', asyn
 
 // ---------- VENDORS ----------
 export const fetchAllVendors = createAsyncThunk('vendors/fetch', async () => {
-  const response = await purchaseApi.get<Vendor[]>('https://yenerp.com/purchasetestapi/vendors/',);
+  const response = await purchaseApi.get<Vendor[]>('http://127.0.0.1:8000/yenerpapi/vendors/',);
   const vendorData = response.data.map((item) => ({
     vendorId: item.vendorId,
     vendorName: item.vendorName,
@@ -254,7 +254,7 @@ export const addPurchaseItem = createAsyncThunk(
 
 
       const response = await purchaseApi.post<PurchaseItem>(
-        'https://yenerp.com/purchasetestapi/rawMaterials/',
+        'http://127.0.0.1:8000/yenerpapi/rawMaterials/',
         purchaseToAdd,
        
       );
@@ -295,7 +295,7 @@ export const POsearchPurchaseItems = createAsyncThunk<
   }
 
   const response = await purchaseApi.get<PurchaseItemSearch[]>(
-    `https://yenerp.com/purchasetestapi/rawMaterials/exact-name/`,
+    `http://127.0.0.1:8000/yenerpapi/rawMaterials/exact-name/`,
     {
       params: {
         item_name: searchQuery,
@@ -364,7 +364,7 @@ export const searchPurchaseItems = createAsyncThunk<
     }
     
     const response = await purchaseApi.get<SearchResponse>(
-      `https://yenerp.com/purchasetestapi/rawMaterials/search-with-stock`,
+      `http://127.0.0.1:8000/yenerpapi/rawMaterials/search-with-stock`,
       { params }
     );
     
@@ -403,7 +403,7 @@ export const updatePurchaseItem = createAsyncThunk(
     
 
       const response = await purchaseApi.patch<PurchaseItem>(
-        `https://yenerp.com/purchasetestapi/rawMaterials/${purchase.purchaseitemId}`,
+        `http://127.0.0.1:8000/yenerpapi/rawMaterials/${purchase.purchaseitemId}`,
         purchaseToUpdate,
        
       );
@@ -431,7 +431,7 @@ export const deactivatePurchaseItem = createAsyncThunk('purchaseItems/deactivate
     
     
     const response = await purchaseApi.patch<PurchaseItem>(
-      `https://yenerp.com/purchasetestapi/rawMaterials/${id}/deactivate`,
+      `http://127.0.0.1:8000/yenerpapi/rawMaterials/${id}/deactivate`,
       { status: 'deactivated' },
       
     );
@@ -448,7 +448,7 @@ export const activatePurchaseItem = createAsyncThunk('purchaseItems/activate', a
     const username = localStorage.getItem('username') || 'default_user';
     
     await purchaseApi.patch<PurchaseItem>(
-      `https://yenerp.com/purchasetestapi/rawMaterials/${id}/activate`,
+      `http://127.0.0.1:8000/yenerpapi/rawMaterials/${id}/activate`,
       { status: 'active' },
       
     );
@@ -468,7 +468,7 @@ export const importPurchaseItems = createAsyncThunk(
       formData.append('mode', mode);
 
       const response = await purchaseApi.post(
-        'https://yenerp.com/purchasetestapi/rawMaterials/import_csv',
+        'http://127.0.0.1:8000/yenerpapi/rawMaterials/import_csv',
         formData,
       
       );
@@ -528,7 +528,7 @@ export const exportPurchaseItems = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await purchaseApi.get(
-        'https://yenerp.com/purchasetestapi/rawMaterials/purchaseitemexport/export_csv',
+        'http://127.0.0.1:8000/yenerpapi/rawMaterials/purchaseitemexport/export_csv',
         {
 
           responseType: 'blob',

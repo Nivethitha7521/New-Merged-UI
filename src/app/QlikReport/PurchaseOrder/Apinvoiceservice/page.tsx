@@ -2,8 +2,8 @@
 
 import { ApInvoiceServiceReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { apInvoiceServiceConfig } from '../../configs/apInvoiceService.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { apInvoiceServiceConfig } from '@/features/purchase-order/reports/apInvoiceService.config';
 
 // Select 'apInvoiceService' (the key defined in your config)
 const selector = (s: RootState) => s.apInvoiceService;

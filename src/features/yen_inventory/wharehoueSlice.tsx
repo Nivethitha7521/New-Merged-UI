@@ -7,7 +7,12 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 
-import purchaseApi from "@/utils/api";
+import { API_BASE_URL } from "./OuletePhysicalStockSlice";
+import { getApiErrorMessage } from "@/components/Inventory/shared/apiError";
+import {
+  downloadBlobSafely,
+  getFilenameFromContentDisposition,
+} from "@/components/Inventory/shared/downloadFile";
 /* ---------- HELPERS ---------- */
 
 
@@ -104,6 +109,7 @@ export interface RawMaterialsState {
     varianceNameSearch?: string;
     categoryPage: number;
     categoryLimit: number;
+
     subCategoryPage: number;
     subCategoryLimit: number;
     itemNamePage: number;
@@ -113,6 +119,7 @@ export interface RawMaterialsState {
     includeDropdowns: boolean;
   };
   lastFetchParams: string;
+  visibleColumns: Record<string, boolean>;
   openSnackbar: boolean;
   openDownloadDialog: boolean;
   editMessage: string;
@@ -179,6 +186,18 @@ const initialState: RawMaterialsState = {
     includeDropdowns: true,
   },
   lastFetchParams: "",
+  visibleColumns: {
+    "S.No": true,
+    "Item Code": true,
+    "Category": false,
+    "Sub Category": false,
+    "Item Group": true,
+    "Item Name": true,
+    "SO Stock": true,
+    "Prev System": true,
+    "System Stock": true,
+    "Physical": true,
+  },
   openSnackbar: false,
   openDownloadDialog: false,
   editMessage: "",
@@ -201,26 +220,11 @@ interface AxiosErrorPayload {
   raw?: unknown;
 }
 
-export const parseAxiosError = (err: AxiosError): AxiosErrorPayload => {
-  const data = err.response?.data as AxiosErrorResponseData | undefined;
-  let message: string;
-  if (data && typeof data === "object") {
-    if (Array.isArray(data.detail)) {
-      message = data.detail
-        .map((e) => `${e.loc.join(".")}: ${e.msg}`)
-        .join("; ");
-    } else if (typeof data.detail === "string") {
-      message = data.detail;
-    } else if (data.message) {
-      message = data.message;
-    } else {
-      message = err.message ?? "Unknown error";
-    }
-  } else {
-    message = err.message ?? "Unknown error";
-  }
-  return { message, status: err.response?.status ?? null, raw: data ?? null };
-};
+export const parseAxiosError = (err: AxiosError): AxiosErrorPayload => ({
+  message: getApiErrorMessage(err, "Unknown error"),
+  status: err.response?.status ?? null,
+  raw: err.response?.data ?? null,
+});
 
 /* ---------- HELPER: Validate and convert to valid integer ---------- */
 const toValidInteger = (value: unknown, defaultValue: number): number => {
@@ -251,7 +255,7 @@ export const fetchWarehouses = createAsyncThunk<
     params.append("limit", limit.toString());
     if (search) params.append("search", search);
 
-    const { data } = await purchaseApi.get<Warehouse[]>(`/outletinventory/locations/all`, {
+    const { data } = await axios.get<Warehouse[]>(`${API_BASE_URL}/warehouseinventory/warehouses`, {
       params,
       timeout: 15000,
     });
@@ -380,8 +384,8 @@ export const fetchRawMaterials = createAsyncThunk<
     });
 
     try {
-      const { data } = await purchaseApi.get<SearchRawMaterialsResponse>(
-        `/warehouseinventory/`,
+      const { data } = await axios.get<SearchRawMaterialsResponse>(
+        `${API_BASE_URL}/warehouseinventory/`,
         { params: clean, timeout: 30000 }
       );
 
@@ -393,8 +397,59 @@ export const fetchRawMaterials = createAsyncThunk<
   }
 );
 
+// export const updateRawMaterialStock = createAsyncThunk<
+//   { randomId: string; physicalStock: number },
+//   UpdateStockRequestPayload,
+//   { state: RootState; rejectValue: AxiosErrorPayload }
+// >(
+//   "rawMaterials/updateRawMaterialStock",
+//   async (payload, { getState, rejectWithValue }) => {
+//     const { randomId, warehouseId, physicalStock, updatedBy, description } =
+//       payload;
+
+//     if (!randomId || typeof physicalStock !== "number" || physicalStock < 0)
+//       return rejectWithValue({
+//         message:
+//           "Invalid payload: randomId + non-negative physicalStock required",
+//         status: 400,
+//       });
+//     if (!warehouseId)
+//       return rejectWithValue({
+//         message: "warehouseId is required",
+//         status: 400,
+//       });
+//     try {
+//       await axios.patch(
+//         `${API_BASE_URL}/warehouseinventory/inventory`,
+//         {
+//           randomId,
+//           warehouseId: warehouseId,
+//           physicalStock,
+//         },
+//         {
+//           params: {
+//             updated_by: updatedBy,
+//             description,
+//           },
+//           timeout: 15000,
+//         }
+//       );
+
+//       return { randomId, physicalStock };
+//     } catch (e) {
+//       const err = e as AxiosError;
+//       return rejectWithValue(parseAxiosError(err));
+//     }
+//   }
+// );
+// replace the part 1 8 1
 export const updateRawMaterialStock = createAsyncThunk<
-  { randomId: string; physicalStock: number },
+  {
+    randomId: string;
+    physicalStock: number;
+    systemStock: number;
+    previousSystemStock: number;
+  },
   UpdateStockRequestPayload,
   { state: RootState; rejectValue: AxiosErrorPayload }
 >(
@@ -415,8 +470,8 @@ export const updateRawMaterialStock = createAsyncThunk<
         status: 400,
       });
     try {
-      await purchaseApi.patch(
-        `/warehouseinventory/inventory`,
+      const { data } = await axios.patch(
+        `${API_BASE_URL}/warehouseinventory/inventory`,
         {
           randomId,
           warehouseId: warehouseId,
@@ -431,7 +486,12 @@ export const updateRawMaterialStock = createAsyncThunk<
         }
       );
 
-      return { randomId, physicalStock };
+      return {
+        randomId,
+        physicalStock: data?.physicalStock ?? physicalStock,
+        systemStock: data?.systemStock ?? physicalStock,
+        previousSystemStock: data?.previousSystemStock ?? 0,
+      };
     } catch (e) {
       const err = e as AxiosError;
       return rejectWithValue(parseAxiosError(err));
@@ -439,161 +499,6 @@ export const updateRawMaterialStock = createAsyncThunk<
   }
 );
 
-interface ExportCSVPayload {
-  locationId: string;
-  aliasName?: string;
-
-  purchasecategoryName?: string;
-  purchasesubcategoryName?: string;
-  itemName?: string;
-  varianceName?: string;
-}
-
-
-export const downloadExportCSV = createAsyncThunk<void, ExportCSVPayload>(
-  "rawMaterials/downloadExportCSV",
-  async ({ locationId, aliasName, purchasecategoryName, purchasesubcategoryName, itemName, varianceName }) => {
-    const params = new URLSearchParams();
-    params.append("locationId", locationId);
-
-    if (purchasecategoryName) params.append("purchasecategoryName", purchasecategoryName);
-    if (purchasesubcategoryName) params.append("purchasesubcategoryName", purchasesubcategoryName);
-    if (itemName) params.append("itemName", itemName);
-    if (varianceName) params.append("varianceName", varianceName);
-
-    const url = `}/warehouseinventory/export?${params.toString()}`;
-    const response = await purchaseApi.get(url, { responseType: "blob" });
-
-    const blob = new Blob([response.data], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-
-    //  NEW filename logic
-    const today = new Date();
-    const dateString = `${today.getDate().toString().padStart(2, "0")}-${(today.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${today.getFullYear()}`;
-
-    const alias = aliasName || `warehouse_${locationId}`;
-    let filename = `${alias}_Warehousestock_${dateString}.csv`;
-
-    // If server sends filename, use it
-    const contentDisposition = response.headers["content-disposition"];
-    const match = contentDisposition?.match(/filename="(.+)"/);
-    if (match?.[1]) filename = match[1];
-
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-);
-
-
-
-export const downloadSampleCSV = createAsyncThunk<void>(
-  "rawMaterials/downloadSampleCSV",
-  async () => {
-    const url = `/warehouseinventory/export/sample`;
-    const response = await purchaseApi.get(url, { responseType: "blob" });
-    const blob = new Blob([response.data], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-
-    // Extract filename from headers
-    const contentDisposition = response.headers["content-disposition"];
-    let filename = "sample_rmstock.csv";
-    if (contentDisposition) {
-      const match = contentDisposition.match(/filename="(.+)"/);
-      if (match?.[1]) filename = match[1];
-    }
-
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-);
-
-export interface ImportStockPayload {
-  file: File;
-  locationId: string;
-  updated_by?: string;
-}
-
-export const importRawMaterialStock = createAsyncThunk<
-  ImportStockResponse,
-  ImportStockPayload,
-  { rejectValue: AxiosErrorPayload }
->(
-  "rawMaterials/importRawMaterialStock",
-  async (payload, { rejectWithValue }) => {
-    const { file, locationId, updated_by = "" } = payload;
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const { data } = await purchaseApi.post(
-        `/warehouseinventory/importstocks?locationId=${locationId}&updated_by=${encodeURIComponent(updated_by)}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          timeout: 60000
-        }
-      );
-      return data;
-    } catch (e) {
-      const err = e as AxiosError;
-      return rejectWithValue(parseAxiosError(err));
-    }
-  }
-);
-
-export const createInventoryStock = createAsyncThunk<
-  { randomId: string; physicalStock: number },
-  UpdateStockRequestPayload,
-  { rejectValue: AxiosErrorPayload }
->(
-  "rawMaterials/createInventoryStock",
-  async (payload, { rejectWithValue }) => {
-    const { randomId, warehouseId, physicalStock, updatedBy, description } = payload;
-
-    if (!randomId || typeof physicalStock !== "number" || physicalStock < 0)
-      return rejectWithValue({
-        message:
-          "Invalid payload: randomId + non-negative physicalStock required",
-        status: 400,
-      });
-    if (!warehouseId || !updatedBy)
-      return rejectWithValue({
-        message: "locationId and updatedBy are required",
-        status: 400,
-      });
-
-    try {
-      await purchaseApi.post(
-        `/warehouseinventory/inventory`,
-        {
-          randomId,
-          warehouseId,
-          physicalStock,
-        },
-        {
-          params: {
-            updated_by: updatedBy,
-            description: description || "Initial stock created",
-          },
-          timeout: 15000,
-        }
-      );
-
-      return { randomId, physicalStock };
-    } catch (e) {
-      const err = e as AxiosError;
-      return rejectWithValue(parseAxiosError(err));
-    }
-  }
-);
 export interface UpdateStockBulkPayload {
   warehouseId: string;
   updates: {
@@ -618,8 +523,8 @@ export const updateRawMaterialsBulk = createAsyncThunk<
       });
 
     try {
-      const { data } = await purchaseApi.patch(
-        `/warehouseinventory/inventory/bulk`,
+      const { data } = await axios.patch(
+        `${API_BASE_URL}/warehouseinventory/inventory/bulk`,
         {
           updates: updates.map((u) => ({
             randomId: u.randomId,
@@ -636,7 +541,7 @@ export const updateRawMaterialsBulk = createAsyncThunk<
         }
       );
 
-      return { updated: data.updated ?? updates.length };
+      return { updated: data.updated || updates.length };
     } catch (e) {
       const err = e as AxiosError;
       return rejectWithValue(parseAxiosError(err));
@@ -644,130 +549,168 @@ export const updateRawMaterialsBulk = createAsyncThunk<
   }
 );
 
+export interface ImportRawMaterialPayload {
+  file: File;
+  locationId: string;
+}
 
-/* ---------- SLICE ---------- */
+export const importRawMaterialStock = createAsyncThunk<
+  ImportStockResponse,
+  ImportRawMaterialPayload,
+  { rejectValue: AxiosErrorPayload }
+>(
+  "rawMaterials/importRawMaterialStock",
+  async ({ file, locationId }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const url = `${API_BASE_URL}/warehouseinventory/importstock?locationId=${encodeURIComponent(
+        locationId
+      )}&updated_by=`;
+      const { data } = await axios.post<ImportStockResponse>(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 60000,
+      });
+      return data;
+    } catch (e) {
+      const err = e as AxiosError;
+      return rejectWithValue(parseAxiosError(err));
+    }
+  }
+);
+// newly add this part 29 7 1
+export interface DownloadExportCSVArgs {
+  locationId: string;
+  aliasName?: string;
+  purchasecategoryName?: string;
+  purchasesubcategoryName?: string;
+  itemName?: string;
+  varianceName?: string;
+}
+// export const downloadExportCSV = createAsyncThunk<
+//   void,
+//   void,
+//   { state: RootState; rejectValue: AxiosErrorPayload }
+// >(replace the part 29 7 1
+export const downloadExportCSV = createAsyncThunk<
+  void,
+  DownloadExportCSVArgs,
+  { rejectValue: AxiosErrorPayload }
+>(
+
+  "rawMaterials/downloadExportCSV",
+  // async (_, { getState, rejectWithValue }) => {
+  // replace the one line 29 7 1
+  async (params, { rejectWithValue }) => {
+    try {
+      // const state = getState() as { rawMaterials: RawMaterialsState };
+      // const params = { ...state.rawMaterials.filters };
+      const clean: Record<string, string | number | boolean | string[]> = {};
+      Object.entries(params).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        if (["purchasecategoryName", "purchasesubcategoryName", "itemName", "varianceName", "locationId", "createdDate"].includes(k)) {
+          if (Array.isArray(v) && v.length) clean[k] = v.join(",");
+          else if (typeof v === "string" && v.trim()) clean[k] = v;
+        } else if (k === "includeDropdowns") {
+          clean[k] = Boolean(v);
+        } else {
+          clean[k] = v;
+        }
+      });
+
+      const url = `${API_BASE_URL}/warehouseinventory/export/inventory`;
+      const response = await axios.get(url, { params: clean, responseType: "blob" });
+      const filename = getFilenameFromContentDisposition(
+        response.headers["content-disposition"],
+        "export.csv"
+      );
+      await downloadBlobSafely(new Blob([response.data], { type: response.data?.type || "text/csv" }), filename);
+    } catch (e) {
+      const err = e as AxiosError;
+      return rejectWithValue(parseAxiosError(err));
+    }
+  }
+);
+
+export const downloadSampleCSV = createAsyncThunk<void, void, { rejectValue: AxiosErrorPayload }>(
+  "rawMaterials/downloadSampleCSV",
+  async (_, { rejectWithValue }) => {
+    try {
+      const url = `${API_BASE_URL}/warehouseinventory/export/sample`;
+      const response = await axios.get(url, { responseType: "blob" });
+      const filename = getFilenameFromContentDisposition(
+        response.headers["content-disposition"],
+        "sample_rmstock.csv"
+      );
+      await downloadBlobSafely(new Blob([response.data], { type: response.data?.type || "text/csv" }), filename);
+    } catch (e) {
+      const err = e as AxiosError;
+      return rejectWithValue(parseAxiosError(err));
+    }
+  }
+);
+
 const rawMaterialsSlice = createSlice({
   name: "rawMaterials",
   initialState,
   reducers: {
-    setFilter<K extends keyof RawMaterialsState["filters"]>(
-      state: RawMaterialsState,
-      action: PayloadAction<{ key: K; value: RawMaterialsState["filters"][K] }>
-    ) {
-      const { key, value } = action.payload;
-
-      // -----------------------
-      // Update alias when location changes
-      // -----------------------
-      if (key === "locationId") {
-        state.filters.locationId = value as string;
-
-        const warehouse = state.warehouses.find(w => w.locationId === value);
-        state.filters.aliasName = warehouse?.aliasName || "";
-      }
-      // Validate numeric values before setting
-      if (
-        [
-          "page",
-          "limit",
-          "categoryPage",
-          "categoryLimit",
-          "subCategoryPage",
-          "subCategoryLimit",
-          "itemNamePage",
-          "itemNameLimit",
-          "varianceNamePage",
-          "varianceNameLimit",
-        ].includes(key)
-      ) {
-        const defaultValue = key.includes("Page") ? 1 : 10;
-        const numericValue = toValidInteger(value, defaultValue);
-        state.filters[key] = numericValue as RawMaterialsState["filters"][K];
-      } else {
-        state.filters[key] = value;
-      }
-
-      // When search changes, reset the page for that dropdown
-      if (key.includes("Search")) {
-        if (key === "categorySearch") {
-          state.filters.categoryPage = 1;
-        } else if (key === "subCategorySearch") {
-          state.filters.subCategoryPage = 1;
-        } else if (key === "itemNameSearch") {
-          state.filters.itemNamePage = 1;
-        } else if (key === "varianceNameSearch") {
-          state.filters.varianceNamePage = 1;
-        }
-      }
-
-      // Reset accumulation when changing main filters (not search/page/limit)
-      if (
-        key !== "page" &&
-        !key.includes("Page") &&
-        !key.includes("Search") &&
-        !key.includes("Limit") &&
-        key !== "includeDropdowns"
-      ) {
-        state.accumulatedRawMaterials = [];
-        state.filteredRawMaterials = null;
-        state.filters.page = 1;
-        state.lastFetchParams = "";
-
-        // Reset dropdown pages when changing selections
-        state.filters.categoryPage = 1;
-        state.filters.subCategoryPage = 1;
-        state.filters.itemNamePage = 1;
-        state.filters.varianceNamePage = 1;
-      }
-    },
-    clearAllFilters(state) {
-      // Clear main selection filters
-      state.filters.purchasecategoryName = undefined;
-      state.filters.purchasesubcategoryName = undefined;
-      state.filters.itemName = undefined;
-      state.filters.varianceName = undefined;
-
-      // Clear dropdown searches
-      state.filters.categorySearch = undefined;
-      state.filters.subCategorySearch = undefined;
-      state.filters.itemNameSearch = undefined;
-      state.filters.varianceNameSearch = undefined;
-
-      // Reset dropdown pagination
-      state.filters.categoryPage = 1;
-      state.filters.subCategoryPage = 1;
-      state.filters.itemNamePage = 1;
-      state.filters.varianceNamePage = 1;
-
-      // Reset table pagination
-      state.filters.page = 1;
-
-      // Reset data
-      state.accumulatedRawMaterials = [];
-      state.filteredRawMaterials = null;
-      state.lastFetchParams = "";
-    },
-
     resetRawMaterials(state) {
       state.accumulatedRawMaterials = [];
       state.filteredRawMaterials = null;
-      state.lastFetchParams = "";
-      state.error = null;
-
       state.filters.page = 1;
-
-      state.filters.categoryPage = 1;
-      state.filters.subCategoryPage = 1;
-      state.filters.itemNamePage = 1;
-      state.filters.varianceNamePage = 1;
-
-      // DO NOT reset warehouse or main filters
+      state.lastFetchParams = "";
     },
-    setImportMessage(state, action: PayloadAction<string>) {
-      state.editMessage = action.payload;
-      state.openSnackbar = true;
+    toggleColumn(state, action: PayloadAction<string>) {
+      const col = action.payload;
+      state.visibleColumns[col] = !state.visibleColumns[col];
     },
-
+    clearAllFilters(state) {
+      state.filters = { ...initialState.filters };
+      state.accumulatedRawMaterials = [];
+      state.filteredRawMaterials = null;
+      state.lastFetchParams = "";
+    },
+    //     setFilter(
+    //       state,
+    //       // action: PayloadAction<{ field: keyof RawMaterialsState["filters"]; value: any }>
+    //       // replace the part 29 7 1
+    //       action: PayloadAction<{
+    //   field: keyof RawMaterialsState["filters"];
+    //   value: RawMaterialsState["filters"][keyof RawMaterialsState["filters"]];
+    // }>
+    //     ) 
+    // replace the part 29 7 1
+    setFilter<K extends keyof RawMaterialsState["filters"]>(
+      state: RawMaterialsState,
+      action: PayloadAction<{
+        field: K;
+        value: RawMaterialsState["filters"][K];
+      }>
+    ) {
+      const { field, value } = action.payload;
+      // Changing page via infinite-scroll must NOT clear accumulated rows.
+      // Use setPageOnly for that. setFilter is only for filter fields.
+      // if (field === "page") {
+      //   state.filters.page = value;
+      //   return;
+      // }
+      // replace the part 29 7 1
+      if (field === "page") {
+        state.filters.page = action.payload.value as RawMaterialsState["filters"]["page"];
+        return;
+      }
+      state.filters[field] = value;
+      state.accumulatedRawMaterials = [];
+      state.filteredRawMaterials = null;
+      state.filters.page = 1;
+      state.lastFetchParams = "";
+    },
+    /** Update only the page cursor — does NOT wipe accumulated rows. */
+    setPageOnly(state, action: PayloadAction<number>) {
+      state.filters.page = action.payload;
+    },
     setOpenSnackbar(state, action: PayloadAction<boolean>) {
       state.openSnackbar = action.payload;
     },
@@ -794,290 +737,168 @@ const rawMaterialsSlice = createSlice({
     },
     setChangedRows(
       state,
-      action: PayloadAction<Record<string, boolean>>
+      action: PayloadAction<RawMaterialsState["changedRows"]>
     ) {
       state.changedRows = action.payload;
     },
   },
-
   extraReducers: (builder) => {
-    /* ----- Warehouses ----- */
-    builder
-      .addCase(fetchWarehouses.pending, (state) => {
-        state.warehousesLoading = true;
-        state.error = null;
-      })
-      .addCase(fetchWarehouses.fulfilled, (state, action) => {
-        state.warehousesLoading = false;
-        state.warehouses = Array.isArray(action.payload) ? action.payload : [];
+    // fetchWarehouses
+    builder.addCase(fetchWarehouses.pending, (state) => {
+      state.warehousesLoading = true;
+    });
+    builder.addCase(fetchWarehouses.fulfilled, (state, action) => {
+      state.warehousesLoading = false;
+      state.warehouses = action.payload;
+    });
+    builder.addCase(fetchWarehouses.rejected, (state, action) => {
+      state.warehousesLoading = false;
+      state.error = action.payload?.message || "Failed to fetch warehouses";
+    });
 
-        // Set default warehouse if none selected
-        if (action.payload.length && !state.filters.locationId) {
-          const first = action.payload[0];
-          state.filters.locationId = first.locationId;
-          state.filters.aliasName = first.aliasName || "";
-        }
+    // fetchRawMaterials
+    builder.addCase(fetchRawMaterials.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchRawMaterials.fulfilled, (state, action) => {
+      state.loading = false;
+      const { data, field, append, params, isFilterRequest } = action.payload;
+      if (!isFilterRequest) state.lastFetchParams = params;
 
-        // Sync aliasName if locationId already exists
-        if (state.filters.locationId) {
-          const selected = action.payload.find(
-            (w) => w.locationId === state.filters.locationId
+      if (field) {
+        state.filterOptions[field] = {
+          ...state.filterOptions[field],
+          values: append
+            ? [...state.filterOptions[field].values, ...data.dropdown_values[field].values]
+            : data.dropdown_values[field].values,
+          hasMore: data.dropdown_values[field].hasMore,
+          total: data.dropdown_values[field].total,
+          count: data.dropdown_values[field].count,
+          page: data.dropdown_values[field].page,
+          limit: data.dropdown_values[field].limit,
+        };
+      } else {
+        if (!append) {
+          state.accumulatedRawMaterials = data.results || [];
+          if (data.dropdown_values) {
+            state.filterOptions = data.dropdown_values;
+          }
+        } else {
+          const newItems = (data.results || []).filter(
+            (newItem) => !state.accumulatedRawMaterials.some((item) => item.randomId === newItem.randomId)
           );
-          if (selected) {
-            state.filters.aliasName = selected.aliasName || "";
-          }
+          state.accumulatedRawMaterials = [...state.accumulatedRawMaterials, ...newItems];
         }
-      })
+        state.filteredRawMaterials = {
+          total: data.total,
+          page: data.page,
+          limit: data.limit,
+          // count: data.count,
+          // replace the part 29 7 1
+          count: state.accumulatedRawMaterials.length,
+          items: state.accumulatedRawMaterials,
+          hasMore: data.total > state.accumulatedRawMaterials.length,
+        };
+      }
+    });
+    builder.addCase(fetchRawMaterials.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload?.message || "Failed to fetch data";
+    });
 
-      .addCase(fetchWarehouses.rejected, (state, action) => {
-        state.warehousesLoading = false;
-        state.warehouses = [];
-        state.error =
-          (action.payload as AxiosErrorPayload)?.message ||
-          "Failed to fetch warehouses";
-      });
+    // importRawMaterialStock
+    builder.addCase(importRawMaterialStock.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(importRawMaterialStock.fulfilled, (state, action) => {
+      state.loading = false;
+      state.openSnackbar = true;
+      state.editMessage = action.payload.message;
+    });
+    builder.addCase(importRawMaterialStock.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload?.message || "Failed to import stock";
+    });
 
-    /* ----- Raw Materials (table + bidirectional dropdowns) ----- */
-    builder
-      .addCase(fetchRawMaterials.pending, (state, action) => {
-        const field = action.meta.arg?.field;
-        if (!field) state.loading = true;
-        else state.filterOptions[field].loading = true;
-        state.error = null;
-      })
-      .addCase(fetchRawMaterials.fulfilled, (state, action) => {
-        const { data, field, append } = action.payload;
-        state.loading = false;
-        state.lastFetchParams = action.payload.params;
+    // updateRawMaterialStock
+    builder.addCase(updateRawMaterialStock.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+  
+    builder.addCase(updateRawMaterialStock.fulfilled, (state, action) => {
+      state.loading = false;
+      state.openSnackbar = true;
+      state.editMessage = "Stock updated successfully";
+      const { randomId, physicalStock, systemStock, previousSystemStock } = action.payload;
 
-        // Handle case where dropdown_values might be null
-        if (!field && !data.dropdown_values && data.results) {
-          // If no dropdown values but we have results, just update the table
-          const newItems = Array.isArray(data.results) ? data.results : [];
-          const total = data.total ?? newItems.length;
-
-          if (append && newItems.length && state.accumulatedRawMaterials.length) {
-            const existingIds = new Set(
-              state.accumulatedRawMaterials.map((i) => i.randomId)
-            );
-            const uniques = newItems.filter(
-              (i: RawMaterial) => !existingIds.has(i.randomId)
-            );
-            state.accumulatedRawMaterials = [
-              ...state.accumulatedRawMaterials,
-              ...uniques,
-            ];
-          } else {
-            state.accumulatedRawMaterials = newItems;
-          }
-
-          const count = state.accumulatedRawMaterials.length;
-          state.filteredRawMaterials = {
-            total,
-            page: data.page ?? state.filters.page,
-            limit: data.limit ?? state.filters.limit,
-            count,
-            items: state.accumulatedRawMaterials,
-            hasMore: count < total,
-          };
-          state.filters.page = data.page ?? state.filters.page;
-          return;
-        }
-
-        /* ---------- SINGLE FIELD (dropdown scroll / search) ---------- */
-        if (field && data.dropdown_values) {
-          const fd = data.dropdown_values[field];
-          const currentValues = state.filterOptions[field].values;
-          const isFilterRequest = action.payload.isFilterRequest;
-
-          // For search, replace values (don't append)
-          // For scroll/pagination, merge unique values
-          const newValues = append && !isFilterRequest
-            ? Array.from(new Set([...currentValues, ...fd.values]))
-            : fd.values;
-
-          state.filterOptions[field] = {
-            ...fd,
-            values: newValues,
-            loading: false,
-            hasMore: fd.hasMore,
-            searchFilter: fd.searchFilter,
-          };
-        } else if (data.dropdown_values) {
-          /* ---------- MAIN TABLE FETCH (ALL dropdowns updated bidirectionally) ---------- */
-          const fields: (keyof FilterOptionsResponse)[] = [
-            "categories",
-            "subcategories",
-            "itemNames",
-            "varianceNames",
-          ];
-
-          // Update ALL dropdowns with bidirectional filtered values
-          fields.forEach((f) => {
-            const fd = data.dropdown_values[f];
-            const currentValues = state.filterOptions[f].values;
-
-            // For initial load or non-append, replace values
-            // For append (pagination), merge values
-            const newValues = append && currentValues.length > 0
-              ? Array.from(new Set([...currentValues, ...fd.values]))
-              : fd.values;
-
-            state.filterOptions[f] = {
-              ...fd,
-              values: newValues,
-              loading: false,
-              hasMore: fd.hasMore,
-              searchFilter: fd.searchFilter || state.filterOptions[f].searchFilter,
-            };
-          });
-
-          /* ---------- TABLE DATA ---------- */
-          const newItems = Array.isArray(data.results) ? data.results : [];
-          const total = data.total ?? newItems.length;
-
-          if (append && newItems.length && state.accumulatedRawMaterials.length) {
-            // Append mode: merge unique items
-            const existingIds = new Set(
-              state.accumulatedRawMaterials.map((i) => i.randomId)
-            );
-            const uniques = newItems.filter(
-              (i: RawMaterial) => !existingIds.has(i.randomId)
-            );
-            state.accumulatedRawMaterials = [
-              ...state.accumulatedRawMaterials,
-              ...uniques,
-            ];
-          } else {
-            // Replace mode
-            state.accumulatedRawMaterials = newItems;
-          }
-
-          const count = state.accumulatedRawMaterials.length;
-          state.filteredRawMaterials = {
-            total,
-            page: data.page ?? state.filters.page,
-            limit: data.limit ?? state.filters.limit,
-            count,
-            items: state.accumulatedRawMaterials,
-            hasMore: count < total,
-          };
-          state.filters.page = data.page ?? state.filters.page;
-        }
-      })
-      .addCase(fetchRawMaterials.rejected, (state, action) => {
-        state.loading = false;
-        const payload = action.payload as AxiosErrorPayload;
-        if (payload?.status !== 409) {
-          state.error = payload?.message ?? "Failed to fetch raw materials";
-        }
-        const field = action.meta.arg?.field;
-        if (field) state.filterOptions[field].loading = false;
-        else
-          (Object.keys(state.filterOptions) as (keyof FilterOptionsResponse)[]).forEach(
-            (k) => (state.filterOptions[k].loading = false)
-          );
-      });
-
-    /* ----- Stock Update ----- */
-    builder
-      .addCase(updateRawMaterialStock.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateRawMaterialStock.fulfilled, (state, action) => {
-        state.loading = false;
-        const { randomId, physicalStock } = action.payload;
-        const idx = state.accumulatedRawMaterials.findIndex(
-          (i) => i.randomId === randomId
+      if (state.filteredRawMaterials) {
+        // Create a new array mapping to ensure React detects the state change
+        state.filteredRawMaterials.items = state.filteredRawMaterials.items.map((i) =>
+          i.randomId === randomId
+            ? {
+              ...i,
+              physicalStock: physicalStock,
+              stockQuantity: systemStock,
+              previousSystemStock: previousSystemStock,
+            }
+            : i
         );
-        if (idx > -1) {
-          state.accumulatedRawMaterials[idx].stockQuantity = physicalStock;
-          state.accumulatedRawMaterials[idx].physicalStock = physicalStock;
-        }
-      })
-      .addCase(updateRawMaterialStock.rejected, (state, action) => {
-        state.loading = false;
-        const p = action.payload as AxiosErrorPayload;
-        state.error = p?.message ?? "Failed to update stock";
-        state.editMessage = p?.message ?? "Failed to update stock";
-        state.openSnackbar = true;
-      });
+      }
 
-    /* ----- Create Inventory Stock ----- */
-    builder
-      .addCase(createInventoryStock.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createInventoryStock.fulfilled, (state, action) => {
-        state.loading = false;
-        const { randomId, physicalStock } = action.payload;
-        state.editMessage = "Inventory stock created successfully";
-        state.openSnackbar = true;
-      })
-      .addCase(createInventoryStock.rejected, (state, action) => {
-        state.loading = false;
-        const p = action.payload as AxiosErrorPayload;
-        state.error = p?.message ?? "Failed to create inventory stock";
-        state.editMessage = p?.message ?? "Failed to create inventory stock";
-        state.openSnackbar = true;
-      });
-    builder
-      .addCase(updateRawMaterialsBulk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateRawMaterialsBulk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.editMessage = `${action.payload.updated} stock(s) updated successfully`;
-        state.openSnackbar = true;
-      })
-      .addCase(updateRawMaterialsBulk.rejected, (state, action) => {
-        state.loading = false;
-        const p = action.payload as AxiosErrorPayload;
-        state.error = p?.message ?? "Failed to bulk update stock";
-        state.editMessage = p?.message ?? "Failed to bulk update stock";
-        state.openSnackbar = true;
-      });
+      // Create a new array mapping for accumulatedRawMaterials as well
+      state.accumulatedRawMaterials = state.accumulatedRawMaterials.map((i) =>
+        i.randomId === randomId
+          ? {
+            ...i,
+            physicalStock: physicalStock,
+            stockQuantity: systemStock,
+            previousSystemStock: previousSystemStock,
+          }
+          : i
+      );
+    });
+    builder.addCase(updateRawMaterialStock.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload?.message || "Failed to update stock";
+    });
 
-
-    /* ----- Import Stock ----- */
-    builder
-      .addCase(importRawMaterialStock.fulfilled, (state, action) => {
-        state.editMessage = action.payload.message || "Import completed successfully";
-        state.openSnackbar = true;
-      })
-      .addCase(importRawMaterialStock.rejected, (state, action) => {
-        const p = action.payload as AxiosErrorPayload;
-        state.error = p?.message ?? "Failed to import stocks";
-        state.editMessage = p?.message ?? "Failed to import stocks";
-        state.openSnackbar = true;
-      });
+    // updateRawMaterialsBulk
+    builder.addCase(updateRawMaterialsBulk.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(updateRawMaterialsBulk.fulfilled, (state, action) => {
+      state.loading = false;
+      state.openSnackbar = true;
+      state.editMessage = "Bulk stock updated successfully";
+    });
+    builder.addCase(updateRawMaterialsBulk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload?.message || "Failed to bulk update stock";
+    });
   },
 });
 
-/* ---------- ACTIONS ---------- */
 export const {
-  setFilter,
   resetRawMaterials,
+  clearAllFilters,
+  toggleColumn,
+  setFilter,
+  setPageOnly,
   setOpenSnackbar,
   setOpenDownloadDialog,
   setEditMessage,
-  clearAllFilters,
   setOpenDialog,
   setOpenModal,
   setUpdatedStocks,
   setChanges,
   setChangedRows,
-  setImportMessage,
 } = rawMaterialsSlice.actions;
 
-/* ---------- SELECTORS ---------- */
-export const selectRawMaterials = (state: RootState) =>
-  state.rawMaterials.accumulatedRawMaterials;
-export const selectRawMaterialsLoading = (state: RootState) =>
-  state.rawMaterials.loading;
+export const selectLoading = (state: RootState) => state.rawMaterials.loading;
 export const selectFilters = (state: RootState) => state.rawMaterials.filters;
 export const selectFilterOptions = (state: RootState) =>
   state.rawMaterials.filterOptions;
@@ -1105,5 +926,6 @@ export const selectUpdatedStocks = (state: RootState) =>
 export const selectChanges = (state: RootState) => state.rawMaterials.changes;
 export const selectChangedRows = (state: RootState) =>
   state.rawMaterials.changedRows;
+export const selectVisibleColumns = (state: RootState) => state.rawMaterials.visibleColumns;
 
 export default rawMaterialsSlice.reducer;

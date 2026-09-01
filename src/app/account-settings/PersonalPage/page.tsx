@@ -132,8 +132,8 @@ const PersonalPage = () => {
   };
 
   return (
-    <Box>
-      <Box style={{ padding: "2px" }} sx={{ ml: 2 }}>
+   <Box className="account-settings-module account-settings-personal">
+      <Box className="account-settings-section" style={{ padding: "2px" }} sx={{ ml: 2 }}>
         <Typography variant="h5">Personal Information</Typography>
 
         {/* Add New Button (disable if personal info already exists) */}
@@ -235,7 +235,7 @@ const PersonalPage = () => {
         )}
 
         {/* Dialog for adding/editing personal info */}
-        <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog className="account-settings-dialog" open={openDialog} onClose={handleCloseDialog}>
           <DialogTitle>
             {selectedPersonal ? "Edit Personal Info" : "Add Personal Info"}
           </DialogTitle>

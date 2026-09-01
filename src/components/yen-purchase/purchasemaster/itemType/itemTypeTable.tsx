@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  IconButton, Button,
+  IconButton, Button,Box,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import ConfirmationDialog from '@/components/confirmationDialog';
 import { PurchaseItemType } from '@/Models/itemType';
 
@@ -51,8 +53,10 @@ const ItemTypeTable: React.FC<ItemTypeTableProps> = ({
 
   return (
     <>
+    <Box className="purchase-master-table-shell">
       <TableContainer
         component={Paper}
+        className="purchase-master-table"
         sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
           overflowY: 'auto',
@@ -80,12 +84,35 @@ const ItemTypeTable: React.FC<ItemTypeTableProps> = ({
               reversedItems.map((item, index) => (
                 <TableRow key={item.itemtypeId || index}>
                   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{item.randomId}</TableCell>
-                  <TableCell>{item.itemtypeName}</TableCell>
-                  <TableCell>{item.status}</TableCell>
+                 <TableCell>
+  <span className="purchase-master-id-pill">
+    {item.randomId}
+  </span>
+</TableCell>
                   <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(item.itemtypeName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{item.itemtypeName}</span>
+  </Box>
+</TableCell>
+                 <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      item.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {item.status}
+  </span>
+</TableCell>
+                  <TableCell><Box className="purchase-master-actions">
   {!showDeactivated && item.status === 'active' && (
     <IconButton 
+    className="purchase-master-action-button is-edit"
       onClick={() => handleEdit(item.itemtypeId)}
       disabled={!canEdit}
       sx={{ opacity: canEdit ? 1 : 0.5 }}
@@ -95,6 +122,8 @@ const ItemTypeTable: React.FC<ItemTypeTableProps> = ({
   )}
   {item.status === 'active' && !showDeactivated ? (
     <IconButton 
+    className="purchase-master-action-button is-delete"
+
       onClick={() => handleOpenConfirmDialog(item.itemtypeId, 'deactivate')}
       disabled={!canDelete}
       sx={{ opacity: canDelete ? 1 : 0.5 }}
@@ -102,7 +131,8 @@ const ItemTypeTable: React.FC<ItemTypeTableProps> = ({
       <DeleteIcon />
     </IconButton>
   ) : (
-    <IconButton 
+    <IconButton
+    className="purchase-master-action-button is-activate" 
       onClick={() => handleOpenConfirmDialog(item.itemtypeId, 'activate')}
       disabled={!canDelete}
       sx={{ opacity: canDelete ? 1 : 0.5 }}
@@ -110,14 +140,16 @@ const ItemTypeTable: React.FC<ItemTypeTableProps> = ({
       <RefreshIcon />
     </IconButton>
   )}
+  </Box>
 </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
+        
       </TableContainer>
-
+</Box>
       <ConfirmationDialog
         open={openConfirmDialog}
         onClose={handleCloseConfirmDialog}

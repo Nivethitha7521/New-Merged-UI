@@ -2,8 +2,8 @@
 
 import { DebitNoteReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { debitNoteConfig } from '../../configs/debitNote.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { debitNoteConfig } from '@/features/purchase-order/reports/debitNote.config';
 
 // Select 'debitNote' (the key defined in your config)
 const selector = (s: RootState) => s.debitNote;

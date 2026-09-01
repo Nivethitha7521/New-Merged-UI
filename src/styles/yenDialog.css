@@ -1,0 +1,711 @@
+/*
+ * YEN ERP global dialog design system
+ * -----------------------------------
+ * Visual-only layer for every MUI Dialog plus the legacy Vendor Modal.
+ * No API, Redux, validation, event handler, routing, or form behavior is changed.
+ *
+ * All interactive colors are derived from the existing Display Settings CSS tokens,
+ * so changing the global accent/theme updates dialogs automatically.
+ */
+
+:root {
+  --yen-dialog-surface: var(--erp-surface);
+  --yen-dialog-surface-muted: color-mix(in srgb, var(--erp-surface) 84%, var(--erp-bg));
+  --yen-dialog-field-surface: color-mix(in srgb, var(--erp-surface) 94%, var(--erp-bg));
+  --yen-dialog-text: var(--erp-text);
+  --yen-dialog-muted: var(--erp-muted);
+  --yen-dialog-border: var(--erp-border);
+  --yen-dialog-border-strong: var(--erp-border-strong);
+  --yen-dialog-accent: var(--erp-accent);
+  --yen-dialog-accent-soft: var(--erp-accent-soft, color-mix(in srgb, var(--erp-accent) 14%, var(--erp-surface)));
+  --yen-dialog-accent-border: var(--erp-accent-border, color-mix(in srgb, var(--erp-accent) 38%, var(--erp-surface)));
+  --yen-dialog-accent-ring: var(--erp-accent-ring, color-mix(in srgb, var(--erp-accent) 16%, transparent));
+  --yen-dialog-accent-contrast: var(--erp-accent-contrast, var(--erp-surface));
+  --yen-dialog-danger: var(--erp-danger);
+  --yen-dialog-overlay: color-mix(in srgb, var(--erp-text) 46%, transparent);
+  --yen-dialog-shadow: 0 28px 90px color-mix(in srgb, var(--erp-text) 18%, transparent);
+  --yen-dialog-radius: clamp(16px, 1.2vw, 22px);
+  --yen-dialog-control-radius: clamp(10px, 0.75vw, 13px);
+  --yen-dialog-control-height: clamp(40px, calc(var(--erp-ui, 8px) * 5.25), 46px);
+}
+
+html[data-erp-theme='dark'] {
+  --yen-dialog-overlay: color-mix(in srgb, var(--erp-bg) 84%, transparent);
+  --yen-dialog-shadow: 0 32px 100px color-mix(in srgb, var(--erp-bg) 88%, transparent);
+  --yen-dialog-field-surface: color-mix(in srgb, var(--erp-surface-2) 92%, var(--erp-bg));
+}
+
+/* ---------------------------------------------------------
+   Backdrop + responsive dialog shell
+   --------------------------------------------------------- */
+body .MuiDialog-root > .MuiBackdrop-root,
+body .yen-erp-modal-root > .MuiBackdrop-root {
+  background: var(--yen-dialog-overlay) !important;
+  backdrop-filter: blur(6px) saturate(112%);
+  -webkit-backdrop-filter: blur(6px) saturate(112%);
+}
+
+body .MuiDialog-root .MuiDialog-container {
+  padding: clamp(12px, 2vw, 28px) !important;
+}
+
+body .MuiDialog-root .MuiDialog-paper {
+  position: relative;
+  margin: 0 !important;
+
+  /* Screen adaptive */
+  max-height: calc(100dvh - 48px) !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-surface) !important;
+  background-image: none !important;
+
+  border: 1px solid var(--yen-dialog-border) !important;
+  border-radius: var(--yen-dialog-radius) !important;
+  box-shadow: var(--yen-dialog-shadow) !important;
+
+  animation: yen-dialog-enter 180ms cubic-bezier(.2, .8, .2, 1);
+}
+
+/* =========================================================
+   RESPONSIVE DIALOG WIDTH
+   Browser zoom 100% + laptop/desktop adaptive
+   ========================================================= */
+
+body .MuiDialog-root .MuiDialog-paperWidthXs {
+  width: min(
+    clamp(360px, 32vw, 420px),
+    calc(100vw - 48px)
+  ) !important;
+
+  max-width: 420px !important;
+}
+
+body .MuiDialog-root .MuiDialog-paperWidthSm {
+  width: min(
+    clamp(440px, 36vw, 560px),
+    calc(100vw - 48px)
+  ) !important;
+
+  max-width: 560px !important;
+}
+
+body .MuiDialog-root .MuiDialog-paperWidthMd {
+  width: min(
+    clamp(560px, 52vw, 720px),
+    calc(100vw - 48px)
+  ) !important;
+
+  max-width: 720px !important;
+}
+
+body .MuiDialog-root .MuiDialog-paperWidthLg {
+  width: min(
+    clamp(720px, 68vw, 940px),
+    calc(100vw - 48px)
+  ) !important;
+
+  max-width: 940px !important;
+}
+
+body .MuiDialog-root .MuiDialog-paperWidthXl {
+  width: min(
+    clamp(900px, 82vw, 1180px),
+    calc(100vw - 48px)
+  ) !important;
+
+  max-width: 1180px !important;
+}
+
+body .MuiDialog-root .MuiDialog-paperFullWidth {
+  width: 100% !important;
+}
+
+body .MuiDialog-root .MuiDialog-paperFullScreen {
+  width: 100vw !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ---------------------------------------------------------
+   Header
+   --------------------------------------------------------- */
+body .MuiDialog-root .MuiDialogTitle-root {
+  position: relative;
+  margin: 0 !important;
+  padding: clamp(20px, 2.3vw, 28px) clamp(20px, 2.6vw, 32px) clamp(14px, 1.5vw, 18px) !important;
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-surface) !important;
+  border-bottom: 1px solid var(--yen-dialog-border) !important;
+  font-family: var(--erp-font-family) !important;
+  font-size: clamp(18px, calc(var(--erp-ui, 8px) * 2.55 * var(--erp-type-scale, 1)), 24px) !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+body .MuiDialog-root .MuiDialogTitle-root .MuiTypography-root,
+body .MuiDialog-root .yen-dialog-heading {
+  color: var(--yen-dialog-text) !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+}
+
+body .MuiDialog-root .yen-dialog-title-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+body .MuiDialog-root .yen-dialog-title-copy {
+  min-width: 0;
+}
+
+body .MuiDialog-root .yen-dialog-subtitle {
+  display: block;
+  margin-top: 5px;
+  color: var(--yen-dialog-muted) !important;
+  font-family: var(--erp-font-family) !important;
+  font-size: clamp(12px, calc(var(--erp-ui, 8px) * 1.65 * var(--erp-type-scale, 1)), 14px) !important;
+  line-height: 1.5 !important;
+  font-weight: 450 !important;
+  letter-spacing: 0 !important;
+}
+
+body .MuiDialog-root .MuiDialogTitle-root .MuiIconButton-root,
+body .MuiDialog-root .yen-dialog-close-button {
+  flex: 0 0 auto;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  margin: -5px -7px -5px 0 !important;
+  padding: 0 !important;
+  color: var(--yen-dialog-muted) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, transform 140ms ease !important;
+}
+
+body .MuiDialog-root .MuiDialogTitle-root .MuiIconButton-root:hover,
+body .MuiDialog-root .yen-dialog-close-button:hover {
+  color: var(--yen-dialog-accent) !important;
+  background: var(--yen-dialog-accent-soft) !important;
+  border-color: var(--yen-dialog-accent-border) !important;
+}
+
+/* ---------------------------------------------------------
+   Scrollable content + spacing
+   --------------------------------------------------------- */
+body .MuiDialog-root .MuiDialogContent-root {
+  min-height: 0;
+  padding: clamp(18px, 2vw, 26px) clamp(20px, 2.6vw, 32px) clamp(22px, 2.4vw, 30px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-surface) !important;
+  scrollbar-gutter: stable;
+}
+
+body .MuiDialog-root .MuiDialogContent-root:first-child {
+  padding-top: clamp(22px, 2.4vw, 30px) !important;
+}
+
+body .MuiDialog-root .MuiDialogContentText-root,
+body .MuiDialog-root .MuiFormHelperText-root,
+body .MuiDialog-root .MuiTypography-body2,
+body .MuiDialog-root .MuiTypography-caption {
+  color: var(--yen-dialog-muted) !important;
+}
+
+body .MuiDialog-root .MuiDialogContent-root > .MuiTextField-root,
+body .MuiDialog-root .MuiDialogContent-root > .MuiFormControl-root {
+  width: 100%;
+}
+
+/* ---------------------------------------------------------
+   Inputs / selects / autocomplete / textarea
+   --------------------------------------------------------- */
+body .MuiDialog-root .MuiOutlinedInput-root,
+body .MuiDialog-root .MuiInputBase-root.MuiOutlinedInput-root {
+  min-height: var(--yen-dialog-control-height) !important;
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-field-surface) !important;
+  border-radius: var(--yen-dialog-control-radius) !important;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--yen-dialog-text) 4%, transparent) !important;
+  transition: box-shadow 150ms ease, background-color 150ms ease, transform 150ms ease !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-notchedOutline {
+  border-color: var(--yen-dialog-border-strong) !important;
+  border-width: 1px !important;
+  transition: border-color 150ms ease, border-width 150ms ease !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: color-mix(in srgb, var(--yen-dialog-accent) 34%, var(--yen-dialog-border-strong)) !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-root.Mui-focused {
+  background: var(--yen-dialog-surface) !important;
+  box-shadow: 0 0 0 4px var(--yen-dialog-accent-ring), 0 1px 2px color-mix(in srgb, var(--yen-dialog-text) 5%, transparent) !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--yen-dialog-accent) !important;
+  border-width: 1.5px !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline {
+  border-color: var(--yen-dialog-danger) !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-root.Mui-error.Mui-focused {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--yen-dialog-danger) 15%, transparent) !important;
+}
+
+body .MuiDialog-root .MuiInputBase-input,
+body .MuiDialog-root .MuiOutlinedInput-input,
+body .MuiDialog-root .MuiSelect-select,
+body .MuiDialog-root textarea.MuiInputBase-input {
+  color: var(--yen-dialog-text) !important;
+  font-family: var(--erp-font-family) !important;
+  font-size: clamp(13px, calc(var(--erp-ui, 8px) * 1.75 * var(--erp-type-scale, 1)), 15px) !important;
+  line-height: 1.45 !important;
+}
+
+body .MuiDialog-root .MuiOutlinedInput-input,
+body .MuiDialog-root .MuiSelect-select {
+  padding: 11px 14px !important;
+}
+
+body .MuiDialog-root .MuiSelect-select {
+  padding-right: 38px !important;
+}
+
+body .MuiDialog-root .MuiInputBase-multiline {
+  min-height: 96px !important;
+  align-items: flex-start !important;
+  padding: 12px 14px !important;
+}
+
+body .MuiDialog-root .MuiInputBase-multiline textarea.MuiInputBase-input {
+  padding: 0 !important;
+}
+
+body .MuiDialog-root input::placeholder,
+body .MuiDialog-root textarea::placeholder {
+  color: var(--yen-dialog-muted) !important;
+  opacity: .72 !important;
+  text-align: left !important;
+}
+
+body .MuiDialog-root .MuiFormLabel-root,
+body .MuiDialog-root .MuiInputLabel-root {
+  color: var(--yen-dialog-muted) !important;
+  font-family: var(--erp-font-family) !important;
+  font-size: clamp(12px, calc(var(--erp-ui, 8px) * 1.65 * var(--erp-type-scale, 1)), 14px) !important;
+  line-height: 1.2 !important;
+  transition: color 150ms ease, transform 150ms ease !important;
+}
+
+body .MuiDialog-root .MuiFormLabel-root.Mui-focused,
+body .MuiDialog-root .MuiInputLabel-root.Mui-focused {
+  color: var(--yen-dialog-accent) !important;
+}
+
+body .MuiDialog-root .MuiFormLabel-root.Mui-error,
+body .MuiDialog-root .MuiInputLabel-root.Mui-error,
+body .MuiDialog-root .MuiFormHelperText-root.Mui-error {
+  color: var(--yen-dialog-danger) !important;
+}
+
+body .MuiDialog-root .MuiFormHelperText-root {
+  margin: 7px 4px 0 !important;
+  font-size: clamp(11px, calc(var(--erp-ui, 8px) * 1.45 * var(--erp-type-scale, 1)), 13px) !important;
+  line-height: 1.4 !important;
+}
+
+body .MuiDialog-root .MuiAutocomplete-tag,
+body .MuiDialog-root .MuiChip-root {
+  color: var(--yen-dialog-accent) !important;
+  background: var(--yen-dialog-accent-soft) !important;
+  border-color: var(--yen-dialog-accent-border) !important;
+}
+
+body .MuiDialog-root .MuiInputAdornment-root,
+body .MuiDialog-root .MuiSelect-icon,
+body .MuiDialog-root .MuiAutocomplete-popupIndicator,
+body .MuiDialog-root .MuiAutocomplete-clearIndicator {
+  color: var(--yen-dialog-muted) !important;
+}
+
+/* ---------------------------------------------------------
+   Checkbox / radio / switch / progress
+   --------------------------------------------------------- */
+body .MuiDialog-root .MuiCheckbox-root,
+body .MuiDialog-root .MuiRadio-root,
+body .MuiDialog-root .MuiSwitch-switchBase {
+  color: var(--yen-dialog-muted) !important;
+}
+
+body .MuiDialog-root .MuiCheckbox-root.Mui-checked,
+body .MuiDialog-root .MuiCheckbox-root.MuiCheckbox-indeterminate,
+body .MuiDialog-root .MuiRadio-root.Mui-checked,
+body .MuiDialog-root .MuiSwitch-switchBase.Mui-checked,
+body .MuiDialog-root .MuiCircularProgress-root,
+body .MuiDialog-root .MuiLinearProgress-bar {
+  color: var(--yen-dialog-accent) !important;
+}
+
+body .MuiDialog-root .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background: var(--yen-dialog-accent) !important;
+  opacity: .48 !important;
+}
+
+body .MuiDialog-root .MuiLinearProgress-root {
+  background: var(--yen-dialog-accent-soft) !important;
+}
+
+/* ---------------------------------------------------------
+   Footer actions
+   --------------------------------------------------------- */
+body .MuiDialog-root .MuiDialogActions-root {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: clamp(14px, 1.6vw, 18px) clamp(20px, 2.6vw, 32px) clamp(18px, 2vw, 24px) !important;
+  background: var(--yen-dialog-surface-muted) !important;
+  border-top: 1px solid var(--yen-dialog-border) !important;
+}
+
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root {
+  min-width: 88px !important;
+  min-height: 40px !important;
+  padding: 8px 16px !important;
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-surface) !important;
+  border: 1px solid var(--yen-dialog-border-strong) !important;
+  border-radius: 11px !important;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--yen-dialog-text) 4%, transparent) !important;
+  font-family: var(--erp-font-family) !important;
+  font-size: clamp(12px, calc(var(--erp-ui, 8px) * 1.65 * var(--erp-type-scale, 1)), 14px) !important;
+  line-height: 1.2 !important;
+  font-weight: 650 !important;
+  text-transform: none !important;
+  transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease, border-color 140ms ease !important;
+}
+
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root:hover {
+  color: var(--yen-dialog-accent) !important;
+  background: var(--yen-dialog-accent-soft) !important;
+  border-color: var(--yen-dialog-accent-border) !important;
+  transform: translateY(-1px);
+}
+
+/* The final action is the primary CTA for existing dialogs that use text buttons. */
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root:last-of-type,
+body .MuiDialog-root .MuiDialogActions-root > .yen-dialog-primary-action {
+  color: var(--yen-dialog-accent-contrast) !important;
+  background: var(--yen-dialog-accent) !important;
+  border-color: var(--yen-dialog-accent) !important;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--yen-dialog-accent) 22%, transparent) !important;
+}
+
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root:last-of-type:hover,
+body .MuiDialog-root .MuiDialogActions-root > .yen-dialog-primary-action:hover {
+  color: var(--yen-dialog-accent-contrast) !important;
+  background: var(--erp-accent-hover, color-mix(in srgb, var(--yen-dialog-accent) 86%, var(--yen-dialog-text))) !important;
+  border-color: var(--erp-accent-hover, color-mix(in srgb, var(--yen-dialog-accent) 86%, var(--yen-dialog-text))) !important;
+  box-shadow: 0 9px 22px color-mix(in srgb, var(--yen-dialog-accent) 28%, transparent) !important;
+}
+
+/* Preserve destructive semantics instead of recoloring delete/reject actions as primary. */
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-colorError,
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-containedError,
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-textError,
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-outlinedError {
+  color: var(--yen-dialog-accent-contrast) !important;
+  background: var(--yen-dialog-danger) !important;
+  border-color: var(--yen-dialog-danger) !important;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--yen-dialog-danger) 22%, transparent) !important;
+}
+
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root.Mui-disabled {
+  color: color-mix(in srgb, var(--yen-dialog-muted) 68%, transparent) !important;
+  background: color-mix(in srgb, var(--yen-dialog-surface) 78%, var(--erp-bg)) !important;
+  border-color: var(--yen-dialog-border) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root:last-of-type .MuiCircularProgress-root {
+  color: currentColor !important;
+}
+
+/* ---------------------------------------------------------
+   Portalled dropdown / date-picker states that originate from forms
+   --------------------------------------------------------- */
+body .MuiMenu-paper,
+body .MuiPopover-paper,
+body .MuiPickersPopper-paper {
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-surface) !important;
+  border-color: var(--yen-dialog-border) !important;
+}
+
+body .MuiMenuItem-root.Mui-selected,
+body .MuiMenuItem-root.Mui-selected:hover,
+body .MuiPickersDay-root.Mui-selected,
+body .MuiPickersDay-root.Mui-selected:hover,
+body .MuiPickersYear-yearButton.Mui-selected,
+body .MuiPickersMonth-monthButton.Mui-selected {
+  color: var(--yen-dialog-accent-contrast) !important;
+  background: var(--yen-dialog-accent) !important;
+}
+
+body .MuiMenuItem-root:focus-visible,
+body .MuiPickersDay-root:focus-visible,
+body .MuiPickersYear-yearButton:focus-visible,
+body .MuiPickersMonth-monthButton:focus-visible {
+  outline: 3px solid var(--yen-dialog-accent-ring) !important;
+  outline-offset: 2px;
+}
+
+body .MuiPickersCalendarHeader-label,
+body .MuiDayCalendar-weekDayLabel,
+body .MuiPickersDay-root,
+body .MuiPickersYear-yearButton,
+body .MuiPickersMonth-monthButton {
+  color: var(--yen-dialog-text) !important;
+}
+
+/* ---------------------------------------------------------
+   Legacy Vendor Modal — visual normalization only
+   --------------------------------------------------------- */
+body .yen-erp-modal-root .yen-erp-modal-surface {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: min(860px, calc(100vw - 32px)) !important;
+  max-width: 860px !important;
+  max-height: min(90dvh, 920px) !important;
+  margin: 0 !important;
+  padding: clamp(20px, 2.4vw, 30px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  color: var(--yen-dialog-text) !important;
+  background: var(--yen-dialog-surface) !important;
+  border: 1px solid var(--yen-dialog-border) !important;
+  border-radius: var(--yen-dialog-radius) !important;
+  box-shadow: var(--yen-dialog-shadow) !important;
+  transform: translate(-50%, -50%) !important;
+  outline: none !important;
+}
+
+body .yen-erp-modal-root .yen-erp-modal-surface > .MuiTypography-h6:first-child {
+  margin: 0 0 20px !important;
+  color: var(--yen-dialog-text) !important;
+  font-family: var(--erp-font-family) !important;
+  font-size: clamp(18px, calc(var(--erp-ui, 8px) * 2.55 * var(--erp-type-scale, 1)), 24px) !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+body .yen-erp-modal-root .yen-erp-modal-surface .MuiStepIcon-root.Mui-active,
+body .yen-erp-modal-root .yen-erp-modal-surface .MuiStepIcon-root.Mui-completed {
+  color: var(--yen-dialog-accent) !important;
+}
+
+body .yen-erp-modal-root .yen-erp-modal-surface .MuiStepLabel-label.Mui-active,
+body .yen-erp-modal-root .yen-erp-modal-surface .MuiStepLabel-label.Mui-completed {
+  color: var(--yen-dialog-accent) !important;
+}
+
+/* ---------------------------------------------------------
+   Display style modes
+   --------------------------------------------------------- */
+html[data-erp-style='classic'] body .MuiDialog-root .MuiDialog-paper,
+html[data-erp-style='classic'] body .yen-erp-modal-root .yen-erp-modal-surface {
+  border-radius: 12px !important;
+}
+
+html[data-erp-style='classic'] body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root,
+html[data-erp-style='classic'] body .MuiDialog-root .MuiOutlinedInput-root {
+  border-radius: 8px !important;
+}
+
+html[data-erp-style='glass'] body .MuiDialog-root .MuiDialog-paper,
+html[data-erp-style='glass'] body .yen-erp-modal-root .yen-erp-modal-surface {
+  background: color-mix(in srgb, var(--yen-dialog-surface) 84%, transparent) !important;
+  border-color: color-mix(in srgb, var(--yen-dialog-accent) 18%, var(--yen-dialog-border)) !important;
+  backdrop-filter: blur(24px) saturate(155%);
+  -webkit-backdrop-filter: blur(24px) saturate(155%);
+}
+
+html[data-erp-style='glass'] body .MuiDialog-root .MuiDialogTitle-root,
+html[data-erp-style='glass'] body .MuiDialog-root .MuiDialogContent-root,
+html[data-erp-style='glass'] body .MuiDialog-root .MuiDialogActions-root {
+  background: transparent !important;
+}
+
+/* ---------------------------------------------------------
+   100% adaptive screen sizing
+   --------------------------------------------------------- */
+@media (max-width: 720px) {
+  body .MuiDialog-root .MuiDialog-container {
+    padding: 10px !important;
+    align-items: flex-end !important;
+  }
+
+  body .MuiDialog-root .MuiDialog-paper:not(.MuiDialog-paperFullScreen) {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 20px) !important;
+    border-radius: 18px !important;
+  }
+
+  body .MuiDialog-root .MuiDialogTitle-root {
+    padding: 18px 18px 14px !important;
+  }
+
+  body .MuiDialog-root .MuiDialogContent-root {
+    padding: 18px !important;
+  }
+
+  body .MuiDialog-root .MuiDialogActions-root {
+    padding: 14px 18px 18px !important;
+  }
+
+  body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root {
+    flex: 1 1 120px;
+  }
+
+  body .yen-erp-modal-root .yen-erp-modal-surface {
+    top: auto !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100dvh - 20px) !important;
+    padding: 18px !important;
+    border-radius: 18px !important;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  body .MuiDialog-root .MuiDialog-container {
+    padding: 0 !important;
+  }
+
+  body .MuiDialog-root .MuiDialog-paper:not(.MuiDialog-paperFullScreen) {
+    min-height: min-content;
+    max-height: 100dvh !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  body .MuiDialog-root .MuiDialogActions-root {
+    gap: 8px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .MuiDialog-root .MuiDialog-paper,
+  body .MuiDialog-root .MuiButton-root,
+  body .MuiDialog-root .MuiOutlinedInput-root,
+  body .MuiDialog-root .MuiIconButton-root {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes yen-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* =========================================================
+   LAPTOP / 100% ZOOM COMPACT MODE
+   Example: 1366x768, 1536x864, 1600x900
+   ========================================================= */
+
+@media (min-width: 721px) and (max-height: 900px) {
+
+  body .MuiDialog-root .MuiDialog-container {
+    padding: 20px !important;
+  }
+
+body .MuiDialog-root .MuiDialog-paper {
+  min-width: 0 !important;
+}
+
+  /* Header */
+  body .MuiDialog-root .MuiDialogTitle-root {
+    padding: 18px 22px 14px !important;
+    font-size: clamp(
+      17px,
+      calc(var(--erp-ui, 8px) * 2.25 * var(--erp-type-scale, 1)),
+      21px
+    ) !important;
+  }
+
+  /* Main form area */
+  body .MuiDialog-root .MuiDialogContent-root {
+    padding: 18px 22px 20px !important;
+  }
+
+  body .MuiDialog-root .MuiDialogContent-root:first-child {
+    padding-top: 20px !important;
+  }
+
+  /* Input height */
+  body .MuiDialog-root .MuiOutlinedInput-root,
+  body .MuiDialog-root .MuiInputBase-root.MuiOutlinedInput-root {
+    min-height: px !important;
+  }
+
+  body .MuiDialog-root .MuiOutlinedInput-input,
+  body .MuiDialog-root .MuiSelect-select {
+    padding: 10px 13px !important;
+  }
+
+  /* Reduce excess gap caused by MUI margin=dense */
+  body .MuiDialog-root .MuiTextField-root {
+    margin-top: 7px !important;
+    margin-bottom: 7px !important;
+  }
+
+  /* Footer */
+  body .MuiDialog-root .MuiDialogActions-root {
+    padding: 13px 22px 17px !important;
+    gap: 9px !important;
+  }
+
+  body .MuiDialog-root .MuiDialogActions-root > .MuiButton-root {
+    min-width: 82px !important;
+    min-height: 38px !important;
+    padding: 7px 15px !important;
+  }
+}

@@ -54,7 +54,7 @@ const YenSettingsPage = () => {
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>('datesettings');
   const [selectedSubSetting, setSelectedSubSetting] = useState<string>('');
   const [openNested, setOpenNested] = useState<string | null>('purchase');
-
+ const [isMenuCollapsed, setIsMenuCollapsed] = useState<boolean>(false);
 
   const permissions = useSelector(
     (state: RootState) => state.auth.permissions?.yenerp || {}
@@ -239,7 +239,9 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
  if (!canReadSettings) {
     return (
       <div>
-        <SideMenu
+    <SideMenu
+          collapsed={isMenuCollapsed}
+          onToggleCollapse={() => setIsMenuCollapsed((prev) => !prev)}
           onMenuClick={handleMenuClick}
           activePath={pathname || '/'}
           showPurchaseMenu={!hidePurchaseMenu}
@@ -264,14 +266,16 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
   }
   return (
     <div>
-      <SideMenu
-        onMenuClick={handleMenuClick}
-        activePath={pathname || '/'}
-        showPurchaseMenu={!hidePurchaseMenu}
-        showBookMenu={!hideBookMenu}         // ✅ add
+    <SideMenu
+          collapsed={isMenuCollapsed}
+          onToggleCollapse={() => setIsMenuCollapsed((prev) => !prev)}
+          onMenuClick={handleMenuClick}
+          activePath={pathname || '/'}
+          showPurchaseMenu={!hidePurchaseMenu}
+          showBookMenu={!hideBookMenu}         // ✅ add
   showInventoryMenu={showInventoryMenu} // ✅ add
   showReportsMenu={showReportsMenu}
-      />
+        />
 
       <Box sx={{ display: 'flex', p: 3 }}>
         {/* Left Sidebar Menu */}

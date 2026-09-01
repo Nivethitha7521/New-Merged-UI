@@ -13,6 +13,25 @@ export interface Freight {
   igst: number;
   taxPercentage: number;
 }
+export interface MultiPoGrnDraft {
+  draftId: string;
+  _id?: string;
+  draftType: "MULTI_PO_GRN";
+  purchaseOrderIds: string[];
+  poRandomIds: string[];
+  vendorId?: string;
+  vendorName?: string;
+  invoiceNo?: string;
+  invoiceDate?: string | null;
+  grnDate?: string | null;
+  locationId?: string;
+  locationName?: string;
+  state: any;
+  isUnread: boolean;
+  status: "draft" | "deleted";
+  createdDate?: string;
+  lastUpdatedDate?: string;
+}
 export interface Item {
   itemId: string;
   itemCode: string;
@@ -381,6 +400,10 @@ export interface StockLogsResponse {
 
 // Define the structure of the state for purchaseList
 export interface PurchaseListState {
+  multiPoGrnDrafts: MultiPoGrnDraft[];
+multiPoGrnDraftCount: number;
+multiPoGrnDraftLoading: boolean;
+selectedMultiPoGrnDraft: MultiPoGrnDraft | null;
   purchaseList: PurchaseOrderData[];
   pendingPurchaseList: PurchaseOrderData[];
   grnConvertedPurchaseList: PurchaseOrderData[];
@@ -481,7 +504,11 @@ export const initialState: PurchaseListState = {
     error: null
   },
   showStockLogsDialog: false,
-  selectedStockLogsPOId: null
+  selectedStockLogsPOId: null,
+  multiPoGrnDrafts: [],
+multiPoGrnDraftCount: 0,
+multiPoGrnDraftLoading: false,
+selectedMultiPoGrnDraft: null,
 };
 // Define the Item type for the payload
 export interface PurchaseOrderItem {

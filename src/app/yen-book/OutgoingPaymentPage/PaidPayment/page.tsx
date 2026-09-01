@@ -78,7 +78,10 @@ const PaidPaymentComponent = () => {
   const { hasPermission, isModuleVisible } = usePermissions();
   const canReadpaymentdone = hasPermission("yenerp", "paymentdone", "read");
 const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
-
+  const paymentDonePermissions = useSelector(
+    (state: any) => state.auth?.permissions?.yenerp?.paymentdone || {}
+  );
+  const canEdit = paymentDonePermissions?.edit ?? false;
 
   const { outgoings, loading, snackbarOpen, snackbarMessage, outgoingvendor } = useSelector(selectOutgoings);
   const { itemwise } = useSelector(selectGrn);
@@ -960,6 +963,7 @@ const handleConfirmRevert = async () => {
                           </IconButton>
                          <Tooltip title="Cancel Payment">
 <IconButton
+disabled={!canEdit}
   sx={{
     color: "#1976d2",
     "&:hover": {

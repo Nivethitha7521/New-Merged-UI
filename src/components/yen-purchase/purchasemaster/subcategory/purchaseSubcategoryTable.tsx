@@ -1,11 +1,22 @@
 'use client';
 import React, { useState } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  IconButton, Tooltip
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  Box
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
-import ConfirmationDialog from '@/components/confirmationDialog';
+import {
+  EditOutlined as EditIcon,
+  DeleteOutlineRounded as DeleteIcon,
+  RestoreRounded as RefreshIcon
+} from '@mui/icons-material';import ConfirmationDialog from '@/components/confirmationDialog';
 import { PurchaseSubcategory } from '@/Models/purchasesubcategory';
 
 interface PurchaseSubcategoryTableProps {
@@ -54,9 +65,11 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
 
   return (
     <>
-      <TableContainer
-        component={Paper}
-        sx={{
+    <Box className="purchase-master-table-shell">
+   <TableContainer
+  component={Paper}
+  className="purchase-master-table"
+  sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
           overflowY: 'auto',
           width: '100%',
@@ -83,12 +96,39 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
               reversedSubcategories.map((subcategory, index) => (
                 <TableRow key={subcategory.randomId}>
                   <TableCell className='table-number-right'>{index+1}</TableCell>
-                  <TableCell>{subcategory.randomId}</TableCell>
-                  <TableCell>{subcategory.purchasesubcategoryName}</TableCell>
-                  <TableCell>{subcategory.status}</TableCell>
                   <TableCell>
+  <span className="purchase-master-id-pill">
+    {subcategory.randomId}
+  </span>
+</TableCell>
+                  <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(subcategory.purchasesubcategoryName || '?')
+        .charAt(0)
+        .toUpperCase()}
+    </span>
+
+    <span>{subcategory.purchasesubcategoryName}</span>
+  </Box>
+  
+</TableCell>
+                 <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      subcategory.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {subcategory.status}
+  </span>
+</TableCell>
+                  <TableCell>
+                    <Box className="purchase-master-actions">
   {showDeactivated ? (
     <IconButton 
+     className="purchase-master-action-button is-delete"
       onClick={() => handleOpenDialog('activate', subcategory.purchasesubcategoryId)}
       disabled={!canDelete}
       sx={{ 
@@ -104,6 +144,7 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
   ) : (
     <>
       <IconButton 
+      className="purchase-master-action-button is-edit"
   onClick={() => {
    
     handleEdit(subcategories.indexOf(subcategory));
@@ -135,6 +176,7 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
         </IconButton>
       ) : (
         <IconButton 
+        className="purchase-master-action-button is-activate"
           onClick={() => handleOpenDialog('activate', subcategory.purchasesubcategoryId)}
           disabled={!canDelete}
           sx={{ 
@@ -150,6 +192,7 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
       )}
     </>
   )}
+  </Box>
 </TableCell>
                 </TableRow>
               ))
@@ -157,7 +200,7 @@ const PurchaseSubcategoryTable: React.FC<PurchaseSubcategoryTableProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
-
+</Box>
       <ConfirmationDialog
         open={openDialog}
         onClose={handleCloseDialog}

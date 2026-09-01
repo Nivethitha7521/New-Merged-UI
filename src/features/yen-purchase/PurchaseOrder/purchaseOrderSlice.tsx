@@ -181,7 +181,7 @@ export const initialState: PurchaseOrderState = {
 let purchaseItemsCache: Map<string, { data: PurchaseItemSearchAdd[], timestamp: number }> = new Map();
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
-const BASE_URL = 'https://yenerp.com/purchasetestapi';
+const BASE_URL = 'http://127.0.0.1:8000/yenerpapi';
 
 // Async thunks for freight and PO calculations
 export const calculateFreightTotals = createAsyncThunk(
@@ -531,9 +531,16 @@ export const addPurchaseOrder = createAsyncThunk(
   async (
     purchaseOrder: Omit<PurchaseOrderData, "purchaseOrderId"> & {
       isHoldOrder?: boolean;
+      fromPR?: boolean;       // ← NEW flag
     },
   ) => {
-    const response = await purchaseApi.post("/purchaseorders/", purchaseOrder);
+    // If created from PR flow, override poStatus to "PR Pending"
+    // so it doesn't appear in normal Pending tab
+    const payload = purchaseOrder.fromPR
+      ? { ...purchaseOrder, poStatus: "PR Pending" }
+      : purchaseOrder;
+
+    const response = await purchaseApi.post("/purchaseorders/", payload);
     return response.data;
   }
 );

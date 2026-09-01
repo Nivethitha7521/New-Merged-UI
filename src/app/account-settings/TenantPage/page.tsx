@@ -34,7 +34,7 @@ const [snackbar, setSnackbar] = useState({
 });
 
 
-  const API = "https://yenerp.com/purchasetestapi";
+  const API = "http://127.0.0.1:8000/yenerpapi";
 
   // ✅ Fetch tenants
  const fetchTenants = async () => {
@@ -182,10 +182,10 @@ const handleActivateTenant = async () => {
 
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-4 mx-auto max-w-[1150px] w-full">
-
+<div className="account-settings-module account-settings-tenant account-settings-panel bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-4 mx-auto max-w-[1150px] w-full">
+ 
       {/* 🔍 HEADER */}
-      <div className="flex justify-between items-center mb-6">
+     <div className="account-settings-toolbar flex justify-between items-center mb-6">
 
         <div className="w-80 relative">
           <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
@@ -226,11 +226,9 @@ const handleActivateTenant = async () => {
       </div>
 
     {/* 📋 TABLE CONTAINER */}
-<div className="max-h-[calc(100vh-260px)] overflow-y-auto bg-white">
-  
+<div className="account-settings-grid-table account-settings-tenant-table max-h-[calc(100vh-260px)] overflow-y-auto bg-white">  
   {/* Header */}
-<div className="grid grid-cols-5 bg-white text-xs font-semibold border-b sticky top-0 z-0">
-
+<div className="account-settings-grid-header grid grid-cols-5 bg-white text-xs font-semibold border-b sticky top-0 z-0">
   <div className="px-4 py-3">S.NO</div>
   <div className="px-4 py-3">TENANT ID</div>
   <div className="px-4 py-3">TENANT NAME</div>
@@ -246,7 +244,7 @@ const handleActivateTenant = async () => {
   filteredTenants.map((t, i) => (
     <div
       key={t._id}
-      className="grid grid-cols-5 border-b hover:bg-gray-50 text-sm"
+     className="account-settings-grid-row grid grid-cols-5 border-b hover:bg-gray-50 text-sm"
     >
       <div className="px-4 py-3">{i + 1}</div>
       <div className="px-4 py-3">{t.tenantId}</div>
@@ -307,8 +305,7 @@ const handleActivateTenant = async () => {
       {/* 🧾 CREATE MODAL */}
      {tenantModal && (
   <div
-    className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"
-    onClick={() => {
+className="account-settings-custom-modal account-settings-tenant-form-modal fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50"    onClick={() => {
       setTenantModal(false);
       setEditingTenantId(null);
       setTenantName("");
@@ -374,7 +371,7 @@ focus:border-blue-600"
       {/* 🗑 CONFIRM DELETE */}
    {/* 🗑 DEACTIVATE MODAL — NEW DESIGN */}
 {deleteId && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
+ <div className="account-settings-custom-modal account-settings-confirm-modal fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
     <div className="bg-white rounded-2xl shadow-lg w-[420px] p-6 text-center">
 
       {/* Title */}
@@ -411,7 +408,7 @@ focus:border-blue-600"
 
 {/* 🔄 RESTORE MODAL */}
 {restoreId && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
+ <div className="account-settings-custom-modal account-settings-confirm-modal fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
     <div className="bg-white rounded-2xl shadow-lg w-[420px] p-6 text-center">
 
       {/* Title */}

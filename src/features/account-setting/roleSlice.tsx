@@ -54,9 +54,12 @@ export const fetchRoles = createAsyncThunk(
   'roles/fetchRoles',
   async () => {
     try {
+      const token = sessionStorage.getItem('accessToken');
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
       const [roleRes, permRes] = await Promise.all([
-        fetch('https://yenerp.com/purchasetestapi/roles'),
-        fetch('https://yenerp.com/purchasetestapi/permissions')
+        fetch('http://127.0.0.1:8000/yenerpapi/roles', { headers }),
+        fetch('http://127.0.0.1:8000/yenerpapi/permissions', { headers })
       ]);
 
       const roles = await roleRes.json();
@@ -70,6 +73,7 @@ export const fetchRoles = createAsyncThunk(
       
       const PREDEFINED = [
         "Admin",
+        "Super Admin",
         "Purchase Manager",
         "Purchase Assistant",
         "Store Incharge",

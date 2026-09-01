@@ -12,34 +12,37 @@ export const setupAxios = () => {
   if (isInterceptorAdded) return;
   isInterceptorAdded = true;
 
+  // ⬅️ INTHA REQUEST INTERCEPTOR PUTHUSA ADD PANNUNGA
+  axios.interceptors.request.use(
+    (config) => {
+      const token = sessionStorage.getItem("accessToken");
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
   axios.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // ⭐ GET CURRENT SESSION INFO
         const username = sessionStorage.getItem("username");
         const tenantId = sessionStorage.getItem("tenant_id");
 
-        // ⭐ SHOW MESSAGE
-        store.dispatch(
-          setSnackbarMessage("Session expired. Please login again.")
-        );
+        store.dispatch(setSnackbarMessage("Session expired. Please login again."));
         store.dispatch(setSnackbarOpen(true));
         store.dispatch(forceLogout());
 
-        // ⭐ BROADCAST ONLY THIS SESSION LOGOUT
         localStorage.setItem(
           "forceLogout",
-          JSON.stringify({
-            username,
-            tenantId,
-            time: Date.now(),
-          })
+          JSON.stringify({ username, tenantId, time: Date.now() })
         );
 
         window.location.href = "/";
       }
-
       return Promise.reject(error);
     }
   );

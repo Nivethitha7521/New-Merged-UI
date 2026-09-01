@@ -5,8 +5,13 @@ import {
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button,
   Backdrop, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert
 } from '@mui/material';
-import { Add as AddIcon, GetApp as GetAppIcon, Upload as UploadIcon,Refresh as RefreshIcon } from '@mui/icons-material';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import {
+  Add as AddIcon,
+  DescriptionOutlined as SampleIcon,
+  FileUploadOutlined as ImportIcon,
+  FileDownloadOutlined as ExportIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -21,6 +26,7 @@ interface PurchaseItemData {
   purchasePrice: number;
   purchasetaxName: number;
   reorderLevel: number;
+  targetStockLevel: number;
   itemType: string;
   hsnCode: string;
   shelfLife: string;
@@ -58,6 +64,8 @@ interface PurchaseControlsProps {
   exportStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   canAdd: boolean;
     handleRefresh?: () => void;
+    totalItems: number;
+visibleItems: number;
  
 }
 
@@ -73,6 +81,7 @@ const HEADER_MAPPING: { [key: string]: string } = {
   purchasePrice: "Purchase Price",
   purchasetaxName: "Tax Rate",
   reorderLevel: "Reorder Level",
+  targetStockLevel: "Target Stock Level",
   itemType: "Item Type",
   hsnCode: "HSN Code",
   shelfLife: "Shelf Life",
@@ -105,7 +114,9 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
   setShowDeactivated,
   loading,
   exportStatus,
-  handleRefresh 
+  handleRefresh,
+  totalItems,
+  visibleItems,
 }) => {
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -248,6 +259,7 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
         purchasePrice: 50.00,
         purchasetaxName: 18,
         reorderLevel: 10,
+        targetStockLevel: 100,
         itemType: "Sample Type",
         hsnCode: "123456",
         shelfLife: "12 months",
@@ -293,7 +305,7 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
         {/* Search Fields and Filter/Clear Buttons */}
         <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
           <Grid container spacing={0.5} alignItems="center">
-            <Grid item xs={3.5}>
+            <Grid item xs={3}>
               <TextField
                 autoComplete="off"
                 label="Item Name"
@@ -305,7 +317,7 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
                 size="small"
               />
             </Grid>
-            <Grid item xs={3.5}>
+            <Grid item xs={3}>
               <TextField
                 autoComplete="off"
                 label="Category"
@@ -317,7 +329,7 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
                 size="small"
               />
             </Grid>
-            <Grid item xs={3.5}>
+            <Grid item xs={3}>
               <TextField
                 label="Subcategory"
                 variant="outlined"
@@ -328,8 +340,24 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
                 size="small"
               />
             </Grid>
-            <Grid item xs={0.75}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+           <Grid
+  item
+  xs={0.75}
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+             <Box
+  sx={{
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
                 <IconButton
                   color="primary"
                   className="icon-button-outline"
@@ -344,18 +372,33 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
                   variant="caption"
                   align="center"
                   sx={{
-                    maxWidth: 30,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.1,
-                    mt: 0.1,
-                  }}
+  whiteSpace: 'nowrap',
+  lineHeight: 1.1,
+  mt: 0.1,
+}}
                 >
                   Filter
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={0.75}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Grid
+  item
+  xs={0.75}
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+            <Box
+  sx={{
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
                 <IconButton
                   className="icon-button-outline"
                   color="primary"
@@ -370,11 +413,10 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
                   variant="caption"
                   align="center"
                   sx={{
-                    maxWidth: 30,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.1,
-                    mt: 0.1,
-                  }}
+  whiteSpace: 'nowrap',
+  lineHeight: 1.1,
+  mt: 0.1,
+}}
                 >
                   Clear
                 </Typography>
@@ -390,145 +432,112 @@ const PurchaseControls: React.FC<PurchaseControlsProps> = ({
            {/* Add the Refresh button RIGHT HERE - after the Add button */}
    
            
+           {/* Add */}
+<Grid item>
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={<AddIcon />}
+    onClick={handleDialogOpen}
+    disabled={
+      !canAdd ||
+      loading ||
+      importLoading ||
+      exportStatus === 'loading'
+    }
+    className="purchase-reference-action-button"
+  >
+    Add New
+  </Button>
+</Grid>
+
+{/* Sample */}
+<Grid item>
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={<SampleIcon />}
+    onClick={handleDownloadSampleCSVInternal}
+    disabled={
+      loading ||
+      importLoading ||
+      exportStatus === 'loading'
+    }
+    className="purchase-reference-action-button"
+  >
+    Sample
+  </Button>
+</Grid>
+
+{/* Import */}
+<Grid item>
+  <input
+    type="file"
+    ref={inputFileRef}
+    onChange={handleFileChange}
+    accept=".csv,.xlsx,.xls"
+    style={{ display: 'none' }}
+  />
+
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={
+      importLoading ? (
+        <CircularProgress size={15} />
+      ) : (
+        <ImportIcon />
+      )
+    }
+    onClick={handleButtonClick}
+    disabled={
+      importLoading ||
+      loading ||
+      exportStatus === 'loading'
+    }
+    className="purchase-reference-action-button"
+  >
+    Import
+  </Button>
+</Grid>
+
+{/* Export */}
+<Grid item>
+  <Button
+    type="button"
+    variant="outlined"
+    startIcon={
+      exportStatus === 'loading' ? (
+        <CircularProgress size={15} />
+      ) : (
+        <ExportIcon />
+      )
+    }
+    onClick={handleExportCSV}
+    disabled={
+      exportStatus === 'loading' ||
+      importLoading ||
+      loading
+    }
+    className="purchase-reference-action-button"
+  >
+    Export
+  </Button>
+</Grid>
             <Grid item>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-               <IconButton
-              color="primary"
-              onClick={handleDialogOpen}
-              className="icon-button-outline"
-              disabled={!canAdd || loading || importLoading || exportStatus === 'loading'}
-              size="small"
-              sx={{ 
-                p: 0.3,
-                opacity: canAdd ? 1 : 0.5
-              }}
-            >
-              <AddIcon fontSize="small" />
-            </IconButton>
-                <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                lineHeight: 1.1,
-                mt: 0.2,
-                color: canAdd ? 'text.primary' : 'grey.500',
-                opacity: canAdd ? 1 : 0.7,
-              }}
-            >
-              Add
-            </Typography>
-              </Box>
-            </Grid>
-            <Grid item>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <IconButton
-                  color="primary"
-                  onClick={handleDownloadSampleCSVInternal}
-                  className="icon-button-outline"
-                  disabled={loading || importLoading || exportStatus === 'loading'}
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  <InsertDriveFileIcon fontSize="small" />
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 70,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Sample
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item>
-              <input
-                type="file"
-                accept=".csv"
-                ref={inputFileRef}
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-                id="import-csv"
-              />
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <IconButton
-                  color="primary"
-                  className="icon-button-outline"
-                  onClick={handleButtonClick}
-                  disabled={loading || importLoading || exportStatus === 'loading'}
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  {importLoading ? <CircularProgress size={16} /> : <GetAppIcon fontSize="small" />}
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 40,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Import
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <IconButton
-                  color="primary"
-                  onClick={handleExportCSV}
-                  className="icon-button-outline"
-                  disabled={loading || importLoading || exportStatus === 'loading'}
-                  size="small"
-                  sx={{ p: 0.3 }}
-                >
-                  {exportStatus === 'loading' ? <CircularProgress size={16} /> : <UploadIcon fontSize="small" />}
-                </IconButton>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 40,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  Export
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography
-                  variant="caption"
-                  align="center"
-                  sx={{
-                    maxWidth: 60,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.1,
-                    mt: 0.2,
-                  }}
-                >
-                  {showDeactivated ? 'Deactivated' : 'Activated'}
-                </Typography>
-                <Switch
-                  checked={showDeactivated}
-                  onChange={(e) => setShowDeactivated(e.target.checked)}
-                  disabled={loading || importLoading || exportStatus === 'loading'}
-                  size="small"
-                  sx={{ height: 24 }}
-                />
-              </Box>
+<Box className="purchase-reference-active-toggle">
+  <Typography component="span">Show Active Only</Typography>
+
+  <Switch
+    checked={!showDeactivated}
+    onChange={(event) => setShowDeactivated(!event.target.checked)}
+    disabled={loading || importLoading || exportStatus === 'loading'}
+    size="small"
+    inputProps={{
+      'aria-label': 'Show active purchase items only',
+    }}
+  />
+</Box>
             </Grid>
           </Grid>
         </Grid>

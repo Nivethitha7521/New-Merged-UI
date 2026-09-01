@@ -1,0 +1,338 @@
+/* =========================================================
+   VEHICLE DIALOG
+   Matches the Master Admin reference dialog
+   ========================================================= */
+
+.vehicle-form-dialog .dialog-paper-medium {
+  width: min(1120px, calc(100vw - 32px)) !important;
+  max-width: 1120px !important;
+  max-height: 90vh !important;
+
+  margin: 16px !important;
+
+  overflow: hidden;
+
+  background: var(--erp-surface, #ffffff) !important;
+
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 16px !important;
+
+  box-shadow:
+    0 24px 70px rgba(16, 24, 40, 0.2) !important;
+}
+
+/* Dialog heading */
+
+.vehicle-form-dialog .dialog-title {
+  padding: 22px 28px 18px !important;
+
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-bottom:
+    1px solid var(--erp-border, #e7ecf1) !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 750 !important;
+  line-height: 1.3 !important;
+}
+
+/* Dialog content */
+
+.vehicle-form-dialog .dialog-content {
+  max-height: calc(90vh - 175px) !important;
+
+  padding: 20px 22px 22px !important;
+
+  overflow-y: auto !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+}
+
+/* Form border section */
+
+.vehicle-form-dialog .form-section {
+  width: 100% !important;
+
+  margin: 0 !important;
+  padding: 22px !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+
+  border:
+    1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 4px !important;
+}
+
+/* Three-column layout */
+
+.vehicle-form-dialog .form-grid-manager {
+  width: 100% !important;
+
+  display: grid !important;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+.vehicle-form-dialog .form-grid-manager:last-child {
+  margin-bottom: 0 !important;
+}
+
+.vehicle-form-dialog .form-field {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.vehicle-form-dialog .form-field-span-2 {
+  grid-column: span 2 !important;
+}
+
+/* Override global width: 70px */
+
+.vehicle-form-dialog .custom-textfield,
+.vehicle-form-dialog .MuiTextField-root,
+.vehicle-form-dialog .MuiFormControl-root {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+/* TextField and Select boxes */
+
+.vehicle-form-dialog
+.custom-textfield
+.MuiInputBase-root,
+.vehicle-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+
+  height: 56px !important;
+  min-height: 56px !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-radius: 9px !important;
+}
+
+.vehicle-form-dialog
+.custom-textfield
+.MuiOutlinedInput-notchedOutline {
+  border-color:
+    var(--erp-border-strong, #c5ced8) !important;
+}
+
+.vehicle-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root:hover
+.MuiOutlinedInput-notchedOutline {
+  border-color:
+    var(--erp-accent-border, #9bb9fa) !important;
+}
+
+.vehicle-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root.Mui-focused {
+  box-shadow:
+    0 0 0 3px
+    var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}
+
+.vehicle-form-dialog
+.custom-textfield
+.MuiOutlinedInput-root.Mui-focused
+.MuiOutlinedInput-notchedOutline {
+  border-width: 1px !important;
+  border-color:
+    var(--erp-accent, #155eef) !important;
+}
+
+/* Labels */
+
+.vehicle-form-dialog .custom-label {
+  color: var(--erp-text, #344054) !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 550 !important;
+
+  transform:
+    translate(14px, 16px) scale(1) !important;
+}
+
+.vehicle-form-dialog
+.custom-label.MuiInputLabel-shrink {
+  color: var(--erp-text, #344054) !important;
+
+  transform:
+    translate(14px, -8px) scale(0.82) !important;
+}
+
+/* Input and Select text */
+
+.vehicle-form-dialog
+.custom-input
+input,
+.vehicle-form-dialog
+.custom-input
+.MuiSelect-select {
+  height: auto !important;
+
+  padding: 16px 14px !important;
+
+  color: var(--erp-text, #344054) !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+
+  text-align: left !important;
+}
+
+.vehicle-form-dialog
+.custom-input
+input::placeholder {
+  color: #98a2b3 !important;
+
+  text-align: left !important;
+
+  opacity: 1 !important;
+}
+
+.vehicle-form-dialog
+.custom-input
+.MuiSelect-select {
+  padding-right: 40px !important;
+}
+
+/* Validation text */
+
+.vehicle-form-dialog
+.MuiFormHelperText-root {
+  margin: 5px 4px 0 !important;
+
+  font-size: 10px !important;
+}
+
+/* Footer */
+
+.vehicle-form-dialog .dialog-actions {
+  min-height: 78px !important;
+
+  padding: 14px 28px 18px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 14px !important;
+
+  background: var(--erp-surface, #ffffff) !important;
+
+  border-top:
+    1px solid var(--erp-border, #e7ecf1) !important;
+}
+
+/* Cancel and Create buttons */
+
+.vehicle-form-dialog .btn-secondary,
+.vehicle-form-dialog .btn-primary {
+  width: auto !important;
+  min-width: 120px !important;
+  min-height: 48px !important;
+
+  padding: 10px 22px !important;
+
+  border-radius: 12px !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 650 !important;
+
+  cursor: pointer;
+}
+
+.vehicle-form-dialog .btn-secondary {
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border:
+    1px solid var(--erp-border-strong, #c5ced8) !important;
+}
+
+.vehicle-form-dialog
+.btn-secondary:hover:not(:disabled) {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+.vehicle-form-dialog .btn-primary {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border: 1px solid var(--erp-accent, #155eef) !important;
+}
+
+.vehicle-form-dialog
+.btn-primary:hover:not(:disabled) {
+  background: var(--erp-accent-hover, #124bc0) !important;
+  border-color: var(--erp-accent-hover, #124bc0) !important;
+
+  box-shadow:
+    0 5px 14px
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.2) !important;
+}
+
+.vehicle-form-dialog
+.btn-primary:disabled {
+  color: #ffffff !important;
+  background: #aab3c1 !important;
+  border-color: #aab3c1 !important;
+
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .vehicle-form-dialog .form-grid-manager {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+  .vehicle-form-dialog .dialog-title {
+    padding: 18px 18px 15px !important;
+  }
+
+  .vehicle-form-dialog .dialog-content {
+    padding: 16px 18px 18px !important;
+  }
+
+  .vehicle-form-dialog .form-section {
+    padding: 16px !important;
+  }
+
+  .vehicle-form-dialog .form-grid-manager {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+
+  .vehicle-form-dialog .form-field-span-2 {
+    grid-column: span 1 !important;
+  }
+
+  .vehicle-form-dialog .dialog-actions {
+    padding: 12px 18px 16px !important;
+  }
+}
+

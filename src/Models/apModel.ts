@@ -101,6 +101,8 @@ export interface ItemDetail {
   status: string;
   hsnCode: string;
   additionalTaxes?: { [key: string]: number };
+    sourcePurchaseOrderId?: string;
+  sourcePoRandomId?: string;
 }
 
 export interface FrontendItemDetail {
@@ -145,6 +147,11 @@ export interface ApInvoice {
   purchaseOrderId: string;
   poRandomId: string;
   grnRandomId: string;
+  purchaseOrderIds?: string[];
+poRandomIds?: string[];
+poCount?: number;
+grnSource?: string;
+poRandomID?: string;
   apRandomId: string;
   grnId: string;
   apinvoiceDate: Date | null;

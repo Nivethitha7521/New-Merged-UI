@@ -1,0 +1,757 @@
+/* =========================================================
+   ONLINE PARTNERS — YEN ERP COMPACT ALIGNMENT @ 100% ZOOM
+   Presentation only.
+   No API, Redux, validation, routing, handler or business logic changes.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* ---------- Module shell ---------- */
+  .erp-master-admin-viewport .online-partners-layout {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partners-content {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ---------- Master / Config tabs ---------- */
+  .erp-master-admin-viewport .online-partners-submodule-tabs {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    margin: 0 0 16px !important;
+    padding: 0 !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  .erp-master-admin-viewport .online-partners-submodule-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+.erp-master-admin-viewport .online-partners-submodule-tab {
+  width: auto !important;
+  min-width: 101px !important;
+  height: 27px !important;
+  min-height: 27px !important;
+  padding: 0 11px !important;
+
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border-strong, #c5ced8) !important;
+
+  border-radius: 7px !important;
+
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
+
+  font-family: inherit !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+.erp-master-admin-viewport .online-partners-config-tab {
+  min-width: 124px !important;
+  max-width: min(360px, 42vw) !important;
+}
+
+  .erp-master-admin-viewport .online-partners-submodule-tab:hover {
+    color: var(--erp-text, #101828) !important;
+    background: #f8fafc !important;
+    border-color: var(--erp-accent-border, #b8cbf8) !important;
+  }
+
+  .erp-master-admin-viewport .online-partners-submodule-tab.is-active {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #155eef) !important;
+    border-color: var(--erp-accent, #155eef) !important;
+    font-weight: 700 !important;
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, 0.08),
+      0 5px 12px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.18) !important;
+  }
+
+  .erp-master-admin-viewport .online-partners-submodule-tab.is-active:hover {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent-hover, #124bc0) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  /* ---------- Partner master toolbar ---------- */
+  .erp-master-admin-viewport .online-partner-master-toolbar {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 0 12px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-title {
+    margin: 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-actions {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-actions .icon-action-wrapper {
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle {
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle .MuiFormControlLabel-label {
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    font-weight: 550 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle .MuiSwitch-switchBase.Mui-checked {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-toggle .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+    background: var(--erp-accent, #155eef) !important;
+    opacity: 0.48 !important;
+  }
+
+  /* ---------- Partner master table ---------- */
+  .erp-master-admin-viewport .online-partner-master-table-container,
+  .erp-master-admin-viewport .online-partner-template-table-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table-container {
+    max-height: calc(100vh - 290px) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table,
+  .erp-master-admin-viewport .online-partner-template-table {
+    width: 100% !important;
+    min-width: 760px !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    table-layout: fixed !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table thead,
+  .erp-master-admin-viewport .online-partner-template-table thead {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #f1f4f8 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th,
+  .erp-master-admin-viewport .online-partner-template-table th {
+    height: 38px !important;
+    padding: 8px 10px !important;
+    color: var(--erp-text, #344054) !important;
+    background: #f1f4f8 !important;
+    border-bottom: 1px solid var(--erp-border, #dfe5ec) !important;
+    font-family: inherit !important;
+    font-size: 10.5px !important;
+    font-weight: 750 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table td,
+  .erp-master-admin-viewport .online-partner-template-table td {
+    height: 40px !important;
+    padding: 7px 10px !important;
+    color: var(--erp-text, #344054) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid #eef1f5 !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table tbody tr:hover td,
+  .erp-master-admin-viewport .online-partner-template-table tbody tr:hover td {
+    background: #f8fafc !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th:nth-child(1),
+  .erp-master-admin-viewport .online-partner-master-table td:nth-child(1) {
+    width: 16% !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th:nth-child(2),
+  .erp-master-admin-viewport .online-partner-master-table td:nth-child(2) {
+    width: 64% !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table th:nth-child(3),
+  .erp-master-admin-viewport .online-partner-master-table td:nth-child(3) {
+    width: 20% !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-master-table-container h2,
+  .erp-master-admin-viewport .online-partner-template-table-container .empty-state h2 {
+    margin: 0 !important;
+    padding: 22px 12px !important;
+    color: var(--erp-text-muted, #667085) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+  }
+
+  /* ---------- Template/config view ---------- */
+  .erp-master-admin-viewport .online-partner-template-view {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-bar {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-row {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns:
+      minmax(150px, 190px)
+      minmax(150px, 190px)
+      minmax(210px, 1fr)
+      130px
+      auto !important;
+    align-items: start !important;
+    gap: 10px !important;
+    margin: 0 0 10px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  /* Critical legacy-width override: globals.css has .custom-textfield { width: 70px !important; } */
+  .erp-master-admin-viewport .online-partners-layout .custom-textfield,
+  .erp-master-admin-viewport .online-partners-layout .MuiTextField-root,
+  .erp-master-admin-viewport .online-partners-layout .MuiFormControl-root,
+  .erp-master-admin-viewport .online-partners-layout .MuiAutocomplete-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-notchedOutline,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+    border-width: 1px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, #b8cbf8) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root.Mui-focused,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+  .erp-master-admin-viewport .online-partner-template-search .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiInputLabel-root,
+  .erp-master-admin-viewport .online-partner-template-search .MuiInputLabel-root {
+    color: var(--erp-text-muted, #667085) !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiInputBase-input,
+  .erp-master-admin-viewport .online-partner-filter-field .MuiSelect-select,
+  .erp-master-admin-viewport .online-partner-template-search .MuiInputBase-input {
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-filter-field .MuiFormHelperText-root {
+    min-height: 12px !important;
+    margin: 2px 0 0 2px !important;
+    font-family: inherit !important;
+    font-size: 9.5px !important;
+    line-height: 1.15 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions {
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    margin: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-apply-button,
+  .erp-master-admin-viewport .online-partner-assign-button {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 14px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-wrapper {
+    min-width: 42px !important;
+    margin: 0 !important;
+    gap: 2px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-button {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 !important;
+    color: var(--erp-accent, #155eef) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-accent, #155eef) !important;
+    border-radius: 8px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-button:hover:not(.Mui-disabled) {
+    color: var(--erp-accent-hover, #124bc0) !important;
+    background: var(--erp-accent-soft, #eef4ff) !important;
+    border-color: var(--erp-accent-hover, #124bc0) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-button.Mui-disabled {
+    color: #98a2b3 !important;
+    border-color: #d0d5dd !important;
+    background: #f8fafc !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions .icon-action-label {
+    margin: 2px 0 0 !important;
+    color: var(--erp-text, #344054) !important;
+    font-family: inherit !important;
+    font-size: 9.5px !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-search-row {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 0 12px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-search {
+    flex: 0 1 360px !important;
+    width: min(360px, 100%) !important;
+    min-width: 220px !important;
+    max-width: 360px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-assign-wrap {
+    flex: 0 0 auto !important;
+  }
+
+  /* ---------- Template table ---------- */
+  .erp-master-admin-viewport .online-partner-template-table-container {
+    max-height: calc(100vh - 360px) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table {
+    min-width: 940px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table .MuiCheckbox-root {
+    padding: 0 !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table .MuiCheckbox-root .MuiSvgIcon-root {
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 17px !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-table .edit-btn,
+  .erp-master-admin-viewport .online-partner-template-table .deactivate-btn,
+  .erp-master-admin-viewport .online-partner-template-table .activate-btn,
+  .erp-master-admin-viewport .online-partner-master-table .edit-btn,
+  .erp-master-admin-viewport .online-partner-master-table .deactivate-btn,
+  .erp-master-admin-viewport .online-partner-master-table .activate-btn {
+    margin: 0 3px !important;
+  }
+}
+
+/* ---------- Config popover is portalled under body ---------- */
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-menu {
+  min-width: 210px !important;
+  max-width: 280px !important;
+  padding: 8px !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 34px rgba(16, 24, 40, 0.16) !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-menu > .MuiBox-root {
+  padding: 0 !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-option {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  justify-content: flex-start !important;
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-option:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+}
+
+body .MuiPopover-root.online-partners-config-popover .online-partners-config-option.is-active {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  font-weight: 700 !important;
+}
+
+/* =========================================================
+   PORTALLED ONLINE PARTNER DIALOGS
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.online-partner-form-dialog .MuiDialog-paper.online-partner-dialog-paper {
+    width: min(360px, calc(100vw - 32px)) !important;
+    max-width: 360px !important;
+    max-height: calc(100vh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  body .MuiDialog-root.online-partner-template-dialog .MuiDialog-paper.online-partner-template-dialog-paper {
+    width: min(470px, calc(100vw - 32px)) !important;
+    max-width: 470px !important;
+    max-height: calc(100vh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  body .MuiDialog-root.online-partner-import-dialog .MuiDialog-paper.online-partner-import-dialog-paper {
+    width: min(850px, calc(100vw - 32px)) !important;
+    max-width: 850px !important;
+    max-height: calc(100vh - 32px) !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .dialog-title {
+    min-height: 46px !important;
+    padding: 12px 16px !important;
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-bottom: 1px solid var(--erp-border, #e5e7eb) !important;
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .dialog-content {
+    padding: 12px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .form-section,
+  body .online-partner-dialog-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 8px !important;
+  }
+
+  /* Critical portal override for legacy globals.css 70px width. */
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .custom-textfield,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .MuiTextField-root,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .custom-textfield .MuiOutlinedInput-root,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 40px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border-radius: 8px !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #c5ced8) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-root.Mui-focused {
+    box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent, #155eef) !important;
+    border-width: 1px !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog) .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #155eef) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .dialog-actions {
+    min-height: 50px !important;
+    padding: 8px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    background: #f8fafc !important;
+    border-top: 1px solid var(--erp-border, #e5e7eb) !important;
+  }
+
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .btn-primary,
+  body :is(.online-partner-form-dialog, .online-partner-template-dialog, .online-partner-import-dialog) .btn-secondary {
+    min-width: 74px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+  }
+
+  body .online-partner-snackbar-alert {
+    background: var(--erp-accent, #155eef) !important;
+    color: var(--erp-accent-contrast, #ffffff) !important;
+  }
+}
+
+/* ---------- Mid-size laptops/tablets ---------- */
+@media (max-width: 1180px) and (min-width: 701px) {
+  .erp-master-admin-viewport .online-partner-filter-row {
+    grid-template-columns: repeat(2, minmax(180px, 1fr)) !important;
+  }
+
+  .erp-master-admin-viewport .online-partner-template-actions {
+    grid-column: 1 / -1 !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 700px) {
+  .online-partners-layout {
+    padding: 0 !important;
+  }
+
+  .online-partners-submodule-tabs {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    margin-bottom: 12px !important;
+  }
+
+  .online-partners-submodule-tab {
+    flex: 0 0 auto !important;
+  }
+
+  .online-partner-master-toolbar,
+  .online-partner-search-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .online-partner-master-actions {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  .online-partner-filter-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .online-partner-filter-field,
+  .online-partner-template-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .online-partner-template-actions {
+    display: flex !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+  }
+
+  body .MuiDialog-root.online-partner-form-dialog .MuiDialog-paper.online-partner-dialog-paper,
+  body .MuiDialog-root.online-partner-template-dialog .MuiDialog-paper.online-partner-template-dialog-paper,
+  body .MuiDialog-root.online-partner-import-dialog .MuiDialog-paper.online-partner-import-dialog-paper {
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 10px !important;
+  }
+}
+
+/* ---------- Online Partner secondary dialog details ---------- */
+body .online-partner-template-dialog .online-partner-assign-select-all {
+  margin: 0 0 10px !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-list {
+  margin: 0 !important;
+  padding: 4px 0 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-row {
+  min-height: 36px !important;
+  margin: 0 !important;
+  padding: 4px 6px !important;
+  border-bottom: 1px solid #eef1f5 !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-row .MuiCheckbox-root {
+  padding: 4px !important;
+}
+
+body .online-partner-template-dialog .online-partner-assign-row .MuiTypography-root {
+  color: var(--erp-text, #344054) !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+}
+
+body .online-partner-import-mode-dialog .MuiDialogContent-root .MuiButton-root {
+  width: 100% !important;
+  max-width: 280px !important;
+  min-height: 48px !important;
+  color: var(--erp-text, #344054) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border-strong, #c5ced8) !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  text-transform: none !important;
+}
+
+body .online-partner-import-mode-dialog .MuiDialogContent-root .MuiButton-contained {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+body .online-partner-import-mode-dialog .MuiDialogContent-root .MuiButton-root:hover {
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+}

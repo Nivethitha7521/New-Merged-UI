@@ -2,8 +2,8 @@
 
 import { OverallSalesReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { overallSalesConfig } from '../../configs/overallSales.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { overallSalesConfig } from '@/features/pos/reports/overallSales.config';
 
 // Select 'overallSales' (the key defined in your config)
 const selector = (s: RootState) => s.overallSales;

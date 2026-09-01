@@ -4,7 +4,22 @@ export const roundPrice = (price: number): number => {
 };
 
 export const formatCurrency = (amount: number): string => {
-  return `₹${amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+  let currency = 'INR';
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('erp:display-settings:active');
+      currency = raw ? JSON.parse(raw).currency || 'INR' : 'INR';
+    } catch {
+      currency = 'INR';
+    }
+  }
+
+  return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number.isFinite(amount) ? amount : 0);
 };
 
 export const formatDate = (date: Date | string | null): string => {

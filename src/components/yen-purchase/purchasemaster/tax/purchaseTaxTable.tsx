@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  IconButton, Tooltip
+  IconButton, Tooltip,Box
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import ConfirmationDialog from '@/components/confirmationDialog';
 import { PurchaseTax } from '@/Models/purchasetax';
 
@@ -67,8 +69,10 @@ const PurchaseTaxTable: React.FC<PurchaseTaxTableProps> = ({
   .reverse();
   return (
     <>
+    <Box className="purchase-master-table-shell">
   <TableContainer
         component={Paper}
+         className="purchase-master-table"
         sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
           overflowY: 'auto',
@@ -97,14 +101,43 @@ const PurchaseTaxTable: React.FC<PurchaseTaxTableProps> = ({
               filteredPurchaseTaxes.map((tax, index) => (
                 <TableRow key={tax.purchasetaxId}>
                   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{tax.randomId}</TableCell>
-                  <TableCell>{tax.purchasetaxName}</TableCell>
-                  <TableCell className='table-number-right'>{`${tax.purchasetaxPercentage}%`}</TableCell>
-                  <TableCell>{tax.status}</TableCell>
+                 <TableCell>
+  <span className="purchase-master-id-pill">
+    {tax.randomId}
+  </span>
+</TableCell>
+                 <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(tax.purchasetaxName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{tax.purchasetaxName}</span>
+  </Box>
+</TableCell>
+                 <TableCell className="table-number-right">
+  <span className="purchase-master-value-pill">
+    {tax.purchasetaxPercentage}%
+  </span>
+</TableCell>
+                 <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      tax.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {tax.status}
+  </span>
+</TableCell>
                   <TableCell>
+                    <Box className="purchase-master-actions">
                     {tax.status === 'active' ? (
                       <>
                        <IconButton
+                       className="purchase-master-action-button is-edit"
+
                           onClick={() => handleEdit(tax.purchasetaxId)}
                           disabled={!canEdit} // ✅ ADD PERMISSION CHECK
                           sx={{
@@ -118,6 +151,8 @@ const PurchaseTaxTable: React.FC<PurchaseTaxTableProps> = ({
                           <EditIcon />
                         </IconButton>
                        <IconButton
+                       className="purchase-master-action-button is-delete"
+
                           onClick={() =>
                             handleOpenDialog("deactivate", tax.purchasetaxId)
                           }
@@ -135,6 +170,8 @@ const PurchaseTaxTable: React.FC<PurchaseTaxTableProps> = ({
                       </>
                     ) : (
                       <IconButton
+                      className="purchase-master-action-button is-activate"
+
                         onClick={() =>
                           handleOpenDialog("activate", tax.purchasetaxId)
                         }
@@ -150,6 +187,7 @@ const PurchaseTaxTable: React.FC<PurchaseTaxTableProps> = ({
                         <RefreshIcon />
                       </IconButton>
                     )}
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -157,7 +195,7 @@ const PurchaseTaxTable: React.FC<PurchaseTaxTableProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
-
+</Box>
       <ConfirmationDialog
   open={openDialog}
   onClose={handleCloseDialog}

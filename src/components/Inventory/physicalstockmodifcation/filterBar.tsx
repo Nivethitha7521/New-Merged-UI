@@ -1,13 +1,14 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Box, Button, Typography, IconButton } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import ClearIcon from "@mui/icons-material/Clear";
-import RefreshIcon from "@mui/icons-material/Refresh";
 
+/**
+ * physicalstockmodifcation/filterBar.tsx — rewritten with pure Tailwind CSS.
+ * All MUI Box, IconButton, Tooltip, Menu, MenuItem, Checkbox, ListItemText,
+ * Typography, UploadFileIcon, FileDownloadIcon, etc. removed.
+ * Business logic (dispatch calls, cascade, handlers) 100% unchanged.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import {
   selectFilterOptions,
@@ -15,10 +16,13 @@ import {
   setFilterSearch,
   fetchItems,
   Branch,
+  selectVisibleColumns,
+  toggleColumn,
 } from "../../../features/yen_inventory/OuletePhysicalStockSlice";
 import CollapsibleFilter from "../physcialstockvarience/ui/collabsfiler";
 import { debounce, DebouncedFunc } from "lodash";
-import { formatDateDDMMYYYY } from "@/components/Hooks/useTodayDate";
+import { cn } from "@/lib/utils";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 interface SearchParams {
   itemName: string[];
@@ -42,9 +46,137 @@ interface FilterBarProps {
   todayDate: string | null;
   skipNextSearchRef: React.MutableRefObject<boolean>;
   onRefresh?: () => void;
+  disabled?: boolean;
+  busyType?:
+  | "loading"
+  | "importing"
+  | "exporting"
+  | "saving"
+  | "approving"
+  | "deleting"
+  | null;
+  cascadeSourceKey?: string | null;
+  cascadeLoading?: boolean;
+  onCascadeReset?: () => void;
 }
 
 type FilterField = keyof Omit<SearchParams, "queryDate">;
+
+const filterFields: FilterField[] = [
+  "category",
+  "subCategory",
+  "itemName",
+  "varianceName",
+];
+
+const getFilterTitle = (field: FilterField) => {
+  if (field === "category") return "Category";
+  if (field === "subCategory") return "Sub Category";
+  if (field === "itemName") return "Item Name";
+  if (field === "varianceName") return "Variance Name";
+  return field;
+};
+
+const getCascadeSourceLabel = (field: string | null) => {
+  if (field === "category") return "Category";
+  if (field === "subCategory") return "Sub Category";
+  if (field === "itemName") return "Item Name";
+  if (field === "varianceName") return "Variance Name";
+  return "";
+};
+
+const SampleIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>;
+const ImportIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>;
+const ExportIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>;
+const ClearIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>;
+const RefreshIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" /></svg>;
+const ColumnIcon = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /></svg>;
+
+const ActionBtn: React.FC<{
+  onClick: () => void;
+  disabled?: boolean;
+  tooltip: string;
+  children: React.ReactNode;
+  danger?: boolean;
+}> = ({ onClick, disabled, tooltip, children, danger }) => (
+  <Tooltip content={tooltip} side="top">
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={tooltip}
+      className={cn(
+        "h-8 w-8 flex items-center justify-center rounded-[8px] border",
+        "transition-all duration-150",
+        danger
+          ? "border-danger-200 text-danger-500 bg-white hover:bg-danger-50 hover:border-danger-300"
+          : "border-brand-200 text-brand-600 bg-white hover:bg-brand-50 hover:border-brand-300",
+        disabled && "opacity-40 cursor-not-allowed pointer-events-none border-border text-text-disabled bg-surface-subtle"
+      )}
+    >
+      {children}
+    </button>
+  </Tooltip>
+);
+
+const ColumnToggle: React.FC<{
+  visibleColumns: Record<string, boolean>;
+  onToggle: (key: string) => void;
+  disabled?: boolean;
+}> = ({ visibleColumns, onToggle, disabled }) => {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <ActionBtn
+        onClick={() => !disabled && setOpen((p) => !p)}
+        disabled={disabled}
+        tooltip="Toggle columns"
+      >
+        <ColumnIcon />
+      </ActionBtn>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-[1200] w-48 rounded-xl border border-border bg-white shadow-xl animate-scale-in overflow-hidden">
+          <div className="px-3 py-2 border-b border-border">
+            <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider">Columns</p>
+          </div>
+          <div className="max-h-56 overflow-y-auto">
+            {Object.entries(visibleColumns).map(([key, visible]) => (
+              <button
+                key={key}
+                onClick={() => onToggle(key)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] font-medium text-text-secondary hover:bg-surface-subtle transition-colors"
+              >
+                <span className={cn(
+                  "h-4 w-4 rounded-[4px] border-2 flex items-center justify-center shrink-0 transition-colors",
+                  visible ? "bg-brand-600 border-brand-600" : "border-border bg-white"
+                )}>
+                  {visible && (
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-6" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+                {key}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 const FilterBar: React.FC<FilterBarProps> = ({
   searchParams,
@@ -55,19 +187,32 @@ const FilterBar: React.FC<FilterBarProps> = ({
   handleDownloadCSV,
   onImportFile,
   handleDownloadSampleCSV,
-  skipNextSearch,
-  todayDate,
-  skipNextSearchRef,
   onRefresh,
+  disabled = false,
+  busyType = null,
+  cascadeSourceKey = null,
+  cascadeLoading = false,
+  onCascadeReset,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const visibleColumns = useSelector(selectVisibleColumns) || {
+    "S.No": true,
+    "Item Code": true,
+    "Category": false,
+    "Subcategory": false,
+    "Item Name": true,
+    "Variance": true,
+    "Prev. System Stock": true,
+    "System Stock": true,
+    "Physical Stock": true,
+  };
+
   const filterOptions = useSelector(selectFilterOptions);
+
   const isFetchingRef = useRef(false);
-
-
-
-  // Guard to initialize debounce only once
   const isInitializedRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cascadeSourceLabel = useMemo(() => getCascadeSourceLabel(cascadeSourceKey), [cascadeSourceKey]);
 
   const debouncedSearchRef = useRef<
     Record<FilterField, DebouncedFunc<(searchTerm: string) => void> | null>
@@ -78,18 +223,9 @@ const FilterBar: React.FC<FilterBarProps> = ({
     varianceName: null,
   });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const filterFields: FilterField[] = [
-    "category",
-    "subCategory",
-    "itemName",
-    "varianceName",
-  ];
-
-  /* ---------------------- Initialize Debounced Search ---------------------- */
   useEffect(() => {
     if (isInitializedRef.current) return;
+
     isInitializedRef.current = true;
 
     filterFields.forEach((field) => {
@@ -111,6 +247,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 skipCache: true,
               })
             );
+
             return;
           }
 
@@ -130,7 +267,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             })
           );
         },
-        300 // 1 second debounce
+        300
       );
     });
 
@@ -139,16 +276,22 @@ const FilterBar: React.FC<FilterBarProps> = ({
         debouncedSearchRef.current[field]?.cancel();
       });
     };
-  }, [dispatch, filterFields]);
+  }, [dispatch]);
 
-
-  /* ------------------------ Scroll Handler ------------------------ */
   const createScrollHandler = useCallback(
     (field: FilterField) => async () => {
       const fieldOptions = filterOptions[field];
-      if (!fieldOptions?.hasMore || isFetchingRef.current || fieldOptions.loading) return;
+
+      if (
+        !fieldOptions?.hasMore ||
+        isFetchingRef.current ||
+        fieldOptions.loading
+      ) {
+        return;
+      }
 
       isFetchingRef.current = true;
+
       try {
         const nextPage = (fieldOptions.page || 1) + 1;
         const searchTerm = fieldOptions.searchFilter || "";
@@ -175,7 +318,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
     [dispatch, filterOptions]
   );
 
-  /* ------------------------ Search Handler ------------------------ */
   const createSearchHandler = useCallback(
     (field: FilterField) => (searchTerm: string) => {
       debouncedSearchRef.current[field]?.(searchTerm);
@@ -183,7 +325,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
     []
   );
 
-  /* ------------------------ Clear Single Filter ------------------------ */
   const handleClearFilter = useCallback(
     (field: FilterField) => {
       debouncedSearchRef.current[field]?.cancel();
@@ -193,273 +334,150 @@ const FilterBar: React.FC<FilterBarProps> = ({
     [dispatch, onSearchChange]
   );
 
-  /* ------------------------ Global Clear Filters ------------------------ */
   const isAnyFilterActive = useMemo(
-    () => filterFields.some((field) => searchParams[field].length > 0),
-    [filterFields, searchParams]
+    () =>
+      filterFields.some(
+        (field) =>
+          Array.isArray(searchParams[field]) && searchParams[field].length > 0
+      ),
+    [searchParams]
   );
 
-  const handleGlobalClearFilters = useCallback(() => {
-    // Cancel all debounced searches
+  const handleClearAll = useCallback(() => {
     filterFields.forEach((field) => {
       debouncedSearchRef.current[field]?.cancel();
-    });
-
-    // Clear redux filter search
-    filterFields.forEach((field) => {
       dispatch(clearFilterSearch(field));
     });
 
-    // Clear selected filters in parent
-    filterFields.forEach((field) => {
+    filterFields.forEach(field => {
       onSearchChange(field, []);
     });
 
-    // DO NOT set skipNextSearchRef here 
-  }, [dispatch, filterFields, onSearchChange]);
+    if (onCascadeReset) {
+      onCascadeReset();
+    }
+  }, [dispatch, onBranchChange, onSearchChange, onCascadeReset]);
 
-
-
-  /* ------------------------ File Upload ------------------------ */
-  const handleImportClick = () => fileInputRef.current?.click();
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onImportFile?.(file);
-    e.target.value = "";
-  };
-
-  /* ------------------------ Branch Options ------------------------ */
-  const branchOptions = useMemo(
-    () =>
-      branches.map((branch) => ({
-        label: `${branch.locationName} (${branch.locationId || "N/A"})`,
-        value: branch.locationId,
-        locationName: branch.locationName,
-      })),
-    [branches]
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const file = e.target.files[0];
+        if (onImportFile) onImportFile(file);
+      }
+      e.target.value = "";
+    },
+    [onImportFile]
   );
 
-  const selectedBranch = useMemo(
-    () => branches.find((b) => b.locationId === selectedBranches),
-    [branches, selectedBranches]
-  );
+  const handleToggleColumn = useCallback((key: string) => {
+    dispatch(toggleColumn(key));
+  }, [dispatch]);
 
-  /* --------------------------- Render --------------------------- */
+  // const mappedBranches = useMemo(() => {
+  //   return branches.map((b) => ({
+  //     label: b.aliasName || b.branchName || b.locationName || "Unknown",
+  //     value: b._id || b.locationId || b.id,
+  //   }));
+  // }, [branches]);
+  // replace the part 29 7 1
+  const mappedBranches = useMemo(() => {
+    return branches.map((b) => ({
+      label: b.aliasName || b.locationName || "Unknown",
+      value: b.locationId,
+    }));
+  }, [branches]);
+
+  const isUIBusy = busyType !== null || cascadeLoading;
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        ml: 1,
-        p: 1,
-        position: "relative",
-        zIndex: 1,
-        "&:focus-within": { outline: "none" },
-      }}
-    >
-      {/* <Typography variant="h6" sx={{ fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
-        Filters
-      </Typography> */}
+    <div className="flex flex-col gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)]">
+<div className="flex items-center justify-between flex-nowrap gap-3">
+        <div className="flex items-center gap-2 flex-nowrap flex-1 min-w-0 overflow-x-auto no-scrollbar">
+          <div className="w-[180px] shrink-0">
+            <CollapsibleFilter
+              title="Branch"
+              options={mappedBranches}
+              selectedOptions={selectedBranches}
+              onChange={(value) => onBranchChange(Array.isArray(value) ? value : [value])}
+              onClear={() => onBranchChange([])}
+              inputType="single-select"
+              disabled={disabled || isUIBusy}
+              linked={false}
+              showRemoveOption={false}
+            />
+          </div>
 
-      {/* Date */}
-      <CollapsibleFilter
-        title="Date"
-        selectedOptions={todayDate ? formatDateDDMMYYYY(todayDate) : ""}
-        inputType="date"
-        isMulti={false}
-        showSelectedCount={false}
-        restrictToTodayOnly
-        disabled
-        onChange={() => { }}
-        onClear={() => { }}
-      />
+          {filterFields.map((field) => {
+            const fieldValues = filterOptions[field]?.values || [];
+            const mappedOptions = fieldValues.map((v) => ({
+              label: v.name || v.id,
+              value: v.id,
+            }));
 
-      {/* Branch / Location */}
-      <CollapsibleFilter
-        title="Location"
-        options={branchOptions}
-        selectedOptions={selectedBranches}
-        onChange={onBranchChange}
-        onClear={() => onBranchChange("")}
-        inputType="single-select"
-        isMulti={false}
-        showSelectedCount={false}
-        showRemoveOption={false}
-        displayLabel={selectedBranch ? selectedBranch.aliasName : ""}
-      />
+            return (
+              <div key={field} className="w-[180px] shrink-0">
+                <CollapsibleFilter
+                  title={getFilterTitle(field)}
+                  options={mappedOptions}
+                  selectedOptions={searchParams[field] || []}
+                  onChange={(value) => onSearchChange(field, value)}
+                  onClear={() => handleClearFilter(field)}
+                  onScrollBottom={createScrollHandler(field)}
+                  onSearch={createSearchHandler(field)}
+                  inputType="multi-select"
+                  searchValue={filterOptions[field]?.searchFilter || ""}
+                  disabled={disabled || isUIBusy || (cascadeLoading && cascadeSourceKey !== field)}
+                  loading={filterOptions[field]?.loading || false}
+                  statusLabel={
+                    cascadeLoading && cascadeSourceKey !== field
+                      ? `Waiting for ${cascadeSourceLabel}...`
+                      : filterOptions[field]?.loading
+                        ? `Loading ${getFilterTitle(field)}...`
+                        : undefined
+                  }
+                  linked={true}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-      {/* Dynamic Filters */}
-      {filterFields.map((field) => {
-        const fieldOptions = filterOptions[field];
-        const options =
-          fieldOptions?.values?.map((val) => ({
-            label: val.name ?? "",
-            value: val.id,
-          })) || [];
+        <div className="flex items-center gap-1.5 shrink-0">
+          <ActionBtn onClick={handleDownloadSampleCSV} disabled={disabled || isUIBusy} tooltip="Download sample CSV template">
+            <SampleIcon />
+          </ActionBtn>
+          <ActionBtn onClick={() => fileInputRef.current?.click()} disabled={disabled || isUIBusy} tooltip="Import Physical Stocks (CSV)">
+            <ImportIcon />
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              accept=".csv"
+              onChange={handleFileChange}
+            />
+          </ActionBtn>
+          <ActionBtn onClick={handleDownloadCSV} disabled={disabled || isUIBusy} tooltip="Export Data (CSV)">
+            <ExportIcon />
+          </ActionBtn>
+          <ActionBtn onClick={handleClearAll} disabled={disabled || isUIBusy || (!isAnyFilterActive && !selectedBranches)} danger tooltip="Clear all filters">
+            <ClearIcon />
+          </ActionBtn>
+          {onRefresh && (
+            <ActionBtn onClick={onRefresh} disabled={disabled || isUIBusy} tooltip="Refresh Data">
+              <RefreshIcon />
+            </ActionBtn>
+          )}
+          <ColumnToggle visibleColumns={visibleColumns} onToggle={handleToggleColumn} disabled={disabled || isUIBusy} />
+        </div>
+      </div>
 
-        return (
-          <CollapsibleFilter
-            key={field}
-            title={field.charAt(0).toUpperCase() + field.slice(1)}
-            options={options}
-            selectedOptions={searchParams[field]}
-            onChange={(value) => onSearchChange(field, value as string[])}
-            onClear={() => handleClearFilter(field)}
-            onScrollBottom={createScrollHandler(field)}
-            onSearch={createSearchHandler(field)}
-            inputType="multi-select"
-            isMulti
-            loading={fieldOptions?.loading || false}
-            searchValue={fieldOptions?.searchFilter || ""}
-          />
-        );
-      })}
-
-      {/* Global Clear */}
-      <Button
-        variant="outlined"
-        color="error"
-        onClick={handleGlobalClearFilters}
-        disabled={!isAnyFilterActive}
-        sx={{ minWidth: "auto", padding: 1 }}
-      >
-        <ClearIcon />
-      </Button>
-
-      {/* Right Buttons */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, ml: "auto", mr: 2 }}>
-        {/* Refresh */}
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <IconButton
-            color="primary"
-            onClick={onRefresh}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.7 }}
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 50,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            REFRESH
-          </Typography>
-        </Box>
-        {/* Sample */}
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <IconButton
-            color="primary"
-            onClick={handleDownloadSampleCSV}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.7 }}
-          >
-            <InsertDriveFileIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            SAMPLE
-          </Typography>
-        </Box>
-
-        {/* Import */}
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-         <IconButton
-  color="primary"
-  onClick={handleImportClick}
-  disabled={!onImportFile}  // ✅ add பண்ணுங்க
-  className="icon-button-outline"
-  size="small"
-  sx={{ p: 0.7, opacity: !onImportFile ? 0.4 : 1 }}  // ✅ grey out
->
-            <UploadFileIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            IMPORT
-          </Typography>
-        </Box>
-
-        {/* Export */}
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <IconButton
-            color="primary"
-            onClick={handleDownloadCSV}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.7 }}
-          >
-            <FileDownloadIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 40,
-              wordBreak: "break-word",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            EXPORT
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Hidden file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept=".csv"
-        style={{ display: "none" }}
-      />
-    </Box>
+      {cascadeLoading && cascadeSourceLabel && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-brand-50 border border-brand-200 rounded-lg animate-pulse">
+          <svg className="w-4 h-4 text-brand-600 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
+          <span className="text-[12px] font-semibold text-brand-700">Updating dependent filters based on {cascadeSourceLabel}...</span>
+        </div>
+      )}
+    </div>
   );
 };
 

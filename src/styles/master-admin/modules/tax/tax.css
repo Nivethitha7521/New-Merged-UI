@@ -1,0 +1,324 @@
+/* =========================================================
+   TAX MASTER
+   ========================================================= */
+
+.erp-master-admin-viewport
+.tax-master-page {
+  width: 100%;
+  min-width: 0;
+  padding-bottom: 30px;
+}
+
+/* Two independent sections */
+
+.erp-master-admin-viewport
+.tax-master-toolbar {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+
+  margin: 14px 0 16px;
+}
+
+.erp-master-admin-viewport
+.tax-master-toolbar-title {
+  margin: 0 !important;
+
+  color: var(--erp-text, #344054) !important;
+
+  font-size: 12px !important;
+  font-weight: 700 !important;
+
+  white-space: nowrap;
+}
+
+.erp-master-admin-viewport
+.tax-master-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+
+  flex-wrap: nowrap;
+}
+
+/* Compact controls matching Warehouse/UOM */
+
+.erp-master-admin-viewport
+.tax-master-toolbar-actions
+.purchase-reference-action-button {
+  height: 40px !important;
+  min-height: 40px !important;
+
+  padding: 0 14px !important;
+
+  border-radius: 11px !important;
+
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+
+.erp-master-admin-viewport
+.tax-master-toolbar-actions
+.purchase-reference-active-toggle {
+  height: 40px !important;
+  min-height: 40px !important;
+
+  padding: 0 8px 0 14px !important;
+
+  border-radius: 11px !important;
+}
+
+.erp-master-admin-viewport
+.tax-master-toolbar-actions
+.purchase-reference-active-toggle
+.MuiTypography-root {
+  font-size: 12px !important;
+}
+
+/* Space between normal Tax and DineIn Tax */
+
+.erp-master-admin-viewport
+.dinein-tax-toolbar {
+  margin-top: 26px;
+}
+
+/* Tables */
+
+.erp-master-admin-viewport
+.tax-table-shell {
+  width: 100%;
+  margin-bottom: 0 !important;
+}
+
+.erp-master-admin-viewport
+.tax-native-table {
+  width: 100%;
+  min-width: 1050px;
+
+  table-layout: auto;
+}
+
+.erp-master-admin-viewport
+.tax-native-table
+th,
+.erp-master-admin-viewport
+.tax-native-table
+td {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.erp-master-admin-viewport
+.tax-column-sno {
+  width: 65px;
+  min-width: 65px;
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.tax-column-id {
+  width: 120px;
+  min-width: 120px;
+}
+
+.erp-master-admin-viewport
+.tax-column-name {
+  width: 190px;
+  min-width: 190px;
+  text-align: left !important;
+}
+
+.erp-master-admin-viewport
+.tax-column-percentage {
+  width: 145px;
+  min-width: 145px;
+}
+
+.erp-master-admin-viewport
+.tax-column-code-group {
+  min-width: 220px;
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.tax-column-code-name {
+  width: 150px;
+  min-width: 150px;
+}
+
+.erp-master-admin-viewport
+.tax-column-code-percentage {
+  width: 90px;
+  min-width: 90px;
+}
+
+.erp-master-admin-viewport
+.tax-column-actions {
+  width: 105px;
+  min-width: 105px;
+  text-align: center !important;
+}
+
+.erp-master-admin-viewport
+.tax-column-actions
+.purchase-master-actions {
+  justify-content: center;
+}
+
+/* DineIn columns */
+
+.erp-master-admin-viewport
+.dinein-tax-column-name {
+  width: 210px;
+  min-width: 210px;
+  text-align: left !important;
+}
+
+.erp-master-admin-viewport
+.dinein-tax-column-percentage {
+  width: 175px;
+  min-width: 175px;
+}
+
+.erp-master-admin-viewport
+.dinein-tax-column-hsn {
+  width: 145px;
+  min-width: 145px;
+}
+
+/* Two-level grouped headers */
+
+.erp-master-admin-viewport
+.tax-native-table
+thead
+tr:first-child
+th {
+  background: #f8fafc !important;
+}
+
+.erp-master-admin-viewport
+.tax-native-table
+thead
+tr:nth-child(2)
+th {
+  height: 34px;
+
+  padding-top: 8px;
+  padding-bottom: 8px;
+
+  background: #f1f4f8 !important;
+
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+/* Tax dialogs */
+
+.tax-form-dialog
+.tax-dialog-paper {
+  width: min(620px, calc(100vw - 32px)) !important;
+  max-width: 620px !important;
+
+  margin: 16px !important;
+
+  border:
+    1px solid
+    var(--erp-border, #dfe5ec) !important;
+  border-radius: 18px !important;
+
+  background:
+    var(--erp-surface, #ffffff) !important;
+
+  box-shadow:
+    0 24px 70px rgba(16, 24, 40, 0.18) !important;
+
+  overflow: hidden;
+}
+
+.tax-form-dialog
+.master-admin-form-dialog-title {
+  padding: 20px 24px 16px !important;
+
+  border-bottom:
+    1px solid
+    var(--erp-border, #e7ecf1);
+}
+
+.tax-form-dialog
+.master-admin-form-content {
+  max-height: calc(90vh - 180px);
+
+  padding: 20px 24px !important;
+
+  overflow-y: auto;
+}
+
+.tax-form-dialog
+.tax-form-section {
+  margin: 0;
+  padding: 18px;
+
+  border:
+    1px solid
+    var(--erp-border, #e1e7ef);
+  border-radius: 15px;
+
+  background:
+    var(--erp-surface, #ffffff);
+}
+
+.tax-form-dialog
+.tax-form-section
+.custom-textfield {
+  width: 100% !important;
+}
+
+.tax-form-dialog
+.tax-form-section
+.custom-textfield
+.MuiOutlinedInput-root {
+  min-height: 42px !important;
+
+  border-radius: 12px !important;
+}
+
+.tax-form-dialog
+.master-admin-form-actions {
+  padding: 14px 24px 20px !important;
+
+  border-top:
+    1px solid
+    var(--erp-border, #e7ecf1);
+}
+
+/* Split tax row styling */
+
+.tax-form-dialog
+.tax-form-section
+> div[style*="display: flex"] {
+  border-radius: 12px;
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+  .erp-master-admin-viewport
+  .tax-master-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .erp-master-admin-viewport
+  .tax-master-toolbar-actions {
+    width: 100%;
+
+    justify-content: flex-start;
+
+    overflow-x: auto;
+  }
+}
+

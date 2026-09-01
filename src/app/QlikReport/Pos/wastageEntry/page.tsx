@@ -2,8 +2,8 @@
 
 import { WastageEntryReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { wastageEntryConfig } from '../../configs/wastageEntry.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { wastageEntryConfig } from '@/features/pos/reports/wastageEntry.config';
 
 // Select 'wastageEntry' (the key defined in your config)
 const selector = (s: RootState) => s.wastageEntry;
