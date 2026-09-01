@@ -15,7 +15,22 @@ export type DisplayFontSize = 'small' | 'medium' | 'large';
 export type DisplayLanguage = 'en';
 export type DisplayCurrency = 'INR' | 'USD' | 'EUR' | 'GBP';
 export type NavigationLayout = 'sidebar' | 'tabs';
+export type DisplayTimezone =
+  | 'Asia/Kolkata'
+  | 'Asia/Dubai'
+  | 'Asia/Singapore'
+  | 'Europe/London'
+  | 'America/New_York'
+  | 'UTC';
 
+export type DisplayDateFormat =
+  | 'DD/MM/YYYY'
+  | 'DD-MM-YYYY'
+  | 'YYYY-MM-DD'
+  | 'DD MMM YYYY'
+  | 'MMM DD, YYYY';
+
+export type DisplayTimeFormat = '12h' | '24h';
 export interface DisplaySettings {
   theme: DisplayTheme;
   accentColor: string;
@@ -25,6 +40,10 @@ export interface DisplaySettings {
   language: DisplayLanguage;
   currency: DisplayCurrency;
   navigationLayout: NavigationLayout;
+   timezone: DisplayTimezone;
+  dateFormat: DisplayDateFormat;
+  timeFormat: DisplayTimeFormat;
+  showSeconds: boolean;
 }
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
@@ -36,12 +55,16 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   language: 'en',
   currency: 'INR',
   navigationLayout: 'sidebar',
+   timezone: 'Asia/Kolkata',
+  dateFormat: 'DD/MM/YYYY',
+  timeFormat: '12h',
+  showSeconds: false,
 };
 
 interface DisplaySettingsContextValue {
   settings: DisplaySettings;
   previewSettings: (next: DisplaySettings) => void;
-  saveSettings: (next: DisplaySettings) => void;
+  saveSettings: (next: DisplaySettings) => Promise<boolean>;
   resetSettings: () => void;
   formatCurrency: (amount: number) => string;
 }
@@ -69,7 +92,26 @@ const getStorageKey = () => {
   const user = sessionStorage.getItem('username') || localStorage.getItem('username') || 'anonymous';
   return `erp:display-settings:${tenant}:${user}`;
 };
+const getApiBaseUrl = () => {
+  return (
+    process.env.NEXT_PUBLIC_API_URL ||
+    'http://127.0.0.1:8000'
+  );
+};
+const getAuthToken = () => {
+  if (typeof window === 'undefined') return null;
 
+  return (
+    sessionStorage.getItem('access_token') ||
+    sessionStorage.getItem('accessToken') ||
+    sessionStorage.getItem('authToken') ||
+    sessionStorage.getItem('token') ||
+    localStorage.getItem('access_token') ||
+    localStorage.getItem('accessToken') ||
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('token')
+  );
+};
 const normaliseSettings = (value: Partial<DisplaySettings> | null): DisplaySettings => ({
   ...DEFAULT_DISPLAY_SETTINGS,
   ...(value || {}),
@@ -225,7 +267,60 @@ const applySettingsToDocument = (
 
 export const DisplaySettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
+const loadTenantTimeSettings = useCallback(async () => {
+  try {
+    const token = getAuthToken();
 
+    if (!token) return;
+
+    const response = await fetch(
+      `${getApiBaseUrl()}/yenerpapi/display-settings/`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to load display settings');
+    }
+
+    const result = await response.json();
+    const data = result?.data;
+
+    if (!data) return;
+
+    setSettings((current) => {
+      const merged: DisplaySettings = {
+        ...current,
+
+        timezone:
+          data.timezone || current.timezone,
+
+        dateFormat:
+          data.date_format || current.dateFormat,
+
+        timeFormat:
+          data.time_format || current.timeFormat,
+
+        showSeconds:
+          data.show_seconds ??
+          current.showSeconds,
+      };
+
+      applySettingsToDocument(merged);
+
+      return merged;
+    });
+  } catch (error) {
+    console.error(
+      'Failed to load tenant display settings:',
+      error
+    );
+  }
+}, []);
   useEffect(() => {
     try {
       const raw = localStorage.getItem(getStorageKey());
@@ -246,20 +341,85 @@ export const DisplaySettingsProvider: React.FC<{ children: React.ReactNode }> = 
       applySettingsToDocument(DEFAULT_DISPLAY_SETTINGS);
     }
   }, []);
-
+useEffect(() => {
+  loadTenantTimeSettings();
+}, [loadTenantTimeSettings]);
   const previewSettings = useCallback((next: DisplaySettings) => {
     const safe = normaliseSettings(next);
     setSettings(safe);
     applySettingsToDocument(safe);
   }, []);
 
-  const saveSettings = useCallback((next: DisplaySettings) => {
+const saveSettings = useCallback(
+  async (next: DisplaySettings): Promise<boolean> => {
     const safe = normaliseSettings(next);
-    localStorage.setItem(getStorageKey(), JSON.stringify(safe));
-    localStorage.setItem('erp:navigation-layout', safe.navigationLayout);
-    setSettings(safe);
-    applySettingsToDocument(safe);
-  }, []);
+
+    try {
+     const token = getAuthToken();
+    if (!token) {
+  console.error(
+    'Display settings cannot be saved because the login token is unavailable.'
+  );
+  return false;
+}
+
+      const response = await fetch(
+        `${getApiBaseUrl()}/yenerpapi/display-settings/`,
+        {
+          method: 'PUT',
+
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            timezone: safe.timezone,
+            date_format: safe.dateFormat,
+            time_format: safe.timeFormat,
+            show_seconds: safe.showSeconds,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => null);
+
+        console.error(
+          'Display settings save failed:',
+          errorData
+        );
+
+        return false;
+      }
+
+      localStorage.setItem(
+        getStorageKey(),
+        JSON.stringify(safe)
+      );
+
+      localStorage.setItem(
+        'erp:navigation-layout',
+        safe.navigationLayout
+      );
+
+      setSettings(safe);
+      applySettingsToDocument(safe);
+
+      return true;
+    } catch (error) {
+      console.error(
+        'Failed to save display settings:',
+        error
+      );
+
+      return false;
+    }
+  },
+  []
+);
 
   const resetSettings = useCallback(() => {
     localStorage.removeItem(getStorageKey());
