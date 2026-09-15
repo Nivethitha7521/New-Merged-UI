@@ -47,7 +47,8 @@ import {
 } from '../Features/vehicleSlice';
 import ImportResultDialog, { ImportResultData } from '@/app/Components/ImportResultDialog';
 import { Vehicle } from '../Models/vehicleModel';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ImportMode = 'import' | 'merge' | 'replace';
@@ -452,7 +453,10 @@ className="purchase-reference-search location-master-search vehicle-master-searc
 <Box className="purchase-reference-actions location-master-actions vehicle-master-actions">
       {!showDeactivated && (
       <>
-        <Button
+       <PermissionButton
+          app="masteradmin"
+          module="vehicle"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={<AddIcon />}
@@ -461,9 +465,12 @@ className="purchase-reference-search location-master-search vehicle-master-searc
           className="purchase-reference-action-button"
         >
           Add New
-        </Button>
+        </PermissionButton>
 
-        <Button
+        <PermissionButton
+          app="masteradmin"
+          module="vehicle"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={
@@ -476,7 +483,7 @@ className="purchase-reference-search location-master-search vehicle-master-searc
           className="purchase-reference-action-button"
         >
           {isImporting ? 'Importing...' : 'Import'}
-        </Button>
+      </PermissionButton>
 
         <Button
           type="button"
@@ -500,7 +507,10 @@ className="purchase-reference-search location-master-search vehicle-master-searc
           Sample
         </Button>
 
-        <Button
+       <PermissionButton
+          app="masteradmin"
+          module="vehicle"
+          action="edit"
           type="button"
           variant="outlined"
           startIcon={<UndoIcon />}
@@ -509,7 +519,7 @@ className="purchase-reference-search location-master-search vehicle-master-searc
           className="purchase-reference-action-button"
         >
           Rollback
-        </Button>
+       </PermissionButton>
       </>
     )}
 
@@ -709,39 +719,40 @@ className="purchase-reference-search location-master-search vehicle-master-searc
                  <td style={{ textAlign: 'center' }}>
   <Box className="purchase-master-actions">
     {showDeactivated ? (
-      <Tooltip title="Activate vehicle" arrow>
-        <IconButton
-          type="button"
-          onClick={() => handleActivate(vehicle)}
-          className="purchase-master-action-button is-activate"
-          aria-label="Activate vehicle"
-        >
-          <RefreshIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+<PermissionIconButton
+        app="masteradmin"
+        module="vehicle"
+        action="edit"
+        rollback
+        tooltip="Activate vehicle"
+        onClick={() => handleActivate(vehicle)}
+        icon={<RefreshIcon fontSize="small" />}
+        className="purchase-master-action-button is-activate"
+       ariaLabel="Activate vehicle"
+      />
     ) : (
       <>
-        <Tooltip title="Edit vehicle" arrow>
-          <IconButton
-            type="button"
-            onClick={() => handleEdit(vehicle)}
-            className="purchase-master-action-button is-edit"
-            aria-label="Edit vehicle"
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+ <PermissionIconButton
+          app="masteradmin"
+          module="vehicle"
+          action="edit"
+          tooltip="Edit vehicle"
+          onClick={() => handleEdit(vehicle)}
+          icon={<EditIcon fontSize="small" />}
+          className="purchase-master-action-button is-edit"
+         ariaLabel="Edit vehicle"
+        />
 
-        <Tooltip title="Deactivate vehicle" arrow>
-          <IconButton
-            type="button"
-            onClick={() => handleDeactivate(vehicle)}
-            className="purchase-master-action-button is-delete"
-            aria-label="Deactivate vehicle"
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <PermissionIconButton
+          app="masteradmin"
+          module="vehicle"
+          action="delete"
+          tooltip="Deactivate vehicle"
+          onClick={() => handleDeactivate(vehicle)}
+          icon={<DeleteIcon fontSize="small" />}
+          className="purchase-master-action-button is-delete"
+          ariaLabel="Deactivate vehicle"
+        />
       </>
     )}
   </Box>

@@ -22,6 +22,8 @@ import {
 } from "../Locations/Features/locationSlice";
 import { Location } from "../Locations/Models/locationModels";
 import { AppDispatch, RootState } from "@/redux/store";
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import {
   Box,
   Typography,
@@ -531,7 +533,10 @@ const LocationMaster: React.FC = () => {
   <Box className="purchase-reference-actions location-master-actions">
     {!showDeactivated && (
       <>
-        <Button
+        <PermissionButton
+          app="masteradmin"
+          module="location"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={<AddIcon />}
@@ -540,9 +545,11 @@ const LocationMaster: React.FC = () => {
           className="purchase-reference-action-button"
         >
           Add New
-        </Button>
-
-        <Button
+        </PermissionButton>
+ <PermissionButton
+          app="masteradmin"
+          module="location"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={
@@ -557,7 +564,7 @@ const LocationMaster: React.FC = () => {
           className="purchase-reference-action-button"
         >
           {isImporting ? "Importing..." : "Import"}
-        </Button>
+       </PermissionButton>
 
         <Button
           type="button"
@@ -581,7 +588,10 @@ const LocationMaster: React.FC = () => {
           Sample
         </Button>
 
-        <Button
+      <PermissionButton
+          app="masteradmin"
+          module="location"
+          action="edit"
           type="button"
           variant="outlined"
           startIcon={<UndoIcon />}
@@ -590,7 +600,7 @@ const LocationMaster: React.FC = () => {
           className="purchase-reference-action-button"
         >
           Rollback
-        </Button>
+        </PermissionButton>
       </>
     )}
 
@@ -882,7 +892,7 @@ const LocationMaster: React.FC = () => {
         result={importResult}
         moduleName="Location"
       />
-
+<ModuleVisibilityGuard app="masteradmin" module="location">
 <Box className="master-admin-table-area">
   <LocationTableComponent
     filteredTypes={locations}
@@ -903,7 +913,7 @@ const LocationMaster: React.FC = () => {
     setSearchValue={setSearchValue}
   />
 </Box>
-
+</ModuleVisibilityGuard>
       {/* ── Column filter popover ───────────────────────────────────────── */}
       <Popover
         id={id}

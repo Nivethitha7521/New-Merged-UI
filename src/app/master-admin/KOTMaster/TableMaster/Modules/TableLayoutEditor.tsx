@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import { updateLayoutPositions } from '../Features/tableSlice';
 import { AppDispatch } from '../../../../../redux/store';
 import { TablePosition } from "../Models/tableModels";
-
+import { usePermissions } from '@/hooks/usePermissions';
 interface TableLayoutEditorPageProps {
   area: any;
   branchId: string;
@@ -33,7 +33,9 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
   onClose,
   onSaveSuccess,
 }) => {
+  const { hasPermission } = usePermissions();
   const dispatch = useDispatch<AppDispatch>();
+  const canEditLayout = hasPermission('masteradmin', 'tablemaster', 'edit');
   const [layoutTables, setLayoutTables] = useState<TablePosition[]>(initialTables);
   const [draggedTable, setDraggedTable] = useState<TablePosition | null>(null);
   // store pointer offset within the dragged element
@@ -213,14 +215,15 @@ const TableLayoutEditorPage: React.FC<TableLayoutEditorPageProps> = ({
           </Box>
         </Box>
         
-        <button 
-          className='btn-primary kot-layout-editor-action' 
-          color="secondary" 
-          onClick={handleResetPositions}
-          disabled={isSubmitting}
-        >
-          Reset Positions
-        </button>
+ {canEditLayout && (
+            <button
+            className='btn-primary kot-layout-editor-action'
+              onClick={handleUpdateLayout}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <CircularProgress size={24} /> : 'Save Layout'}
+            </button>
+          )}
       </Box>
 
       {/* Canvas Area */}

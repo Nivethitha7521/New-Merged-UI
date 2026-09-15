@@ -72,6 +72,7 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import ItemSearchAutocomplete from './Component/ItemSearch';
 import StockUpdateLogsDialog from './Component/StockUpdateLogsPage';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 // Add the TypeScript declaration for autoTable (if necessary)
 declare module 'jspdf' {
   interface jsPDF {
@@ -733,7 +734,7 @@ const handlePageChange = (newPage: number) => {
         order.randomId.toString(),
         order.vendorName.toString(),
         totalItemsQuantity.toString(),
-        order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : '',
+        order.orderDate ? formatDate(new Date(order.orderDate)) : '',
         finalAmount.toFixed(2).toString(),
       ];
     }).filter(row => row !== null);
@@ -810,7 +811,7 @@ const handlePageChange = (newPage: number) => {
         order.randomId,
         order.vendorName,
         totalItemsQuantity,
-        order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : '',
+        order.orderDate ? formatDate(new Date(order.orderDate)) : '',
         finalAmount.toFixed(2)
       ].join(','); // Join each value with a comma to create a CSV row
     }).filter(row => row !== null).join('\n'); // Filter out null rows and join with newline
@@ -1589,8 +1590,8 @@ return (
                         <TableCell className="table-number-right">{item.befTaxDiscount || 0}</TableCell>
                         <TableCell className="table-number-right">{item.afTaxDiscount || 0}</TableCell>
                         <TableCell className="table-number-right">{item.taxPercentage || 0}</TableCell>
-                        <TableCell className="table-number-right">{(item.pendingTotalPrice || 0).toFixed(2)}</TableCell>
-                        <TableCell className="table-number-right">{(item.pendingFinalPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell className="table-number-right">{formatCurrency(item.pendingTotalPrice)}</TableCell>
+                        <TableCell className="table-number-right">{formatCurrency(item.pendingFinalPrice)}</TableCell>
                       </TableRow>
                     ))
                   )}
@@ -1598,14 +1599,14 @@ return (
                     <TableCell colSpan={11} align="right">
                       <strong>Item-wise Discount:</strong>
                     </TableCell>
-                    <TableCell className="table-number-right">{(pendingDiscountAmount - overallDiscount || 0).toFixed(2)}</TableCell>
+                    <TableCell className="table-number-right">{formatCurrency(pendingDiscountAmount - overallDiscount)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={11} align="right">
                       <strong>Freight Charges:</strong>
                     </TableCell>
                     <TableCell className="table-number-right">
-                      {(selectedOrder?.totalFreightAmount || 0).toFixed(2)}
+                      {formatCurrency(selectedOrder?.totalFreightAmount)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -1613,7 +1614,7 @@ return (
                       <strong>Freight Tax:</strong>
                     </TableCell>
                     <TableCell className="table-number-right">
-                      {(selectedOrder?.totalFreightTaxAmount || 0).toFixed(2)}
+                      {formatCurrency(selectedOrder?.totalFreightTaxAmount)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -1626,7 +1627,7 @@ return (
                     <TableCell colSpan={11} align="right">
                       <strong>Total Discount:</strong>
                     </TableCell>
-                    <TableCell className="table-number-right">{(pendingDiscountAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell className="table-number-right">{formatCurrency(pendingDiscountAmount)}</TableCell>
                   </TableRow>
                   {Object.entries(taxDetails).map(([key, tax]) => (
                     <TableRow key={key}>
@@ -1634,13 +1635,13 @@ return (
                       <TableCell>
                         <strong>{tax.type} ({tax.percentage}%):</strong>
                       </TableCell>
-                      <TableCell className="table-number-right">{(tax.amount || 0).toFixed(2)}</TableCell>
+                      <TableCell className="table-number-right">{formatCurrency(tax.amount)}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow>
                     <TableCell colSpan={10}></TableCell>
                     <TableCell><strong>Order Amount:</strong></TableCell>
-                    <TableCell className="table-number-right">{(pendingOrderAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell className="table-number-right">{formatCurrency(pendingOrderAmount)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -1797,7 +1798,7 @@ return (
     {order.randomId || '-'}
   </span>
 </TableCell>
-                      <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
+                      <TableCell>{order.orderDate ? formatDate(new Date(order.orderDate)) : ""}</TableCell>
                     <TableCell className="table-text-left">
   <Box className="purchase-master-name-cell">
     <span className="purchase-master-avatar">
@@ -1839,7 +1840,7 @@ return (
                         ))}
                       </TableCell>
                       <TableCell className="table-number-right">{totalQuantity}</TableCell>
-                      <TableCell className="table-number-right">{order.pendingOrderAmount.toFixed(2)}</TableCell>
+                      <TableCell className="table-number-right">{formatCurrency(order.pendingOrderAmount)}</TableCell>
                     <TableCell className="table-text-left">
   <span className="purchase-master-status-pill is-pending">
     {order.poStatus || 'Pending'}

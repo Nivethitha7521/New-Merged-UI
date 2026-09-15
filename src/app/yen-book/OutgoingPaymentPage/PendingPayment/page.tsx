@@ -63,6 +63,7 @@ import { ClearIcon } from '@mui/x-date-pickers/icons';
 import { usePermissions } from "@/hooks/usePermissions";
 import { VendorSearch } from '@/Models/vendor';
 import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 
 const PendingPaymentComponent = React.memo(() => {
@@ -318,7 +319,7 @@ const PendingPaymentComponent = React.memo(() => {
         outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo,
-        outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
         outgoing.payableAmount,
         outgoing.totalPayableAmount || '',
       ];
@@ -373,7 +374,7 @@ const PendingPaymentComponent = React.memo(() => {
         randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo,
-        outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
         remainingAmount.toFixed(2),
         finalAmount.toFixed(2),
       ];
@@ -472,7 +473,7 @@ const PendingPaymentComponent = React.memo(() => {
           `PO No: ${outgoing.poRandomId}\n` +
           `GRN No: ${outgoing.grnRandomId}\n` +
           `AP No: ${outgoing.apRandomId}\n` +
-          `Date: ${outgoing.createdDate ? format(new Date(outgoing.createdDate), 'dd-MM-yyyy') : ''}`
+          `Date: ${outgoing.createdDate ? formatDate(new Date(outgoing.createdDate)) : ''}`
         ]
       ];
 
@@ -517,7 +518,7 @@ const PendingPaymentComponent = React.memo(() => {
 
           return [
             outgoing.invoiceNo || 'N/A',  // Invoice No
-            outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',  // Invoice Date
+            outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',  // Invoice Date
             outgoing.vendorName || 'N/A',  // Vendor Name
             item.itemName,
             `${item.purchasetaxName}%`,  // Tax Details
@@ -529,7 +530,7 @@ const PendingPaymentComponent = React.memo(() => {
         : [
           [
             outgoing.invoiceNo || '',  // Invoice No
-            outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',  // Invoice Date
+            outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',  // Invoice Date
             outgoing.vendorName || 'N/A',  // Vendor Name
             'N/A',
             'N/A',  // Tax Details (No items, no tax)
@@ -844,12 +845,12 @@ const PendingPaymentComponent = React.memo(() => {
                           <TableCell>{index + 1}</TableCell>
                           <TableCell>{payment.vendorName}</TableCell>
                           <TableCell>{payment.invoiceNo || 'N/A'}</TableCell>
-                          <TableCell>{payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
-                          <TableCell>{totalAmount.toFixed(2)}</TableCell>
+                          <TableCell>{payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : 'N/A'}</TableCell>
+                          <TableCell>{formatCurrency(totalAmount)}</TableCell>
                           <TableCell>{totalPaid.toFixed(2)}</TableCell>
-                          <TableCell>{payment.paymentDate ? format(new Date(payment.paymentDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                          <TableCell>{payment.paymentDate ? formatDate(new Date(payment.paymentDate)) : 'N/A'}</TableCell>
                           <TableCell>{payment.discountDetails?.toFixed(2) || '0.00'}</TableCell>
-                          <TableCell>{(payment.totalPayableAmount || 0).toFixed(2)}</TableCell>
+                          <TableCell>{formatCurrency(payment.totalPayableAmount)}</TableCell>
                           <TableCell>
                             <Tooltip title='Pay'>
                               <IconButton

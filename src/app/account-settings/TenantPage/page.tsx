@@ -34,7 +34,7 @@ const [snackbar, setSnackbar] = useState({
 });
 
 
-  const API = "http://127.0.0.1:8000/yenerpapi";
+  const API = "http://127.0.0.1:8001/yenerpapi";
 
   // ✅ Fetch tenants
  const fetchTenants = async () => {

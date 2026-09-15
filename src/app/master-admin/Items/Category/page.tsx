@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert } from '@mui/material';
 import { AppDispatch, RootState } from '../../../../redux/store';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import MasterAdminMenu from '../page';
 import {
   activateCategory,
@@ -345,16 +346,18 @@ const CategoryComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <CategoryTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        // showDeactivated={showDeactivated}
-        // setShowDeactivated={setShowDeactivated}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-      />
+     <ModuleVisibilityGuard app="masteradmin" module="itemcategory">
+        <CategoryTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          // showDeactivated={showDeactivated}
+          // setShowDeactivated={setShowDeactivated}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+        />
+      </ModuleVisibilityGuard>
 
       <CategoryDialog
         open={dialogOpen !== 'none'}

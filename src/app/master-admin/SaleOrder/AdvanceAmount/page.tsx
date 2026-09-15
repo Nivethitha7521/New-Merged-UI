@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { AdvanceAmountDialog } from '../AdvanceAmount/Modules/AddAdvanceAmountDialog';
 import { AdvanceAmountTable } from '../AdvanceAmount/Modules/AdvanceAmountTableComponent';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 //import CashManagementPage from '../page';
 import {
   RootState,
@@ -343,19 +344,20 @@ const AdvanceAmountPage: React.FC = () => {
         /> */}
       </Box>
 
+<ModuleVisibilityGuard app="masteradmin" module="advanceamount">
+          <AdvanceAmountTable
+            data={showDeactivated ? deactivatedItems : tableRows}
+            isDeactivatedView={showDeactivated}
+            onEdit={handleEdit}
+            // onDeactivate={handleDeactivate}
+            //  onActivate={handleActivate}
 
-        <AdvanceAmountTable
-          data={showDeactivated ? deactivatedItems : tableRows}
-          isDeactivatedView={showDeactivated}
-          onEdit={handleEdit}
-          // onDeactivate={handleDeactivate}
-          //  onActivate={handleActivate}
-
-          // === NEW PROPS ===
-          onApplyAll={handleApplyAll}
-          applyingAll={applyingAll}
-          allBranches={allBranch}
-        />
+            // === NEW PROPS ===
+            onApplyAll={handleApplyAll}
+            applyingAll={applyingAll}
+            allBranches={allBranch}
+          />
+        </ModuleVisibilityGuard>
      
 
       <AdvanceAmountDialog

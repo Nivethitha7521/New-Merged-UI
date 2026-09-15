@@ -325,13 +325,13 @@ const FilterBar: React.FC<FilterBarProps> = ({
   };
 
   return (
-    <div className="w-full min-w-0 flex flex-nowrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[100] overflow-x-auto no-scrollbar">      {/* comment this part because remove the filter 4 8 1 */}
+    <div className="inventory-filter-toolbar inventory-filter-toolbar-row w-full min-w-0 flex flex-nowrap items-center gap-1.5 relative z-[100] overflow-x-auto no-scrollbar">      {/* comment this part because remove the filter 4 8 1 */}
       {/* Label */}
       {/* <div className="hidden sm:flex h-[34px] items-center px-2.5 rounded-[8px] bg-white border border-brand-200 text-[11px] font-extrabold text-brand-700 whitespace-nowrap shrink-0">
         {cascadeSourceKey ? `Filters · ${cascadeSourceLabel}` : "Filters"}
       </div> */}
 
-        <div className="w-[180px] shrink-0">
+        <div className="inventory-filter-field w-[180px] shrink-0">
           <CollapsibleFilter
             title="Location"
             options={warehouseOptions}
@@ -354,7 +354,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           />
         </div>
 
-        <div className="w-[180px] shrink-0">
+        <div className="inventory-filter-field w-[180px] shrink-0">
           <CollapsibleFilter
             title="Category"
             options={filterOptions.categories.map((n) => ({ label: n, value: n }))}
@@ -369,7 +369,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           />
         </div>
 
-        <div className="w-[180px] shrink-0">
+        <div className="inventory-filter-field w-[180px] shrink-0">
           <CollapsibleFilter
             title="Sub Category"
             options={filterOptions.subcategories.map((n) => ({ label: n, value: n }))}
@@ -384,7 +384,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           />
         </div>
 
-        <div className="w-[180px] shrink-0">
+        <div className="inventory-filter-field w-[180px] shrink-0">
           <CollapsibleFilter
             title="Item Group"
             options={filterOptions.itemNames.map((n) => ({ label: n, value: n }))}
@@ -399,7 +399,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           />
         </div>
 
-        <div className="w-[180px] shrink-0">
+        <div className="inventory-filter-field w-[180px] shrink-0">
           <CollapsibleFilter
             title="Item Name"
             options={filterOptions.varianceNames.map((n) => ({ label: n, value: n }))}
@@ -415,7 +415,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         </div>
 
         {/* Buttons section to match Outlet UI exactly */}
-        <div className="flex items-center gap-1.5 ml-auto">
+        <div className="inventory-filter-actions flex items-center gap-1.5 ml-auto">
           <ActionBtn
             onClick={onClearAll}
             disabled={disabled || !isAnyFilterActive}

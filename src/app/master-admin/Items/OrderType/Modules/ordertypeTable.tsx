@@ -17,6 +17,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RefreshIcon from '@mui/icons-material/RestoreRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import { OrderType } from '../Models/ordertypeModels';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface OrderTypeTableProps {
   handleOpen: () => void;
   handleEdit: (orderType: OrderType) => void;
@@ -105,9 +106,16 @@ const [searchValue, setSearchValue] = useState('');
           >
             {!showDeactivated && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+               <PermissionIconButton
+                  app="masteradmin"
+                  module="ordertype"
+                  action="add"
+                  tooltip="Add"
+                  onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
+                  className="icon-action-button"
+                  ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
             )}
@@ -157,36 +165,43 @@ const [searchValue, setSearchValue] = useState('');
                     <td className="item-master-actions-cell">
                       <div className="flex justify-center gap-1">
                         {showDeactivated ? (
-                          <IconButton
+                         <PermissionIconButton
+                            app="masteradmin"
+                            module="ordertype"
+                            action="edit"
+                            rollback
+                            tooltip="Activate"
                             onClick={() => handleActivate(orderType)}
+                            icon={<RefreshIcon />}
                             className="purchase-master-action-button is-activate"
-                            title="Activate"
-                            size="small"
-                          >
-                           <RefreshIcon />
-                          </IconButton>
+                          ariaLabel="Activate"
+                          />
                         ) : (
                           <>
                             {!orderType.editStatus === false && (
-                              <IconButton
+                              <PermissionIconButton
+                                app="masteradmin"
+                                module="ordertype"
+                                action="edit"
+                                tooltip="Edit"
                                 onClick={() => handleEdit(orderType)}
+                                 icon={<EditIcon />}
                                 className="purchase-master-action-button is-edit"
-                                title="Edit"
-                                size="small"
-                              >
-                             <EditIcon />
-                              </IconButton>
+                                 ariaLabel="Edit"
+                             />
                             )}
 
                             {!orderType.editStatus === false && (
-                              <IconButton
+                               <PermissionIconButton
+                                app="masteradmin"
+                                module="ordertype"
+                                action="delete"
+                                tooltip="Deactivate"
                                 onClick={() => handleDeactivate(orderType)}
-                               className="purchase-master-action-button is-delete"
-                                title="Deactivate"
-                                size="small"
-                              >
-                                <DeleteIcon />
-                              </IconButton>
+                               icon={<DeleteIcon />}
+                                className="purchase-master-action-button is-delete"
+                                ariaLabel="Deactivate"
+                              />
                             )}
                           </>
                         )}

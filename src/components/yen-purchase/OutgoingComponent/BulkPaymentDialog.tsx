@@ -22,6 +22,7 @@ import {
 } from '@/features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import type { SelectChangeEvent } from '@mui/material/Select';
 import { fetchActiveAdvancesMultipleVendor, selectAdvances } from '@/features/yen-purchase/Outgoing/advancePaymentSlice';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface PaymentDialogProps {
   open: boolean;
@@ -147,11 +148,11 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
         
         let message = '';
         if (hasDebit && hasAdvance) {
-          message = `This vendor has ${vendorDebits.length} debit note(s) (₹${totalDebitAmount.toLocaleString('en-IN')}) and ${vendorAdvances.length} advance payment(s) (₹${totalAdvanceAmount.toLocaleString('en-IN')}) available. Please select which ones to apply.`;
+          message = `This vendor has ${vendorDebits.length} debit note(s) (${formatCurrency(totalDebitAmount)}) and ${vendorAdvances.length} advance payment(s) (${formatCurrency(totalAdvanceAmount)}) available. Please select which ones to apply.`;
         } else if (hasDebit) {
-          message = `This vendor has ${vendorDebits.length} debit note(s) totaling ₹${totalDebitAmount.toLocaleString('en-IN')} available. Select which ones to apply to reduce payment amount.`;
+          message = `This vendor has ${vendorDebits.length} debit note(s) totaling ${formatCurrency(totalDebitAmount)} available. Select which ones to apply to reduce payment amount.`;
         } else if (hasAdvance) {
-          message = `This vendor has ${vendorAdvances.length} advance payment(s) totaling ₹${totalAdvanceAmount.toLocaleString('en-IN')} available. Select which ones to apply to reduce payment amount.`;
+          message = `This vendor has ${vendorAdvances.length} advance payment(s) totaling ${formatCurrency(totalAdvanceAmount)} available. Select which ones to apply to reduce payment amount.`;
         }
         
         newWarnings[vendorName] = {
@@ -305,7 +306,7 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
     if (isNaN(numAmount)) return 'Invalid amount format';
     if (numAmount < 0) return 'Amount cannot be negative';
     if (numAmount > maxAllowed) {
-      return `Payment amount cannot exceed ₹${maxAllowed.toFixed(2)} (after debits/advances)`;
+      return `Payment amount cannot exceed ${formatCurrency(maxAllowed)} (after debits/advances)`;
     }
 
     return '';
@@ -824,27 +825,27 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
 
                 <Box display="flex" gap={2} sx={{ mb: 3 }} flexWrap="wrap">
                   <Chip
-                    label={`Total Payable: ₹${vendorTotal.toLocaleString('en-IN')}`}
+                    label={`Total Payable: ${formatCurrency(vendorTotal)}`}
                     color="default"
                     variant="outlined"
                   />
                   {vendorDebitAmount > 0 && (
                     <Chip
-                      label={`Debit Applied: ₹${vendorDebitAmount.toLocaleString('en-IN')}`}
+                      label={`Debit Applied: ${formatCurrency(vendorDebitAmount)}`}
                       color="primary"
                       icon={<InfoIcon />}
                     />
                   )}
                   {vendorAdvanceAmount > 0 && (
                     <Chip
-                      label={`Advance Applied: ₹${vendorAdvanceAmount.toLocaleString('en-IN')}`}
+                      label={`Advance Applied: ${formatCurrency(vendorAdvanceAmount)}`}
                       color="secondary"
                       icon={<InfoIcon />}
                     />
                   )}
                   {vendorAdvanceTotal > 0 && (
                     <Chip
-                      label={`Available Advance: ₹${vendorAdvanceTotal.toLocaleString('en-IN')}`}
+                      label={`Available Advance: ${formatCurrency(vendorAdvanceTotal)}`}
                       color="success"
                       variant="outlined"
                     />
@@ -871,7 +872,7 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
                             return debit ? (
                               <Chip
                                 key={value}
-                                label={`${debit.randomId} (₹${(debit.pendingAmount || debit.finalAmount).toLocaleString('en-IN')})`}
+                                label={`${debit.randomId} (${formatCurrency((debit.pendingAmount || debit.finalAmount))})`}
                                 size="small"
                               />
                             ) : null;
@@ -885,8 +886,8 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
                             checked={(selectedDebitNotes[vendorName] || []).includes(debit.randomId)}
                           />
                           <ListItemText
-                            primary={`${debit.randomId} - ₹${(debit.pendingAmount || debit.finalAmount).toLocaleString('en-IN')}`}
-                            secondary={`Pending: ₹${(debit.pendingAmount || debit.finalAmount).toLocaleString('en-IN')} | Status: ${debit.status}`}
+                            primary={`${debit.randomId} - ${formatCurrency((debit.pendingAmount || debit.finalAmount))}`}
+                            secondary={`Pending: ${formatCurrency((debit.pendingAmount || debit.finalAmount))} | Status: ${debit.status}`}
                           />
                         </MenuItem>
                       ))}
@@ -917,7 +918,7 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
                             return advance ? (
                               <Chip
                                 key={value}
-                                label={`Advance (₹${(advance.pendingAmount || 0).toLocaleString('en-IN')})`}
+                                label={`Advance (${formatCurrency((advance.pendingAmount || 0))})`}
                                 size="small"
                                 color="secondary"
                               />
@@ -932,8 +933,8 @@ const BulkPaymentDialog: React.FC<PaymentDialogProps> = ({
                             checked={(selectedAdvancePayments[vendorName] || []).includes(advance.randomId || advance.advanceId || '')}
                           />
                           <ListItemText
-                            primary={`Advance - ₹${(advance.pendingAmount || 0).toLocaleString('en-IN')}`}
-                            secondary={`Pending: ₹${(advance.pendingAmount || 0).toLocaleString('en-IN')} | Status: ${advance.status}`}
+                            primary={`Advance - ${formatCurrency((advance.pendingAmount || 0))}`}
+                            secondary={`Pending: ${formatCurrency((advance.pendingAmount || 0))} | Status: ${advance.status}`}
                           />
                         </MenuItem>
                       ))}

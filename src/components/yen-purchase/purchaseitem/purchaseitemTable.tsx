@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 
 import { format } from 'date-fns';
+import { formatDate } from '@/utilities/formatters';
 
 interface PurchaseTableProps {
   items: any[];
@@ -163,13 +164,13 @@ const PurchaseTable: React.FC<PurchaseTableProps> = ({
 
                   <TableCell>
                     {item.createdDate
-                      ? format(item.createdDate, 'dd-MM-yyyy')
+                      ? formatDate(item.createdDate)
                       : '-'}
                   </TableCell>
 
                   <TableCell>
                     {item.lastUpdatedDate
-                      ? format(item.lastUpdatedDate, 'dd-MM-yyyy')
+                      ? formatDate(item.lastUpdatedDate)
                       : '-'}
                   </TableCell>
 

@@ -1,5 +1,3 @@
-
-
 'use client';
 import React, { useState, useEffect, ChangeEvent, useMemo, Suspense } from 'react';
 import {
@@ -54,7 +52,7 @@ import ItemMaster from '../add/style';
 import CloseConfirmationDialog from '@/app/Components/Dialogs/CloseConfirmationDialog';
 import EditConfirmationDialog from '@/app/Components/Dialogs/EditConfirmationDialog';
 import { API_BASE_URL } from '../../../../../API_URL';
-
+import { usePermissions } from '@/hooks/usePermissions';
 
 // Interfaces
 interface subCategory {
@@ -80,8 +78,14 @@ function EditItemContent({
   const dispatch: AppDispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
+ const { hasPermission } = usePermissions();
+  const canEditItem = hasPermission('masteradmin', 'item', 'edit');
 
-
+  useEffect(() => {
+    if (!canEditItem) {
+      router.replace('/master-admin/Items');
+    }
+  }, [canEditItem, router]);
 
   // Add state to hold the fetched item
   const [fetchedItem, setFetchedItem] = useState<Item | null>(null);
@@ -1563,6 +1567,9 @@ function EditItemContent({
     return `${datePart} | ${timePart}`;
   };
 
+  if (!canEditItem) {
+    return null;
+  }
 
   return (
    <Box className="item-master-form-page">
@@ -3794,4 +3801,3 @@ const EditItemPage = () => {
 };
 
 export default EditItemPage;
-

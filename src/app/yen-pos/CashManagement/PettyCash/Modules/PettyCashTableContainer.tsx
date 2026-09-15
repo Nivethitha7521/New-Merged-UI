@@ -9,7 +9,9 @@ import {
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 import { PettyCash } from '../Models/pettycashModels';
-
+import { usePermissions } from '@/hooks/usePermissions';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
+ 
 
 interface PettyCashTableProps {
   data: PettyCash[];
@@ -35,7 +37,8 @@ export const PettyCashTable: React.FC<PettyCashTableProps> = ({
 
 
   const [applyAllValue, setApplyAllValue] = useState<string>('');
-
+const { hasPermission } = usePermissions();
+  const canEdit = hasPermission('pos', 'petty_cash', 'edit');
   const handleApplyAll = async () => {
     const trimmed = applyAllValue.trim();
     if (!trimmed || isNaN(Number(trimmed))) {
@@ -84,14 +87,14 @@ export const PettyCashTable: React.FC<PettyCashTableProps> = ({
               }}
               inputProps={{ min: 0, step: '0.01' }}
             
-              disabled={applyingAll}
+             disabled={applyingAll || !canEdit}
              className="custom-textfield yen-pos-apply-all-input"
             />
            <button
               type="button"
               className="item-master-price-button"
               onClick={() => void handleApplyAll()}
-              disabled={!applyAllValue.trim() || applyingAll}
+             disabled={!applyAllValue.trim() || applyingAll || !canEdit}
             >
               {applyingAll && <CircularProgress size={12} />}
               {applyingAll ? 'Applying...' : 'Apply'}
@@ -123,23 +126,28 @@ export const PettyCashTable: React.FC<PettyCashTableProps> = ({
              <td className="item-master-actions-cell">
   <div>
     {isDeactivatedView ? (
-      <IconButton
+     <PermissionIconButton
+        app="pos"
+        module="petty_cash"
+        action="edit"
+        rollback
+        tooltip="Activate"
         onClick={() => onActivate(cash)}
+        icon={<RestoreRoundedIcon />}
         className="purchase-master-action-button is-activate"
-        title="Activate"
-        size="small"
-      >
-        <RestoreRoundedIcon />
-      </IconButton>
+        ariaLabel="Activate"
+      />
     ) : (
-      <IconButton
+      <PermissionIconButton
+        app="pos"
+        module="petty_cash"
+        action="edit"
+        tooltip="Edit"
         onClick={() => onEdit(cash)}
+        icon={<EditOutlinedIcon />}
         className="purchase-master-action-button is-edit"
-        title="Edit"
-        size="small"
-      >
-        <EditOutlinedIcon />
-      </IconButton>
+       ariaLabel="Edit"
+      />
     )}
   </div>
 </td>

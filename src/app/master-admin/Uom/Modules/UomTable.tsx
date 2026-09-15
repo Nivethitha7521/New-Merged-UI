@@ -14,6 +14,7 @@ import RefreshIcon from "@mui/icons-material/RestoreRounded";
 
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import {
   UomState,
   getDisplayFormat,
@@ -46,46 +47,48 @@ const RowActions = memo(
   }) => {
     if (showDeactivated) {
       return (
-        <Tooltip title="Activate UOM" arrow>
-          <IconButton
-            type="button"
-            onClick={() => handleActivate(id)}
-            className="purchase-master-action-button is-activate"
-            aria-label="Activate UOM"
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+      <PermissionIconButton
+          app="masteradmin"
+          module="uom"
+          action="edit"
+          rollback
+          tooltip="Activate UOM"
+          onClick={() => handleActivate(id)}
+          icon={<RefreshIcon fontSize="small" />}
+          className="purchase-master-action-button is-activate"
+          ariaLabel="Activate UOM"
+        />
       );
     }
-
+ // `canEdit` here is the record's own business flag (editStatus), unrelated
+ // to role permissions — PermissionIconButton adds the permission check on top.
     if (!canEdit) {
       return null;
     }
 
     return (
       <>
-        <Tooltip title="Edit UOM" arrow>
-          <IconButton
-            type="button"
-            onClick={() => handleEdit(id)}
-            className="purchase-master-action-button is-edit"
-            aria-label="Edit UOM"
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+ <PermissionIconButton
+          app="masteradmin"
+          module="uom"
+          action="edit"
+          tooltip="Edit UOM"
+          onClick={() => handleEdit(id)}
+          icon={<EditIcon fontSize="small" />}
+          className="purchase-master-action-button is-edit"
+          ariaLabel="Edit UOM"
+        />
 
-        <Tooltip title="Deactivate UOM" arrow>
-          <IconButton
-            type="button"
-            onClick={() => handleDeactivate(id)}
-            className="purchase-master-action-button is-delete"
-            aria-label="Deactivate UOM"
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <PermissionIconButton
+          app="masteradmin"
+          module="uom"
+          action="delete"
+          tooltip="Deactivate UOM"
+          onClick={() => handleDeactivate(id)}
+          icon={<DeleteIcon fontSize="small" />}
+          className="purchase-master-action-button is-delete"
+          ariaLabel="Deactivate UOM"
+        />
       </>
     );
   }

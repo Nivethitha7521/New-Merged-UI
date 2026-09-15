@@ -10,6 +10,7 @@ import {
   RestaurantMenuOutlined, KitchenOutlined,
 } from '@mui/icons-material';
 import './RecipeModuleSideMenu.css';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface RecipeModuleSideMenuProps {
   expanded: boolean;
@@ -18,12 +19,14 @@ interface RecipeModuleSideMenuProps {
 }
 
 const recipeModules = [
-  { text: 'Recipe', path: '/yen-recipie/RecipeManagement', icon: <RestaurantMenuOutlined /> },
-  { text: 'Store Kitchen Master', path: '/yen-recipie/StoreKitchenMaster', icon: <KitchenOutlined /> },
+  { text: 'Recipe', path: '/yen-recipie/RecipeManagement', icon: <RestaurantMenuOutlined />, permissionKey: 'recipe' },
+  { text: 'Store Kitchen Master', path: '/yen-recipie/StoreKitchenMaster', icon: <KitchenOutlined />, permissionKey: 'storekitchenmaster' },
 ];
 
 const RecipeModuleSideMenu: React.FC<RecipeModuleSideMenuProps> = ({ expanded, onToggle, onNavigate }) => {
   const pathname = usePathname();
+  const { isModuleVisible } = usePermissions();
+  const visibleRecipeModules = recipeModules.filter((module) => isModuleVisible('yenerp', module.permissionKey));
   const isActive = (path: string) => pathname === path || Boolean(pathname?.startsWith(`${path}/`));
 
   return (
@@ -51,7 +54,7 @@ const RecipeModuleSideMenu: React.FC<RecipeModuleSideMenuProps> = ({ expanded, o
       </Box>
 
       <List disablePadding className="recipe-module-list">
-        {recipeModules.map((module) => (
+        {visibleRecipeModules.map((module) => (
           <Tooltip key={module.path} title={!expanded ? module.text : ''} placement="right" arrow>
             <ListItem
               button

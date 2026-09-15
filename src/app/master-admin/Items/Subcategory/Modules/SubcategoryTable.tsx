@@ -4,6 +4,8 @@
 import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../../../../redux/store';
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import {
   Table,
   TableBody,
@@ -92,32 +94,39 @@ return (
       <td className="item-master-actions-cell">
         <div className="flex justify-center gap-1">
           {showDeactivated ? (
-            <IconButton
+           <PermissionIconButton
+              app="masteradmin"
+              module="itemsubcategory"
+              action="edit"
+              rollback
+              tooltip="Activate"
               onClick={() => onActivate(subCategory)}
-               className="purchase-master-action-button is-activate"
-              title="Activate"
-              size="small"
-            >
-             <RefreshIcon />
-           </IconButton>
+ icon={<RefreshIcon />}
+              className="purchase-master-action-button is-activate"
+              ariaLabel="Activate"
+            />
           ) : (
             <>
-              <IconButton
+              <PermissionIconButton
+                app="masteradmin"
+                module="itemsubcategory"
+                action="edit"
+                tooltip="Edit"
                 onClick={() => onEdit(subCategory)}
+                icon={<EditIcon />}
                 className="purchase-master-action-button is-edit"
-                title="Edit"
-                size="small"
-              >
-                 <EditIcon />
-              </IconButton>
-              <IconButton
+               ariaLabel="Edit"
+              />
+              <PermissionIconButton
+                app="masteradmin"
+                module="itemsubcategory"
+                action="delete"
+                tooltip="Deactivate"
                 onClick={() => onDeactivate(subCategory)}
-               className="purchase-master-action-button is-delete"
-                title="Deactivate"
-                size="small"
-              >
-               <DeleteIcon />
-              </IconButton>
+                icon={<DeleteIcon />}
+                className="purchase-master-action-button is-delete"
+                ariaLabel="Deactivate"
+              />
             </>
           )}
         </div>
@@ -356,32 +365,36 @@ return (
             {!showDeactivated && (
               <>
                 <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                  <IconButton
-                    color="primary"
+                 <PermissionIconButton
+                    app="masteradmin"
+                    module="itemsubcategory"
+                    action="add"
+                    tooltip="Add"
                     onClick={handleOpen}
+                     icon={<AddIcon className="icon-action-svg" />}
                     className="icon-action-button"
-                    title="Add"
+                   ariaLabel="Add"
                     disabled={isImporting}
-                  >
-                    <AddIcon className="icon-action-svg" />
-                  </IconButton>
+                />
                   <Typography className="icon-action-label">Add</Typography>
                 </div>
 
                 <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                  <IconButton
-                    color="primary"
+                   <PermissionIconButton
+                    app="masteradmin"
+                    module="itemsubcategory"
+                    action="add"
+                    tooltip="Import"
                     onClick={handleImportClick}
-                    className="icon-action-button"
-                    size="small"
-                    disabled={isImporting}
-                  >
-                    {isImporting ? (
+icon={isImporting ? (
                       <CircularProgress size={20} className="icon-action-svg" />
                     ) : (
                       <GetAppIcon className="icon-action-svg" />
                     )}
-                  </IconButton>
+                  className="icon-action-button"
+                    ariaLabel="Import"
+                    disabled={isImporting}
+                  />
                   <Typography className="icon-action-label">
                     {isImporting ? 'Importing...' : 'Import'}
                   </Typography>
@@ -414,15 +427,17 @@ return (
                 </div>
 
                 <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                  <IconButton
-                    color="secondary"
+                  <PermissionIconButton
+                    app="masteradmin"
+                    module="itemsubcategory"
+                    action="edit"
+                    tooltip="Rollback"
                     onClick={handleRollback}
+                    icon={<UndoIcon className="icon-action-svg" />}
                     className="icon-action-button"
-                    size="small"
+                   ariaLabel="Rollback"
                     disabled={isImporting}
-                  >
-                    <UndoIcon className="icon-action-svg" />
-                  </IconButton>
+                />
                   <Typography className="icon-action-label">Rollback</Typography>
                 </div>
               </>

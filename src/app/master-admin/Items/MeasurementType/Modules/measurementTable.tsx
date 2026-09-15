@@ -17,7 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { setSnackbarMessage, setSnackbarOpen, fetchMeasurementTypes } from "../Features/measurementSlice";
 import { MeasurementType } from "../Models/measurementTypeModels";
-
+import { usePermissions } from '@/hooks/usePermissions';
 interface MeasurementTypeTableProps {
   handleOpen: () => void;
   handleEdit: (measurementType: MeasurementType) => void;
@@ -41,7 +41,9 @@ const MeasurementTypeTable: React.FC<MeasurementTypeTableProps> = ({
     loading,
     error,
   } = useSelector((state: RootState) => state.measurementType);
-
+const { hasPermission } = usePermissions();
+  const canEdit = hasPermission('masteradmin', 'measurementtype', 'edit');
+  const canDelete = hasPermission('masteradmin', 'measurementtype', 'delete');
   const displayedMeasurementTypes = showDeactivated ? deactivatedItems : measurementTypes;
 
 
@@ -145,13 +147,15 @@ const MeasurementTypeTable: React.FC<MeasurementTypeTableProps> = ({
                     <td style={{ textAlign: "center" }}>{measurementType.measurementType}</td>
                     <td style={{ textAlign: "center" }}>
                       {showDeactivated ? (
-                        <button
-                          onClick={() => handleActivate(measurementType)}
-                          className="activate-btn"
-                          title="Activate"
-                        >
-                          <RefreshIcon />
-                        </button>
+                       canEdit && (
+                          <button
+                            onClick={() => handleActivate(measurementType)}
+                            className="activate-btn"
+                            title="Activate"
+                          >
+                            <RefreshIcon />
+                          </button>
+                        )
                       ) : (
                         <>
                           {/* <button
@@ -161,14 +165,16 @@ const MeasurementTypeTable: React.FC<MeasurementTypeTableProps> = ({
                           <EditIcon />
                         </button> */}
 
-                          <button
-                            onClick={() => handleDeactivate(measurementType)}
-                            style={{ marginLeft: "10px" }}
-                            className="deactivate-btn"
-                            title="Deactivate"
-                          >
-                            <DeleteIcon />
-                          </button>
+                       +                          {canDelete && (
+                            <button
+                              onClick={() => handleDeactivate(measurementType)}
+                              style={{ marginLeft: "10px" }}
+                              className="deactivate-btn"
+                              title="Deactivate"
+                            >
+                              <DeleteIcon />
+                            </button>
+                          )}
                         </>
                       )}
                     </td>

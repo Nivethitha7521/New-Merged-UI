@@ -51,12 +51,14 @@ import {
   setSnackbarMessage,
   setShowDeactivated,
 } from '../../KOTMaster/TableMaster/Features/tableSlice';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import { Branch, TableData } from '../../KOTMaster/TableMaster/Models/tableModels';
 import CloseConfirmationDialog from '../../../Components/Dialogs/CloseConfirmationDialog';
 import EditConfirmationDialog from '../../../Components/Dialogs/EditConfirmationDialog';
 import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/ActivateDeactivateConfirmationDialog';
 import TableLayoutEditorPage from '../TableMaster/Modules/TableLayoutEditor';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import AddBranchDialog from '../TableMaster/Modules/addDialog';
 import EditBranchDialog from '../TableMaster/Modules/editDialog';
 import styles from './TableMaster.module.css';
@@ -737,6 +739,7 @@ const TableMaster: React.FC = () => {
       )}
 
       {!layoutViewOpen && (
+        <ModuleVisibilityGuard app="masteradmin" module="tablemaster">
         <Box className="kot-master-page kot-table-master-page">
           <Box className="kot-table-master-content">
             <Box sx={{ minWidth: 0 }}>
@@ -806,7 +809,10 @@ const TableMaster: React.FC = () => {
 
             <Box className="kot-master-toolbar-actions">
               {!showDeactivated && (
-               <Button
+              <PermissionButton
+                  app="masteradmin"
+                  module="tablemaster"
+                  action="add"
                   type="button"
                   variant="outlined"
                   startIcon={<AddIcon />}
@@ -814,7 +820,7 @@ const TableMaster: React.FC = () => {
                   className="purchase-reference-action-button kot-master-action-button"
                 >
                   Add
-                </Button>
+               </PermissionButton>
               )}
 <Box className="purchase-reference-active-toggle kot-master-status-toggle">
                 <FormControlLabel
@@ -863,31 +869,39 @@ const TableMaster: React.FC = () => {
                    <Box className="kot-table-branch-actions">
                       {!showDeactivated && (
                         <>
-                        <button
-                            type="button"
+                      <PermissionIconButton
+                            app="masteradmin"
+                            module="tablemaster"
+                            action="edit"
+                            tooltip="Edit"
                             onClick={() => handleEdit(branch)}
+                            icon={<EditIcon />}
                             className="edit-btn kot-master-row-action"
-                            title="Edit"
-                          >
-                            <EditIcon />
-                          </button>
-                        <button
+                         ariaLabel="Edit"
+                          />
+                        <PermissionButton
+                            app="masteradmin"
+                            module="tablemaster"
+                            action="delete"
                             type="button"
                             onClick={() => handleDeactivate(branch)}
                             className="kot-master-card-action"
                           >
                             Deactivate
-                          </button>
+                          </PermissionButton>
                         </>
                       )}
                       {showDeactivated && (
-                       <button
+                       <PermissionButton
+                          app="masteradmin"
+                          module="tablemaster"
+                          action="edit"
                           type="button"
                           onClick={() => handleActivate(branch)}
                           className="kot-master-card-action"
                         >
                           Activate
-                        </button>
+                       </PermissionButton>
                       )}
                     </Box>
                   </Box>
@@ -1185,6 +1199,7 @@ const TableMaster: React.FC = () => {
             </Dialog>
           )}
         </Box>
+        </ModuleVisibilityGuard>
       )}
     </>
   );

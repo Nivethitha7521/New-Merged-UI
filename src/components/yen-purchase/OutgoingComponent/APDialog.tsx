@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { FrontendApInvoiceResponse } from '@/Models/apModel';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { formatDate } from '@/utilities/formatters';
 
 interface ApInvoiceDialogProps {
   open: boolean;
@@ -84,7 +85,7 @@ const ApInvoiceDialog: React.FC<ApInvoiceDialogProps> = ({ open, onClose, apInvo
           <Typography variant="h6"><strong>Vendor Name:</strong> {apInvoice.vendorName || 'N/A'}</Typography>
           <Typography variant="h6">
             <strong>Invoice Date:</strong>{' '}
-            {apInvoice.apInvoiceDate ? format(new Date(apInvoice.apInvoiceDate), 'dd-MM-yyyy') : 'N/A'}
+            {apInvoice.apInvoiceDate ? formatDate(new Date(apInvoice.apInvoiceDate)) : 'N/A'}
           </Typography>
           <Typography variant="h6"><strong>GRN ID:</strong> {apInvoice.grnRandomId || 'N/A'}</Typography>
           <Typography variant="h6"><strong>Invoice Amount:</strong> ₹{apInvoice.invoiceAmount?.toFixed(2) || '0.00'}</Typography>
@@ -132,12 +133,12 @@ const ApInvoiceDialog: React.FC<ApInvoiceDialogProps> = ({ open, onClose, apInvo
                       <TableCell>{apInvoice.sacCode?.[i] ?? 'N/A'}</TableCell>                   
                          <TableCell>
                         {apInvoice.from_dates?.[i] && apInvoice.from_dates[i] !== null
-                          ? format(new Date(apInvoice.from_dates[i]), 'dd-MM-yyyy')
+                          ? formatDate(new Date(apInvoice.from_dates[i]))
                           : 'N/A'}
                       </TableCell>
                       <TableCell>
                         {apInvoice.to_dates?.[i] && apInvoice.to_dates[i] !== null
-                          ? format(new Date(apInvoice.to_dates[i]), 'dd-MM-yyyy')
+                          ? formatDate(new Date(apInvoice.to_dates[i]))
                           : 'N/A'}
                       </TableCell>
                       <TableCell>{item.stockQuantity ?? 1}</TableCell>

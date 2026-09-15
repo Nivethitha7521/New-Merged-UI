@@ -16,6 +16,7 @@ import { AppDispatch } from "@/redux/store";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const UI = {
   pageBg: "#f6f9fd",
@@ -34,6 +35,8 @@ const UI = {
 };
 
 const OutletApprovedStock: React.FC = () => {
+  const { isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "outletapprovedstock");
   const dispatch = useDispatch<AppDispatch>();
 
   const isFullScreen = useSelector(selectIsFullScreen);
@@ -54,6 +57,8 @@ const OutletApprovedStock: React.FC = () => {
   const toggleFullScreen = useCallback(() => {
     dispatch(setIsFullScreen(!isFullScreen));
   }, [dispatch, isFullScreen]);
+
+  if (!canRead) return null;
 
   return (
     <Box

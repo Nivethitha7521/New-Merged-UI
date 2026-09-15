@@ -24,7 +24,8 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 
 interface Variant {
   id: string;
@@ -86,7 +87,10 @@ return (
 
       <Box className="kot-master-toolbar-actions">
           {!showDeactivated && (
-             <Button
+              <PermissionButton
+              app="masteradmin"
+              module="variant"
+              action="add"
               type="button"
               variant="outlined"
               startIcon={<AddRoundedIcon />}
@@ -94,7 +98,7 @@ return (
               className="purchase-reference-action-button kot-master-action-button"
             >
               Add
-            </Button>
+            </PermissionButton>
           )}
       <Box className="purchase-reference-active-toggle kot-master-status-toggle">
         <FormControlLabel
@@ -142,35 +146,39 @@ return (
                 </td>
                 <td className="kot-master-actions-cell">
                   {showDeactivated ? (
-                    <button
-                      type="button"
+                  <PermissionIconButton
+                      app="masteradmin"
+                      module="variant"
+                      action="edit"
+                      rollback
+                      tooltip="Activate"
                       onClick={() => handleActivate(variant)}
+                      icon={<RefreshRoundedIcon />}
                       className="activate-btn kot-master-row-action"
-                     title="Activate"
-                      aria-label={`Activate ${variant.variant}`}
-                    >
-                      <RefreshRoundedIcon />
-                    </button>
+                    ariaLabel={`Activate ${variant.variant}`}
+                    />
                   ) : (
                     <>
-                      <button
-                        type="button"
+                      <PermissionIconButton
+                        app="masteradmin"
+                        module="variant"
+                        action="edit"
+                        tooltip="Edit"
                         onClick={() => handleEdit(variant)}
+                        icon={<EditOutlinedIcon />}
                         className="edit-btn kot-master-row-action"
-                        title="Edit"
-                        aria-label={`Edit ${variant.variant}`}
-                      >
-                        <EditOutlinedIcon />
-                      </button>
-                      <button
-                        type="button"
+                       ariaLabel={`Edit ${variant.variant}`}
+                      />
+                      <PermissionIconButton
+                        app="masteradmin"
+                        module="variant"
+                        action="delete"
+                        tooltip="Deactivate"
                         onClick={() => handleDeactivate(variant)}
+                        icon={<DeleteOutlineRoundedIcon />}
                         className="deactivate-btn kot-master-row-action"
-                        title="Deactivate"
-                        aria-label={`Deactivate ${variant.variant}`}
-                      >
-                        <DeleteOutlineRoundedIcon />
-                      </button>
+                       ariaLabel={`Deactivate ${variant.variant}`}
+                      />
                     </>
                   )}
                 </td>

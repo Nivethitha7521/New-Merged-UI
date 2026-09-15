@@ -25,7 +25,7 @@ import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/Ac
 import MeasurementTypeTable from '../MeasurementType/Modules/measurementTable';
 import MeasurementTypeDialog from '../MeasurementType/Modules/measurementDialog';
 import { MeasurementType } from '../MeasurementType/Models/measurementTypeModels';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const MeasurementTypeComponent: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -214,14 +214,16 @@ const MeasurementTypeComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <MeasurementTypeTable
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleActivate={handleActivate}
-        handleDeactivate={handleDeactivate}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="measurementtype">
+        <MeasurementTypeTable
+          handleOpen={handleOpen}
+          handleEdit={handleEdit}
+          handleActivate={handleActivate}
+          handleDeactivate={handleDeactivate}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
+        />
+      </ModuleVisibilityGuard>
 
       <MeasurementTypeDialog
         open={dialogOpen !== 'none'}

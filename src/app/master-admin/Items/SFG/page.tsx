@@ -30,7 +30,7 @@ import ActivateDeactivateConfirmationDialog from "../../../Components/Dialogs/Ac
 import SfgDialog from '../SFG/Modules/sfgDialog';
 import SfgTableContainer from '../SFG/Modules/sfgTable';
 import { AppDispatch, RootState } from '@/redux/store';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 interface SFG {
   id: string;
   sfgName: string;
@@ -288,16 +288,18 @@ const SFGComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <SfgTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
-        searchValue={searchValue}                  // ADD
-        setSearchValue={setSearchValue}
-      />
+      <ModuleVisibilityGuard app="masteradmin" module="sfg">
+        <SfgTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
+          searchValue={searchValue}                  // ADD
+          setSearchValue={setSearchValue}
+        />
+      </ModuleVisibilityGuard>
 
       <SfgDialog
         open={dialogOpen !== 'none'}

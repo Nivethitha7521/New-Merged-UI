@@ -54,6 +54,7 @@ export interface DataTableProps {
   isLoadingMore: boolean;
   isFullScreen: boolean;
   handleApproveClick: (item: RawMaterialStore) => void;
+  canApprove?: boolean;
   handleTableScroll: (e: React.UIEvent<HTMLDivElement>) => void;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
   loading: boolean;
@@ -141,7 +142,7 @@ const COL_WEIGHTS: Record<string, number> = {
 // replace the part 13 8 2
 const DataTable: React.FC<DataTableProps> = ({
   filteredItems, visibleColumns, staticColumns, fieldTypes, totalColspan,
-  isLoadingMore, loading, handleApproveClick, handleTableScroll, scrollContainerRef,
+  isLoadingMore, loading, handleApproveClick, canApprove = false, handleTableScroll, scrollContainerRef,
   selectedLocation, selectedApprovalItemCodes, onToggleSelectRow, onSelectAll, onSortChange
 }) => {
   // const [detailsRow, setDetailsRow] = React.useState<RawMaterialStore | null>(null);
@@ -396,10 +397,10 @@ const DataTable: React.FC<DataTableProps> = ({
 
   const renderActionButton = (row: RawMaterialStore) => {
     const status = normalizeStatus(row.approvalStatus);
-    const canApprove = isRowApprovable(row);
+    const rowCanApprove = isRowApprovable(row);
 
-    if (canApprove) {
-      return <Button variant="primary" size="xs" onClick={() => handleApproveClick(row)} className={ACTION_BUTTON_WIDTH}>Approve</Button>;
+    if (rowCanApprove) {
+      return <Button variant="primary" size="xs" onClick={() => handleApproveClick(row)} disabled={!canApprove} className={ACTION_BUTTON_WIDTH}>Approve</Button>;
     }
     if (status === "approved") {
       return <Button variant="outline" size="xs" disabled className={cn(ACTION_BUTTON_WIDTH, "bg-success-50 text-success-700 border-success-200")}>Approved</Button>;
@@ -420,8 +421,8 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   return (
-    <div className="w-full h-full min-h-0 bg-white relative">
-      <div ref={scrollContainerRef} onScroll={onScroll} className="w-full h-full max-h-full overflow-auto border border-border rounded-xl bg-white" style={{ scrollbarWidth: "thin" }}>
+    <div className="inventory-data-table-shell w-full h-full min-h-0 bg-white relative">
+      <div ref={scrollContainerRef} onScroll={onScroll} className="inventory-data-table-card w-full h-full max-h-full overflow-auto border border-border rounded-xl bg-white" style={{ scrollbarWidth: "thin" }}>
         <table className="w-full border-separate border-spacing-0 text-left" style={{ minWidth: tableMinWidth(visibleColumnCount), tableLayout: "fixed" }}>
           {/* Explicit per-column widths so visible columns always sum to 100%.
               Required for table-layout:fixed to size columns deterministically —
@@ -575,7 +576,7 @@ const DataTable: React.FC<DataTableProps> = ({
                               className="w-3.5 h-3.5 rounded-sm border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                               checked={selectedApprovalItemCodes?.includes(item.itemCode) || false}
                               onChange={() => onToggleSelectRow?.(item.itemCode)}
-                              disabled={!isRowApprovable(item)}
+                              disabled={!canApprove || !isRowApprovable(item)}
                             />
                           </div>
                         </td>

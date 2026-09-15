@@ -23,7 +23,7 @@ import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/Ac
 import EditConfirmationDialog from '../../../Components/Dialogs/EditConfirmationDialog';
 import CloseConfirmationDialog from "../../../Components/Dialogs/CloseConfirmationDialog";
 import MenuPage from "../page";
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const PaymentPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -191,15 +191,16 @@ const PaymentPage: React.FC = () => {
     <>
       {/* <MenuPage /> */}
 
-
-      <PaymentTable
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        viewDeactivated={viewDeactivated}
-        setViewDeactivated={setViewDeactivated}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="paymenttype">
+        <PaymentTable
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          viewDeactivated={viewDeactivated}
+          setViewDeactivated={setViewDeactivated}
+        />
+      </ModuleVisibilityGuard>
 
 
       <PaymentDialog

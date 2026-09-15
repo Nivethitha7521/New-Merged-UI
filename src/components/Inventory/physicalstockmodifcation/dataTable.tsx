@@ -487,7 +487,7 @@
     } = useVirtualizedRows(rows, tableContainerRef, { rowHeight: 37 });
 
     return (
-      <div className="w-full h-full min-h-0 relative bg-white flex flex-col">
+      <div className="inventory-data-table-shell w-full h-full min-h-0 relative bg-white flex flex-col">
         {touchedCount > 0 && (
           <div className="absolute bottom-4 right-6 z-40 pointer-events-none shadow-md rounded-full">
             <div className="h-[28px] flex items-center px-3 text-[11.5px] font-extrabold text-[#c2410c] bg-[#fffaf2] border border-[#fed7aa] rounded-full">
@@ -499,7 +499,7 @@
         <div 
           ref={tableContainerRef}
           onScroll={handleTableScroll}
-          className="flex-1 w-full min-w-0 max-h-full overflow-auto border border-border rounded-xl bg-white"
+          className="inventory-data-table-card flex-1 w-full min-w-0 max-h-full overflow-auto border border-border rounded-xl bg-white"
           style={{ scrollbarWidth: "thin", contain: "layout paint" }}
         >
           <table className="w-full border-separate border-spacing-0" style={{ minWidth: tableMinWidth(activeColumns.length), tableLayout: "fixed" }}>

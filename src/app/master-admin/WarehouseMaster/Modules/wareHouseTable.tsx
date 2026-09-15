@@ -11,7 +11,7 @@ import EditIcon from "@mui/icons-material/EditOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
 import RefreshIcon from "@mui/icons-material/RestoreRounded";
 import { WareHouse } from "../Models/warehouseModels";
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 // ── Constants ────────────────────────────────────────────────────────────────
 const STATUS = {
   ACTIVE: "active",
@@ -198,48 +198,43 @@ const WareHouseTableComponent: React.FC<WareHouseTableProps> = ({
     {!showDeactivatedTable &&
       row.status === STATUS.ACTIVE && (
         <>
-          <Tooltip title="Edit warehouse" arrow>
-            <IconButton
-              type="button"
-              onClick={() => onOpenEdit(row)}
-              className="purchase-master-action-button is-edit"
-              aria-label="Edit warehouse"
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+<PermissionIconButton
+            app="masteradmin"
+            module="warehousemaster"
+            action="edit"
+            tooltip="Edit warehouse"
+            onClick={() => onOpenEdit(row)}
+            icon={<EditIcon fontSize="small" />}
+            className="purchase-master-action-button is-edit"
+            ariaLabel="Edit warehouse"
+          />
 
-          <Tooltip
-            title="Deactivate warehouse"
-            arrow
-          >
-            <IconButton
-              type="button"
-              onClick={() => onDeactivate(row)}
-              className="purchase-master-action-button is-delete"
-              aria-label="Deactivate warehouse"
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <PermissionIconButton
+            app="masteradmin"
+            module="warehousemaster"
+            action="delete"
+            tooltip="Deactivate warehouse"
+            onClick={() => onDeactivate(row)}
+            icon={<DeleteIcon fontSize="small" />}
+            className="purchase-master-action-button is-delete"
+            ariaLabel="Deactivate warehouse"
+          />
         </>
       )}
 
     {showDeactivatedTable &&
       row.status === STATUS.INACTIVE && (
-        <Tooltip
-          title="Activate warehouse"
-          arrow
-        >
-          <IconButton
-            type="button"
-            onClick={() => onActivate(row)}
-            className="purchase-master-action-button is-activate"
-            aria-label="Activate warehouse"
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+<PermissionIconButton
+          app="masteradmin"
+          module="warehousemaster"
+          action="edit"
+          rollback
+          tooltip="Activate warehouse"
+          onClick={() => onActivate(row)}
+          icon={<RefreshIcon fontSize="small" />}
+          className="purchase-master-action-button is-activate"
+          ariaLabel="Activate warehouse"
+        />
       )}
   </Box>
 </td>

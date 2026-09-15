@@ -104,6 +104,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 
 import { StockAdjustmentDialog } from "@/components/Inventory/physicalstockmodifcation/stockadjustmentDialog";
 import { useTodayDate } from "@/components/Hooks/useTodayDate";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export interface SearchParams {
   itemName: string[];
@@ -143,6 +144,9 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
   const [showPendingOnly, setShowPendingOnly] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
+  const { hasPermission, isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "outletstockvariance");
+  const canApprove = hasPermission("yenerp", "outletstockvariance", "approve");
 
   const branches = useSelector(selectBranches);
   const loading = useSelector(selectDataLoading);
@@ -639,11 +643,12 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
 
   const handleToggleColumn = useCallback(
     (column: string) => dispatch(toggleColumn(column)),
-    [dispatch]
+    [dispatch, canApprove]
   );
 
   const handleApproveClick = useCallback(
     (item: Branchitem) => {
+      if (!canApprove) return;
       dispatch(setSelectedApproveItem(item));
       dispatch(setOpenApproveDialog(true));
       dispatch(setApproveDescription(""));
@@ -688,7 +693,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
   }, [selectedLocation, apiDate, searchParams]);
 
   const handleApproveConfirm = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
-    if (!selectedApproveItem || !selectedLocation || isApprovingRef.current) {
+    if (!canApprove || !selectedApproveItem || !selectedLocation || isApprovingRef.current) {
       return;
     }
 
@@ -761,6 +766,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
   ]);
 
   const handleBulkApproveSelected = useCallback(() => {
+    if (!canApprove) return;
     if (
       !selectedLocation ||
       selectedApprovalItemCodes.length === 0 ||
@@ -771,10 +777,10 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
     }
     setBulkApprovalType("SELECTED");
     setBulkApprovalModalOpen(true);
-  }, [selectedLocation, selectedApprovalItemCodes, bulkApproving]);
+  }, [selectedLocation, selectedApprovalItemCodes, bulkApproving, canApprove]);
 
   const executeBulkApproveSelected = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
-    if (!selectedLocation || selectedApprovalItemCodes.length === 0) return;
+    if (!canApprove || !selectedLocation || selectedApprovalItemCodes.length === 0) return;
     isApprovingRef.current = true;
 
     try {
@@ -1112,13 +1118,14 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
 
   // Approve ALL items for the branch in one backend call (reads closing doc once)
   const handleApproveAllBranch = useCallback(() => {
+    if (!canApprove) return;
     if (!selectedLocation || approveAllBranchLoading || isApprovingRef.current) return;
     setBulkApprovalType("BRANCH");
     setBulkApprovalModalOpen(true);
-  }, [selectedLocation, approveAllBranchLoading]);
+  }, [selectedLocation, approveAllBranchLoading, canApprove]);
 
   const executeApproveAllBranch = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
-    if (!selectedLocation) return;
+    if (!canApprove || !selectedLocation) return;
     isApprovingRef.current = true;
 
     const branch = branches.find(
@@ -1480,7 +1487,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
           <Button
             variant="outlined"
             size="small"
-            disabled={anyApprovalBusy || !selectedLocation}
+            disabled={!canApprove || anyApprovalBusy || !selectedLocation}
             onClick={handleSelectAllPending}
             sx={{
               height: 30,
@@ -1502,7 +1509,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
           <Button
             variant="outlined"
             size="small"
-            disabled={anyApprovalBusy}
+            disabled={!canApprove || anyApprovalBusy}
             // onClick={() => setSelectedApprovalItemCodes([])}
             onClick={async () => {
               isPendingSelectionRef.current = false;
@@ -1532,7 +1539,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
           <Button
             variant="contained"
             size="small"
-            disabled={anyApprovalBusy}
+            disabled={!canApprove || anyApprovalBusy}
             onClick={handleBulkApproveSelected}
             sx={{
               height: 30,
@@ -1556,7 +1563,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
           <Button
             variant="contained"
             size="small"
-            disabled={anyApprovalBusy || !selectedLocation}
+            disabled={!canApprove || anyApprovalBusy || !selectedLocation}
             onClick={handleApproveAllBranch}
             sx={{
               height: 30,
@@ -1615,6 +1622,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
           inputRefs={inputRefs}
           isFullScreen={isFullScreen}
           handleApproveClick={handleApproveClick}
+          canApprove={canApprove}
           selectedApprovalItemCodes={selectedApprovalItemCodes}
           onToggleSelectRow={(itemCode) => {
             setSelectedApprovalItemCodes((prev) =>
@@ -1728,6 +1736,8 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
     </>
   );
 
+  if (!canRead) return null;
+
   return (
     <Box
       ref={fullScreenContainerRef}
@@ -1756,6 +1766,7 @@ const OutletPhysicalStockVarianceModification: React.FC = () => {
       {!isFullScreen && <OutletsInventoryManagementPage />}
 
       <Paper
+        className="inventory-filter-surface"
         elevation={0}
         sx={{
           flexShrink: 0,

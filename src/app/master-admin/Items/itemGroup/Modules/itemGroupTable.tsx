@@ -25,7 +25,8 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RefreshIcon from '@mui/icons-material/RestoreRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import { Importitemgroup } from '../Features/itemgroupSlice';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface itemGroup {
   id: string;
   itemGroupName: string;
@@ -130,9 +131,16 @@ const [page, setPage] = useState(1);
           >
             {!showDeactivated && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+             <PermissionIconButton
+                  app="masteradmin"
+                  module="itemgroup"
+                  action="add"
+                  tooltip="Add"
+                  onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
+                  className="icon-action-button"
+                  ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
 )}
@@ -189,31 +197,39 @@ const [page, setPage] = useState(1);
                     <td className="item-master-actions-cell">
                       <div className="flex justify-center gap-1">
                         {showDeactivated ? (
-                          <IconButton
+                         <PermissionIconButton
+                            app="masteradmin"
+                            module="itemgroup"
+                            action="edit"
+                            rollback
+                            tooltip="Activate"
                             onClick={() => handleActivate(itemGroup)}
-                           className="purchase-master-action-button is-activate"
-                            title="Activate"
-                          >
-                           <RefreshIcon />
-                          </IconButton>
+icon={<RefreshIcon />}
+                            className="purchase-master-action-button is-activate"
+                            ariaLabel="Activate"
+                          />
                         ) : (
                           <>
-                            <IconButton
+                            <PermissionIconButton
+                              app="masteradmin"
+                              module="itemgroup"
+                              action="edit"
+                              tooltip="Edit"
                               onClick={() => handleEdit(itemGroup)}
+                              icon={<EditIcon />}
                               className="purchase-master-action-button is-edit"
-                              title="Edit"
-                              size="small"
-                            >
-                               <EditIcon />
-                            </IconButton>
-                            <IconButton
+                             ariaLabel="Edit"
+                            />
+                            <PermissionIconButton
+                              app="masteradmin"
+                              module="itemgroup"
+                              action="delete"
+                              tooltip="Deactivate"
                               onClick={() => handleDeactivate(itemGroup)}
+                              icon={<DeleteIcon />}
                               className="purchase-master-action-button is-delete"
-                              title="Deactivate"
-                              size="small"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
+                             ariaLabel="Deactivate"
+                            />
                           </>
                         )}
                       </div>

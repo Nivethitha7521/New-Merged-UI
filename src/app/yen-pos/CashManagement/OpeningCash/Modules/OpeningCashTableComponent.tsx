@@ -14,7 +14,8 @@ import {
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 import { OpeningCash } from '../Models/openingcashModels';
-
+import { usePermissions } from '@/hooks/usePermissions';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface OpeningCashTableProps {
   data: OpeningCash[];
   isDeactivatedView: boolean;
@@ -37,6 +38,9 @@ export const OpeningCashTable: React.FC<OpeningCashTableProps> = ({
   allBranches,
 }) => {
   const [applyAllValue, setApplyAllValue] = useState<string>('');
+  const { hasPermission } = usePermissions();
+  // "Apply All" bulk-edits every branch's opening cash — governed by "edit" permission
+  const canEdit = hasPermission('pos', 'opening_cash', 'edit');
 
   const handleApplyAll = async () => {
     const trimmed = applyAllValue.trim();
@@ -87,14 +91,14 @@ export const OpeningCashTable: React.FC<OpeningCashTableProps> = ({
     min: 0,
     step: '0.01',
   }}
-  disabled={applyingAll}
+  disabled={applyingAll || !canEdit}
   className="custom-textfield yen-pos-apply-all-input"
 />
          <button
               type="button"
               className="item-master-price-button"
               onClick={() => void handleApplyAll()}
-              disabled={!applyAllValue.trim() || applyingAll}
+              disabled={!applyAllValue.trim() || applyingAll || !canEdit}
             >
               {applyingAll && <CircularProgress size={12} />}
               {applyingAll ? 'Applying...' : 'Apply'}
@@ -125,24 +129,28 @@ export const OpeningCashTable: React.FC<OpeningCashTableProps> = ({
                 <td className="item-master-actions-cell">
                   <div>
                     {isDeactivatedView ? (
-                      <IconButton
+                    <PermissionIconButton
+                        app="pos"
+                        module="opening_cash"
+                        action="edit"
+                        rollback
+                        tooltip="Activate"
                         onClick={() => onActivate(cash)}
+                         icon={<RestoreRoundedIcon />}
                         className="purchase-master-action-button is-activate"
-                        title="Activate"
-                        size="small"
-                      >
-                        <RestoreRoundedIcon />
-                      </IconButton>
+                       ariaLabel="Activate"
+                      />
                     ) : (
-                      <IconButton
+                     <PermissionIconButton
+                        app="pos"
+                        module="opening_cash"
+                        action="edit"
+                        tooltip="Edit"
                         onClick={() => handleEditClick(cash)}
+                        icon={<EditOutlinedIcon />}
                         className="purchase-master-action-button is-edit"
-                        title="Edit"
-                        size="small"
-                      >
-                  
-                  <EditOutlinedIcon />
-                      </IconButton>
+                        ariaLabel="Edit"
+                      />
                     )}
                   </div>
                 </td>

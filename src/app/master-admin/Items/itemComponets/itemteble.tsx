@@ -29,7 +29,8 @@ import {
   activateVariance,
   deactivateVariance,
 } from '../../Items/Item/Features/itemSlice';
-
+import { formatDateTime } from '@/utilities/formatters';
+import { usePermissions } from '@/hooks/usePermissions';
 interface ItemsTableProps {
   allItems: Item[];
   selectedHeaders: string[];
@@ -105,7 +106,9 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const showDeactivated = useSelector((state: RootState) => state.maItems.showDeactivated);
-
+ const { hasPermission } = usePermissions();
+ const canEditItem = hasPermission('masteradmin', 'item', 'edit');
+ const canDeleteItem = hasPermission('masteradmin', 'item', 'delete');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const [snackbar, setSnackbar] = useState<{
@@ -524,24 +527,24 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
     });
   };
 
-  //   const formatDateTime = (dateStr: string) => {
+  // //   const formatDateTime = (dateStr: string) => {
+  // //   const date = new Date(dateStr);
+  // //   const datePart = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  // //   const timePart = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+  // //   return `${datePart} | ${timePart}`;
+  // // };
+
+  // const formatDateTime = (dateStr: string) => {
   //   const date = new Date(dateStr);
   //   const datePart = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   //   const timePart = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
-  //   return `${datePart} | ${timePart}`;
+  //   return (
+  //     <>
+  //       <div>{datePart}</div>
+  //       <div>{timePart}</div>
+  //     </>
+  //   );
   // };
-
-  const formatDateTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const datePart = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const timePart = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
-    return (
-      <>
-        <div>{datePart}</div>
-        <div>{timePart}</div>
-      </>
-    );
-  };
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -608,7 +611,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                             style={{ textAlign: 'center' }}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {!itemIsDeactivated && !showDeactivated && (
+                          {!itemIsDeactivated && !showDeactivated && canEditItem && (
                               <Tooltip title="Edit Item">
                                 <button
                                   className="edit-btn"
@@ -624,32 +627,36 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                             )}
 
                             {itemIsDeactivated ? (
-                              <Tooltip title="Activate Item">
-                                <button
-                                  className="edit-btn"
-                                  style={{ marginLeft: '12px' }}
-                                  onClick={() => handleActivateItem(item)}
-                                >
-                                  <RefreshIcon fontSize="small" />
-                                </button>
-                              </Tooltip>
+                                                       canEditItem && (
+                                <Tooltip title="Activate Item">
+                                  <button
+                                    className="edit-btn"
+                                    style={{ marginLeft: '12px' }}
+                                    onClick={() => handleActivateItem(item)}
+                                  >
+                                    <RefreshIcon fontSize="small" />
+                                  </button>
+                                </Tooltip>
+                              )
                             ) : showDeactivated ? (
                               <Tooltip title="Item is Active (visible here because it has deactivated variances)">
                                 <span style={{ marginLeft: '12px', opacity: 0.5 }}>
                                   <RefreshIcon fontSize="small" />
                                 </span>
                               </Tooltip>
-                            ) : (
-                              <Tooltip title="Deactivate Item">
-                                <button
-                                  className="deactivate-btn"
-                                  style={{ marginLeft: '12px' }}
-                                  onClick={() => handleDeactivateItem(item)}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </button>
-                              </Tooltip>
-                            )}
+                          ) : (
+  canDeleteItem && (
+    <Tooltip title="Deactivate Item">
+      <button
+        className="deactivate-btn"
+        style={{ marginLeft: '12px' }}
+        onClick={() => handleDeactivateItem(item)}
+      >
+        <DeleteIcon fontSize="small" />
+      </button>
+    </Tooltip>
+  )
+)}
                           </td>
                         </tr>
 
@@ -783,7 +790,7 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                                             </td>
 
                                             <td style={{ textAlign: 'center' }}>
-                                              {!varianceIsDeactivated && (
+                                            {!varianceIsDeactivated && canEditItem && (
                                                 <Tooltip title="Edit Variance">
                                                   <button
                                                     className="edit-btn"
@@ -799,33 +806,37 @@ const ItemsTable: React.FC<ItemsTableProps> = ({
                                               )}
 
                                               {varianceIsDeactivated ? (
-                                                <Tooltip title="Activate Variance">
-                                                  <button
-                                                    className="edit-btn"
-                                                    style={{
-                                                      minHeight: '36px',
-                                                      alignItems: 'center',
-                                                      justifyContent: 'center',
-                                                      padding: '0 12px',
-                                                    }}
-                                                    // ── FIX 2: Pass `item` so we can check parent status
-                                                    onClick={() => handleActivateVariance(item, variance)}
-                                                  >
-                                                    <RefreshIcon fontSize="small" />
-                                                  </button>
-                                                </Tooltip>
-                                              ) : (
-                                                <Tooltip title="Deactivate Variance">
-                                                  <button
-                                                    className="deactivate-btn"
-                                                    onClick={() =>
-                                                      handleDeactivateVariance(item, variance)
-                                                    }
-                                                  >
-                                                    <DeleteIcon fontSize="small" />
-                                                  </button>
-                                                </Tooltip>
-                                              )}
+                                              canEditItem && (
+                                                  <Tooltip title="Activate Variance">
+                                                    <button
+                                                      className="edit-btn"
+                                                      style={{
+                                                        minHeight: '36px',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        padding: '0 12px',
+                                                      }}
+                                                      // ── FIX 2: Pass `item` so we can check parent status
+                                                      onClick={() => handleActivateVariance(item, variance)}
+                                                    >
+                                                      <RefreshIcon fontSize="small" />
+                                                    </button>
+                                                  </Tooltip>
+                                                )
+                                           ) : (
+canDeleteItem && (
+    <Tooltip title="Deactivate Variance">
+      <button
+        className="deactivate-btn"
+        onClick={() =>
+          handleDeactivateVariance(item, variance)
+        }
+      >
+        <DeleteIcon fontSize="small" />
+      </button>
+    </Tooltip>
+  )
+)}
                                             </td>
                                           </tr>
                                         );

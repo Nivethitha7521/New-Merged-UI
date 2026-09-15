@@ -24,7 +24,7 @@ import EditConfirmationDialog from '../../../Components/Dialogs/EditConfirmation
 import ActivateDeactivateConfirmationDialog from "../../../Components/Dialogs/ActivateDeactivateConfirmationDialog";
 import ItemGroupTable from '../../Items/itemGroup/Modules/itemGroupTable';
 import ItemGroupDialog from '../../Items/itemGroup/Modules/itemGroupDialog';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 interface ItemGroup {
   id: string;
   itemGroupName: string;
@@ -222,14 +222,16 @@ const ItemGroupComponent: React.FC = () => {
       {/* <MasterAdminMenu /> */}
 
 
-      <ItemGroupTable
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleActivate={handleActivate}
-        handleDeactivate={handleDeactivate}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="itemgroup">
+        <ItemGroupTable
+          handleOpen={handleOpen}
+          handleEdit={handleEdit}
+          handleActivate={handleActivate}
+          handleDeactivate={handleDeactivate}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
+        />
+      </ModuleVisibilityGuard>
 
       <ItemGroupDialog
         open={dialogOpen !== 'none'}

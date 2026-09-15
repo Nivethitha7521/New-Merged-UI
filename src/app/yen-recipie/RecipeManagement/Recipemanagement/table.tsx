@@ -29,6 +29,7 @@ import { Delete as DeleteIcon, Close as CloseIcon, ExpandMore, ExpandLess } from
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { Recipe } from '../Models/recipeModels';
+import { formatCurrency } from '@/utilities/formatters';
 
 export interface IngredientItem {
   ingredients: string;
@@ -515,7 +516,7 @@ const RecipeTableContainer: React.FC<RecipeTableContainerProps> = ({
          <Typography sx={{ fontSize: '10px', color: '#dc2626', fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)', fontWeight: 500 }}>
             {backingLossIngredients.length} ingredient{backingLossIngredients.length > 1 ? 's' : ''} marked <strong>Have It</strong> in version but <strong>not</strong> in current:&nbsp;
             <strong>{backingLossIngredients.map(i => i.ingredients).join(', ')}</strong>
-            &nbsp;· Cost impact: <strong>₹{backingLossCost.toFixed(2)}</strong>
+            &nbsp;· Cost impact: <strong>{formatCurrency(backingLossCost)}</strong>
           </Typography>
         </Box>
       )}

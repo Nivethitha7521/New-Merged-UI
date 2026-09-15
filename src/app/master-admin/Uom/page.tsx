@@ -15,7 +15,8 @@ import {
   SelectChangeEvent,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import YenbirthdaycakeappPage from '../page';
 import ActivateDeactivateConfirmationDialog from '@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog';
 import EditConfirmationDialog from '@/app/Components/Dialogs/EditConfirmationDialog';
@@ -350,7 +351,10 @@ const Uom: React.FC = () => {
 
   <Box className="uom-master-toolbar-actions">
     {!showDeactivated && (
-      <Button
+      <PermissionButton
+        app="masteradmin"
+        module="uom"
+        action="add"
         type="button"
         variant="outlined"
         startIcon={<AddIcon />}
@@ -358,7 +362,7 @@ const Uom: React.FC = () => {
         className="purchase-reference-action-button"
       >
         Add New
-      </Button>
+      </PermissionButton>
     )}
 
     <Box className="purchase-reference-active-toggle">
@@ -376,14 +380,16 @@ const Uom: React.FC = () => {
 </Box>
 
       {/* Table */}
-      <UomTable
-        displayedUoms={displayedUoms}
-        showDeactivated={showDeactivated}
-        isSubmitting={isSubmitting}
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="uom">
+        <UomTable
+          displayedUoms={displayedUoms}
+          showDeactivated={showDeactivated}
+          isSubmitting={isSubmitting}
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+        />
+      </ModuleVisibilityGuard>
 
       {/* Dialogs */}
       <UomDialog

@@ -56,6 +56,7 @@ import PurchaseOrderRandomIdSearch from '../../../../components/yen-purchase/pen
 import { VendorSearch } from '@/Models/vendor';
 import StockUpdateLogsDialog from '../Component/StockUpdateLogsPage';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 // Helper function to add footer with "Page X of Y" and "This is computer generated" centered at the bottom
 const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
   const pageHeight = doc.internal.pageSize.height;
@@ -333,7 +334,7 @@ const RejectedPo: React.FC = () => {
         order.randomId.toString(),
         order.vendorName.toString(),
         totalItemsQuantity.toString(),
-        order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : '',
+        order.orderDate ? formatDate(new Date(order.orderDate)) : '',
         finalAmount.toFixed(2).toString(),
       ];
     }).filter(row => row !== null);
@@ -471,7 +472,7 @@ const RejectedPo: React.FC = () => {
           `${item.taxPercentage || 0}%`,
           (item.pendingDiscountAmount || 0).toFixed(2),
           (item.pendingFinalPrice || 0).toFixed(2),
-          item.expiryDate ? format(new Date(item.expiryDate), 'dd-MM-yyyy') : 'N/A',
+          item.expiryDate ? formatDate(new Date(item.expiryDate)) : 'N/A',
         ]);
       });
     });
@@ -582,8 +583,8 @@ const RejectedPo: React.FC = () => {
         `Phone: ${purchaseOrder.vendorContact || ''}`,
         `Shipping Address: ${purchaseOrder.shippingAddress || ''}`,
         `PO No: ${purchaseOrder.randomId || ''}\n` +
-        `PO Date: ${purchaseOrder.orderDate ? format(new Date(purchaseOrder.orderDate), 'dd-MM-yyyy') : 'Not Provided'}\n` +
-        `Due Date: ${purchaseOrder.expectedDeliveryDate ? format(new Date(purchaseOrder.expectedDeliveryDate), 'dd-MM-yyyy') : 'Not Provided'}\n` +
+        `PO Date: ${purchaseOrder.orderDate ? formatDate(new Date(purchaseOrder.orderDate)) : 'Not Provided'}\n` +
+        `Due Date: ${purchaseOrder.expectedDeliveryDate ? formatDate(new Date(purchaseOrder.expectedDeliveryDate)) : 'Not Provided'}\n` +
         `Payment Terms: ${purchaseOrder.paymentTerms || ''}\n` +
         `Status: ${purchaseOrder.poStatus || ''}\n` +
         `Currency: INR`,
@@ -1118,7 +1119,7 @@ const RejectedPo: React.FC = () => {
         order.randomId,
         order.vendorName,
         totalItemsQuantity,
-        order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : '',
+        order.orderDate ? formatDate(new Date(order.orderDate)) : '',
         finalAmount.toFixed(2)
       ].join(','); // Join each value with a comma to create a CSV row
     }).filter(row => row !== null).join('\n'); // Filter out null rows and join with newline
@@ -1397,7 +1398,7 @@ sx={{
                       <TableCell className='table-number-right'>{index + 1}</TableCell>
                       <TableCell>{order.randomId}</TableCell>
                       <TableCell>{order.vendorName}</TableCell>
-                      <TableCell>{order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : ''}</TableCell> {/* Custom format */}
+                      <TableCell>{order.orderDate ? formatDate(new Date(order.orderDate)) : ''}</TableCell> {/* Custom format */}
                       <TableCell className='table-number-right'>{totalQuantity}</TableCell>
                       <TableCell className='table-number-right'>{(order.pendingOrderAmount ?? 0).toFixed(2)}</TableCell>
                     <span className="purchase-master-status-pill is-rejected">
@@ -1584,10 +1585,10 @@ sx={{
                         <TableCell className='table-number-right'>{item.pendingCount || 0}</TableCell>
                         <TableCell className='table-number-right'>{item.pendingQuantity || 0}</TableCell>
                         <TableCell className='table-number-right'>{item.poQuantity || 0}</TableCell>
-                        <TableCell className='table-number-right'>{(item.newPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.newPrice)}</TableCell>
                         <TableCell className='table-number-right'>{itemDiscount.toFixed(2)}</TableCell>
-                        <TableCell className='table-number-right'>{taxAmount.toFixed(2)}</TableCell>
-                        <TableCell className='table-number-right'>{(item.pendingTotalPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(taxAmount)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.pendingTotalPrice ?? 0)}</TableCell>
                       </TableRow>
                     );
                   })
@@ -1595,19 +1596,19 @@ sx={{
                 {/* Summary Rows */}
                 <TableRow>
                   <TableCell colSpan={9} align="right"><strong>Total Discount:</strong></TableCell>
-                  <TableCell colSpan={3}>{totalDiscountPrice.toFixed(2)}</TableCell>
+                  <TableCell colSpan={3}>{formatCurrency(totalDiscountPrice)}</TableCell>
                 </TableRow>
                 {Object.entries(taxDetails).map(([key, tax]) => (
                   <TableRow key={key}>
                     <TableCell colSpan={9} align="right">
                       <strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong>
                     </TableCell>
-                    <TableCell colSpan={3}>{tax.amount.toFixed(2)}</TableCell>
+                    <TableCell colSpan={3}>{formatCurrency(tax.amount)}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow>
                   <TableCell colSpan={9} align="right"><strong>Total Order Amount:</strong></TableCell>
-                  <TableCell colSpan={3}>{totalOrderAmount.toFixed(2)}</TableCell>
+                  <TableCell colSpan={3}>{formatCurrency(totalOrderAmount)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

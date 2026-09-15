@@ -14,7 +14,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 import SearchIcon from '@mui/icons-material/Search';
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import { RootState, AppDispatch } from '../../../../redux/store';
 import {
   fetchWhatsApps,
@@ -162,20 +162,21 @@ const handleConfirmationDialogConfirm = async () => {
           </Box>
 
           <Box className="purchase-reference-actions item-master-actions">
-            {!viewDeactivated && (
-              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-       
-                <IconButton
-                  color="primary"
-                  onClick={handleOpen}
-                  className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
-                <Typography className="icon-action-label">Add</Typography>
-              </div>
-           )}
+{!viewDeactivated && (
+  <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
+    <PermissionIconButton
+      app="whatsapp"
+      module="whatsapp_admin"
+      action="add"
+      tooltip="Add"
+      onClick={handleOpen}
+      icon={<AddIcon className="icon-action-svg" />}
+      className="icon-action-button"
+      ariaLabel="Add"
+    />
+    <Typography className="icon-action-label">Add</Typography>
+  </div>
+)}
 
             <FormControlLabel
               className="purchase-reference-active-toggle item-master-active-toggle"
@@ -225,34 +226,40 @@ const handleConfirmationDialogConfirm = async () => {
                     <td className="item-master-actions-cell">
                       <div>
                         {viewDeactivated ? (
-                          <IconButton
+                         <PermissionIconButton
+                          app="whatsapp"
+                           module="whatsapp_admin"
+                            action="edit"
+                            rollback
+                            tooltip="Activate"
                             onClick={() => handleActivate(whatsApp)}
+                            icon={<RestoreRoundedIcon />}
                             className="purchase-master-action-button is-activate"
-                            title="Activate"
-                            size="small"
-                           >
-                          
-                           <RestoreRoundedIcon />
-                          </IconButton>
+                           ariaLabel="Activate"
+                          />
                         ) : (
                           <>
-                            <IconButton
+                           <PermissionIconButton
+                              app="whatsapp"
+                              module="whatsapp_admin"
+                              action="edit"
+                              tooltip="Edit"
                               onClick={() => handleEdit(whatsApp)}
+                              icon={<EditOutlinedIcon />}
                               className="purchase-master-action-button is-edit"
-                              title="Edit"
-                              size="small"
-                            >
-                              <EditOutlinedIcon />
-                            </IconButton>
+                              ariaLabel="Edit"
+                            />
 
-                            <IconButton
+                           <PermissionIconButton
+                              app="whatsapp"
+                              module="whatsapp_admin"
+                              action="delete"
+                              tooltip="Deactivate"
                               onClick={() => handleDeactivate(whatsApp)}
+                              icon={<DeleteOutlineRoundedIcon />}
                               className="purchase-master-action-button is-delete"
-                              title="Deactivate"
-                              size="small"
-                            >
-                              <DeleteOutlineRoundedIcon />
-                            </IconButton>
+                             ariaLabel="Deactivate"
+                            />
                           </>
                         )}
                       </div>

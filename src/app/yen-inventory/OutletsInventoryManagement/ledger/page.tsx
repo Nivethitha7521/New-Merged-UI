@@ -1689,6 +1689,7 @@ import React, {
 } from 'react';
 import 'react-date-range/dist/styles.css';
 import 'react-date-range/dist/theme/default.css';
+import { formatDate } from '@/utilities/formatters';
 
 import {
   Box,
@@ -1909,7 +1910,11 @@ const ITEM_COLORS = [
   { main: '#dc2626', bg: '#fef2f2' },
 ];
 
+import { usePermissions } from "@/hooks/usePermissions";
+
 const StockSummaryPage = () => {
+  const { isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "outletstockledger");
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -1986,7 +1991,9 @@ const StockSummaryPage = () => {
       dispatch(searchBranches({ search: term, page: 1, limit: 50 }));
     }, 400);
 
-    return () => {
+    if (!canRead) return;
+
+  return () => {
       debouncedSearchRef.current?.cancel();
       debouncedBranchSearchRef.current?.cancel();
     };
@@ -2270,9 +2277,7 @@ const StockSummaryPage = () => {
       doc.setFontSize(8);
       doc.setTextColor(100);
       doc.text(
-        `Period: ${moment(selectionRange.startDate).format('DD-MM-YYYY')} to ${moment(
-          selectionRange.endDate
-        ).format('DD-MM-YYYY')}`,
+        `Period: ${formatDate(selectionRange.startDate)} to ${formatDate(selectionRange.endDate)}`,
         196,
         20,
         { align: 'right' }
@@ -2312,7 +2317,7 @@ const StockSummaryPage = () => {
           ],
         ],
         body: getLedgerTransactions(ledger).map((row) => [
-          moment(row.date).format('DD-MM-YYYY'),
+          formatDate(row.date),
           fmtN(row.openingStock),
           fmtN(row.dispatchQty),
           fmtN(row.salesQty),
@@ -2435,6 +2440,7 @@ const StockSummaryPage = () => {
         <OutletsInventoryManagementPage />
 
         <Box
+          className="inventory-ledger-toolbar"
           sx={{
             px: { xs: 0.75, md: 1 },
             py: 0.55,
@@ -2448,6 +2454,7 @@ const StockSummaryPage = () => {
         >
           <Collapse in={filtersOpen || !isMobile}>
             <Box
+              className="inventory-ledger-toolbar-row"
               sx={{
                 display: 'flex',
                 alignItems: 'flex-end',
@@ -3011,8 +3018,8 @@ const StockSummaryPage = () => {
                           </Typography>
 
                           <Typography sx={{ fontSize: '0.62rem', color: T.textSecondary, fontWeight: 850 }}>
-                            {moment(selectionRange.startDate).format('DD MMM YYYY')} —{' '}
-                            {moment(selectionRange.endDate).format('DD MMM YYYY')}
+                            {formatDate(selectionRange.startDate)} —{' '}
+                            {formatDate(selectionRange.endDate)}
                           </Typography>
                         </Box>
 
@@ -3145,7 +3152,7 @@ const StockSummaryPage = () => {
                                     fontWeight: 850,
                                   }}
                                 >
-                                  {moment(row.date).format('DD MMM YYYY')}
+                                  {formatDate(row.date)}
                                 </TableCell>
 
                                 <TableCell align="right" sx={{ color: T.textSecondary, fontWeight: 750 }}>

@@ -7,10 +7,11 @@ import { GrnData } from '@/Models/grnModel';
 import { OverallDiscountRequest, OverallDiscountResponse } from '@/app/yen-purchase/PurchaseOrder/Models/Itemcalculation';
 import { FreightData } from '@/app/yen-purchase/PurchaseOrder/Component/freightSelectionDialog';
 import purchaseApi from "@/utils/api";
+import { formatDate } from '@/utilities/formatters';
 
 
 const LIMIT = 20;
-const API_BASE_URL = 'http://127.0.0.1:8000/yenerpapi';
+const API_BASE_URL = 'http://127.0.0.1:8001/yenerpapi';
 
 export const fetchPurchaseOrderRandomIds = createAsyncThunk(
   "purchaseOrder/fetchRandomIds",
@@ -42,9 +43,7 @@ export const fetchPurchaseOrderRandomIds = createAsyncThunk(
     }
   },
 );
-const formatDate = (date: Date): string => {
-  return format(date, "dd/MM/yyyy"); // Format as day/month/year
-};
+
 const customRound = (value: number) => {
   return Math.round(value * 100) / 100; // Round to two decimal places
 };

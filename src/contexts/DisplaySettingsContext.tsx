@@ -14,6 +14,10 @@ export type DisplayFont =
 export type DisplayFontSize = 'small' | 'medium' | 'large';
 export type DisplayLanguage = 'en';
 export type DisplayCurrency = 'INR' | 'USD' | 'EUR' | 'GBP';
+// Value of 1 INR expressed in each currency. All amounts are stored and
+// calculated in INR everywhere else in the app -- these rates are used
+// ONLY to convert for on-screen display, never to change stored data.
+export type ExchangeRates = Record<DisplayCurrency, number>;
 export type NavigationLayout = 'sidebar' | 'tabs';
 export type DisplayTimezone =
   | 'Asia/Kolkata'
@@ -39,6 +43,7 @@ export interface DisplaySettings {
   fontSize: DisplayFontSize;
   language: DisplayLanguage;
   currency: DisplayCurrency;
+  exchangeRates: ExchangeRates;
   navigationLayout: NavigationLayout;
    timezone: DisplayTimezone;
   dateFormat: DisplayDateFormat;
@@ -48,14 +53,15 @@ export interface DisplaySettings {
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   theme: 'light',
- accentColor: '#155eef',
+ accentColor: '#444ce7',
   uiStyle: 'modern',
   fontFamily: 'Inter',
   fontSize: 'medium',
   language: 'en',
   currency: 'INR',
+  exchangeRates: { INR: 1, USD: 0.010531, EUR: 0.0090, GBP: 0.00779 },
   navigationLayout: 'sidebar',
-   timezone: 'Asia/Kolkata',
+  timezone: 'Asia/Kolkata',
   dateFormat: 'DD/MM/YYYY',
   timeFormat: '12h',
   showSeconds: false,
@@ -95,7 +101,7 @@ const getStorageKey = () => {
 const getApiBaseUrl = () => {
   return (
     process.env.NEXT_PUBLIC_API_URL ||
-    'http://127.0.0.1:8000'
+    'http://127.0.0.1:8001'
   );
 };
 const getAuthToken = () => {
@@ -308,6 +314,17 @@ const loadTenantTimeSettings = useCallback(async () => {
         showSeconds:
           data.show_seconds ??
           current.showSeconds,
+          fontFamily:
+  data.font_family || current.fontFamily,
+
+fontSize:
+  data.font_size || current.fontSize,
+
+        currency:
+          data.currency || current.currency,
+
+        exchangeRates:
+          data.exchange_rates || current.exchangeRates,
       };
 
       applySettingsToDocument(merged);
@@ -378,6 +395,10 @@ const saveSettings = useCallback(
             date_format: safe.dateFormat,
             time_format: safe.timeFormat,
             show_seconds: safe.showSeconds,
+            font_family: safe.fontFamily,
+            font_size: safe.fontSize,
+            currency: safe.currency,
+            exchange_rates: safe.exchangeRates,
           }),
         }
       );
@@ -429,14 +450,21 @@ const saveSettings = useCallback(
   }, []);
 
   const formatCurrency = useCallback((amount: number) => {
+    // All amounts are stored/calculated in INR. Convert to the selected
+    // display currency using the cached rate -- no network call here, so
+    // this stays fast even when called many times per render.
+    const rate = settings.exchangeRates?.[settings.currency] ?? 1;
+    const safeAmount = Number.isFinite(amount) ? amount : 0;
+    const converted = settings.currency === 'INR' ? safeAmount : safeAmount * rate;
+
     const locale = settings.currency === 'INR' ? 'en-IN' : 'en-US';
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: settings.currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(Number.isFinite(amount) ? amount : 0);
-  }, [settings.currency]);
+    }).format(converted);
+  }, [settings.currency, settings.exchangeRates]);
 
   const value = useMemo(() => ({
     settings,

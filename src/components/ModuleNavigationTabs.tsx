@@ -55,16 +55,16 @@ const MODULE_TABS: Record<ModuleNavigationKey, ModuleTab[]> = {
     { text: 'Section', path: '/master-admin/SectionMaster', superAdminOnly: true },
   ],
   recipe: [
-    { text: 'Recipe', path: '/yen-recipie/RecipeManagement' },
-    { text: 'Store Kitchen Master', path: '/yen-recipie/StoreKitchenMaster' },
+    { text: 'Recipe', path: '/yen-recipie/RecipeManagement', permissionKeys: ['recipe'] },
+    { text: 'Store Kitchen Master', path: '/yen-recipie/StoreKitchenMaster', permissionKeys: ['storekitchenmaster'] },
   ],
   book: [
     { text: 'Outgoing Payment', path: '/yen-book/OutgoingPaymentPage', permissionKeys: ['outgoingpayment'] },
     { text: 'Expense Management', path: '/yen-book/ExpenseManagementPage', permissionKeys: ['expensecategory', 'expensesubcategory', 'expensename'] },
   ],
   inventory: [
-    { text: 'Outlets Inventory Management', path: '/yen-inventory/OutletsInventoryManagement', permissionKeys: ['physicalstockmodification', 'physicalstockvariancemodification', 'stockledger'] },
-    { text: 'Warehouse Inventory Management', path: '/yen-inventory/WarehouseInventoryManagement', permissionKeys: ['warehousephysicalstockmodification', 'warehousephysicalstockvariancemodification', 'warehousestockledger'] },
+    { text: 'Outlets Inventory Management', path: '/yen-inventory/OutletsInventoryManagement', permissionKeys: ['outletphysicalstock', 'outletstockvariance', 'outletapprovedstock', 'outletstockledger'] },
+    { text: 'Warehouse Inventory Management', path: '/yen-inventory/WarehouseInventoryManagement', permissionKeys: ['warehousephysicalstock', 'warehousestockvariance', 'warehouseapprovedstock', 'warehousestockledger'] },
   ],
   pos: [
     { text: 'Cash Management', path: '/yen-pos/CashManagement', superAdminOnly: true },

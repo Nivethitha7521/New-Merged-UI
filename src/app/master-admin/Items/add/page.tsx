@@ -1,5 +1,3 @@
-
-
 'use client';
 import React, { useState, useEffect, ChangeEvent, useMemo, useRef } from 'react';
 import {
@@ -23,6 +21,7 @@ import {
     IconButton,
 } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Image as ImageIcon } from '@mui/icons-material';
 import Image from 'next/image';
 import axios from 'axios';
@@ -78,6 +77,15 @@ const initialVarianceState: Variance = {
 function AddItemPage() {
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
+     const { hasPermission } = usePermissions();
+    const canAddItem = hasPermission('masteradmin', 'item', 'add');
+
+    useEffect(() => {
+        if (!canAddItem) {
+            router.replace('/master-admin/Items');
+        }
+    }, [canAddItem, router]);
+
     const [newItem, setNewItem] = useState<Item>(initialItemState);
     const [variances, setVariances] = useState<Variance[]>([{
         ...initialVarianceState,
@@ -1195,6 +1203,10 @@ function AddItemPage() {
             handleTabNavigation(e);
         }
     };
+
+    if (!canAddItem) {
+        return null;
+    }
 
     return (
 

@@ -30,6 +30,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 
 import moment from 'moment';
+import { formatDate } from '@/utilities/formatters';
 
 interface Props {
   open: boolean;
@@ -374,11 +375,7 @@ const pendingAmount =
                       <TableCell>
 
                         {history.date
-                          ? moment(
-                              history.date
-                            ).format(
-                              'DD-MM-YYYY'
-                            )
+                          ? formatDate(history.date)
                           : '-'}
 
                       </TableCell>

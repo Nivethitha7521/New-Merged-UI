@@ -16,6 +16,8 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RefreshIcon from '@mui/icons-material/RestoreRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import { Inventory } from '../Models/inventoryTypeModels';
+import { usePermissions } from '@/hooks/usePermissions';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface InventoryTableProps {
   handleOpen: () => void;
   handleEdit: (inventory: Inventory) => void;
@@ -50,9 +52,12 @@ const InventoryRow = React.memo(function InventoryRow({
   onDeactivate,
   onToggleDirectSale,
 }: InventoryRowProps) {
+   const { hasPermission } = usePermissions();
+  const canEdit = hasPermission('masteradmin', 'inventorytype', 'edit');
   const handleToggle = useCallback(() => {
+    if (!canEdit) return;
     onToggleDirectSale(inventory);
-  }, [onToggleDirectSale, inventory]);
+ }, [onToggleDirectSale, inventory, canEdit]);
 
   const handleEditClick = useCallback(() => {
     onEdit(inventory);
@@ -77,38 +82,47 @@ const InventoryRow = React.memo(function InventoryRow({
           onChange={handleToggle}
           color="primary"
           size="small"
-          title="Toggle Direct Sale"
+         title={canEdit ? "Toggle Direct Sale" : "You don't have permission for this action"}
+          disabled={!canEdit}
         />
       </td>
   <td className="item-master-actions-cell">
         <div className="flex justify-center gap-1">
           {showDeactivated ? (
-           <IconButton
+         <PermissionIconButton
+              app="masteradmin"
+              module="inventorytype"
+              action="edit"
+              rollback
+              tooltip="Activate"
               onClick={handleActivateClick}
+              icon={<RefreshIcon />}
               className="purchase-master-action-button is-activate"
-              title="Activate"
-              size="small"
-            >
-              <RefreshIcon />
-            </IconButton>
-         ) : (
+ariaLabel="Activate"
+            />
+          ) : (
+         
             <>
-             <IconButton
+             <PermissionIconButton
+                app="masteradmin"
+                module="inventorytype"
+                action="edit"
+                tooltip="Edit"
                 onClick={handleEditClick}
+                icon={<EditIcon />}
                 className="purchase-master-action-button is-edit"
-                title="Edit"
-                size="small"
-              >
-                <EditIcon />
-              </IconButton>
-              <IconButton
+            ariaLabel="Edit"
+              />
+              <PermissionIconButton
+                app="masteradmin"
+                module="inventorytype"
+                action="delete"
+                tooltip="Deactivate"
                 onClick={handleDeactivateClick}
+                icon={<DeleteIcon />}
                 className="purchase-master-action-button is-delete"
-                title="Deactivate"
-                size="small"
-              >
-                <DeleteIcon />
-              </IconButton>
+                ariaLabel="Deactivate"
+             />
             </>
           )}
         </div>
@@ -193,9 +207,16 @@ const filteredInventories = useMemo(() => {
           >
             {!showDeactivated && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+              <PermissionIconButton
+                  app="masteradmin"
+                  module="inventorytype"
+                  action="add"
+                  tooltip="Add"
+                  onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
+                  className="icon-action-button"
+                  ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
             )}

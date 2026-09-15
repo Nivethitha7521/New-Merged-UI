@@ -3,6 +3,8 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../../../redux/store';
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import {
   Alert,
   Box,Button,
@@ -64,7 +66,7 @@ interface SnackbarState {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const BASE_URL = 'http://127.0.0.1:8000/yenerpapi/mixbox';
+const BASE_URL = 'http://127.0.0.1:8001/yenerpapi/mixbox';
 
 const INITIAL_SNACKBAR: SnackbarState = { open: false, message: '', severity: 'success' };
 
@@ -195,7 +197,10 @@ const MixBoxTableContainer: React.FC<MixBoxTableContainerProps> = ({
 
   <Box className="purchase-reference-actions mixbox-master-toolbar-actions">
     {!showDeactivated && (
-      <Button
+      <PermissionButton
+        app="masteradmin"
+        module="mixbox"
+        action="add"
         type="button"
         variant="outlined"
         startIcon={<AddIcon />}
@@ -203,7 +208,7 @@ const MixBoxTableContainer: React.FC<MixBoxTableContainerProps> = ({
         className="purchase-reference-action-button"
       >
         Add New
-      </Button>
+      </PermissionButton>
     )}
 
     <Box className="purchase-reference-active-toggle">
@@ -298,39 +303,40 @@ const MixBoxTableContainer: React.FC<MixBoxTableContainerProps> = ({
                 <td style={{ textAlign: 'center' }}>
                   <Box className="purchase-master-actions">
                     {showDeactivated ? (
-                      <Tooltip title="Activate Mix Box" arrow>
-                        <IconButton
-                          type="button"
-                          onClick={() => handleActivate(mixBox)}
-                          className="purchase-master-action-button is-activate"
-                          aria-label="Activate Mix Box"
-                        >
-                          <RefreshIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+              <PermissionIconButton
+                        app="masteradmin"
+                        module="mixbox"
+                        action="edit"
+                        rollback
+                        tooltip="Activate Mix Box"
+                        onClick={() => handleActivate(mixBox)}
+                        icon={<RefreshIcon fontSize="small" />}
+                        className="purchase-master-action-button is-activate"
+                        ariaLabel="Activate Mix Box"
+                      />
                     ) : (
                       <>
-                        <Tooltip title="Edit Mix Box" arrow>
-                          <IconButton
-                            type="button"
-                            onClick={() => handleEdit(mixBox)}
-                            className="purchase-master-action-button is-edit"
-                            aria-label="Edit Mix Box"
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+ <PermissionIconButton
+                          app="masteradmin"
+                          module="mixbox"
+                          action="edit"
+                          tooltip="Edit Mix Box"
+                          onClick={() => handleEdit(mixBox)}
+                          icon={<EditIcon fontSize="small" />}
+                          className="purchase-master-action-button is-edit"
+                          ariaLabel="Edit Mix Box"
+                        />
 
-                        <Tooltip title="Deactivate Mix Box" arrow>
-                          <IconButton
-                            type="button"
-                            onClick={() => handleDeactivate(mixBox)}
-                            className="purchase-master-action-button is-delete"
-                            aria-label="Deactivate Mix Box"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <PermissionIconButton
+                          app="masteradmin"
+                          module="mixbox"
+                          action="delete"
+                          tooltip="Deactivate Mix Box"
+                          onClick={() => handleDeactivate(mixBox)}
+                          icon={<DeleteIcon fontSize="small" />}
+                          className="purchase-master-action-button is-delete"
+                          ariaLabel="Deactivate Mix Box"
+                        />
                       </>
                     )}
                   </Box>

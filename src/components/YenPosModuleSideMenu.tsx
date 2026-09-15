@@ -2,6 +2,8 @@
 
 import React, { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 import {
   Box,
   IconButton,
@@ -32,6 +34,7 @@ interface YenPosModuleItem {
   text: string;
   path: string;
   icon: React.ReactNode;
+  moduleKeys: string[];
 }
 
 const yenPosModules: YenPosModuleItem[] = [
@@ -39,21 +42,25 @@ const yenPosModules: YenPosModuleItem[] = [
     text: 'Cash Management',
     path: '/yen-pos/CashManagement',
     icon: <PaymentsOutlined />,
+    moduleKeys: ['opening_cash', 'petty_cash'],
   },
   {
     text: 'POS Devices',
     path: '/yen-pos/POSDevicePage',
     icon: <PointOfSaleOutlined />,
+    moduleKeys: ['pos_devices'],
   },
   {
         text: 'Reasons',
     path: '/yen-pos/reasons',
     icon: <RuleOutlined />,
+    moduleKeys: ['reasons'],
   },
   {
     text: 'Prefix Master',
     path: '/yen-pos/prefixMaster',
     icon: <LocalOfferOutlined />,
+    moduleKeys: ['prefix_master'],
   },
 ];
 
@@ -64,7 +71,21 @@ const YenPosModuleSideMenu: React.FC<YenPosModuleSideMenuProps> = ({
 }) => {
   const pathname = usePathname();
 
-  const visibleModules = useMemo(() => yenPosModules, []);
+  const role = useSelector((state: RootState) => state.auth.role);
+  const isSuperAdmin = role === 'Super Admin';
+  const posPermissions = useSelector(
+    (state: RootState) => state.auth.permissions?.pos || {}
+  );
+
+  const visibleModules = useMemo(() => {
+    if (isSuperAdmin) return yenPosModules;
+    return yenPosModules.filter((module) =>
+      module.moduleKeys.some((key) => {
+        const perm = posPermissions?.[key];
+        return perm && perm.hide !== true && perm.read === true;
+      })
+    );
+  }, [isSuperAdmin, posPermissions]);
 
   const isActive = (path: string) =>
     pathname === path || Boolean(pathname?.startsWith(`${path}/`));

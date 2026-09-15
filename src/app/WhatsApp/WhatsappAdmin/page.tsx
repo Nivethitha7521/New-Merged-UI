@@ -5,7 +5,7 @@ import { AppDispatch } from "../../../redux/store";
 import { setWhatsAppData, setDialogOpen } from "../WhatsappAdmin/Features/whatsAppSlice";
 import WhatsAppTableComponent from "../WhatsappAdmin/Modules/whatsappTable";
 import WhatsAppDialog from "../WhatsappAdmin/Modules/whatsappDialog";
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const WhatsAppPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [viewDeactivated, setViewDeactivated] = useState(false);
@@ -36,11 +36,13 @@ const WhatsAppPage: React.FC = () => {
   return (
     <>
      
-      <WhatsAppTableComponent
-        viewDeactivated={viewDeactivated}
-        setViewDeactivated={setViewDeactivated}
-        handleOpen={handleOpen}
-      />
+    <ModuleVisibilityGuard app="whatsapp" module="whatsapp_admin">
+        <WhatsAppTableComponent
+          viewDeactivated={viewDeactivated}
+          setViewDeactivated={setViewDeactivated}
+          handleOpen={handleOpen}
+        />
+      </ModuleVisibilityGuard>
       <WhatsAppDialog handleClose={handleClose} />
     </>
   );

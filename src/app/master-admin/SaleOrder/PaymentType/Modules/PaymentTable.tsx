@@ -18,7 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 import SearchIcon from '@mui/icons-material/Search';
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 
 interface PaymentTableContainerProps {
   handleEdit: (payment: PaymentType) => void;
@@ -85,9 +85,16 @@ const PaymentTable: React.FC<PaymentTableContainerProps> = ({
           >
             {!viewDeactivated && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add">
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+            <PermissionIconButton
+                  app="masteradmin"
+                  module="paymenttype"
+                  action="add"
+                  tooltip="Add"
+                  onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
+                  className="icon-action-button"
+                  ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
           )}
@@ -136,36 +143,43 @@ const PaymentTable: React.FC<PaymentTableContainerProps> = ({
   <td className="item-master-actions-cell">
                       <div>
                         {viewDeactivated ? (
-                          <IconButton
+                         <PermissionIconButton
+                            app="masteradmin"
+                            module="paymenttype"
+                            action="edit"
+                            rollback
+                            tooltip="Activate"
                             onClick={() => handleActivate(payment)}
+                            icon={<RestoreRoundedIcon />}
                             className="purchase-master-action-button is-activate"
-                            title="Activate"
-                            size="small"
-                          >
-                          <RestoreRoundedIcon />
-                          </IconButton>
+                          ariaLabel="Activate"
+                          />
                         ) : (
                           <>
                             {!payment.editStatus === false && (
-                              <IconButton
+                               <PermissionIconButton
+                                app="masteradmin"
+                                module="paymenttype"
+                                action="edit"
+                                tooltip="Edit"
                                 onClick={() => handleEdit(payment)}
+                                icon={<EditOutlinedIcon />}
                                 className="purchase-master-action-button is-edit"
-                                title="Edit"
-                                size="small"
-                              >
-                                <EditOutlinedIcon />
-                              </IconButton>
+                                ariaLabel="Edit"
+                              />
                             )}
 
                             {!payment.editStatus === false && (
-                              <IconButton
+                              <PermissionIconButton
+                                app="masteradmin"
+                                module="paymenttype"
+                                action="edit"
+                                tooltip="Edit"
                                 onClick={() => handleDeactivate(payment)}
+                                icon={<DeleteOutlineRoundedIcon />}
                                 className="purchase-master-action-button is-delete"
-                                title="Deactivate"
-                                size="small"
-                              >
-                                <DeleteOutlineRoundedIcon />
-                              </IconButton>
+                               ariaLabel="Deactivate"
+                              />
                             )}
                           </>
                         )}

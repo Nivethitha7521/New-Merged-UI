@@ -210,7 +210,7 @@ const DataTable: React.FC<DataTableProps> = ({
   );
 
   return (
-    <div className="relative w-full h-full min-h-0 bg-white">
+    <div className="inventory-data-table-shell relative w-full h-full min-h-0 bg-white">
       {/* Changed count badge */}
       {changedCount > 0 && (
         <div className="absolute bottom-4 right-6 z-40 pointer-events-none shadow-md rounded-full">
@@ -223,7 +223,7 @@ const DataTable: React.FC<DataTableProps> = ({
       {/* Scrollable table container */}
       <div
         ref={tableContainerRef}
-        className="h-full max-h-full overflow-auto rounded-xl border border-border contain-layout"
+        className="inventory-data-table-card h-full max-h-full overflow-auto rounded-xl border border-border contain-layout"
         style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
       >
         <table

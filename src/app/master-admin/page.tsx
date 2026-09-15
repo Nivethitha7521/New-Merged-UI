@@ -41,11 +41,11 @@ const MasterAdminPage = () => {
 
   //const showSideMenu = true;
 
-  React.useEffect(() => {
-    if (pathname === '/master-admin' || pathname === '/master-admin/') {
-      router.replace('/master-admin');
-    }
-  }, [pathname, router]);
+React.useEffect(() => {
+  if (pathname === '/master-admin' || pathname === '/master-admin/') {
+    router.replace('/master-admin/WarehouseMaster');
+  }
+}, [pathname, router]);
 
   // Updated isActiveRoute function to handle Item Master sub-routes
   const isActiveRoute = (itemPath: string) => {

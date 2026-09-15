@@ -12,7 +12,8 @@ import AddIcon from '@mui/icons-material/Add';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 export interface ReasonTableProps {
   items: Reasons[];
   loading: boolean;
@@ -70,14 +71,16 @@ const filtered = items.filter((reason) =>
           <Box className="purchase-reference-actions item-master-actions">
              {!viewDeactivated && (
              <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton
-                  color="primary"
+               <PermissionIconButton
+                  app="pos"
+                  module="reasons"
+                  action="add"
+                  tooltip="Add"
                   onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
                   className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+                                   ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
             )}
@@ -154,39 +157,40 @@ const filtered = items.filter((reason) =>
           <td className="item-master-actions-cell">
             <div>
               {viewDeactivated ? (
-                <IconButton
-                  onClick={() =>
-                    handleActivate(reason)
-                  }
+             <PermissionIconButton
+                  app="pos"
+                  module="reasons"
+                  action="edit"
+                  rollback
+                  tooltip="Activate"
+                  onClick={() => handleActivate(reason)}
+                  icon={<RestoreRoundedIcon />}
                   className="purchase-master-action-button is-activate"
-                  title="Activate"
-                  size="small"
-                >
-                  <RestoreRoundedIcon />
-                </IconButton>
+                ariaLabel="Activate"
+                />
               ) : (
                 <>
-                  <IconButton
-                    onClick={() =>
-                      handleEdit(reason)
-                    }
+                 <PermissionIconButton
+                    app="pos"
+                    module="reasons"
+                    action="edit"
+                    tooltip="Edit"
+                    onClick={() => handleEdit(reason)}
+                    icon={<EditOutlinedIcon />}
                     className="purchase-master-action-button is-edit"
-                    title="Edit"
-                    size="small"
-                  >
-                    <EditOutlinedIcon />
-                  </IconButton>
+                    ariaLabel="Edit"
+                  />
 
-                  <IconButton
-                    onClick={() =>
-                      handleDeactivate(reason)
-                    }
+                  <PermissionIconButton
+                    app="pos"
+                    module="reasons"
+                    action="delete"
+                    tooltip="Deactivate"
+                    onClick={() => handleDeactivate(reason)}
+                    icon={<DeleteOutlineRoundedIcon />}
                     className="purchase-master-action-button is-delete"
-                    title="Deactivate"
-                    size="small"
-                  >
-                    <DeleteOutlineRoundedIcon />
-                  </IconButton>
+                  ariaLabel="Deactivate"
+                  />
                 </>
               )}
             </div>

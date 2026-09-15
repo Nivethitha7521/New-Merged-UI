@@ -47,9 +47,10 @@ const inventoryModules: InventoryModuleItem[] = [
     path: '/yen-inventory/OutletsInventoryManagement',
     icon: <StorefrontOutlined />,
     permissionKeys: [
-      'physicalstockmodification',
-      'physicalstockvariancemodification',
-      'stockledger',
+      'outletphysicalstock',
+      'outletstockvariance',
+      'outletapprovedstock',
+      'outletstockledger',
     ],
   },
   {
@@ -57,8 +58,9 @@ const inventoryModules: InventoryModuleItem[] = [
     path: '/yen-inventory/WarehouseInventoryManagement',
     icon: <WarehouseOutlined />,
     permissionKeys: [
-      'warehousephysicalstockmodification',
-      'warehousephysicalstockvariancemodification',
+      'warehousephysicalstock',
+      'warehousestockvariance',
+      'warehouseapprovedstock',
       'warehousestockledger',
     ],
   },

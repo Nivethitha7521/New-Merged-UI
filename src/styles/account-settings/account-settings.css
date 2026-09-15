@@ -5509,8 +5509,8 @@ body .account-settings-user-credential-modal
 /* Expand the actual data area into all remaining vertical space.
    Only this area scrolls. */
 .account-role-editor-create .account-role-permission-scroll {
-  flex: 1 1 0 !important;
-  height: auto !important;
+flex: 1 1 auto !important;
+height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
   overflow-y: auto !important;
@@ -5551,3 +5551,3028 @@ body .account-settings-user-credential-modal
   }
 }
 
+/* ============================================================
+   ROLE MANAGEMENT - VIEW PERMISSION POPUP FINAL FIX
+   ------------------------------------------------------------
+   CSS ONLY.
+   No API / Redux / Permission / Click functionality changed.
+   ============================================================ */
+
+body .account-settings-role-permission-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 100vw !important;
+  height: 100vh !important;
+
+  padding: 20px !important;
+  margin: 0 !important;
+
+  box-sizing: border-box !important;
+
+  background: rgba(15, 23, 42, 0.55) !important;
+
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+
+/* ============================================================
+   POPUP MAIN CARD
+   ============================================================ */
+
+body .account-settings-role-permission-modal > div {
+  position: relative !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  width: min(900px, calc(100vw - 40px)) !important;
+  max-width: 900px !important;
+
+  height: auto !important;
+  max-height: calc(100vh - 60px) !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+
+  background: #ffffff !important;
+
+  border: 1px solid #d0d5dd !important;
+  border-radius: 12px !important;
+
+  box-shadow:
+    0 24px 48px -12px rgba(16, 24, 40, 0.22),
+    0 4px 8px -2px rgba(16, 24, 40, 0.08) !important;
+}
+
+
+/* ============================================================
+   BLUE HEADER
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child {
+  flex: 0 0 auto !important;
+
+  width: 100% !important;
+
+  padding: 16px 20px !important;
+
+  box-sizing: border-box !important;
+
+  color: #ffffff !important;
+  background: #2563eb !important;
+}
+
+
+/* Top heading row */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:first-child {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  gap: 16px !important;
+
+  width: 100% !important;
+}
+
+
+/* Shield + title section */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:first-child
+  > div:first-child {
+  display: flex !important;
+
+  align-items: center !important;
+
+  gap: 10px !important;
+
+  min-width: 0 !important;
+}
+
+
+/* Shield wrapper */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:first-child
+  > div:first-child
+  > div:first-child {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  flex: 0 0 34px !important;
+
+  width: 34px !important;
+  height: 34px !important;
+
+  padding: 0 !important;
+
+  border-radius: 8px !important;
+
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+
+/* Shield SVG */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  svg {
+  position: static !important;
+
+  display: block !important;
+
+  margin: 0 !important;
+}
+
+
+/* Heading */
+
+body .account-settings-role-permission-modal h3 {
+  margin: 0 !important;
+
+  color: #ffffff !important;
+
+  font-size: 16px !important;
+  font-weight: 700 !important;
+
+  line-height: 1.3 !important;
+}
+
+
+/* Subtitle */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  p {
+  margin: 4px 0 0 !important;
+
+  color: #dbeafe !important;
+
+  font-size: 11px !important;
+
+  line-height: 1.4 !important;
+}
+
+
+/* ============================================================
+   CLOSE X BUTTON
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:first-child
+  > button {
+  position: static !important;
+
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  flex: 0 0 32px !important;
+
+  width: 32px !important;
+  min-width: 32px !important;
+
+  height: 32px !important;
+  min-height: 32px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  color: #ffffff !important;
+
+  background: transparent !important;
+
+  border: 0 !important;
+  border-radius: 7px !important;
+
+  cursor: pointer !important;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:first-child
+  > button:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:first-child
+  > button
+  svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+
+/* ============================================================
+   ROLE NAME / TYPE / STATUS AREA
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:nth-child(2) {
+  display: grid !important;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 12px !important;
+
+  width: 100% !important;
+
+  margin-top: 14px !important;
+}
+
+
+/* Individual info box */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:nth-child(2)
+  > div {
+  display: block !important;
+
+  min-width: 0 !important;
+
+  padding: 8px 10px !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: 7px !important;
+
+  background: rgba(255, 255, 255, 0.10) !important;
+}
+
+
+/* Role info small label */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:nth-child(2)
+  > div
+  > div:first-child {
+  margin: 0 0 3px !important;
+
+  color: #bfdbfe !important;
+
+  font-size: 10px !important;
+  font-weight: 500 !important;
+
+  line-height: 1.2 !important;
+}
+
+
+/* Role info value */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:first-child
+  > div:nth-child(2)
+  > div
+  > div:last-child {
+  color: #ffffff !important;
+
+  font-size: 12px !important;
+  font-weight: 600 !important;
+
+  line-height: 1.3 !important;
+}
+
+
+/* ============================================================
+   PERMISSION TABLE HEADER
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(2) {
+  flex: 0 0 auto !important;
+
+  width: 100% !important;
+
+  background: #f8fafc !important;
+
+  border-bottom: 1px solid #e4e7ec !important;
+}
+
+
+/* Actual grid inside header */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(2)
+  > div {
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(230px, 2fr)
+    repeat(5, minmax(70px, 1fr)) !important;
+
+  align-items: center !important;
+
+  gap: 0 !important;
+
+  width: 100% !important;
+
+  min-height: 38px !important;
+
+  padding: 0 16px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Header cells */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(2)
+  > div
+  > div {
+  display: flex !important;
+
+  align-items: center !important;
+
+  min-width: 0 !important;
+
+  padding: 0 8px !important;
+
+  color: #344054 !important;
+
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+
+  box-sizing: border-box !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(2)
+  > div
+  > div:not(:first-child) {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+
+/* ============================================================
+   SCROLLABLE TABLE BODY
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3) {
+  flex: 1 1 auto !important;
+
+  min-height: 0 !important;
+
+  width: 100% !important;
+
+  padding: 12px 16px !important;
+
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+
+  box-sizing: border-box !important;
+
+  background: #ffffff !important;
+}
+
+
+/* App blocks spacing */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  > div
+  > div {
+  margin-bottom: 10px !important;
+}
+
+
+/* App name header */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  .bg-blue-50 {
+  display: flex !important;
+
+  align-items: center !important;
+
+  min-height: 30px !important;
+
+  margin: 0 0 5px !important;
+
+  padding: 5px 8px !important;
+
+  color: #2563eb !important;
+
+  background: #eff6ff !important;
+
+  border-radius: 5px !important;
+
+  font-size: 11px !important;
+  font-weight: 600 !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   PERMISSION ROWS
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  .grid.grid-cols-\[2fr_repeat\(5\,1fr\)\] {
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(230px, 2fr)
+    repeat(5, minmax(70px, 1fr)) !important;
+
+  align-items: center !important;
+
+  gap: 0 !important;
+
+  width: 100% !important;
+
+  min-height: 34px !important;
+
+  margin-bottom: 4px !important;
+
+  padding: 0 !important;
+
+  box-sizing: border-box !important;
+
+  background: #ffffff !important;
+
+  border: 1px solid #e4e7ec !important;
+  border-radius: 5px !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  .grid.grid-cols-\[2fr_repeat\(5\,1fr\)\]
+  > div {
+  display: flex !important;
+
+  align-items: center !important;
+
+  min-width: 0 !important;
+
+  height: 100% !important;
+
+  margin: 0 !important;
+
+  padding: 6px 8px !important;
+
+  box-sizing: border-box !important;
+
+  font-size: 10.5px !important;
+}
+
+
+/* Module name */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  .grid.grid-cols-\[2fr_repeat\(5\,1fr\)\]
+  > div:first-child {
+  justify-content: flex-start !important;
+
+  color: #344054 !important;
+
+  font-weight: 500 !important;
+
+  overflow: hidden !important;
+
+  text-overflow: ellipsis !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* Permission columns */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  .grid.grid-cols-\[2fr_repeat\(5\,1fr\)\]
+  > div:not(:first-child) {
+  justify-content: center !important;
+
+  text-align: center !important;
+}
+
+
+/* ============================================================
+   CHECK / CROSS BOX
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)
+  .inline-flex {
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  flex: 0 0 18px !important;
+
+  width: 18px !important;
+  min-width: 18px !important;
+
+  height: 18px !important;
+  min-height: 18px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: 4px !important;
+
+  font-size: 11px !important;
+  font-weight: 600 !important;
+
+  line-height: 1 !important;
+}
+
+
+/* Enabled */
+
+body .account-settings-role-permission-modal
+  .bg-green-100 {
+  color: #15803d !important;
+
+  background: #dcfce7 !important;
+
+  border: 1px solid #86efac !important;
+}
+
+
+/* Disabled */
+
+body .account-settings-role-permission-modal
+  .bg-gray-100 {
+  color: #98a2b3 !important;
+
+  background: #f2f4f7 !important;
+
+  border: 1px solid #d0d5dd !important;
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:last-child {
+  flex: 0 0 auto !important;
+
+  width: 100% !important;
+
+  min-height: 48px !important;
+
+  padding: 8px 16px !important;
+
+  box-sizing: border-box !important;
+
+  background: #f9fafb !important;
+
+  border-top: 1px solid #e4e7ec !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:last-child
+  > div {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  width: 100% !important;
+}
+
+
+/* Close footer button */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:last-child
+  button {
+  display: inline-flex !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  min-width: 70px !important;
+
+  height: 30px !important;
+  min-height: 30px !important;
+
+  margin: 0 !important;
+
+  padding: 0 14px !important;
+
+  color: #ffffff !important;
+
+  background: #2563eb !important;
+
+  border: 1px solid #2563eb !important;
+  border-radius: 6px !important;
+
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+
+  cursor: pointer !important;
+
+  transition: background-color 0.2s ease !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:last-child
+  button:hover {
+  background: #1d4ed8 !important;
+
+  border-color: #1d4ed8 !important;
+}
+
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)::-webkit-scrollbar-track {
+  background: #f2f4f7 !important;
+}
+
+
+body .account-settings-role-permission-modal
+  > div
+  > div:nth-child(3)::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+
+  border-radius: 20px !important;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+  body .account-settings-role-permission-modal {
+    padding: 12px !important;
+  }
+
+  body .account-settings-role-permission-modal > div {
+    width: calc(100vw - 24px) !important;
+
+    max-height: calc(100vh - 24px) !important;
+  }
+
+  body .account-settings-role-permission-modal
+    > div
+    > div:nth-child(2)
+    > div,
+  body .account-settings-role-permission-modal
+    > div
+    > div:nth-child(3)
+    .grid.grid-cols-\[2fr_repeat\(5\,1fr\)\] {
+    grid-template-columns:
+      minmax(180px, 2fr)
+      repeat(5, minmax(55px, 1fr)) !important;
+  }
+
+  body .account-settings-role-permission-modal
+    > div
+    > div:nth-child(3) {
+    overflow-x: auto !important;
+  }
+}
+
+
+@media (max-width: 600px) {
+  body .account-settings-role-permission-modal
+    > div
+    > div:first-child
+    > div:nth-child(2) {
+    grid-template-columns: 1fr !important;
+
+    gap: 6px !important;
+  }
+
+  body .account-settings-role-permission-modal
+    > div
+    > div:nth-child(2),
+  body .account-settings-role-permission-modal
+    > div
+    > div:nth-child(3) {
+    min-width: 620px !important;
+  }
+
+  body .account-settings-role-permission-modal > div {
+    overflow-x: auto !important;
+  }
+}
+
+
+
+/* ============================================================
+   CREATE ROLE - FIXED PAGE + SCROLLABLE TABLE + STATIC FOOTER
+   ------------------------------------------------------------
+   Whole page does not scroll.
+   Only permissions table scrolls.
+   Cancel/Create Role always visible.
+   ============================================================ */
+
+
+/* Account Settings content must not create another scrollbar */
+.account-settings-content:has(.account-role-editor-create) {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+
+/* ============================================================
+   CREATE ROLE MAIN PAGE
+   ============================================================ */
+
+.account-settings-role-editor.account-role-editor-create {
+  display: flex !important;
+  flex-direction: column !important;
+
+  width: 100% !important;
+
+  /*
+   Fill the available Account Settings content area.
+   Do NOT use min-height: 100vh because navbar/breadcrumb
+   already occupies part of the browser height.
+  */
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   MAIN WHITE CARD
+   ============================================================ */
+
+.account-role-editor-create .account-role-editor-card {
+  display: flex !important;
+  flex-direction: column !important;
+
+  flex: 1 1 0 !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   NON-SCROLLABLE TOP SECTIONS
+   ============================================================ */
+
+.account-role-editor-create .account-role-editor-header,
+.account-role-editor-create .account-role-editor-fields,
+.account-role-editor-create .account-role-permission-header {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+}
+
+
+/* ============================================================
+   PERMISSION TABLE
+   ONLY THIS SECTION SCROLLS
+   ============================================================ */
+
+.account-role-editor-create .account-role-permission-scroll {
+  position: relative !important;
+
+  flex: 1 1 0 !important;
+
+  width: 100% !important;
+
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  overscroll-behavior: contain !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Permission content itself */
+.account-role-editor-create .account-role-permission-stack {
+  width: 100% !important;
+
+  min-height: auto !important;
+
+  margin: 0 !important;
+
+  padding-bottom: 8px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   STATIC FOOTER
+   ============================================================ */
+
+.account-role-editor-create .account-role-editor-footer {
+  position: relative !important;
+
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+
+  flex: 0 0 52px !important;
+  flex-shrink: 0 !important;
+
+  width: 100% !important;
+
+  height: 52px !important;
+  min-height: 52px !important;
+
+  margin: 0 !important;
+  padding: 8px 14px !important;
+
+  z-index: 50 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  background: #ffffff !important;
+
+  border-top: 1px solid #e5e7eb !important;
+
+  box-shadow: 0 -2px 8px rgba(16, 24, 40, 0.06) !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Footer button container */
+.account-role-editor-create
+  .account-role-editor-footer
+  > div {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  width: 100% !important;
+  max-width: none !important;
+
+  margin: 0 !important;
+
+  gap: 10px !important;
+}
+
+
+/* Footer buttons */
+.account-role-editor-create
+  .account-role-editor-footer
+  button {
+  width: auto !important;
+
+  min-width: 96px !important;
+
+  height: 34px !important;
+  min-height: 34px !important;
+
+  padding: 0 14px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 11px !important;
+  font-weight: 600 !important;
+
+  border-radius: 6px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Old footer spacer must never consume height */
+.account-role-editor-create
+  .account-role-editor-footer
+  + .pb-20 {
+  display: none !important;
+}
+
+
+/* ============================================================
+   TABLE SCROLLBAR
+   ============================================================ */
+
+.account-role-editor-create
+  .account-role-permission-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+
+.account-role-editor-create
+  .account-role-permission-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+
+.account-role-editor-create
+  .account-role-permission-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+
+.account-role-editor-create
+  .account-role-permission-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* ============================================================
+   CREATE ROLE - USE BOTTOM EMPTY SPACE
+   Footer moves down and table gets more visible height
+   ============================================================ */
+
+/* Main create-role area should use the full available height */
+.account-settings-content:has(.account-role-editor-create) {
+  height: calc(100dvh - 82px) !important;
+  min-height: 0 !important;
+
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Create Role page fills full available content height */
+.account-settings-role-editor.account-role-editor-create {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Main card occupies entire remaining height */
+.account-role-editor-create .account-role-editor-card {
+  display: flex !important;
+  flex-direction: column !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Table should take every remaining pixel */
+.account-role-editor-create .account-role-permission-scroll {
+  flex: 1 1 auto !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+
+/* Footer stays at the very bottom */
+.account-role-editor-create .account-role-editor-footer {
+  position: relative !important;
+
+  flex: 0 0 52px !important;
+
+  width: 100% !important;
+
+  height: 52px !important;
+  min-height: 52px !important;
+
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+
+  padding: 8px 14px !important;
+
+  bottom: 0 !important;
+
+  background: #ffffff !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Remove any accidental space after footer */
+.account-role-editor-create .account-role-editor-footer ~ * {
+  margin-bottom: 0 !important;
+}
+
+
+/* Remove bottom gap from account settings area */
+body:has(.account-role-editor-create),
+html:has(.account-role-editor-create) {
+  overflow: hidden !important;
+}
+
+/* ============================================================
+   CREATE ROLE - MAXIMIZE AVAILABLE SCREEN SPACE
+   ------------------------------------------------------------
+   Uses the unused surrounding space.
+   Only permission table scrolls.
+   No functionality / JSX changes.
+   ============================================================ */
+
+
+/* Outer Account Settings content */
+.account-settings-content:has(.account-role-editor-create) {
+  width: calc(100% + 28px) !important;
+
+  height: calc(100dvh - 68px) !important;
+
+  margin:
+    -14px
+    -14px
+    0
+    -14px !important;
+
+  padding: 0 !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Create Role itself */
+.account-settings-role-editor.account-role-editor-create {
+  width: 100% !important;
+  max-width: none !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Main white card fills the new available area */
+.account-role-editor-create .account-role-editor-card {
+  width: 100% !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+
+  flex: 1 1 auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Keep header / form / permission heading fixed */
+.account-role-editor-create .account-role-editor-header,
+.account-role-editor-create .account-role-editor-fields,
+.account-role-editor-create .account-role-permission-header,
+.account-role-editor-create .account-role-editor-footer {
+  flex-shrink: 0 !important;
+}
+
+
+/* Give all newly available space to the table */
+.account-role-editor-create .account-role-permission-scroll {
+  flex: 1 1 auto !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+
+/* Don't keep artificial space inside table */
+.account-role-editor-create .account-role-permission-stack {
+  min-height: 100% !important;
+
+  padding-bottom: 4px !important;
+}
+
+
+/* Footer always stays visible */
+.account-role-editor-create .account-role-editor-footer {
+  position: relative !important;
+
+  flex: 0 0 48px !important;
+
+  width: 100% !important;
+
+  height: 48px !important;
+  min-height: 48px !important;
+
+  margin: 0 !important;
+
+  padding: 7px 14px !important;
+
+  bottom: auto !important;
+
+  background: #ffffff !important;
+
+  border-top: 1px solid #e5e7eb !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Prevent old spacer from returning */
+.account-role-editor-create
+  .account-role-editor-footer
+  + .pb-20 {
+  display: none !important;
+}
+
+
+/* Page itself should never scroll */
+html:has(.account-role-editor-create),
+body:has(.account-role-editor-create) {
+  overflow: hidden !important;
+}
+
+/* ============================================================
+   EDIT ROLE - MATCH CREATE ROLE PRESENTATION
+   CSS only. Mirrors Create Role layout without changing logic.
+   ============================================================ */
+/* =========================================================
+   EDIT ROLE — OLD WORKING UI PARITY (SCOPED)
+   ---------------------------------------------------------
+   Restores the old Edit Role presentation without relying
+   on Tailwind utility generation.  This block is intentionally
+   scoped to .account-role-editor-edit, so no business logic,
+   API, Redux, routing, Edit Role, or other Account Settings UI
+   is changed.
+   ========================================================= */
+
+.account-settings-role-editor.account-role-editor-edit {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: calc(100dvh - 112px) !important;
+  min-height: 560px !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #f9fafb !important;
+  box-sizing: border-box !important;
+}
+
+.account-role-editor-edit .account-role-editor-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Old header sizing */
+.account-role-editor-edit .account-role-editor-header {
+  position: relative !important;
+  flex: 0 0 58px !important;
+  min-height: 58px !important;
+  padding: 8px 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+.account-role-editor-edit .account-role-back-button {
+  min-width: 110px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  color: #2563eb !important;
+  background: #ffffff !important;
+  border: 1px solid #2563eb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-edit .account-role-back-button:hover {
+  background: #eff6ff !important;
+}
+
+.account-role-editor-edit .account-role-back-button svg {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  flex: 0 0 16px !important;
+}
+
+.account-role-editor-edit .account-role-editor-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  color: #000000 !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 28px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+/* Old two-field section */
+.account-role-editor-edit .account-role-editor-fields {
+  flex: 0 0 auto !important;
+  padding: 12px 24px !important;
+  background: #ffffff !important;
+  border-bottom: 0 !important;
+}
+
+.account-role-editor-edit .account-role-editor-fields-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.account-role-editor-edit .account-role-editor-field label {
+  display: block !important;
+  margin: 0 0 2px !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field p {
+  min-height: 18px !important;
+  margin: 0 0 8px !important;
+  color: #6b7280 !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field select,
+.account-role-editor-edit .account-role-editor-field input {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 8px !important;
+  box-sizing: border-box !important;
+  color: #111827 !important;
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  outline: none !important;
+}
+
+.account-role-editor-edit .account-role-editor-field select:focus,
+.account-role-editor-edit .account-role-editor-field input:focus {
+  border-color: #93c5fd !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35) !important;
+}
+
+/* Old permission table header */
+.account-role-editor-edit .account-role-permission-grid {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(300px, 2fr) repeat(6, minmax(72px, 1fr)) !important;
+  align-items: center !important;
+  column-gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+.account-role-editor-edit .account-role-permission-header {
+  flex: 0 0 42px !important;
+  min-height: 42px !important;
+  padding: 8px 24px !important;
+  color: #000000 !important;
+  background: #f9fafb !important;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.account-role-editor-edit .account-role-permission-header > div:first-child {
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+.account-role-editor-edit .account-role-permission-header > div:not(:first-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  color: #000000 !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+
+/* The old Tailwind w-4/h-4 help icon was lost after merge. */
+.account-role-editor-edit .account-role-permission-header > div:not(:first-child) > span:last-child {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: #4b5563 !important;
+  background: transparent !important;
+  border: 1px solid #9ca3af !important;
+  border-radius: 9999px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+.account-role-editor-edit .account-role-permission-header > div:not(:first-child) > span:last-child:hover {
+  background: #e5e7eb !important;
+}
+
+/* Scroll body */
+.account-role-editor-edit .account-role-permission-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 0 24px 8px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
+}
+
+.account-role-editor-edit .account-role-permission-stack {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 8px 0 72px !important;
+}
+
+.account-role-editor-edit .account-role-app {
+  margin: 0 0 12px !important;
+}
+
+.account-role-editor-edit .account-role-app-title {
+  min-height: 40px !important;
+  margin: 0 0 8px !important;
+  padding: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  color: #2563eb !important;
+  background: #eff6ff !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-edit .account-role-module {
+  width: 100% !important;
+  margin: 0 0 8px !important;
+  overflow: visible !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+}
+
+.account-role-editor-edit .account-role-module-header {
+  min-height: 42px !important;
+  padding: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 20px !important;
+  cursor: pointer !important;
+}
+
+.account-role-editor-edit .account-role-module-header:hover {
+  background: #f9fafb !important;
+}
+
+.account-role-editor-edit .account-role-module-header > div {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+
+/* Module select-all checkbox: old w-5 h-5 */
+.account-role-editor-edit .account-role-module-header > div > button:first-child {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0 12px 0 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: transparent !important;
+  background: #ffffff !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.account-role-editor-edit .account-role-module-header > div > button:first-child.bg-blue-600 {
+  color: #ffffff !important;
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.account-role-editor-edit .account-role-module-header > div > button:first-child:hover {
+  border-color: #3b82f6 !important;
+}
+
+/* Module information icon */
+.account-role-editor-edit .account-role-module-header span.inline-flex,
+.account-role-editor-edit .account-role-permission-row span.inline-flex {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  margin-left: 8px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: #4b5563 !important;
+  background: transparent !important;
+  border: 1px solid #9ca3af !important;
+  border-radius: 9999px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+/* Right-side expand/collapse arrow */
+.account-role-editor-edit .account-role-module-header > button:last-child {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #6b7280 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.account-role-editor-edit .account-role-module-header > button:last-child:hover {
+  color: #374151 !important;
+  background: transparent !important;
+}
+
+.account-role-editor-edit .account-role-module-header > button:last-child svg {
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  display: block !important;
+}
+
+.account-role-editor-edit .account-role-module-header > button:last-child svg.rotate-180 {
+  transform: rotate(180deg) !important;
+}
+
+/* Old submodule rows */
+.account-role-editor-edit .account-role-permission-row {
+  min-height: 42px !important;
+  padding: 8px !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+}
+
+.account-role-editor-edit .account-role-permission-row:last-child {
+  border-bottom: 0 !important;
+}
+
+.account-role-editor-edit .account-role-permission-row:hover {
+  background: #f9fafb !important;
+}
+
+.account-role-editor-edit .account-role-permission-row > div:first-child {
+  min-width: 0 !important;
+  padding-left: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  color: #000000 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Old action cells: w-6 h-5; remove native merged-app button chrome. */
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > button,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > div > button {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  color: #4b5563 !important;
+  background: #e5e7eb !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+}
+
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > button.bg-blue-600,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600 {
+  color: #ffffff !important;
+  background: #2563eb !important;
+}
+
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > button.bg-blue-600:hover,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600:hover {
+  background: #1d4ed8 !important;
+}
+
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > button.bg-gray-200:hover,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > div > button.bg-gray-200:hover {
+  background: #d1d5db !important;
+}
+
+/* Edit-action popover: keep the old compact look. */
+.account-role-editor-edit .account-role-permission-row .relative {
+  position: relative !important;
+}
+
+.account-role-editor-edit .account-role-permission-row .absolute.z-50 {
+  position: absolute !important;
+  z-index: 50 !important;
+  top: 24px !important;
+  left: 50% !important;
+  width: 176px !important;
+  padding: 8px !important;
+  transform: translateX(-50%) !important;
+  color: #111827 !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Old footer spacing/buttons; sticky is used so it remains inside the merged shell. */
+.account-role-editor-edit .account-role-editor-footer {
+  position: sticky !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+  flex: 0 0 72px !important;
+  width: 100% !important;
+  min-height: 72px !important;
+  padding: 16px 24px !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer > div {
+  width: 100% !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button {
+  min-width: 110px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 20px !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button:first-child {
+  color: #374151 !important;
+  background: #ffffff !important;
+  border: 2px solid #9ca3af !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button:first-child:hover {
+  background: #f3f4f6 !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button:last-child {
+  color: #ffffff !important;
+  background: #2563eb !important;
+  border: 1px solid #2563eb !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button:last-child:hover {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Old spacer should not create a second blank band under the footer. */
+.account-role-editor-edit .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+@media (max-width: 1100px) {
+  .account-role-editor-edit .account-role-permission-grid {
+    grid-template-columns: minmax(260px, 2fr) repeat(6, minmax(68px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .account-role-editor-edit .account-role-editor-fields-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .account-role-editor-edit .account-role-editor-field p {
+    min-height: 0 !important;
+  }
+
+  .account-role-editor-edit .account-role-permission-scroll {
+    overflow-x: auto !important;
+  }
+
+  .account-role-editor-edit .account-role-permission-grid {
+    min-width: 900px !important;
+  }
+}
+/* =========================================================
+   EDIT ROLE — LAPTOP 100% COMPACT + REMOVE MODULE DIVIDER
+   Edit Role only
+   ========================================================= */
+
+/* 1. Remove black line below Purchase Master */
+.account-role-editor-edit .account-role-module > .border-t {
+  border-top: 0 !important;
+}
+
+/* 2. Compact Edit Role UI at browser 100% */
+.account-role-editor-edit .account-role-editor-header {
+  flex-basis: 48px !important;
+  min-height: 48px !important;
+  padding: 6px 20px !important;
+}
+
+.account-role-editor-edit .account-role-back-button {
+  min-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 15px !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-edit .account-role-back-button svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+}
+
+.account-role-editor-edit .account-role-editor-title {
+  font-size: 17px !important;
+  line-height: 22px !important;
+}
+
+.account-role-editor-edit .account-role-editor-fields {
+  padding: 10px 20px !important;
+}
+
+.account-role-editor-edit .account-role-editor-fields-grid {
+  gap: 10px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field label {
+  margin-bottom: 1px !important;
+  font-size: 12px !important;
+  line-height: 17px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field p {
+  min-height: 15px !important;
+  margin-bottom: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field select,
+.account-role-editor-edit .account-role-editor-field input {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 6px 8px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-edit .account-role-permission-header {
+  flex-basis: 35px !important;
+  min-height: 35px !important;
+  padding: 6px 20px !important;
+  font-size: 12px !important;
+}
+
+.account-role-editor-edit .account-role-permission-header > div:first-child,
+.account-role-editor-edit .account-role-permission-header > div:not(:first-child) {
+  font-size: 12px !important;
+}
+
+.account-role-editor-edit
+  .account-role-permission-header
+  > div:not(:first-child)
+  > span:last-child {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-edit .account-role-permission-scroll {
+  padding: 0 20px 6px !important;
+}
+
+.account-role-editor-edit .account-role-permission-stack {
+  padding: 6px 0 58px !important;
+}
+
+.account-role-editor-edit .account-role-app {
+  margin-bottom: 9px !important;
+}
+
+.account-role-editor-edit .account-role-app-title {
+  min-height: 33px !important;
+  margin-bottom: 6px !important;
+  padding: 6px 7px !important;
+  font-size: 12px !important;
+  line-height: 17px !important;
+}
+
+.account-role-editor-edit .account-role-module {
+  margin-bottom: 6px !important;
+}
+
+.account-role-editor-edit .account-role-module-header {
+  min-height: 35px !important;
+  padding: 6px 7px !important;
+  font-size: 12px !important;
+  line-height: 17px !important;
+}
+
+.account-role-editor-edit
+  .account-role-module-header
+  > div
+  > button:first-child {
+  width: 17px !important;
+  min-width: 17px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  margin-right: 10px !important;
+  border-width: 1.5px !important;
+  font-size: 10px !important;
+}
+
+.account-role-editor-edit .account-role-module-header span.inline-flex,
+.account-role-editor-edit .account-role-permission-row span.inline-flex {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+  margin-left: 6px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-edit .account-role-module-header > button:last-child,
+.account-role-editor-edit .account-role-module-header > button:last-child svg {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+}
+
+.account-role-editor-edit .account-role-permission-row {
+  min-height: 34px !important;
+  padding: 6px 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+.account-role-editor-edit
+  .account-role-permission-row
+  > div:first-child {
+  padding-left: 26px !important;
+  font-size: 12px !important;
+}
+
+.account-role-editor-edit
+  .account-role-permission-row
+  > div:not(:first-child)
+  > button,
+.account-role-editor-edit
+  .account-role-permission-row
+  > div:not(:first-child)
+  > div
+  > button {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  font-size: 10px !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer {
+  flex-basis: 58px !important;
+  min-height: 58px !important;
+  padding: 10px 20px !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer > div {
+  gap: 10px !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button {
+  min-width: 92px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 15px !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+}
+
+/* =========================================================
+   EDIT ROLE — 100% LAPTOP COMPACT VIEW + FIXED SMALL FOOTER
+   Scope: Edit Role only. Presentation only.
+   ========================================================= */
+
+.account-settings-role-editor.account-role-editor-edit {
+  height: calc(100dvh - 112px) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 112px) !important;
+  overflow: hidden !important;
+}
+
+.account-role-editor-edit .account-role-editor-card {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.account-role-editor-edit .account-role-editor-header {
+  flex: 0 0 40px !important;
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 4px 14px !important;
+}
+
+.account-role-editor-edit .account-role-back-button {
+  min-width: 78px !important;
+  width: auto !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  gap: 5px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit .account-role-back-button svg {
+  width: 12px !important;
+  min-width: 12px !important;
+  height: 12px !important;
+}
+
+.account-role-editor-edit .account-role-editor-title {
+  font-size: 14px !important;
+  line-height: 18px !important;
+}
+
+.account-role-editor-edit .account-role-editor-fields {
+  padding: 7px 14px 8px !important;
+}
+
+.account-role-editor-edit .account-role-editor-fields-grid {
+  gap: 10px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field label {
+  margin-bottom: 1px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field p {
+  min-height: 13px !important;
+  margin-top: 1px !important;
+  margin-bottom: 4px !important;
+  font-size: 9.5px !important;
+  line-height: 13px !important;
+}
+
+.account-role-editor-edit .account-role-editor-field select,
+.account-role-editor-edit .account-role-editor-field input {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit .account-role-permission-header {
+  flex: 0 0 31px !important;
+  min-height: 31px !important;
+  height: 31px !important;
+  padding: 4px 14px !important;
+  font-size: 10.5px !important;
+}
+
+.account-role-editor-edit .account-role-permission-header > div:first-child,
+.account-role-editor-edit .account-role-permission-header > div:not(:first-child) {
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit
+  .account-role-permission-header
+  > div:not(:first-child)
+  > span:last-child {
+  width: 13px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  min-height: 13px !important;
+  font-size: 8px !important;
+}
+
+.account-role-editor-edit .account-role-permission-scroll {
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 0 14px 4px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.account-role-editor-edit .account-role-permission-stack {
+  padding: 5px 0 8px !important;
+}
+
+.account-role-editor-edit .account-role-app {
+  margin-bottom: 6px !important;
+}
+
+.account-role-editor-edit .account-role-app-title {
+  min-height: 29px !important;
+  margin-bottom: 5px !important;
+  padding: 5px 7px !important;
+  border-radius: 5px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit .account-role-module {
+  margin-bottom: 5px !important;
+}
+
+.account-role-editor-edit .account-role-module > .border-t {
+  border-top: 0 !important;
+}
+
+.account-role-editor-edit .account-role-module-header {
+  min-height: 31px !important;
+  height: 31px !important;
+  padding: 4px 7px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+}
+
+.account-role-editor-edit
+  .account-role-module-header
+  > div
+  > button:first-child {
+  width: 16px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  margin-right: 8px !important;
+  padding: 0 !important;
+  border-width: 1px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-edit .account-role-module-header span.inline-flex,
+.account-role-editor-edit .account-role-permission-row span.inline-flex {
+  width: 13px !important;
+  min-width: 13px !important;
+  height: 13px !important;
+  min-height: 13px !important;
+  margin-left: 5px !important;
+  font-size: 8px !important;
+}
+
+.account-role-editor-edit .account-role-module-header > button:last-child,
+.account-role-editor-edit .account-role-module-header > button:last-child svg {
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px !important;
+  min-height: 14px !important;
+}
+
+.account-role-editor-edit .account-role-permission-row {
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 4px 7px !important;
+  font-size: 10px !important;
+  line-height: 13px !important;
+}
+
+.account-role-editor-edit
+  .account-role-permission-row
+  > div:first-child {
+  padding-left: 24px !important;
+  font-size: 10px !important;
+}
+
+.account-role-editor-edit
+  .account-role-permission-row
+  > div:not(:first-child)
+  > button,
+.account-role-editor-edit
+  .account-role-permission-row
+  > div:not(:first-child)
+  > div
+  > button {
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 17px !important;
+  min-height: 17px !important;
+  padding: 0 !important;
+  border-radius: 4px !important;
+  font-size: 9px !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 50 !important;
+  flex: 0 0 44px !important;
+  width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 6px 14px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border-top: 1px solid #e5e7eb !important;
+  box-shadow: 0 -2px 6px rgba(16, 24, 40, 0.04) !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer > div {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  gap: 7px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer button {
+  min-width: 80px !important;
+  width: auto !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 11px !important;
+  border-radius: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 14px !important;
+  font-weight: 600 !important;
+}
+
+.account-role-editor-edit .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+/* =========================================================
+   EDIT ROLE — USE FULL AVAILABLE ACCOUNT SETTINGS SPACE
+   Scope: Edit Role only. No logic / API changes.
+   ========================================================= */
+
+/* Remove the unused outer gap around only the Edit Role editor.
+   This expands into the existing top/left/right padding without
+   changing the inner UI structure. */
+.account-settings-content:has(.account-role-editor-edit) {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.account-settings-role-editor.account-role-editor-edit {
+  width: calc(100% + 32px) !important;
+  max-width: none !important;
+
+  /* consume the unused outer spacing */
+  margin: -16px -16px 0 -16px !important;
+  padding: 0 !important;
+
+  /* use the lower free area too */
+  height: calc(100dvh - 20px) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 20px) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Card must stretch through the entire editor height. */
+.account-role-editor-edit .account-role-editor-card {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Header and role fields keep their current compact UI.
+   They must not consume the newly available data height. */
+.account-role-editor-edit .account-role-editor-header,
+.account-role-editor-edit .account-role-editor-fields,
+.account-role-editor-edit .account-role-permission-header,
+.account-role-editor-edit .account-role-editor-footer {
+  flex-shrink: 0 !important;
+}
+
+/* Expand the actual data area into all remaining vertical space.
+   Only this area scrolls. */
+.account-role-editor-edit .account-role-permission-scroll {
+flex: 1 1 auto !important;
+height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Do not reserve artificial empty space below the permission list. */
+.account-role-editor-edit .account-role-permission-stack {
+  min-height: 100% !important;
+  padding-bottom: 6px !important;
+}
+
+/* Footer stays visible while the permissions/modules scroll. */
+.account-role-editor-edit .account-role-editor-footer {
+  position: relative !important;
+  bottom: auto !important;
+  z-index: 60 !important;
+  flex: 0 0 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 5px 12px !important;
+  margin: 0 !important;
+  background: #fff !important;
+}
+
+/* Keep only the permission list scrolling; remove the old spacer. */
+.account-role-editor-edit .account-role-editor-footer + .pb-20 {
+  display: none !important;
+}
+
+/* On smaller laptop widths, don't force horizontal overflow. */
+@media (max-width: 1366px) {
+  .account-settings-role-editor.account-role-editor-edit {
+    width: calc(100% + 24px) !important;
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    margin-top: -12px !important;
+  }
+}
+
+/* ============================================================
+   EDIT ROLE - FIXED PAGE + SCROLLABLE TABLE + STATIC FOOTER
+   ------------------------------------------------------------
+   Whole page does not scroll.
+   Only permissions table scrolls.
+   Cancel/Edit Role always visible.
+   ============================================================ */
+
+
+/* Account Settings content must not create another scrollbar */
+.account-settings-content:has(.account-role-editor-edit) {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+
+/* ============================================================
+   EDIT ROLE MAIN PAGE
+   ============================================================ */
+
+.account-settings-role-editor.account-role-editor-edit {
+  display: flex !important;
+  flex-direction: column !important;
+
+  width: 100% !important;
+
+  /*
+   Fill the available Account Settings content area.
+   Do NOT use min-height: 100vh because navbar/breadcrumb
+   already occupies part of the browser height.
+  */
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   MAIN WHITE CARD
+   ============================================================ */
+
+.account-role-editor-edit .account-role-editor-card {
+  display: flex !important;
+  flex-direction: column !important;
+
+  flex: 1 1 0 !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   NON-SCROLLABLE TOP SECTIONS
+   ============================================================ */
+
+.account-role-editor-edit .account-role-editor-header,
+.account-role-editor-edit .account-role-editor-fields,
+.account-role-editor-edit .account-role-permission-header {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+}
+
+
+/* ============================================================
+   PERMISSION TABLE
+   ONLY THIS SECTION SCROLLS
+   ============================================================ */
+
+.account-role-editor-edit .account-role-permission-scroll {
+  position: relative !important;
+
+  flex: 1 1 0 !important;
+
+  width: 100% !important;
+
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+
+  overscroll-behavior: contain !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Permission content itself */
+.account-role-editor-edit .account-role-permission-stack {
+  width: 100% !important;
+
+  min-height: auto !important;
+
+  margin: 0 !important;
+
+  padding-bottom: 8px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ============================================================
+   STATIC FOOTER
+   ============================================================ */
+
+.account-role-editor-edit .account-role-editor-footer {
+  position: relative !important;
+
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+
+  flex: 0 0 52px !important;
+  flex-shrink: 0 !important;
+
+  width: 100% !important;
+
+  height: 52px !important;
+  min-height: 52px !important;
+
+  margin: 0 !important;
+  padding: 8px 14px !important;
+
+  z-index: 50 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  background: #ffffff !important;
+
+  border-top: 1px solid #e5e7eb !important;
+
+  box-shadow: 0 -2px 8px rgba(16, 24, 40, 0.06) !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Footer button container */
+.account-role-editor-edit
+  .account-role-editor-footer
+  > div {
+  display: flex !important;
+
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  width: 100% !important;
+  max-width: none !important;
+
+  margin: 0 !important;
+
+  gap: 10px !important;
+}
+
+
+/* Footer buttons */
+.account-role-editor-edit
+  .account-role-editor-footer
+  button {
+  width: auto !important;
+
+  min-width: 96px !important;
+
+  height: 34px !important;
+  min-height: 34px !important;
+
+  padding: 0 14px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 11px !important;
+  font-weight: 600 !important;
+
+  border-radius: 6px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Old footer spacer must never consume height */
+.account-role-editor-edit
+  .account-role-editor-footer
+  + .pb-20 {
+  display: none !important;
+}
+
+
+/* ============================================================
+   TABLE SCROLLBAR
+   ============================================================ */
+
+.account-role-editor-edit
+  .account-role-permission-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+
+.account-role-editor-edit
+  .account-role-permission-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+
+.account-role-editor-edit
+  .account-role-permission-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+
+.account-role-editor-edit
+  .account-role-permission-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* ============================================================
+   EDIT ROLE - USE BOTTOM EMPTY SPACE
+   Footer moves down and table gets more visible height
+   ============================================================ */
+
+/* Main create-role area should use the full available height */
+.account-settings-content:has(.account-role-editor-edit) {
+  height: calc(100dvh - 82px) !important;
+  min-height: 0 !important;
+
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Edit Role page fills full available content height */
+.account-settings-role-editor.account-role-editor-edit {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Main card occupies entire remaining height */
+.account-role-editor-edit .account-role-editor-card {
+  display: flex !important;
+  flex-direction: column !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+/* Table should take every remaining pixel */
+.account-role-editor-edit .account-role-permission-scroll {
+  flex: 1 1 auto !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+
+/* Footer stays at the very bottom */
+.account-role-editor-edit .account-role-editor-footer {
+  position: relative !important;
+
+  flex: 0 0 52px !important;
+
+  width: 100% !important;
+
+  height: 52px !important;
+  min-height: 52px !important;
+
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+
+  padding: 8px 14px !important;
+
+  bottom: 0 !important;
+
+  background: #ffffff !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Remove any accidental space after footer */
+.account-role-editor-edit .account-role-editor-footer ~ * {
+  margin-bottom: 0 !important;
+}
+
+
+/* Remove bottom gap from account settings area */
+body:has(.account-role-editor-edit),
+html:has(.account-role-editor-edit) {
+  overflow: hidden !important;
+}
+
+/* ============================================================
+   EDIT ROLE - MAXIMIZE AVAILABLE SCREEN SPACE
+   ------------------------------------------------------------
+   Uses the unused surrounding space.
+   Only permission table scrolls.
+   No functionality / JSX changes.
+   ============================================================ */
+
+
+/* Outer Account Settings content */
+.account-settings-content:has(.account-role-editor-edit) {
+  width: calc(100% + 28px) !important;
+
+  height: calc(100dvh - 68px) !important;
+
+  margin:
+    -14px
+    -14px
+    0
+    -14px !important;
+
+  padding: 0 !important;
+
+  min-width: 0 !important;
+  min-height: 0 !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Edit Role itself */
+.account-settings-role-editor.account-role-editor-edit {
+  width: 100% !important;
+  max-width: none !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Main white card fills the new available area */
+.account-role-editor-edit .account-role-editor-card {
+  width: 100% !important;
+
+  height: 100% !important;
+  min-height: 0 !important;
+
+  flex: 1 1 auto !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Keep header / form / permission heading fixed */
+.account-role-editor-edit .account-role-editor-header,
+.account-role-editor-edit .account-role-editor-fields,
+.account-role-editor-edit .account-role-permission-header,
+.account-role-editor-edit .account-role-editor-footer {
+  flex-shrink: 0 !important;
+}
+
+
+/* Give all newly available space to the table */
+.account-role-editor-edit .account-role-permission-scroll {
+  flex: 1 1 auto !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+
+/* Don't keep artificial space inside table */
+.account-role-editor-edit .account-role-permission-stack {
+  min-height: 100% !important;
+
+  padding-bottom: 4px !important;
+}
+
+
+/* Footer always stays visible */
+.account-role-editor-edit .account-role-editor-footer {
+  position: relative !important;
+
+  flex: 0 0 48px !important;
+
+  width: 100% !important;
+
+  height: 48px !important;
+  min-height: 48px !important;
+
+  margin: 0 !important;
+
+  padding: 7px 14px !important;
+
+  bottom: auto !important;
+
+  background: #ffffff !important;
+
+  border-top: 1px solid #e5e7eb !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* Prevent old spacer from returning */
+.account-role-editor-edit
+  .account-role-editor-footer
+  + .pb-20 {
+  display: none !important;
+}
+
+
+/* Page itself should never scroll */
+html:has(.account-role-editor-edit),
+body:has(.account-role-editor-edit) {
+  overflow: hidden !important;
+}
+
+/* ========================================================================
+   ROLE MANAGEMENT - DISPLAY SETTINGS ACCENT
+   Create Role + Edit Role use the global YEN ERP accent selected in
+   Display Settings. Presentation only; no role/permission logic changes.
+   ======================================================================== */
+
+.account-role-editor-create .bg-blue-600,
+.account-role-editor-edit .bg-blue-600 {
+  background-color: var(--erp-accent, #155eef) !important;
+}
+
+.account-role-editor-create .bg-blue-700,
+.account-role-editor-edit .bg-blue-700,
+.account-role-editor-create .hover\:bg-blue-700:hover,
+.account-role-editor-edit .hover\:bg-blue-700:hover {
+  background-color: var(--erp-accent-hover, #124fc9) !important;
+}
+
+.account-role-editor-create .bg-blue-50,
+.account-role-editor-edit .bg-blue-50,
+.account-role-editor-create .hover\:bg-blue-50:hover,
+.account-role-editor-edit .hover\:bg-blue-50:hover {
+  background-color: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.account-role-editor-create .text-blue-600,
+.account-role-editor-edit .text-blue-600,
+.account-role-editor-create .account-role-back-button,
+.account-role-editor-edit .account-role-back-button,
+.account-role-editor-create .account-role-app-title,
+.account-role-editor-edit .account-role-app-title {
+  color: var(--erp-accent, #155eef) !important;
+}
+
+.account-role-editor-create .border-blue-600,
+.account-role-editor-edit .border-blue-600,
+.account-role-editor-create .account-role-back-button,
+.account-role-editor-edit .account-role-back-button {
+  border-color: var(--erp-accent, #155eef) !important;
+}
+
+.account-role-editor-create .border-blue-500,
+.account-role-editor-edit .border-blue-500,
+.account-role-editor-create .border-blue-300,
+.account-role-editor-edit .border-blue-300,
+.account-role-editor-create .focus\:border-blue-500:focus,
+.account-role-editor-edit .focus\:border-blue-500:focus {
+  border-color: var(--erp-accent-border, var(--erp-accent, #155eef)) !important;
+}
+
+.account-role-editor-create .focus\:ring-blue-500:focus,
+.account-role-editor-edit .focus\:ring-blue-500:focus,
+.account-role-editor-create .ring-blue-500,
+.account-role-editor-edit .ring-blue-500 {
+  --tw-ring-color: var(--erp-accent-ring, rgba(21, 94, 239, 0.18)) !important;
+}
+
+/* Explicit role controls that older CSS forced to #2563eb/#1d4ed8. */
+.account-role-editor-create .account-role-reset-button,
+.account-role-editor-edit .account-role-reset-button,
+.account-role-editor-create .account-role-editor-footer .bg-blue-600,
+.account-role-editor-edit .account-role-editor-footer .bg-blue-600 {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #ffffff) !important;
+}
+
+.account-role-editor-create .account-role-reset-button:hover,
+.account-role-editor-edit .account-role-reset-button:hover,
+.account-role-editor-create .account-role-editor-footer .hover\:bg-blue-700:hover,
+.account-role-editor-edit .account-role-editor-footer .hover\:bg-blue-700:hover {
+  background: var(--erp-accent-hover, #124fc9) !important;
+  border-color: var(--erp-accent-hover, #124fc9) !important;
+}
+
+/* Checked module/action buttons inherit the selected Display Settings colour. */
+.account-role-editor-create button.bg-blue-600,
+.account-role-editor-edit button.bg-blue-600 {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #ffffff) !important;
+}
+
+/* App headings use the selected accent + its soft surface. */
+.account-role-editor-create .account-role-app-title,
+.account-role-editor-edit .account-role-app-title {
+  background: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+/* ========================================================================
+   ROLE CREATE/EDIT - FINAL DISPLAY SETTINGS ACCENT OVERRIDES
+   These selectors intentionally match the higher-specificity legacy rules
+   that previously forced #2563eb/#1d4ed8 on checked boxes and footer CTA.
+   ======================================================================== */
+
+/* Parent/module checked box */
+.account-role-editor-create .account-role-module-header > div > button:first-child.bg-blue-600,
+.account-role-editor-edit .account-role-module-header > div > button:first-child.bg-blue-600 {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #ffffff) !important;
+}
+
+.account-role-editor-create .account-role-module-header > div > button:first-child.bg-blue-600:hover,
+.account-role-editor-edit .account-role-module-header > div > button:first-child.bg-blue-600:hover {
+  background: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+  border-color: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+}
+
+/* Read/Add/Edit/Delete/Hide/Approve checked buttons */
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > button.bg-blue-600,
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > button.bg-blue-600,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600 {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #ffffff) !important;
+}
+
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > button.bg-blue-600:hover,
+.account-role-editor-create .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600:hover,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > button.bg-blue-600:hover,
+.account-role-editor-edit .account-role-permission-row > div:not(:first-child) > div > button.bg-blue-600:hover {
+  background: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+  border-color: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+}
+
+/* Create Role / Update Role footer CTA */
+.account-role-editor-create .account-role-editor-footer button:last-child,
+.account-role-editor-edit .account-role-editor-footer button:last-child {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #ffffff) !important;
+}
+
+.account-role-editor-create .account-role-editor-footer button:last-child:hover,
+.account-role-editor-edit .account-role-editor-footer button:last-child:hover {
+  background: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+  border-color: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+}
+
+/* Reset button on Edit Role */
+.account-role-editor-create .account-role-reset-button,
+.account-role-editor-edit .account-role-reset-button {
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  color: var(--erp-accent-contrast, #ffffff) !important;
+}
+
+.account-role-editor-create .account-role-reset-button:hover,
+.account-role-editor-edit .account-role-reset-button:hover {
+  background: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+  border-color: var(--erp-accent-hover, var(--erp-accent, #155eef)) !important;
+}

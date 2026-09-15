@@ -738,14 +738,14 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
   };
 
   return (
-    <div className={cn("w-full h-full min-h-0 flex flex-col bg-white border border-border rounded-xl overflow-hidden", isFullScreen ? "shadow-2xl" : "shadow-sm")}>
+    <div className={cn("inventory-approved-stock-table w-full h-full min-h-0 flex flex-col bg-white border border-border rounded-xl overflow-hidden", isFullScreen ? "shadow-2xl" : "shadow-sm")}>
       {/* ── Filter Bar ── */}
-      <div className="shrink-0 border-b border-border bg-surface-muted">
+      <div className="inventory-approved-toolbar shrink-0 border-b border-border bg-surface-muted">
         {/* Top row: Status toggle + filter toggle */}
-        <div className="flex items-center justify-between px-3 py-1.5">
+        <div className="inventory-approved-toolbar-top flex items-center justify-between px-3 py-1.5">
           <div className="flex items-center gap-2">
             {/* Status Toggle */}
-            <div className="flex items-center rounded-lg border border-border overflow-hidden">
+            <div className="inventory-approved-status-toggle flex items-center rounded-lg border border-border overflow-hidden">
               <button
                 type="button"
                 onClick={() => handleStatusToggle("approved")}
@@ -776,7 +776,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
             <button
               type="button"
               onClick={() => setFiltersVisible((v) => !v)}
-              className="flex items-center gap-1.5 text-[11px] font-extrabold text-text-secondary hover:text-text-primary transition-colors"
+              className="inventory-approved-filter-toggle flex items-center gap-1.5 text-[11px] font-extrabold text-text-secondary hover:text-text-primary transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
@@ -803,8 +803,8 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
 
         {/* Filter inputs */}
         {filtersVisible && (
-          <div className="flex items-end gap-2 px-3 pb-2 flex-wrap">
-            <div className="flex flex-col gap-0.5">
+          <div className="inventory-approved-filter-row flex items-end gap-2 px-3 pb-2 flex-wrap">
+            <div className="inventory-approved-filter-field flex flex-col gap-0.5">
               <label className="text-[10px] font-bold text-text-muted">Item Name</label>
               <input
                 type="text"
@@ -818,7 +818,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
 
             {/* Approved By — only for approved status */}
             {!isPending && (
-              <div className="flex flex-col gap-0.5">
+              <div className="inventory-approved-filter-field flex flex-col gap-0.5">
                 <label className="text-[10px] font-bold text-text-muted">Approved By</label>
                 <input
                   type="text"
@@ -831,7 +831,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
               </div>
             )}
 
-            <div className="flex flex-col gap-0.5">
+            <div className="inventory-approved-filter-field flex flex-col gap-0.5">
               <label className="text-[10px] font-bold text-text-muted">From</label>
               <input
                 type="date"
@@ -841,7 +841,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
               />
             </div>
 
-            <div className="flex flex-col gap-0.5">
+            <div className="inventory-approved-filter-field flex flex-col gap-0.5">
               <label className="text-[10px] font-bold text-text-muted">To</label>
               <input
                 type="date"
@@ -854,7 +854,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
             <button
               type="button"
               onClick={applyFilters}
-              className="h-7 px-3 text-[11px] font-extrabold rounded-md bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 transition-colors shrink-0"
+              className="inventory-approved-apply h-7 px-3 text-[11px] font-extrabold rounded-md bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 transition-colors shrink-0"
             >
               Apply
             </button>
@@ -863,7 +863,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="h-7 px-3 text-[11px] font-extrabold rounded-md border border-border text-text-secondary hover:text-danger-600 hover:border-danger-300 transition-colors shrink-0"
+                className="inventory-approved-reset h-7 px-3 text-[11px] font-extrabold rounded-md border border-border text-text-secondary hover:text-danger-600 hover:border-danger-300 transition-colors shrink-0"
               >
                 Reset
               </button>
@@ -873,8 +873,8 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
       </div>
 
       {/* ── Table Container ── */}
-      <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 min-h-0 w-full overflow-auto bg-white" style={{ scrollbarWidth: "thin" }}>
-        <table className="w-full border-separate border-spacing-0" style={{ tableLayout: "auto" }}>
+      <div ref={scrollContainerRef} onScroll={handleScroll} className="inventory-approved-table-scroll flex-1 min-h-0 w-full overflow-auto bg-white" style={{ scrollbarWidth: "thin" }}>
+        <table className="inventory-approved-table w-full border-separate border-spacing-0" style={{ tableLayout: "auto" }}>
           <thead className="sticky top-0 z-10">
             <tr>
               {HEADERS.map((header) => (
@@ -903,7 +903,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
 
             {approvedItemsError && (
               <tr>
-                <td colSpan={HEADERS.length} className="py-20 text-center text-danger-600 font-bold">
+                <td colSpan={HEADERS.length} className="inventory-approved-error py-20 text-center text-danger-600 font-bold">
                   Error loading records: {approvedItemsError}
                 </td>
               </tr>
@@ -956,7 +956,7 @@ const ApprovedStockTable: React.FC<ApprovedStockTableProps> = ({
       </div>
 
       {/* ── Footer ── */}
-      <div className="flex items-center justify-between px-3 py-2 border-t border-border bg-surface-muted backdrop-blur-md shrink-0">
+      <div className="inventory-approved-footer flex items-center justify-between px-3 py-2 border-t border-border bg-surface-muted backdrop-blur-md shrink-0">
         <span className="text-[11px] font-extrabold text-text-secondary">
           Showing {approvedItems.length} of {approvedItemsTotal} {isPending ? "pending" : "approved"} items
         </span>

@@ -27,7 +27,7 @@ import { Alert, Snackbar, SelectChangeEvent, debounce } from '@mui/material';
 // import MenuPage from '../page';
 import { validateLettersOnly, validateMaxLength } from '@/app/Components/validation';
 import { Vehicle } from '../Vehicle/Models/vehicleModel';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ActionType = 'deactivate' | 'activate' | null;
@@ -359,16 +359,18 @@ const VehiclePage: React.FC = () => {
     <>
       {/* <MenuPage /> */}
 
-      <VehicleTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={handleSetShowDeactivated}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-      />
+<ModuleVisibilityGuard app="masteradmin" module="vehicle">
+        <VehicleTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={handleSetShowDeactivated}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+        />
+      </ModuleVisibilityGuard>
 
       <VehicleDialog
         open={dialogOpen !== 'none'}

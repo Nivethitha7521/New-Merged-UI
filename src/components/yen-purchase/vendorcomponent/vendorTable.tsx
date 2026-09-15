@@ -16,7 +16,7 @@ import {
   EditOutlined as EditIcon,
   DeleteOutlineRounded as DeleteIcon,
   RestoreRounded as RefreshIcon,
-} from '@mui/icons-material';import { format } from 'date-fns';
+} from '@mui/icons-material';import { formatDate } from '@/utilities/formatters';
 import {
   setEditIndex,
   setVendorData,
@@ -121,12 +121,17 @@ return (
               )}
               {selectedHeaders.includes('city') && <TableCell sx={{ width: '120px' }}>{headerNameMap['city']}</TableCell>}
               {selectedHeaders.includes('country') && <TableCell sx={{ width: '120px' }}>{headerNameMap['country']}</TableCell>}
-              {selectedHeaders.includes('createdDate') && (
-                <TableCell sx={{ width: '120px' }}>{headerNameMap['createdDate']}</TableCell>
-              )}
-              {selectedHeaders.includes('updatedDate') && (
-                <TableCell sx={{ width: '120px' }}>{headerNameMap['updatedDate']}</TableCell>
-              )}
+            {selectedHeaders.includes('createdDate') && (
+  <TableCell sx={{ width: '120px' }}>
+    {headerNameMap['createdDate']}
+  </TableCell>
+)}
+
+{selectedHeaders.includes('updatedDate') && (
+  <TableCell sx={{ width: '120px' }}>
+    {headerNameMap['updatedDate']}
+  </TableCell>
+)}
               <TableCell sx={{ width: '120px' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -217,12 +222,12 @@ return (
                     )}
                     {selectedHeaders.includes('createdDate') && (
                       <TableCell sx={{ width: '120px' }}>
-                        {vendor.createdDate ? format(new Date(vendor.createdDate), 'dd-MM-yyyy') : ''}
+                        {vendor.createdDate ? formatDate(vendor.createdDate) : ''}
                       </TableCell>
                     )}
                     {selectedHeaders.includes('updatedDate') && (
                       <TableCell sx={{ width: '120px' }}>
-                        {vendor.updatedDate ? format(new Date(vendor.updatedDate), 'dd-MM-yyyy') : ''}
+                       {vendor.updatedDate ? formatDate(vendor.updatedDate) : ''}
                       </TableCell>
                     )}
                    <TableCell sx={{ width: '120px' }}>

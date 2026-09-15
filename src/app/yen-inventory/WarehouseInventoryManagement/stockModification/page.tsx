@@ -110,6 +110,7 @@
 // const WarehousePhysicalStockModification: React.FC = () => {
 //   const dispatch = useDispatch<AppDispatch>();
 
+
 //   const filterOptions = useSelector(selectFilterOptions);
 //   const loading = useSelector(selectRawMaterialsLoading);
 //   const warehouses = useSelector(selectWarehouses);
@@ -634,10 +635,10 @@
 //       dispatch(setEditMessage("No changes to submit."));
 //       dispatch(setOpenSnackbar(true));
 //     }
-//   }, [dispatch, changes]);
+//   }, [dispatch, changes, canEdit]);
 
 //    const handleConfirmSubmit = useCallback(async () => {
-//     if (isSubmittingRef.current || actionGuard.disableAllActions) return;
+//     if (isSubmittingRef.current || actionGuard.disableAllActions || !canEdit) return;
 
 //     const actionId = actionGuard.startAction(
 //       "saving",
@@ -1289,6 +1290,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import WarehouseInventoryManagementPage from "../page";
 import { useTodayDate } from "@/components/Hooks/useTodayDate";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export interface TableRowData {
   id: string;
@@ -1334,6 +1336,9 @@ const UI = {
 
 const WarehousePhysicalStockModification: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { hasPermission, isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "warehousephysicalstock");
+  const canEdit = hasPermission("yenerp", "warehousephysicalstock", "edit");
 
   const filterOptions = useSelector(selectFilterOptions);
   const loading = useSelector(selectRawMaterialsLoading);
@@ -1850,6 +1855,11 @@ const WarehousePhysicalStockModification: React.FC = () => {
   );
 
   const handleSubmitClick = useCallback(() => {
+    if (!canEdit) {
+      dispatch(setEditMessage("You do not have Edit permission for Physical Stock."));
+      dispatch(setOpenSnackbar(true));
+      return;
+    }
     if (changes.length > 0) {
       dispatch(setUpdatedStocks(changes));
       dispatch(setOpenDialog(true));
@@ -1857,10 +1867,10 @@ const WarehousePhysicalStockModification: React.FC = () => {
       dispatch(setEditMessage("No changes to submit."));
       dispatch(setOpenSnackbar(true));
     }
-  }, [dispatch, changes]);
+  }, [dispatch, changes, canEdit]);
 
    const handleConfirmSubmit = useCallback(async () => {
-    if (isSubmittingRef.current || actionGuard.disableAllActions) return;
+    if (isSubmittingRef.current || actionGuard.disableAllActions || !canEdit) return;
 
     const actionId = actionGuard.startAction(
       "saving",
@@ -2264,6 +2274,8 @@ const WarehousePhysicalStockModification: React.FC = () => {
   const currentLocationLabel =
     currentFilters.aliasName || currentFilters.locationId || "";
 
+  if (!canRead) return null;
+
   return (
     <Box
       sx={{
@@ -2280,6 +2292,7 @@ const WarehousePhysicalStockModification: React.FC = () => {
       <WarehouseInventoryManagementPage />
 
       <Paper
+        className="inventory-filter-surface"
         elevation={0}
         sx={{
           flexShrink: 0,
@@ -2348,7 +2361,7 @@ const WarehousePhysicalStockModification: React.FC = () => {
             hasMore={hasMore}
             onScrollBottom={handleTableScrollBottom}
             changedRows={changedRows}
-            disabled={actionGuard.disableAllActions}
+            disabled={actionGuard.disableAllActions || !canEdit}
           />
         </Box>
 
@@ -2365,7 +2378,7 @@ const WarehousePhysicalStockModification: React.FC = () => {
               onPreviousPage={loadPreviousPage}
               onNextPage={loadNextPage}
               onSubmitClick={handleSubmitClick}
-              disabled={actionGuard.disableAllActions}
+              disabled={actionGuard.disableAllActions || !canEdit}
             />
           </Box>
         )}

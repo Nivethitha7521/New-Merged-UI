@@ -17,6 +17,7 @@ import {
 } from "@/features/yen-purchase/GRN/grnSlice";
 import { GrnData } from "@/Models/grnModel";
 import purchaseApi from "@/utils/api";
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const customRound = (v: number) => Math.round(v * 100) / 100;
@@ -192,13 +193,13 @@ setCollapsedPoGroups(groups);
           <Box>
             <Typography variant="caption" color="text.secondary">Invoice Date</Typography>
             <Typography variant="body2" fontWeight="medium">
-              {grn.invoiceDate ? format(new Date(grn.invoiceDate), "dd-MM-yyyy") : "—"}
+              {grn.invoiceDate ? formatDate(new Date(grn.invoiceDate)) : "—"}
             </Typography>
           </Box>
           <Box>
             <Typography variant="caption" color="text.secondary">GRN Date</Typography>
             <Typography variant="body2" fontWeight="medium">
-              {grn.grnDate ? format(new Date(grn.grnDate), "dd-MM-yyyy") : "—"}
+              {grn.grnDate ? formatDate(new Date(grn.grnDate)) : "—"}
             </Typography>
           </Box>
           <Box>
@@ -249,7 +250,7 @@ setCollapsedPoGroups(groups);
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
                   <Typography variant="subtitle2" fontWeight="bold" color="warning.dark">
-                    PO Final Amount: ₹{totals.finalTotal.toFixed(2)}
+                    PO Final Amount: {formatCurrency(totals.finalTotal)}
                   </Typography>
                   {collapsed
                     ? <ExpandMoreIcon sx={{ color: "warning.dark" }} />
@@ -305,10 +306,10 @@ setCollapsedPoGroups(groups);
                             <TableCell align="right">{item.purchasetaxName || 0}%</TableCell>
                             <TableCell>
                               {item.expiryDate
-                                ? format(new Date(item.expiryDate), "dd-MM-yyyy")
+                                ? formatDate(new Date(item.expiryDate))
                                 : "—"}
                             </TableCell>
-                            <TableCell align="right">{(item.finalPrice || 0).toFixed(2)}</TableCell>
+                            <TableCell align="right">{formatCurrency(item.finalPrice)}</TableCell>
                           </TableRow>
                         );
                       })}
@@ -324,7 +325,7 @@ setCollapsedPoGroups(groups);
                           <TableCell colSpan={11} align="right">
                             <strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong>
                           </TableCell>
-                          <TableCell align="right">{tax.amount.toFixed(2)}</TableCell>
+                          <TableCell align="right">{formatCurrency(tax.amount)}</TableCell>
                         </TableRow>
                       ))}
 
@@ -367,11 +368,11 @@ setCollapsedPoGroups(groups);
               Grand Total ({Object.keys(poGroups).length} POs)
             </Typography>
             <Typography variant="h6" fontWeight="bold" color="warning.dark">
-              ₹ {grandTotal.toFixed(2)}
+              {formatCurrency(grandTotal)}
             </Typography>
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
-            GRN Amount: ₹{(grn.grnAmount || 0).toFixed(2)}
+            GRN Amount: {formatCurrency((grn.grnAmount || 0))}
           </Typography>
         </Paper>
 
@@ -422,7 +423,7 @@ setCollapsedPoGroups(groups);
               <Typography key={i} variant="body2" sx={{ ml: 1 }}>• {id}</Typography>
             ))}
             <Box sx={{ borderTop: "1px solid #eee", pt: 1, mt: 1 }}>
-              <Typography variant="body2" fontWeight="bold">Grand Total: ₹{grandTotal.toFixed(2)}</Typography>
+              <Typography variant="body2" fontWeight="bold">Grand Total: {formatCurrency(grandTotal)}</Typography>
             </Box>
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>

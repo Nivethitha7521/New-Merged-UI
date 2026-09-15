@@ -8,7 +8,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import { OnlinePartnerTemplate, dynamicData } from '../Models/templateModels';
 import { SelectedItem } from '../Modules/OnlinePartnerTemplateComponent';
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 
 interface TemplateTableProps {
   selectedType: 'template' | 'dynamic';
@@ -274,23 +274,17 @@ const TemplateTable: React.FC<TemplateTableProps> = ({
                       verticalAlign: 'middle'
                     }}>
                       {showDeactivated ? (
-                        <button 
-                          className='activate-btn'
-                          style={{
-                            padding: '6px 12px',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: '#4caf50',
-                            color: 'white',
-                            transition: 'background-color 0.2s'
-                          }}
-                        >
-                          <RefreshIcon fontSize="small" />
-                        </button>
+                       <PermissionIconButton
+                          app="masteradmin"
+                          module="onlinepartnertemplate"
+                          action="edit"
+                          rollback
+                          tooltip="Activate"
+                          onClick={() => {}}
+                          icon={<RefreshIcon fontSize="small" />}
+                          className="activate-btn"
+                          ariaLabel="Activate"
+                        />
                       ) : (
                         <div style={{
                           display: 'flex',
@@ -298,9 +292,11 @@ const TemplateTable: React.FC<TemplateTableProps> = ({
                           justifyContent: 'center',
                           alignItems: 'center'
                         }}>
-                          <button
-                            className='edit-btn'
-                            title='Edit'
+                         <PermissionIconButton
+                            app="masteradmin"
+                            module="onlinepartnertemplate"
+                            action="edit"
+                            tooltip="Edit"
                             onClick={() =>
                               handleEditPercentage({
                                 itemName: item.itemName,
@@ -313,40 +309,20 @@ const TemplateTable: React.FC<TemplateTableProps> = ({
                                 isTemporary: 'isTemporary' in item ? item.isTemporary : false,
                               })
                             }
-                            // style={{
-                            //   padding: '6px 12px',
-                            //   border: 'none',
-                            //   borderRadius: '4px',
-                            //   cursor: 'pointer',
-                            //   display: 'inline-flex',
-                            //   alignItems: 'center',
-                            //   justifyContent: 'center',
-                            //   backgroundColor: '#2196f3',
-                            //   color: 'white',
-                            //   transition: 'background-color 0.2s'
-                            // }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </button>
-                          <button
+                            icon={<EditIcon fontSize="small" />}
+                            className="edit-btn"
+                            ariaLabel="Edit"
+                          />
+                          <PermissionIconButton
+                            app="masteradmin"
+                            module="onlinepartnertemplate"
+                            action="delete"
+                            tooltip="Delete"
                             onClick={() => handleDelete(item)}
+                            icon={<DeleteIcon fontSize="small" />}
                             className="deactivate-btn"
-                            title="Delete"
-                            // style={{
-                            //   padding: '6px 12px',
-                            //   border: 'none',
-                            //   borderRadius: '4px',
-                            //   cursor: 'pointer',
-                            //   display: 'inline-flex',
-                            //   alignItems: 'center',
-                            //   justifyContent: 'center',
-                            //   backgroundColor: '#f44336',
-                            //   color: 'white',
-                            //   transition: 'background-color 0.2s'
-                            // }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </button>
+                                                      ariaLabel="Delete"
+                          />
                         </div>
                       )}
                     </td>

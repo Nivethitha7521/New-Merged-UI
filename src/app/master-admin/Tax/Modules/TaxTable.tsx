@@ -15,7 +15,8 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
 import RefreshIcon from "@mui/icons-material/RestoreRounded";
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface TaxSplit {
@@ -80,15 +81,17 @@ const Toolbar = React.memo<ToolbarProps>(
 
       <Box className="tax-master-toolbar-actions">
         {!showDeactivated && (
-          <Button
-            type="button"
+          <PermissionButton
+            app="masteradmin"
+            module="tax"
+            action="add"
             variant="outlined"
             startIcon={<AddIcon />}
             onClick={onAdd}
             className="purchase-reference-action-button"
           >
             Add New
-          </Button>
+          </PermissionButton>
         )}
 
         <Box className="purchase-reference-active-toggle">
@@ -197,39 +200,39 @@ return (
   <td className="tax-column-actions">
     <Box className="purchase-master-actions">
       {showDeactivated ? (
-        <Tooltip title="Activate tax" arrow>
-          <IconButton
-            type="button"
-            onClick={handleActivate}
-            className="purchase-master-action-button is-activate"
-            aria-label={`Activate ${tax.taxName}`}
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+ <PermissionIconButton
+          app="masteradmin"
+          module="tax"
+          action="edit"
+          rollback
+          tooltip="Activate tax"
+          onClick={handleActivate}
+          icon={<RefreshIcon fontSize="small" />}
+          className="purchase-master-action-button is-activate"
+          ariaLabel={`Activate ${tax.taxName}`}
+        />
       ) : (
         <>
-          <Tooltip title="Edit tax" arrow>
-            <IconButton
-              type="button"
-              onClick={handleEdit}
-              className="purchase-master-action-button is-edit"
-              aria-label={`Edit ${tax.taxName}`}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Deactivate tax" arrow>
-            <IconButton
-              type="button"
-              onClick={handleDeactivate}
-              className="purchase-master-action-button is-delete"
-              aria-label={`Deactivate ${tax.taxName}`}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+<PermissionIconButton
+            app="masteradmin"
+            module="tax"
+            action="edit"
+            tooltip="Edit tax"
+            onClick={handleEdit}
+            icon={<EditIcon fontSize="small" />}
+            className="purchase-master-action-button is-edit"
+            ariaLabel={`Edit ${tax.taxName}`}
+          />
+          <PermissionIconButton
+            app="masteradmin"
+            module="tax"
+            action="delete"
+            tooltip="Deactivate tax"
+            onClick={handleDeactivate}
+            icon={<DeleteIcon fontSize="small" />}
+            className="purchase-master-action-button is-delete"
+           ariaLabel={`Deactivate ${tax.taxName}`}
+          />
         </>
       )}
     </Box>

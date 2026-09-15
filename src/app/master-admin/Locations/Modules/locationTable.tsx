@@ -23,7 +23,7 @@ import {
 import { Location } from "../Models/locationModels";
 import { useAppSelector, useAppDispatch } from "@/redux/store";
 import { fetchLocation, selectLocations } from "../Features/locationSlice";
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface ImportResult {
   message: string;
   inserted_count: number;
@@ -268,54 +268,43 @@ const renderLocationValue = (
                   {!showDeactivatedTable &&
                     location.status === "active" && (
                       <>
-                        <Tooltip title="Edit location" arrow>
-                          <IconButton
-                            type="button"
-                            onClick={() =>
-                              onOpenEdit(location)
-                            }
-                            className="purchase-master-action-button is-edit"
-                            aria-label="Edit location"
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                      <PermissionIconButton
+                          app="masteradmin"
+                          module="location"
+                          action="edit"
+                          tooltip="Edit location"
+                          onClick={() => onOpenEdit(location)}
+                          icon={<EditIcon fontSize="small" />}
+                          className="purchase-master-action-button is-edit"
+                          ariaLabel="Edit location"
+                        />
 
-                        <Tooltip
-                          title="Deactivate location"
-                          arrow
-                        >
-                          <IconButton
-                            type="button"
-                            onClick={() =>
-                              onDeactivate(location)
-                            }
-                            className="purchase-master-action-button is-delete"
-                            aria-label="Deactivate location"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <PermissionIconButton
+                          app="masteradmin"
+                          module="location"
+                          action="delete"
+                          tooltip="Deactivate location"
+                          onClick={() => onDeactivate(location)}
+                          icon={<DeleteIcon fontSize="small" />}
+                          className="purchase-master-action-button is-delete"
+                          ariaLabel="Deactivate location"
+                        />
                       </>
                     )}
 
                   {showDeactivatedTable &&
                     location.status === "inactive" && (
-                      <Tooltip
-                        title="Activate location"
-                        arrow
-                      >
-                        <IconButton
-                          type="button"
-                          onClick={() =>
-                            onActivate(location)
-                          }
-                          className="purchase-master-action-button is-activate"
-                          aria-label="Activate location"
-                        >
-                          <RefreshIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <PermissionIconButton
+                        app="masteradmin"
+                        module="location"
+                        action="edit"
+                        rollback
+                        tooltip="Activate location"
+                        onClick={() => onActivate(location)}
+                        icon={<RefreshIcon fontSize="small" />}
+                        className="purchase-master-action-button is-activate"
+                        ariaLabel="Activate location"
+                      />
                     )}
                 </Box>
               </td>

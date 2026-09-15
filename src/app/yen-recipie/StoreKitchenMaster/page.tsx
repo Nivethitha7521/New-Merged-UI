@@ -56,12 +56,17 @@ import { setRecipeId } from "./edit/versionhistory/features/viewrecipehistory";
 import { clearNewRecipeDraft } from "../StoreKitchenMaster/newRecipe/Features/newrecipeSlice";
 import CustomKeyboard from "./newRecipe/components/CustomKeyboard";
 import { useCustomKeyboard } from "./newRecipe/hooks/useCustomKeyboard";
+import { formatCurrency } from '@/utilities/formatters';
 import RecipeDetailsModal from "./reciepviewicon"
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export default function StoreKitchenMaster() {
   const [searchText, setSearchText] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const router = useRouter()
+  const { isModuleVisible } = usePermissions()
   const pathname = usePathname()
   const dispatch = useDispatch<AppDispatch>()
   const keyboard = useCustomKeyboard()
@@ -219,6 +224,8 @@ const StatusBadge = ({ status }: { status: boolean }) => (
   const isPrintAll = printTarget === "ALL"
   const isExcelAll = excelTarget === "ALL"
 
+  if (!isModuleVisible('yenerp', 'storekitchenmaster')) return null;
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* <Navbar moduleName="STORE KITCHEN MASTER" onLogout={handleLogout} /> */}
@@ -288,8 +295,10 @@ const StatusBadge = ({ status }: { status: boolean }) => (
       PDF Print
     </Button>
 
-    <Button
-      type="button"
+    <PermissionButton
+      app="yenerp"
+      module="storekitchenmaster"
+      action="add"
       variant="outlined"
       startIcon={<AddIcon />}
       onClick={() => {
@@ -301,7 +310,7 @@ const StatusBadge = ({ status }: { status: boolean }) => (
       className="purchase-reference-action-button"
     >
       New Recipe
-    </Button>
+    </PermissionButton>
 
   </Box>
 </Box>
@@ -358,7 +367,7 @@ const StatusBadge = ({ status }: { status: boolean }) => (
                 </td>
 
                 <td align="right">
-                  ₹{Number(recipe.cost).toFixed(2)}
+                  {formatCurrency(Number(recipe.cost))}
                 </td>
 
                 <td align="center">
@@ -368,16 +377,15 @@ const StatusBadge = ({ status }: { status: boolean }) => (
                 <td align="center">
                   <Box className="purchase-master-actions">
 
-                    <IconButton
-                      type="button"
-                      title={`Edit v${recipe.version}`}
-                      onClick={(e) =>
-                        handleEdit(recipe, e)
-                      }
+                    <PermissionIconButton
+                      app="yenerp"
+                      module="storekitchenmaster"
+                      action="edit"
+                      tooltip={`Edit v${recipe.version}`}
+                      onClick={(e) => handleEdit(recipe, e)}
                       className="purchase-master-action-button is-edit"
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
+                      icon={<EditIcon fontSize="small" />}
+                    />
 
                     <IconButton
                       type="button"

@@ -1,0 +1,864 @@
+.yen-inventory-ui {
+  /*
+   * Use the same live Display Settings tokens as Yen Purchase.
+   * Font family is inherited globally; accent/theme changes now update
+   * Inventory immediately without maintaining a second colour system.
+   */
+  --inventory-bg: var(--erp-bg, #f4f7fa);
+  --inventory-surface: var(--erp-surface, #ffffff);
+  --inventory-border: var(--erp-border, #dfe5ec);
+  --inventory-text: var(--erp-text, #101828);
+  --inventory-text-secondary: var(--erp-muted, #475467);
+  --inventory-active: var(--erp-accent, #155eef);
+  --inventory-active-hover: var(--erp-accent-hover, #124dcc);
+
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--inventory-bg);
+  color: var(--inventory-text);
+}
+
+.yen-inventory-ui > .MuiBox-root,
+.yen-inventory-ui > div {
+  height: 100% !important;
+  max-width: 100%;
+}
+
+.inventory-section-nav {
+  flex: 0 0 auto;
+  margin: 0 0 18px;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  scrollbar-width: thin;
+}
+
+.inventory-section-nav::-webkit-scrollbar {
+  height: 5px;
+}
+
+.inventory-section-nav::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.inventory-section-nav-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+}
+
+.inventory-section-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: unset;
+  height: 32px;
+  min-height: 32px;
+  padding: 6px 15px;
+  white-space: nowrap;
+  color: var(--inventory-text-secondary);
+  background: var(--inventory-surface);
+  border: 1px solid var(--inventory-border);
+  border-radius: 10px;
+  box-shadow: none;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(11.5px * var(--erp-type-scale, 1));
+  font-weight: 550;
+  line-height: 1;
+  text-decoration: none;
+  transition: color 150ms ease, background-color 150ms ease,
+    border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.inventory-section-tab:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #aebfff) !important;
+  box-shadow: 0 2px 5px rgba(16, 24, 40, 0.06);
+  transform: translateY(-1px);
+}
+
+.inventory-section-tab.is-active {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--inventory-active) !important;
+  border-color: var(--inventory-active) !important;
+  font-weight: 650;
+  box-shadow: 0 5px 13px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.17);
+}
+
+.inventory-section-tab.is-active:hover {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--inventory-active-hover) !important;
+  border-color: var(--inventory-active-hover) !important;
+}
+
+.inventory-section-tab:focus-visible {
+  outline: 3px solid rgba(var(--erp-accent-rgb, 25, 118, 210), 0.2);
+  outline-offset: 2px;
+}
+
+.yen-inventory-ui .MuiPaper-root {
+  box-shadow: none;
+}
+
+.yen-inventory-ui table {
+  color: var(--inventory-text);
+}
+
+.yen-inventory-ui thead th {
+  letter-spacing: 0.025em;
+}
+
+.yen-inventory-ui input,
+.yen-inventory-ui button {
+  font-family: var(--erp-font-family, inherit);
+}
+
+/*
+ * Inventory components contain Tailwind brand utility classes. Map those
+ * presentation utilities to the same live accent tokens used by Purchase.
+ */
+.yen-inventory-ui [class~="text-brand-500"],
+.yen-inventory-ui [class~="text-brand-600"],
+.yen-inventory-ui [class~="text-brand-700"],
+.yen-inventory-ui [class~="text-brand-800"],
+.yen-inventory-ui [class~="text-brand-900"] {
+  color: var(--erp-accent, #155eef) !important;
+}
+
+.yen-inventory-ui [class~="bg-brand-50"],
+.yen-inventory-ui [class~="bg-brand-100"] {
+  background-color: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.yen-inventory-ui [class~="bg-brand-600"],
+.yen-inventory-ui [class~="bg-brand-700"],
+.yen-inventory-ui [class~="bg-brand-800"] {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background-color: var(--erp-accent, #155eef) !important;
+}
+
+.yen-inventory-ui [class~="border-brand-200"],
+.yen-inventory-ui [class~="border-brand-300"],
+.yen-inventory-ui [class~="border-brand-400"],
+.yen-inventory-ui [class~="border-brand-500"],
+.yen-inventory-ui [class~="border-brand-600"] {
+  border-color: var(--erp-accent-border, #aebfff) !important;
+}
+
+.yen-inventory-ui [class~="ring-brand-100"],
+.yen-inventory-ui [class~="ring-brand-400"],
+.yen-inventory-ui [class~="ring-brand-500"] {
+  --tw-ring-color: var(--erp-accent-ring, rgba(21, 94, 239, 0.18)) !important;
+}
+
+.yen-inventory-ui [class~="hover:bg-brand-50"]:hover,
+.yen-inventory-ui [class~="hover:bg-brand-100"]:hover {
+  background-color: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.yen-inventory-ui [class~="hover:text-brand-600"]:hover,
+.yen-inventory-ui [class~="hover:text-brand-700"]:hover,
+.yen-inventory-ui [class~="hover:text-brand-800"]:hover {
+  color: var(--erp-accent, #155eef) !important;
+}
+
+.yen-inventory-ui [class~="hover:border-brand-300"]:hover,
+.yen-inventory-ui [class~="hover:border-brand-400"]:hover {
+  border-color: var(--erp-accent-border, #aebfff) !important;
+}
+
+/* Filters are individual controls, not one large bordered toolbar. */
+.inventory-filter-area {
+  padding: 0 0 16px;
+}
+
+.inventory-filter-toolbar {
+  width: 100%;
+  min-width: 0;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.inventory-filter-surface {
+  margin: 0;
+  padding: 0 0 16px !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.inventory-filter-toolbar-row {
+  gap: 12px !important;
+}
+
+.inventory-filter-fields {
+  gap: 10px !important;
+  padding: 0;
+  overflow: visible !important;
+}
+
+.inventory-filter-field {
+  width: auto !important;
+  min-width: 135px;
+  flex: 1 1 0;
+  filter: drop-shadow(0 1px 1px rgba(16, 24, 40, 0.035));
+}
+
+.inventory-filter-actions {
+  margin-left: auto;
+  padding-left: 12px;
+  border-left: 1px solid var(--inventory-border);
+  gap: 8px !important;
+  flex-shrink: 0;
+}
+
+.inventory-filter-actions button[aria-label] {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+/* The data grid is a separate, correctly bounded card. */
+.inventory-table-area {
+  padding: 0;
+}
+
+.inventory-data-table-shell {
+  min-width: 0;
+  background: transparent !important;
+}
+
+.inventory-data-table-card {
+  min-width: 0;
+  overflow: auto;
+  background: var(--inventory-surface) !important;
+  border: 1px solid var(--inventory-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.045);
+}
+
+.inventory-data-table-card table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.inventory-data-table-card thead th {
+  height: 42px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  background: #f8fafc !important;
+  color: #475467 !important;
+  border-bottom: 1px solid var(--inventory-border) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.inventory-data-table-card tbody td {
+  min-height: 42px;
+  border-bottom-color: #edf1f5 !important;
+}
+
+.inventory-data-table-card tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+[data-theme="dark"] .yen-inventory-ui {
+  --inventory-bg: var(--erp-background, #0f172a);
+  --inventory-surface: var(--erp-surface, #111827);
+  --inventory-border: var(--erp-border, #334155);
+  --inventory-text: var(--erp-text-primary, #f8fafc);
+  --inventory-text-secondary: var(--erp-text-secondary, #cbd5e1);
+  --inventory-active: var(--erp-accent, #1976d2);
+  --inventory-active-hover: var(--erp-accent, #1976d2);
+}
+
+@media (max-width: 900px) {
+  .inventory-section-nav {
+    margin: 0 0 15px;
+    padding: 0 0 4px;
+  }
+
+  .inventory-section-nav-list {
+    gap: 6px;
+  }
+
+  .inventory-section-tab {
+    min-height: 32px;
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .inventory-filter-area,
+  .inventory-table-area,
+  .inventory-filter-surface {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .inventory-filter-toolbar-row {
+    align-items: stretch !important;
+    flex-wrap: wrap !important;
+    overflow-x: auto;
+    padding-bottom: 4px !important;
+  }
+
+  .inventory-filter-fields {
+    min-width: 100%;
+    overflow-x: auto !important;
+  }
+
+  .inventory-filter-field {
+    min-width: 150px;
+    flex: 0 0 150px;
+  }
+
+  .inventory-filter-actions {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 10px;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .inventory-section-nav {
+    margin: 0 0 12px;
+  }
+
+  .inventory-filter-area,
+  .inventory-table-area,
+  .inventory-filter-surface {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .inventory-filter-actions {
+    padding-left: 8px;
+    border-left: 0;
+  }
+
+  .inventory-filter-actions button[aria-label] {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/*
+ * Laptop/desktop density aligned with Yen Purchase.
+ * Uses the same fluid --erp-ui unit, so browser 100% looks consistent on
+ * both a laptop and a wide monitor. These rules are presentation-only.
+ */
+@media (min-width: 561px) {
+  .erp-inventory-viewport > .erp-page-viewport {
+    padding: calc(var(--erp-ui) * 2.5) var(--erp-page-gutter)
+      calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  .inventory-section-nav {
+    margin-bottom: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .inventory-section-nav-list {
+    gap: var(--erp-ui) !important;
+  }
+
+  .inventory-section-tab {
+    flex: 0 0 auto;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 0.75) calc(var(--erp-ui) * 1.8) !important;
+    border-radius: calc(var(--erp-ui) * 1.375) !important;
+    /* Exact Purchase Master tab typography + Display Settings scaling. */
+    font-size: calc(
+      var(--erp-ui) * 1.84 * var(--erp-type-scale, 1)
+    ) !important;
+    font-weight: 550 !important;
+    line-height: 1.15 !important;
+  }
+
+  .inventory-filter-area,
+  .inventory-filter-surface {
+    padding-bottom: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .inventory-filter-toolbar,
+  .inventory-filter-toolbar-row {
+    gap: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .inventory-filter-fields {
+    gap: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .inventory-filter-field {
+    min-width: calc(var(--erp-ui) * 20) !important;
+    width: auto !important;
+    flex: 1 1 0 !important;
+  }
+
+  /* CollapsibleFilter trigger (wrapper > clickable trigger). */
+  .inventory-filter-field > div > div:first-child {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    gap: var(--erp-ui) !important;
+    padding-inline: calc(var(--erp-ui) * 1.5) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+    color: var(--inventory-text-secondary) !important;
+    background-color: var(--inventory-surface) !important;
+    border-color: var(--inventory-border) !important;
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale, 1)
+    ) !important;
+    font-weight: 500 !important;
+  }
+
+  .inventory-filter-field > div > div:first-child[class*="text-brand-"] {
+    color: var(--erp-accent, #155eef) !important;
+    background-color: var(--erp-accent-soft, #eef4ff) !important;
+    border-color: var(--erp-accent-border, #aebfff) !important;
+  }
+
+  .inventory-filter-actions {
+    gap: var(--erp-ui) !important;
+    padding-left: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .inventory-filter-actions button[aria-label] {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  .inventory-filter-actions button[aria-label] svg {
+    width: calc(var(--erp-ui) * 1.9) !important;
+    height: calc(var(--erp-ui) * 1.9) !important;
+  }
+
+  .inventory-data-table-card {
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .inventory-data-table-card thead th {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 1.1) calc(var(--erp-ui) * 2) !important;
+    font-size: calc(var(--erp-ui) * 1.52 * var(--erp-type-scale, 1)) !important;
+  }
+
+  .inventory-data-table-card tbody td {
+    min-height: calc(var(--erp-ui) * 7.25) !important;
+    padding: calc(var(--erp-ui) * 1.25) calc(var(--erp-ui) * 2) !important;
+    font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale, 1)) !important;
+  }
+}
+
+/*
+ * Ledger and approved-stock screens still carried their original, oversized
+ * component-local styles.  Keep their controls on the same density and live
+ * Display Settings tokens as Purchase Master and the rest of Inventory.
+ */
+.yen-inventory-ui .sl-root *,
+.yen-inventory-ui .wsl-root * {
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif) !important;
+}
+
+.inventory-ledger-toolbar {
+  width: 100% !important;
+  min-height: 0 !important;
+  padding: 0 0 calc(var(--erp-ui) * 2) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.inventory-ledger-toolbar-row {
+  display: flex !important;
+  align-items: flex-end !important;
+  flex-wrap: nowrap !important;
+  gap: calc(var(--erp-ui) * 1.25) !important;
+  width: 100% !important;
+}
+
+/* The active tab already names the screen, so the old title tile is redundant. */
+.inventory-ledger-toolbar-row > .MuiBox-root:first-child {
+  display: none !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(2) {
+  flex: 1 1 calc(var(--erp-ui) * 27) !important;
+  min-width: calc(var(--erp-ui) * 19) !important;
+  width: auto !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(3) {
+  flex: 2 1 calc(var(--erp-ui) * 42) !important;
+  min-width: calc(var(--erp-ui) * 24) !important;
+  width: auto !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(4) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(5) {
+  display: flex !important;
+  align-items: center !important;
+  flex: 0 0 auto !important;
+  flex-wrap: nowrap !important;
+  gap: var(--erp-ui) !important;
+  margin: 0 0 0 auto !important;
+  width: auto !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(2) > div > div:first-child,
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(3) > div > div:first-child,
+.inventory-ledger-date-button,
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(5) button {
+  height: calc(var(--erp-ui) * 5.25) !important;
+  min-height: calc(var(--erp-ui) * 5.25) !important;
+  border-radius: calc(var(--erp-ui) * 1.35) !important;
+  font-size: calc(var(--erp-ui) * 1.9 * var(--erp-type-scale, 1)) !important;
+  line-height: 1 !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(2) > div > div:first-child,
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(3) > div > div:first-child {
+  width: 100% !important;
+  padding-inline: calc(var(--erp-ui) * 1.5) !important;
+  color: var(--inventory-text-secondary) !important;
+  background: var(--inventory-surface) !important;
+  border-color: var(--inventory-border) !important;
+}
+
+.inventory-ledger-toolbar-row label,
+.inventory-ledger-toolbar-row .MuiTypography-root {
+  color: var(--inventory-text-secondary) !important;
+  font-size: calc(var(--erp-ui) * 1.48 * var(--erp-type-scale, 1)) !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.inventory-ledger-date-button {
+  width: auto !important;
+  max-width: calc(var(--erp-ui) * 29) !important;
+  padding: 0 calc(var(--erp-ui) * 1.5) !important;
+  white-space: nowrap !important;
+  color: var(--inventory-text-secondary) !important;
+  background: var(--inventory-surface) !important;
+  border: 1px solid var(--inventory-border) !important;
+  box-shadow: none !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(5) button {
+  min-width: calc(var(--erp-ui) * 5.25) !important;
+  padding: 0 calc(var(--erp-ui) * 1.2) !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+.inventory-ledger-toolbar-row > .MuiBox-root:nth-child(5) button svg {
+  width: calc(var(--erp-ui) * 1.9) !important;
+  height: calc(var(--erp-ui) * 1.9) !important;
+}
+
+.inventory-approved-banner {
+  margin: 0 0 calc(var(--erp-ui) * 2) !important;
+  overflow: hidden !important;
+  background: var(--inventory-surface) !important;
+  border: 1px solid var(--inventory-border) !important;
+  border-radius: calc(var(--erp-ui) * 2) !important;
+  box-shadow: 0 calc(var(--erp-ui) * 0.25) calc(var(--erp-ui) * 0.75)
+    rgba(16, 24, 40, 0.06) !important;
+}
+
+.inventory-approved-banner > .MuiBox-root {
+  min-height: calc(var(--erp-ui) * 7) !important;
+  padding: calc(var(--erp-ui) * 1.25) calc(var(--erp-ui) * 2) !important;
+}
+
+.inventory-approved-content {
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+.inventory-approved-stock-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: calc(var(--erp-ui) * 52);
+  overflow: hidden;
+  color: var(--inventory-text);
+  background: var(--inventory-surface);
+  border: 1px solid var(--inventory-border);
+  border-radius: calc(var(--erp-ui) * 2);
+}
+
+.inventory-approved-toolbar {
+  flex: 0 0 auto;
+  padding: calc(var(--erp-ui) * 1.5);
+  background: var(--inventory-surface);
+  border-bottom: 1px solid var(--inventory-border);
+}
+
+.inventory-approved-toolbar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-ui);
+  margin-bottom: calc(var(--erp-ui) * 1.25);
+}
+
+.inventory-approved-status-toggle,
+.inventory-approved-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--erp-ui) * 0.5);
+}
+
+.inventory-approved-status-toggle button,
+.inventory-approved-filter-toggle,
+.inventory-approved-apply,
+.inventory-approved-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--erp-ui) * 4.5);
+  min-height: calc(var(--erp-ui) * 4.5);
+  padding: 0 calc(var(--erp-ui) * 1.5);
+  color: var(--inventory-text-secondary);
+  background: var(--inventory-surface);
+  border: 1px solid var(--inventory-border);
+  border-radius: calc(var(--erp-ui) * 1.1);
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(var(--erp-ui) * 1.72 * var(--erp-type-scale, 1));
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.inventory-approved-status-toggle button[class*="bg-emerald-600"] {
+  color: #ffffff;
+  background: #059669;
+  border-color: #059669;
+}
+
+.inventory-approved-status-toggle button[class*="bg-amber-500"] {
+  color: #ffffff;
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.inventory-approved-filter-toggle svg,
+.inventory-approved-apply svg,
+.inventory-approved-reset svg {
+  width: calc(var(--erp-ui) * 1.8);
+  height: calc(var(--erp-ui) * 1.8);
+}
+
+.inventory-approved-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--erp-ui);
+  width: 100%;
+}
+
+.inventory-approved-filter-field {
+  display: flex;
+  flex: 1 1 calc(var(--erp-ui) * 22);
+  flex-direction: column;
+  min-width: calc(var(--erp-ui) * 16);
+  gap: calc(var(--erp-ui) * 0.5);
+}
+
+.inventory-approved-filter-field label {
+  color: var(--inventory-text-secondary);
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(var(--erp-ui) * 1.5 * var(--erp-type-scale, 1));
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.inventory-approved-filter-field input {
+  width: 100%;
+  height: calc(var(--erp-ui) * 4.5);
+  min-height: calc(var(--erp-ui) * 4.5);
+  padding: 0 calc(var(--erp-ui) * 1.25);
+  color: var(--inventory-text);
+  background: var(--inventory-surface);
+  border: 1px solid var(--inventory-border);
+  border-radius: calc(var(--erp-ui) * 1.1);
+  outline: 0;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(var(--erp-ui) * 1.72 * var(--erp-type-scale, 1));
+}
+
+.inventory-approved-filter-field input:focus {
+  border-color: var(--erp-accent, #155eef);
+  box-shadow: 0 0 0 calc(var(--erp-ui) * 0.3)
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.14);
+}
+
+.inventory-approved-apply {
+  color: var(--erp-accent-contrast, #ffffff);
+  background: var(--inventory-active);
+  border-color: var(--inventory-active);
+}
+
+.inventory-approved-reset {
+  min-width: calc(var(--erp-ui) * 4.5);
+  padding-inline: var(--erp-ui);
+}
+
+.inventory-approved-table-scroll {
+  flex: 1 1 auto;
+  min-height: calc(var(--erp-ui) * 34);
+  overflow: auto;
+}
+
+.inventory-approved-table {
+  width: 100%;
+  min-width: calc(var(--erp-ui) * 120);
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+
+.inventory-approved-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: calc(var(--erp-ui) * 5.25);
+  padding: calc(var(--erp-ui) * 1.1) calc(var(--erp-ui) * 1.5);
+  color: var(--inventory-text-secondary);
+  background: var(--inventory-bg);
+  border-bottom: 1px solid var(--inventory-border);
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(var(--erp-ui) * 1.48 * var(--erp-type-scale, 1));
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.inventory-approved-table tbody td {
+  height: calc(var(--erp-ui) * 6.5);
+  padding: calc(var(--erp-ui) * 1.1) calc(var(--erp-ui) * 1.5);
+  color: var(--inventory-text);
+  background: var(--inventory-surface);
+  border-bottom: 1px solid var(--inventory-border);
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(var(--erp-ui) * 1.7 * var(--erp-type-scale, 1));
+}
+
+.inventory-approved-error {
+  padding: calc(var(--erp-ui) * 4) calc(var(--erp-ui) * 2) !important;
+  color: #d92d20 !important;
+  text-align: center !important;
+}
+
+.inventory-approved-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--erp-ui) * 2);
+  min-height: calc(var(--erp-ui) * 5);
+  padding: var(--erp-ui) calc(var(--erp-ui) * 1.5);
+  color: var(--inventory-text-secondary);
+  background: var(--inventory-surface);
+  border-top: 1px solid var(--inventory-border);
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: calc(var(--erp-ui) * 1.65 * var(--erp-type-scale, 1));
+}
+
+@media (max-width: 1180px) {
+  .inventory-ledger-toolbar-row {
+    flex-wrap: wrap !important;
+  }
+
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(2),
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(3) {
+    flex: 1 1 calc(50% - var(--erp-ui)) !important;
+  }
+
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(5) {
+    margin-left: 0 !important;
+  }
+
+  .inventory-approved-filter-row {
+    flex-wrap: wrap;
+  }
+
+  .inventory-approved-filter-field {
+    flex-basis: calc(50% - var(--erp-ui));
+  }
+}
+
+@media (max-width: 700px) {
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(2),
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(3),
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(4) {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+
+  .inventory-ledger-date-button {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .inventory-ledger-toolbar-row > .MuiBox-root:nth-child(5) {
+    width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .inventory-approved-toolbar-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .inventory-approved-filter-field {
+    flex-basis: 100%;
+  }
+
+  .inventory-approved-apply,
+  .inventory-approved-reset {
+    flex: 1 1 auto;
+  }
+
+  .inventory-approved-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inventory-section-tab {
+    transition: none;
+  }
+}

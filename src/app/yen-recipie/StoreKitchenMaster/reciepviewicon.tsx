@@ -1,5 +1,8 @@
+"use client";
 
-"use client"
+import { formatCurrency } from '@/utilities/formatters';
+
+
 
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
@@ -156,9 +159,9 @@ export default function RecipeDetailsModal({
               <Divider orientation="vertical" flexItem sx={{ my: 0.3 }} />
               <SummaryInline label="UOM" value={recipe.recipeMeta?.item_Uom || "—"} />
               <Divider orientation="vertical" flexItem sx={{ my: 0.3 }} />
-              <SummaryInline label="Cost" value={`₹${cost.toFixed(2)}`} />
+              <SummaryInline label="Cost" value={`${formatCurrency(cost)}`} />
               <Divider orientation="vertical" flexItem sx={{ my: 0.3 }} />
-              <SummaryInline label="Making Cost" value={`₹${makingCost.toFixed(2)}`} />
+              <SummaryInline label="Making Cost" value={`${formatCurrency(makingCost)}`} />
               <Divider orientation="vertical" flexItem sx={{ my: 0.3 }} />
               <SummaryInline label="Profit">
                 <Typography
@@ -168,7 +171,7 @@ export default function RecipeDetailsModal({
                     color: profit >= 0 ? "success.main" : "error.main",
                   }}
                 >
-                  ₹{profit.toFixed(2)}
+                  {formatCurrency(profit)}
                 </Typography>
               </SummaryInline>
               <Divider orientation="vertical" flexItem sx={{ my: 0.3 }} />
@@ -230,8 +233,8 @@ export default function RecipeDetailsModal({
                         <Cell align="center">{item.type}</Cell>
                         <Cell align="center">{item.uom}</Cell>
                         <Cell align="right">{item.quantity}</Cell>
-                        <Cell align="right">₹{Number(item.unitPrice ?? 0).toFixed(2)}</Cell>
-                        <Cell align="right">₹{Number(item.totalPrice ?? 0).toFixed(2)}</Cell>
+                        <Cell align="right">{formatCurrency(Number(item.unitPrice ?? 0))}</Cell>
+                        <Cell align="right">{formatCurrency(Number(item.totalPrice ?? 0))}</Cell>
                       </tr>
                     ))}
                     <tr>
@@ -277,7 +280,7 @@ export default function RecipeDetailsModal({
                           background: "#f8fafc",
                         }}
                       >
-                        ₹{totalItemsPrice.toFixed(2)}
+                        {formatCurrency(totalItemsPrice)}
                       </td>
                     </tr>
                   </tbody>

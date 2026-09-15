@@ -68,6 +68,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import TableRowsRoundedIcon from "@mui/icons-material/TableRowsRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { formatInventoryQty } from "@/components/Inventory/shared/numberFormat";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export interface SearchParams {
   itemName: string[];
@@ -105,6 +106,9 @@ const UI = {
 
 const WarehouseRawMaterialsStockModification: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { hasPermission, isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "warehousestockvariance");
+  const canApprove = hasPermission("yenerp", "warehousestockvariance", "approve");
 
   const {
     rawmaterialItems,
@@ -837,7 +841,7 @@ const handleColumnSort = useCallback(
   );
 
   const handleApproveConfirm = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
-    if (!selectedApproveItem || isApprovingRef.current) return;
+    if (!canApprove || !selectedApproveItem || isApprovingRef.current) return;
 
     isApprovingRef.current = true;
     setIsApproving(true);
@@ -1056,12 +1060,14 @@ const handleColumnSort = useCallback(
   ]);
 
   const handleApproveAllBranch = useCallback(() => {
+    if (!canApprove) return;
     if (!searchParams.locationName) return;
     setBulkApprovalType("BRANCH");
     setBulkApprovalModalOpen(true);
   }, [searchParams.locationName]);
 
   const executeApproveAllBranch = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
+    if (!canApprove) return;
     if (!searchParams.locationName) return;
     isApprovingRef.current = true;
     try {
@@ -1112,6 +1118,7 @@ const handleColumnSort = useCallback(
 ]);
 
   const handleBulkApproveSelected = useCallback(() => {
+    if (!canApprove) return;
     if (selectedApprovalItemCodes.length === 0) return;
     setBulkApprovalType("SELECTED");
     setBulkApprovalModalOpen(true);
@@ -1167,6 +1174,7 @@ const handleColumnSort = useCallback(
   // }, [dispatch, selectedApprovalItemCodes, rawmaterialItems, searchParams.locationName, todayDate]);
   // replace the part 12 8 1
   const executeBulkApproveSelected = useCallback(async (mode: "ADJUST_SYSTEM" | "KEEP_SYSTEM", description: string) => {
+    if (!canApprove) return;
     if (selectedApprovalItemCodes.length === 0) return;
     setBulkApproving(true);
 
@@ -1414,6 +1422,8 @@ const handleColumnSort = useCallback(
     return warehouse?.aliasName || warehouse?.locationName || searchParams.locationName || "";
   }, [warehouses, searchParams.locationName]);
 
+  if (!canRead) return null;
+
   return (
     <Box
       sx={{
@@ -1439,6 +1449,7 @@ const handleColumnSort = useCallback(
       {!isFullScreen && <WarehouseInventoryManagementPage />}
 
       <Paper
+        className="inventory-filter-surface"
         elevation={0}
         sx={{
           flexShrink: 0,
@@ -1585,7 +1596,7 @@ const handleColumnSort = useCallback(
                     <Button
                       variant="outlined"
                       size="small"
-                      disabled={bulkApproving || approveAllBranchLoading || status === "loading"}
+                      disabled={!canApprove || bulkApproving || approveAllBranchLoading || status === "loading"}
                       onClick={handleSelectAllPending}
                       sx={{
                         height: 30,
@@ -1656,7 +1667,7 @@ const handleColumnSort = useCallback(
                   {selectedApprovalCount > 0 && (
                     <Button
                       variant="contained"
-                      disabled={bulkApproving || status === "loading"}
+                      disabled={!canApprove || bulkApproving || status === "loading"}
                       onClick={handleBulkApproveSelected}
                       sx={{
                         height: 30,
@@ -1679,7 +1690,7 @@ const handleColumnSort = useCallback(
                     <Button
                       variant="contained"
                       size="small"
-                      disabled={bulkApproving || approveAllBranchLoading || status === "loading" || !searchParams.locationName}
+                      disabled={!canApprove || bulkApproving || approveAllBranchLoading || status === "loading" || !searchParams.locationName}
                       onClick={handleApproveAllBranch}
                       sx={{
                         height: 30,
@@ -1715,7 +1726,9 @@ const handleColumnSort = useCallback(
                   loading={status === "loading"}
                   isFullScreen={isFullScreen}
                   handleTableScroll={handleScroll}
+                  canApprove={canApprove}
                   handleApproveClick={(item: RawMaterialStore) => {
+                    if (!canApprove) return;
                     dispatch(
                       setSelectedApproveItem({
                         ...item,

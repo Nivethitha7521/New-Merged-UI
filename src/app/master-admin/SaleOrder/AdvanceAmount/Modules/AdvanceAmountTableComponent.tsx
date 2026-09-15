@@ -11,7 +11,8 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import { AdvanceAmount } from '../Models/advanceamountModels';
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
+import { usePermissions } from '@/hooks/usePermissions';
 interface AdvanceAmountTableProps {
   data: AdvanceAmount[];
   isDeactivatedView: boolean;
@@ -37,6 +38,8 @@ export const AdvanceAmountTable: React.FC<AdvanceAmountTableProps> = ({
   allBranches,
 }) => {
   const [applyAllValue, setApplyAllValue] = useState<string>('');
+   const { hasPermission } = usePermissions();
+  const canEdit = hasPermission('masteradmin', 'advanceamount', 'edit');
   const [searchValue, setSearchValue] = useState('');
 
   const filteredData = React.useMemo(() => {
@@ -142,7 +145,7 @@ export const AdvanceAmountTable: React.FC<AdvanceAmountTableProps> = ({
           step: '0.01',
         }}
         sx={{ width: 110 }}
-        disabled={applyingAll}
+      disabled={applyingAll || !canEdit}
         className="custom-textfield sale-order-apply-all-input"
       />
 
@@ -150,7 +153,7 @@ export const AdvanceAmountTable: React.FC<AdvanceAmountTableProps> = ({
         type="button"
         className="item-master-price-button"
         onClick={() => void handleApplyAll()}
-        disabled={!applyAllValue.trim() || applyingAll}
+      disabled={!applyAllValue.trim() || applyingAll || !canEdit}
       >
         {applyingAll && <CircularProgress size={12} />}
         {applyingAll ? 'Applying...' : 'Apply'}
@@ -192,14 +195,16 @@ export const AdvanceAmountTable: React.FC<AdvanceAmountTableProps> = ({
         <RestoreRoundedIcon />
       </IconButton>
     ) : (
-      <IconButton
+     <PermissionIconButton
+        app="masteradmin"
+        module="advanceamount"
+        action="edit"
+        tooltip="Edit"
         onClick={() => onEdit(item)}
+         icon={<EditOutlinedIcon />}
         className="purchase-master-action-button is-edit"
-        title="Edit"
-        size="small"
-      >
-        <EditOutlinedIcon />
-      </IconButton>
+       ariaLabel="Edit"
+      />
     )}
   </div>
 </td>

@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { DeliveryType } from "../Models/deliverytypeModels"
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 
@@ -62,33 +62,41 @@ const DeliveryTypeTableComponent: React.FC<DeliveryTypeTableProps> = ({
                     <div>
                       {!showDeactivatedTable && type.status === "active" && (
                         <>
-                          <IconButton
+                          <PermissionIconButton
+                            app="masteradmin"
+                            module="deliverytype"
+                            action="edit"
+                            tooltip="Edit"
                             onClick={() => onOpenEdit(type)}
+                            icon={<EditOutlinedIcon />}
                             className="purchase-master-action-button is-edit"
-                            title="Edit"
-                            size="small"
-                          >
-                            <EditOutlinedIcon />
-                          </IconButton>
-                          <IconButton
+                            ariaLabel="Edit"
+                          />
+ <PermissionIconButton
+                            app="masteradmin"
+                            module="deliverytype"
+                            action="delete"
+                            tooltip="Deactivate"
+                        
                             onClick={() => onDeactivate(type)}
+                            icon={<DeleteOutlineRoundedIcon />}
                             className="purchase-master-action-button is-delete"
-                            title="Deactivate"
-                            size="small"
-                          >
-                            <DeleteOutlineRoundedIcon />
-                          </IconButton>
+                            ariaLabel="Deactivate"
+                          />
                         </>
                       )}
                       {showDeactivatedTable && type.status === "deactivate" && (
-                        <IconButton
+                        <PermissionIconButton
+                          app="masteradmin"
+                          module="deliverytype"
+                          action="edit"
+                          rollback
+                          tooltip="Activate"
                           onClick={() => onActivate(type)}
+                           icon={<RestoreRoundedIcon />}
                           className="purchase-master-action-button is-activate"
-                          title="Activate"
-                          size="small"
-                        >
- <RestoreRoundedIcon />
-                        </IconButton>
+                         ariaLabel="Activate"
+                        />
                       )}
                     </div>
                   </td>

@@ -14,6 +14,7 @@ import {
   RootState,
   AppDispatch,
 } from '../../../../redux/store';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import {
   addOpeningCash,
   fetchOpeningCashs,
@@ -323,16 +324,18 @@ const OpeningCashPage: React.FC = () => {
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : (
-        <OpeningCashTable
-          data={showDeactivated ? deactivatedItems : tableRows}
-          isDeactivatedView={showDeactivated}
-          onEdit={handleEdit}
-          onDeactivate={handleDeactivate}
-          onActivate={handleActivate} 
-          onApplyAll={handleApplyAll}
-          applyingAll={applyingAll}
-          allBranches={allBranches}
-        />
+       <ModuleVisibilityGuard app="pos" module="opening_cash">
+          <OpeningCashTable
+            data={showDeactivated ? deactivatedItems : tableRows}
+            isDeactivatedView={showDeactivated}
+            onEdit={handleEdit}
+            onDeactivate={handleDeactivate}
+            onActivate={handleActivate} 
+            onApplyAll={handleApplyAll}
+            applyingAll={applyingAll}
+            allBranches={allBranches}
+          />
+        </ModuleVisibilityGuard>
       )}
 
       <OpeningCashDialog

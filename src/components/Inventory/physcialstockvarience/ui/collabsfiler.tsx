@@ -235,11 +235,10 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
 
-    // const minWidth = Math.max(240, rect.width);
-    // const maxWidth = Math.min(420, viewportWidth - 24);
-    // const width = Math.min(minWidth, maxWidth);
-    // repalce the part 7 8 1
-    const width = Math.max(rect.width, 320);
+    const width = Math.min(
+      Math.max(rect.width, 280),
+      Math.max(0, viewportWidth - 24)
+    );
 
     // Viewport-relative (no scrollX/scrollY) since the panel is position: fixed.
     const left = Math.min(Math.max(12, rect.left), Math.max(12, viewportWidth - width - 12));
@@ -247,17 +246,10 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
     const spaceBelow = viewportHeight - rect.bottom - 16;
     const maxHeight = Math.max(160, Math.min(280, spaceBelow));
 
-    // setDropdownPosition({
-    //   top: rect.bottom + 6,
-    //   left,
-    //   width,
-    //   maxHeight,
-    // });
-    // replace the part 7 8 1
     setDropdownPosition({
-      top: rect.bottom + 4,
-      left: rect.left,
-      width: rect.width,
+      top: rect.bottom + 8,
+      left,
+      width,
       maxHeight,
     });
   }, []);
@@ -572,7 +564,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
 
   const triggerClasses = useMemo(() => {
     const base =
-      "flex h-[36px] w-full min-w-0 items-center justify-between gap-2 rounded-xl border px-3 text-[13px] font-medium transition-all duration-200";
+      "flex h-[40px] w-full min-w-0 items-center justify-between gap-2 rounded-[10px] border px-3 text-[12.5px] font-semibold transition-all duration-200 shadow-[0_1px_2px_rgba(16,24,40,0.04)]";
 
     if (disabled && loading) {
       return `${base} cursor-wait border-border bg-surface-subtle text-text-disabled`;
@@ -587,7 +579,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
       return `${base} cursor-pointer border-brand-200 bg-brand-50/50 font-semibold text-brand-900 hover:border-brand-300`;
     }
     if (linked) {
-      return `${base} cursor-pointer border-dashed border-border bg-white text-text-muted hover:border-text-disabled hover:bg-surface-subtle`;
+      return `${base} cursor-pointer border-border bg-white text-text-muted hover:border-brand-300 hover:bg-white`;
     }
     return `${base} cursor-pointer border-border bg-white text-text-secondary hover:border-border hover:bg-surface-subtle`;
   }, [disabled, hasSelection, isOpen, linked, loading]);
@@ -610,8 +602,8 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
         role="option"
         aria-selected={isSelected}
         onClick={() => toggleValue(option)}
-        className={`flex w-full flex-col gap-0.5 rounded-lg px-2.5 py-2 text-left transition-all ${isSelected
-          ? "bg-brand-50 text-brand-900"
+        className={`inventory-dropdown-option flex w-full flex-col gap-0.5 rounded-lg px-2.5 py-2 text-left transition-all ${isSelected
+          ? "is-selected bg-brand-50 text-brand-900"
           : "hover:bg-surface-subtle text-text-primary"
           } cursor-pointer`}
       >
@@ -628,7 +620,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
           {/* repalce the part 7 8 1 */}
           <span
             title={main}
-            className={`min-w-0 flex-1 truncate text-[13px] leading-tight ${isSelected ? "font-bold" : "font-medium"
+            className={`inventory-dropdown-option-title min-w-0 flex-1 truncate text-[13px] leading-tight ${isSelected ? "font-bold" : "font-medium"
               }`}
           >
             {main}
@@ -638,7 +630,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
         </div>
 
         {group && (
-          <span className={`ml-auto max-w-[75%] truncate text-[10px] font-semibold ${isSelected ? "text-brand-500/70" : "text-text-muted"}`}>
+          <span className={`inventory-dropdown-option-group ml-auto max-w-[75%] truncate text-[10px] font-semibold ${isSelected ? "text-brand-500/70" : "text-text-muted"}`}>
             {group}
           </span>
         )}
@@ -657,7 +649,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
             value={today}
             readOnly
             disabled
-            className="w-full cursor-not-allowed rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-400 outline-none"
+            className="inventory-dropdown-date-input w-full cursor-not-allowed rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-400 outline-none"
           />
         );
       }
@@ -668,23 +660,23 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
           value={typeof selectedOptions === "string" ? selectedOptions : ""}
           onChange={handleDateChange}
           max={today}
-          className="w-full rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-800 outline-none ring-1 ring-transparent transition-all focus:bg-white focus:ring-1 focus:ring-slate-300"
+          className="inventory-dropdown-date-input w-full rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-800 outline-none ring-1 ring-transparent transition-all focus:bg-white focus:ring-1 focus:ring-slate-300"
         />
       );
     }
 
     return (
-      <div className="flex max-h-full flex-col">
+      <div className="inventory-dropdown-content flex max-h-full flex-col">
         {/* search box */}
-        <div className="mb-2 flex items-center gap-2 px-1 pb-2 border-b border-slate-100 transition-all focus-within:border-slate-300">
-          <FaSearch className="h-3 w-3 flex-shrink-0 text-text-muted" />
+        <div className="inventory-dropdown-search mb-2 flex items-center gap-2 px-1 pb-2 border-b border-slate-100 transition-all focus-within:border-slate-300">
+          <FaSearch className="inventory-dropdown-search-icon h-3 w-3 flex-shrink-0 text-text-muted" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchInput}
             onChange={handleInputChange}
             placeholder={`Search ${title.toLowerCase()}`}
-            className="min-w-0 flex-1 bg-transparent text-[13px] text-text-primary outline-none placeholder:text-text-disabled font-medium"
+            className="inventory-dropdown-search-input min-w-0 flex-1 bg-transparent text-[13px] text-text-primary outline-none placeholder:text-text-disabled font-medium"
           />
           {loading && <FaSpinner className="h-3.5 w-3.5 flex-shrink-0 animate-spin text-text-muted" />}
           {!loading && searchInput && (
@@ -694,7 +686,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
                 event.preventDefault();
                 handleClearSearch();
               }}
-              className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-text-muted hover:bg-border hover:text-text-primary transition-colors"
+              className="inventory-dropdown-search-clear flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-text-muted hover:bg-border hover:text-text-primary transition-colors"
               title="Clear search"
               aria-label="Clear search"
             >
@@ -707,12 +699,12 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
         <div
           ref={listRef}
           onScroll={handleListScroll}
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-0.5 [scrollbar-width:thin]"
+          className="inventory-dropdown-list min-h-0 flex-1 overflow-y-auto overscroll-contain pr-0.5 [scrollbar-width:thin]"
           style={{ maxHeight: dropdownPosition.maxHeight - 44 }}
           role="listbox"
         >
           {filteredOptions.length === 0 && !loading && (
-            <div className="px-2.5 py-6 text-center text-xs font-medium text-slate-400">
+            <div className="inventory-dropdown-empty px-2.5 py-6 text-center text-xs font-medium text-slate-400">
               {searchInput ? "No matching options" : "No options"}
             </div>
           )}
@@ -720,7 +712,7 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
           {filteredOptions.map(renderOptionRow)}
 
           {loading && (
-            <div className="flex items-center justify-center gap-1.5 px-2.5 py-3 text-[11px] font-semibold text-slate-400">
+            <div className="inventory-dropdown-loading flex items-center justify-center gap-1.5 px-2.5 py-3 text-[11px] font-semibold text-slate-400">
               <FaSpinner className="h-3 w-3 animate-spin" />
               {loadingText}
             </div>
@@ -732,13 +724,16 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
 
   return (
     <div
-      className="relative w-full min-w-0 max-w-full flex-1"
+      className="inventory-collapsible-filter relative w-full min-w-0 max-w-full flex-1"
       style={{ zIndex: isOpen ? 9999 : 1 }}
     >
       <div
         ref={buttonRef}
         onClick={handleToggle}
-        className={triggerClasses}
+        className={`${triggerClasses} inventory-collapsible-filter-trigger`}
+        role="button"
+        aria-haspopup={inputType === "date" ? "dialog" : "listbox"}
+        aria-expanded={isOpen}
         title={loading && disabled ? loadingText : statusLabel || String(displayText)}
       >
         <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate leading-tight">
@@ -772,13 +767,13 @@ const CollapsibleFilter: React.FC<CollapsibleFilterProps> = ({
             ref={panelRef}
             style={{
               position: "fixed",
-              top: dropdownPosition.top + 4,
+              top: dropdownPosition.top,
               left: dropdownPosition.left,
               width: dropdownPosition.width,
               maxHeight: dropdownPosition.maxHeight,
               zIndex: 999999,
             }}
-            className={`overflow-hidden rounded-xl border border-border bg-white p-2 shadow-2xl transition-all duration-200 ease-out ${panelVisible ? "translate-y-0 opacity-100 scale-100" : "-translate-y-2 opacity-0 scale-95"
+            className={`inventory-filter-dropdown-panel overflow-hidden rounded-xl border border-border bg-white p-2 shadow-2xl transition-all duration-200 ease-out ${panelVisible ? "is-visible translate-y-0 opacity-100 scale-100" : "-translate-y-2 opacity-0 scale-95"
               }`}
           >
             {renderDropdownContent()}

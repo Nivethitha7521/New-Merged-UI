@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import MenuPage from "../page";
 import DeliveryOrderCard from "../DeliveryDate/Modules/deliveryOrderCard";
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 type EditData = {
   configures: Config[];
   noOfChangeableDate: string;
@@ -190,7 +190,7 @@ const DeliveryOrdersPage: React.FC = () => {
           </Typography>
         </Box>
       </Box>
-
+<ModuleVisibilityGuard app="masteradmin" module="deliverydate">
      <Grid container spacing={2} mt={0}>
         {reversedItems.map((order) => (
           <Grid item xs={12} key={order.deliveryOrderId}>
@@ -209,7 +209,7 @@ const DeliveryOrdersPage: React.FC = () => {
           </Grid>
         ))}
       </Grid>
-
+</ModuleVisibilityGuard>
 
       {/* Confirm Dialog */}
       <Dialog

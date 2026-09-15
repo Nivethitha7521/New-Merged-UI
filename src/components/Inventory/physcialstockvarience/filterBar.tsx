@@ -198,13 +198,13 @@ const FilterBarComponent: React.FC<FilterBarProps> = ({
   })), [branches]);
 
   return (
-    <div className="w-full min-w-0 flex flex-nowrap items-center gap-1.5 px-2 py-1.5 bg-surface-muted border-y border-border relative z-[20] overflow-x-auto no-scrollbar">   
+    <div className="inventory-filter-toolbar inventory-filter-toolbar-row w-full min-w-0 flex flex-nowrap items-center gap-1.5 relative z-[20] overflow-x-auto no-scrollbar">
       {/* Label  4 8 1*/}
       {/* <div className="hidden sm:flex h-[34px] items-center px-2.5 rounded-[8px] bg-white border border-brand-200 text-[11px] font-extrabold text-brand-700 whitespace-nowrap shrink-0">
         {cascadeSourceKey ? `Filters · ${cascadeSourceLabel}` : "Filters"}
       </div> */}
 
-      <div className="shrink-0 w-[140px] md:w-[180px]">
+      <div className="inventory-filter-field shrink-0 w-[140px] md:w-[180px]">
         <CollapsibleFilter
           title="Location"
           options={branchOptions}
@@ -232,7 +232,7 @@ const FilterBarComponent: React.FC<FilterBarProps> = ({
           })) || [];
 
           return (
-            <div key={field} className={cn("shrink-0", 
+            <div key={field} className={cn("inventory-filter-field shrink-0",
               (field === "itemName" || field === "varianceName") ? "w-[170px] md:w-[220px]" : "w-[140px] md:w-[180px]")}>
               <CollapsibleFilter
                 title={getFilterTitle(field)}
@@ -252,7 +252,7 @@ const FilterBarComponent: React.FC<FilterBarProps> = ({
       )}
 
       {/* Buttons */}
-      <div className="flex items-center gap-1.5 ml-auto">
+      <div className="inventory-filter-actions flex items-center gap-1.5 ml-auto">
         <ActionBtn onClick={handleClearAllFilters} disabled={!hasLocation || !isAnyFilterActive} tooltip="Clear filters" danger>
           <ClearIcon />
         </ActionBtn>

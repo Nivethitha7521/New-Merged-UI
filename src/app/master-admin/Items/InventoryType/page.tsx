@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../redux/store';
 import { Snackbar, Alert } from '@mui/material';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import MasterAdminMenu from '../page';
 import {
   activateInventory,
@@ -257,16 +258,17 @@ const InventoryComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <InventoryTable
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleActivate={handleActivate}
-        handleDeactivate={handleDeactivate}
-        handleToggleDirectSale={handleToggleDirectSale}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={handleSetShowDeactivated}
-      />
-
+   <ModuleVisibilityGuard app="masteradmin" module="inventorytype">
+        <InventoryTable
+          handleOpen={handleOpen}
+          handleEdit={handleEdit}
+          handleActivate={handleActivate}
+          handleDeactivate={handleDeactivate}
+          handleToggleDirectSale={handleToggleDirectSale}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={handleSetShowDeactivated}
+        />
+      </ModuleVisibilityGuard>
       <InventoryDialog
         open={dialogOpen !== 'none'}
         handleClose={handleClose}

@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react'; // Add useRef
-import { TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Input, Tooltip } from '@mui/material';
+import { TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Typography, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Input, Tooltip, FormControl, Select, MenuItem, RadioGroup, FormControlLabel, Radio, Switch, InputAdornment, Alert, CircularProgress } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBusinesses, updateBusiness, addBusiness, fetchShipping, updateShipping, addShipping, addBusinessdetail, updateBusinessdetail, addShippingdetail, updateShippingdetail, selectBusinesses, fetchPhoto, uploadBusinessPhoto } from '@/features/account-setting/businessSlice';
 import { AppDispatch } from '@/redux/store';
@@ -8,9 +8,51 @@ import { Business, ShippingAddress } from '@/Models/businessModel';
 import AccountSettingsPage from '../page';
 import { Add, Save, Edit } from '@mui/icons-material';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Image from 'next/image';
 import * as Yup from 'yup';
 import { Formik, Form, Field, FormikHelpers } from 'formik';
+import { DisplayCurrency, DisplayDateFormat, DisplaySettings, DisplayTimeFormat, DisplayTimezone, useDisplaySettings } from '@/contexts/DisplaySettingsContext';
+import { formatDateTime } from '@/utilities/formatters';
+import './BusinessPage.css';
+
+const TIMEZONE_LABELS: Record<string, string> = {
+  'Asia/Kolkata': 'India Standard Time',
+  'Asia/Dubai': 'United Arab Emirates (Dubai)',
+  'Asia/Singapore': 'Singapore Standard Time',
+  'Europe/London': 'United Kingdom (London)',
+  'America/New_York': 'United States (New York)',
+  UTC: 'Coordinated Universal Time',
+};
+
+const CURRENCY_LABELS: Record<string, string> = {
+  INR: 'Indian Rupee',
+  USD: 'US Dollar',
+  EUR: 'Euro',
+  GBP: 'British Pound',
+};
+
+const TIMEZONE_OPTIONS = [
+  { value: 'Asia/Kolkata', label: 'India (Kolkata)', helper: 'UTC +05:30' },
+  { value: 'Asia/Dubai', label: 'United Arab Emirates (Dubai)', helper: 'UTC +04:00' },
+  { value: 'Asia/Singapore', label: 'Singapore', helper: 'UTC +08:00' },
+  { value: 'Europe/London', label: 'United Kingdom (London)', helper: 'Automatic daylight saving' },
+  { value: 'America/New_York', label: 'United States (New York)', helper: 'Automatic daylight saving' },
+  { value: 'UTC', label: 'UTC', helper: 'Coordinated Universal Time' },
+] as const;
+
+const DATE_FORMAT_OPTIONS = [
+  { value: 'DD/MM/YYYY', example: '01/09/2026' },
+  { value: 'DD-MM-YYYY', example: '01-09-2026' },
+  { value: 'YYYY-MM-DD', example: '2026-09-01' },
+  { value: 'DD MMM YYYY', example: '01 Sep 2026' },
+  { value: 'MMM DD, YYYY', example: 'Sep 01, 2026' },
+] as const;
 
 // Define validation schema using Yup
 const phoneValidation = Yup.string()
@@ -53,6 +95,16 @@ const ShippingSchema = Yup.object().shape({
 const BusinessPage = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { businesses, shippingaddress, loading } = useSelector(selectBusinesses);
+  const { settings, previewSettings, saveSettings, formatCurrency } = useDisplaySettings();
+  const [regionalDraft, setRegionalDraft] = useState<DisplaySettings>(settings);
+  const [regionalSaving, setRegionalSaving] = useState(false);
+  const [regionalSaved, setRegionalSaved] = useState(false);
+  const [regionalError, setRegionalError] = useState('');
+
+  const timezoneLabel = TIMEZONE_LABELS[regionalDraft.timezone] || regionalDraft.timezone;
+  const currencyLabel = CURRENCY_LABELS[regionalDraft.currency] || regionalDraft.currency;
+  const selectedExchangeRate = regionalDraft.exchangeRates?.[regionalDraft.currency] ?? 1;
+  const currentDateTimePreview = formatDateTime(new Date());
   
   // Refs for scrolling
   const businessRef = useRef<HTMLDivElement>(null);
@@ -73,6 +125,36 @@ const BusinessPage = () => {
     dispatch(fetchBusinesses());
     dispatch(fetchShipping());
   }, [dispatch]);
+
+  useEffect(() => {
+    setRegionalDraft(settings);
+  }, [settings]);
+
+  const updateRegionalSetting = <K extends keyof DisplaySettings>(
+    key: K,
+    value: DisplaySettings[K]
+  ) => {
+    const next = { ...regionalDraft, [key]: value };
+    setRegionalDraft(next);
+    previewSettings(next);
+    setRegionalSaved(false);
+    setRegionalError('');
+  };
+
+  const handleSaveRegionalSettings = async () => {
+    setRegionalSaving(true);
+    setRegionalError('');
+    const success = await saveSettings(regionalDraft);
+    setRegionalSaving(false);
+
+    if (!success) {
+      setRegionalError('Unable to save regional settings. Please try again.');
+      return;
+    }
+
+    setRegionalSaved(true);
+    window.setTimeout(() => setRegionalSaved(false), 2200);
+  };
 
   useEffect(() => {
     businesses.forEach((business) => {
@@ -282,8 +364,23 @@ const BusinessPage = () => {
   };
 
   return (
-<Box className="account-settings-module account-settings-business" sx={{ height: '100vh', overflow: 'auto', p: 2 }}> {/* Make the main container scrollable */}      {/* Business Details Section */}
-<Box className="account-settings-section" ref={businessRef} sx={{ mb: 4 }}> {/* Add ref and bottom margin */}        <Typography variant="h5">Business Information</Typography>
+<Box className="account-settings-module account-settings-business business-details-page">
+      <Box className="business-page-heading">
+        <Box className="business-heading-icon"><BusinessOutlinedIcon /></Box>
+        <Box>
+          <Typography component="h1">Business Details</Typography>
+          <Typography component="p">Manage tenant business information, regional preferences and shipping addresses.</Typography>
+        </Box>
+      </Box>
+
+<Box className="account-settings-section business-profile-section" ref={businessRef}>
+        <Box className="business-section-heading">
+          <Box>
+            <Typography component="h2">Business Information</Typography>
+            <Typography component="p">Tenant-linked company and statutory information.</Typography>
+          </Box>
+          <span className="business-sync-badge"><CheckCircleOutlineIcon /> Tenant synced</span>
+        </Box>
         <Tooltip title="Add New Business" arrow>
           <span>
             <IconButton
@@ -301,15 +398,15 @@ const BusinessPage = () => {
           <Typography>Loading...</Typography>
         ) : businesses.length > 0 ? ( // Fix: use businesses.length instead of getFilteredBusinesses.length
           businesses.map((business: Business) => (
-            <Box key={business.businessId} sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box key={business.businessId} className="business-record">
+              <Box className="business-profile-summary">
                 <Input
                   id={`file-input-${business.businessId}`}
                   type="file"
                   style={{ display: 'none' }}
                   onChange={(e: any) => handleFileChange(e, business.businessId)}
                 />
-                <label htmlFor={`file-input-${business.businessId}`}>
+                <label htmlFor={`file-input-${business.businessId}`} className="business-photo-upload">
                   {!business.imageUrl && (
                     <IconButton color="primary" component="span">
                       <CameraAltIcon />
@@ -322,12 +419,22 @@ const BusinessPage = () => {
                     alt={`Business Photo for ${business.companyName}`}
                     width={100}
                     height={100}
-                    style={{ marginTop: '10px' }}
+                    className="business-logo-image"
                   />
                 )}
+                <Box className="business-profile-copy">
+                  <Box className="business-profile-title">
+                    <Typography component="h3">{business.companyName}</Typography>
+                    <span>{business.aliasName || '--'}</span>
+                    <em>Active</em>
+                  </Box>
+                  <Typography>{business.emailId || 'Email not available'}</Typography>
+                  <Typography>{business.phoneNo || 'Phone not available'}</Typography>
+                  <small>Business ID: {business.businessId}</small>
+                </Box>
               </Box>
               
-              <TableContainer component={Paper} style={{ width: '100%', maxWidth: '800px' }}>
+              <TableContainer component={Paper} className="business-info-table">
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -453,7 +560,7 @@ const BusinessPage = () => {
                     </TableRow>
                   </TableBody>
                 </Table>
-                <Box sx={{ p: 1 }}>
+                <Box className="business-table-actions">
                   {editBusinessRowId === business.businessId ? (
                     <Tooltip title='Save'>
                       <IconButton color='primary' onClick={() => handleSaveBusiness(business.businessId)}>
@@ -476,8 +583,191 @@ const BusinessPage = () => {
         )}
       </Box>
 
+      <Box className="account-settings-section business-display-section">
+        <Box className="business-section-heading">
+          <Box>
+            <Typography component="h2">Regional Settings</Typography>
+            <Typography component="p">Set the tenant&apos;s timezone, date, time and currency preferences.</Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={regionalSaving ? <CircularProgress size={16} color="inherit" /> : <Save />}
+            onClick={handleSaveRegionalSettings}
+            disabled={regionalSaving}
+            className="business-save-settings"
+          >
+            {regionalSaving ? 'Saving...' : regionalSaved ? 'Saved' : 'Save Regional Settings'}
+          </Button>
+        </Box>
+
+        {regionalError && (
+          <Alert severity="error" className="business-regional-alert">{regionalError}</Alert>
+        )}
+
+        <Box className="business-regional-form">
+          <Box className="business-regional-field">
+            <Box className="business-regional-label">
+              <Box className="business-setting-icon"><ScheduleOutlinedIcon /></Box>
+              <Box>
+                <Typography component="label">Timezone</Typography>
+                <span>Used when displaying saved timestamps.</span>
+              </Box>
+            </Box>
+            <FormControl fullWidth size="small">
+              <Select
+                value={regionalDraft.timezone}
+                onChange={(event) => updateRegionalSetting('timezone', event.target.value as DisplayTimezone)}
+              >
+                {TIMEZONE_OPTIONS.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    <Box className="business-select-option">
+                      <strong>{option.label}</strong>
+                      <small>{option.helper}</small>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Box className="business-regional-field">
+            <Box className="business-regional-label">
+              <Box className="business-setting-icon"><CalendarMonthOutlinedIcon /></Box>
+              <Box>
+                <Typography component="label">Date Format</Typography>
+                <span>Controls how dates appear across the ERP.</span>
+              </Box>
+            </Box>
+            <FormControl fullWidth size="small">
+              <Select
+                value={regionalDraft.dateFormat}
+                onChange={(event) => updateRegionalSetting('dateFormat', event.target.value as DisplayDateFormat)}
+              >
+                {DATE_FORMAT_OPTIONS.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.value} — {option.example}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Box className="business-regional-field business-time-field">
+            <Box className="business-regional-label">
+              <Box className="business-setting-icon"><ScheduleOutlinedIcon /></Box>
+              <Box>
+                <Typography component="label">Time Format</Typography>
+                <span>Choose a 12-hour or 24-hour clock.</span>
+              </Box>
+            </Box>
+            <RadioGroup
+              row
+              value={regionalDraft.timeFormat}
+              onChange={(event) => updateRegionalSetting('timeFormat', event.target.value as DisplayTimeFormat)}
+              className="business-time-options"
+            >
+              <FormControlLabel value="12h" control={<Radio size="small" />} label="12 Hour — 02:30 PM" />
+              <FormControlLabel value="24h" control={<Radio size="small" />} label="24 Hour — 14:30" />
+            </RadioGroup>
+          </Box>
+
+          <Box className="business-regional-field business-seconds-field">
+            <Box className="business-regional-label">
+              <Box className="business-setting-icon"><ScheduleOutlinedIcon /></Box>
+              <Box>
+                <Typography component="label">Show Seconds</Typography>
+                <span>Include seconds in displayed time.</span>
+              </Box>
+            </Box>
+            <Switch
+              checked={regionalDraft.showSeconds}
+              onChange={(event) => updateRegionalSetting('showSeconds', event.target.checked)}
+              inputProps={{ 'aria-label': 'Show seconds in displayed time' }}
+            />
+          </Box>
+
+          <Box className="business-regional-field business-currency-field">
+            <Box className="business-regional-label">
+              <Box className="business-setting-icon"><PaymentsOutlinedIcon /></Box>
+              <Box>
+                <Typography component="label">Currency</Typography>
+                <span>Sets the centralized on-screen currency formatter.</span>
+              </Box>
+            </Box>
+            <RadioGroup
+              row
+              value={regionalDraft.currency}
+              onChange={(event) => updateRegionalSetting('currency', event.target.value as DisplayCurrency)}
+              className="business-currency-options"
+            >
+              {(['INR', 'USD', 'EUR', 'GBP'] as DisplayCurrency[]).map((currency) => (
+                <FormControlLabel key={currency} value={currency} control={<Radio size="small" />} label={currency} />
+              ))}
+            </RadioGroup>
+          </Box>
+
+          <Box className="business-regional-field business-rate-field">
+            <Box className="business-regional-label">
+              <Box className="business-setting-icon"><PaymentsOutlinedIcon /></Box>
+              <Box>
+                <Typography component="label">Exchange Rate</Typography>
+                <span>Value of 1 INR in the selected display currency.</span>
+              </Box>
+            </Box>
+            <TextField
+              fullWidth
+              size="small"
+              type="number"
+              value={selectedExchangeRate}
+              disabled={regionalDraft.currency === 'INR'}
+              inputProps={{ step: '0.000001', min: '0.000001' }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">1 INR =</InputAdornment>,
+                endAdornment: <InputAdornment position="end">{regionalDraft.currency}</InputAdornment>,
+              }}
+              onChange={(event) => {
+                const nextRate = Number(event.target.value);
+                if (Number.isFinite(nextRate) && nextRate > 0) {
+                  updateRegionalSetting('exchangeRates', {
+                    ...regionalDraft.exchangeRates,
+                    [regionalDraft.currency]: nextRate,
+                  });
+                }
+              }}
+            />
+          </Box>
+        </Box>
+
+        <Box className="business-regional-preview">
+          <Box>
+            <span>Live Date &amp; Time Preview</span>
+            <strong>{currentDateTimePreview}</strong>
+            <small>{timezoneLabel}</small>
+          </Box>
+          <Box>
+            <span>Live Currency Preview</span>
+            <strong>{formatCurrency(1234.56)}</strong>
+            <small>{regionalDraft.currency} · {currencyLabel}</small>
+          </Box>
+        </Box>
+
+        <Box className="business-settings-note">
+          <CheckCircleOutlineIcon />
+          <span>Display conversion only. Existing saved timestamps and stored transaction values are not modified.</span>
+        </Box>
+      </Box>
+
       {/* Shipping Details Section */}
-<Box className="account-settings-section" ref={shippingRef} sx={{ mt: 4 }}> {/* Add ref and top margin */}        <Typography variant="h5">Shipping Addresses</Typography>
+      <Box className="account-settings-section business-shipping-section" ref={shippingRef}>
+        <Box className="business-section-heading">
+          <Box className="business-section-heading-copy">
+            <Box className="business-section-icon"><LocalShippingOutlinedIcon /></Box>
+            <Box>
+              <Typography component="h2">Shipping Addresses</Typography>
+              <Typography component="p">Addresses used for purchasing and delivery documents.</Typography>
+            </Box>
+          </Box>
+        </Box>
         <Tooltip title="Add New Shipping Address" arrow>
           <span>
             <IconButton
@@ -493,7 +783,7 @@ const BusinessPage = () => {
         {loading ? (
           <Typography>Loading...</Typography>
         ) : shippingaddress.length > 0 ? (
-          <TableContainer component={Paper} sx={{ mt: 2, width: '100%', maxWidth: '1000px' }}>
+          <TableContainer component={Paper} className="business-shipping-table">
             <Table>
               <TableHead>
                 <TableRow>

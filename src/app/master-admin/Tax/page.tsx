@@ -4,7 +4,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert,Box } from '@mui/material';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import MasterAdminMenu from '../page';
 
 // ── Tax imports ──
@@ -565,23 +565,27 @@ const TaxComponent: React.FC = () => {
     <Box className="master-admin-module-page tax-master-page">
       {/* <MasterAdminMenu /> */}
 
-      <TaxTableContainer
-        handleOpen={handleTaxOpen}
-        handleEdit={handleTaxEdit}
-        handleActivate={handleTaxActivate}
-        handleDeactivate={handleTaxDeactivate}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={handleTaxShowDeactivated}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="tax">
+        <TaxTableContainer
+          handleOpen={handleTaxOpen}
+          handleEdit={handleTaxEdit}
+          handleActivate={handleTaxActivate}
+          handleDeactivate={handleTaxDeactivate}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={handleTaxShowDeactivated}
+        />
+      </ModuleVisibilityGuard>
 
-      <DineInTaxTableContainer
-        handleOpen={handleDineInOpen}
-        handleEdit={handleDineInEdit}
-        handleActivate={handleDineInActivate}
-        handleDeactivate={handleDineInDeactivate}
-        showDeactivated={dineInShowDeactivated}
-        setShowDeactivated={handleDineInShowDeactivated}
-      />
+      <ModuleVisibilityGuard app="masteradmin" module="dineintax">
+        <DineInTaxTableContainer
+          handleOpen={handleDineInOpen}
+          handleEdit={handleDineInEdit}
+          handleActivate={handleDineInActivate}
+         handleDeactivate={handleDineInDeactivate}
+          showDeactivated={dineInShowDeactivated}
+          setShowDeactivated={handleDineInShowDeactivated}
+        />
+      </ModuleVisibilityGuard>
 
       {/* ── Tax Dialog ── */}
       <TaxDialog

@@ -19,6 +19,7 @@ import {
   setSectionsData,
   updateSection,
 } from '../SectionMaster/Features/sectionsSlice';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import MasterAdminMenu from '../page';
 import SectionsTable from './Modules/sectionsTable';
 import SectionsDialog from './Modules/sectionsDialog';
@@ -309,16 +310,18 @@ const SectionsPage: React.FC = () => {
 <div className="section-master-page">
       {/* <MasterAdminMenu /> */}
 
-      <SectionsTable
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="sectionmaster">
+        <SectionsTable
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+        />
+      </ModuleVisibilityGuard>
 
       <SectionsDialog
         open={dialogOpen !== 'none'}

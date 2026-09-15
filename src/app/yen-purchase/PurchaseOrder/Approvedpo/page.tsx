@@ -100,6 +100,7 @@ import StockUpdateDialog from "../Component/StockUpdateDialog";
 import LocationAutocomplete from "@/components/yen-purchase/pocreationcomponent/locationautocomplete";
 import { Location } from "@/Models/storagelocation";
 import { UnifiedDatePicker } from "../Component/UnifiedDatePicker";
+import { formatCurrency, formatDate } from '@/utilities/formatters';
 import StockUpdateLogsDialog from "../Component/StockUpdateLogsPage";
 import { GrnSettings, grnSettingsService } from "../../service/grnpriceservice";
 import { fetchGRNPriceSettings, validateGRNPrice } from "@/app/yen-settings/Features/GRNSettingsSlice";
@@ -325,7 +326,7 @@ const TableRowMemo = React.memo(
             helperText={touched[index]?.expiryDate && errors[index]?.expiryDate}
           />
         </TableCell>
-        <TableCell className='table-number-right'>{(item.calculatedTotalPrice || 0).toFixed(2)}</TableCell>
+        <TableCell className='table-number-right'>{formatCurrency(item.calculatedTotalPrice ?? 0)}</TableCell>
       </TableRow>
     );
   }
@@ -944,7 +945,7 @@ try {
                     <TableCell>
                       <strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong>
                     </TableCell>
-                    <TableCell className='table-number-right'>{tax.amount.toFixed(2)}</TableCell>
+                    <TableCell className='table-number-right'>{formatCurrency(tax.amount)}</TableCell>
                   </TableRow>
                 ))}
 
@@ -955,7 +956,7 @@ try {
                     <strong>Freight Amount:</strong>
                   </TableCell>
                   <TableCell className='table-number-right'>
-                    {freightTotalAmount.toFixed(2)}
+                    {formatCurrency(freightTotalAmount)}
                   </TableCell>
                 </TableRow>
 
@@ -1059,7 +1060,7 @@ try {
                   <TableCell>
                     <strong>Before RoundOff:</strong>
                   </TableCell>
-                  <TableCell className='table-number-right'>{totalOrderAmount.toFixed(2)}</TableCell>
+                  <TableCell className='table-number-right'>{formatCurrency(totalOrderAmount)}</TableCell>
                 </TableRow>
 
                 {/* Round Off - Update colSpan */}
@@ -1125,7 +1126,7 @@ try {
                     sx={{
                       color: finalTotalAmount < 0 ? 'error.main' : 'inherit'
                     }}>
-                    {finalTotalAmount.toFixed(2)}
+                    {formatCurrency(finalTotalAmount)}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -1195,13 +1196,13 @@ try {
             <Typography>Are you sure you want to convert this purchase order to a Goods Received Note (GRN)?</Typography>
             <Box sx={{ mt: 1 }}>
               <Typography variant="body2">
-                <strong>Total Before Round Off:</strong> {totalOrderAmount.toFixed(2)}
+                <strong>Total Before Round Off:</strong> {formatCurrency(totalOrderAmount)}
               </Typography>
               <Typography variant="body2">
-                <strong>Round Off Amount:</strong> {roundOffAmount.toFixed(2)}
+                <strong>Round Off Amount:</strong> {formatCurrency(roundOffAmount)}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                <strong>Final Total:</strong> {finalTotalAmount.toFixed(2)}
+                <strong>Final Total:</strong> {formatCurrency(finalTotalAmount)}
               </Typography>
             </Box>
           </Box>
@@ -2455,7 +2456,7 @@ if (!invoiceAvailability.available || isInvoiceDuplicate) {
             order.vendorName.toString(),
             order.poStatus || "", // NEW: Status column
             totalItemsQuantity.toString(),
-            order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "",
+            order.orderDate ? formatDate(new Date(order.orderDate)) : "",
             finalAmount.toFixed(2).toString(),
           ];
         })
@@ -2548,7 +2549,7 @@ if (!invoiceAvailability.available || isInvoiceDuplicate) {
             order.vendorName,
             order.poStatus || "", // NEW: Status column
             totalItemsQuantity,
-            order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : "",
+            order.orderDate ? formatDate(new Date(order.orderDate)) : "",
             finalAmount.toFixed(2),
           ];
         })
@@ -2943,7 +2944,7 @@ const handleOpenDraft = async (draftId: string) => {
         setUpdatedItems(newItems);
         // Recalculate totals (triggers useMemo for totalOrderAmount, etc.)
         setSnackbarInvoiceMessage(
-          `Overall discount of ₹${overallDiscountAmount.toFixed(2)} applied as ${discountType} tax. New total: ₹${result.summary.totalFinalAmount.toFixed(2)}`
+          `Overall discount of ${formatCurrency(overallDiscountAmount)} applied as ${discountType} tax. New total: ${formatCurrency(result.summary.totalFinalAmount)}`
         );
         setSnackbarInvoiceOpen(true);
       } else {
@@ -3214,15 +3215,15 @@ const handleOpenDraft = async (draftId: string) => {
     <span>{order.vendorName || '-'}</span>
   </Box>
 </TableCell>
-                    <TableCell>{order.orderDate ? format(new Date(order.orderDate), "dd-MM-yyyy") : ""}</TableCell>
-                    <TableCell>{order.approvedDate ? format(new Date(order.approvedDate), "dd-MM-yyyy") : ""}</TableCell>
+                    <TableCell>{order.orderDate ? formatDate(new Date(order.orderDate)) : ""}</TableCell>
+                    <TableCell>{order.approvedDate ? formatDate(new Date(order.approvedDate)) : ""}</TableCell>
                     <TableCell className='table-number-right'>
                       {(() => {
                         const total = order.items.reduce((acc, item) => acc + (item.pendingTotalQuantity || 0), 0);
                         return total.toFixed(3);
                       })()}
                     </TableCell>
-                    <TableCell className='table-number-right'>{(order.pendingOrderAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell className='table-number-right'>{formatCurrency(order.pendingOrderAmount)}</TableCell>
                  <TableCell>
   <span className="purchase-master-status-pill is-approved">
     {order.poStatus || 'Approved'}

@@ -38,7 +38,7 @@ import { useRouter } from 'next/navigation';
 import UndoIcon from "@mui/icons-material/Undo";
 import ImportResultDialog, { ImportResultData } from '../../../Components/ImportResultDialog';
 import { API_BASE_URL } from '../../../../../API_URL';
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -483,15 +483,17 @@ function ItemActions({
 
           {/* Add */}
         <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-            <IconButton
-              color="primary"
+            <PermissionIconButton
+              app="masteradmin"
+              module="item"
+              action="add"
+              tooltip="Add"
               onClick={handleAddClick}
-              disabled={isAnyActionLoading}
+             icon={<AddIcon className="icon-action-svg" />}
               className="icon-action-button"
-              title="Add"
-            >
-              <AddIcon className="icon-action-svg" />
-            </IconButton>
+             ariaLabel="Add"
+              disabled={isAnyActionLoading}
+            />
             <Typography className="icon-action-label">Add</Typography>
           </div>
 
@@ -568,19 +570,21 @@ function ItemActions({
 
           {/* Import */}
         <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-            <IconButton
-              color="primary"
+            <PermissionIconButton
+              app="masteradmin"
+              module="item"
+              action="add"
+              tooltip="Import"
               onClick={handleImportClick}
-              disabled={isAnyActionLoading}
-              className="icon-action-button cursor-pointer"
-              title="Import"
-            >
-              {isImporting ? (
+             icon={isImporting ? (
                 <CircularProgress size={24} sx={{ color: 'primary.main' }} />
               ) : (
                <ImportIcon className="icon-action-svg" />
               )}
-            </IconButton>
+          className="icon-action-button cursor-pointer"
+              ariaLabel="Import"
+              disabled={isAnyActionLoading}
+            />
             <Typography className="icon-action-label">
               {isImporting ? 'Importing...' : 'Import'}
             </Typography>
@@ -608,19 +612,21 @@ function ItemActions({
 
           {/* Image Upload — Item / Variance choice */}
         <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-            <IconButton
-              color="primary"
+           <PermissionIconButton
+              app="masteradmin"
+              module="item"
+              action="add"
+              tooltip="Upload Images (ZIP)"
               onClick={(e) => !isAnyActionLoading && setImageMenuAnchorEl(e.currentTarget)}
-              disabled={isAnyActionLoading}
-              className="icon-action-button"
-              title="Upload Images (ZIP)"
-            >
-              {isUploadingImages ? (
+            icon={isUploadingImages ? (
                 <CircularProgress size={24} sx={{ color: 'primary.main' }} />
               ) : (
                 <ImageIcon className="icon-action-svg" />
               )}
-            </IconButton>
+           className="icon-action-button"
+              ariaLabel="Upload Images (ZIP)"
+              disabled={isAnyActionLoading}
+            />
             <Typography className="icon-action-label">Image</Typography>
           </div>
 
@@ -674,19 +680,21 @@ function ItemActions({
 
           {/* Export */}
         <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-            <IconButton
-              color="primary"
-              onClick={handleExport}
-              disabled={isAnyActionLoading}
-              className="icon-action-button"
-              title="Export"
-            >
-              {isExporting ? (
-                <CircularProgress size={24} sx={{ color: 'primary.main' }} />
-              ) : (
-              <ExportIcon className="icon-action-svg" />
-              )}
-            </IconButton>
+<PermissionIconButton
+  app="masteradmin"
+  module="item"
+  action="add"
+  tooltip="Export"
+  onClick={handleExport}
+  icon={isExporting ? (
+    <CircularProgress size={24} sx={{ color: 'primary.main' }} />
+  ) : (
+    <ExportIcon className="icon-action-svg" />
+  )}
+  className="icon-action-button"
+  ariaLabel="Export"
+  disabled={isAnyActionLoading}
+/>
             <Typography className="icon-action-label">Export</Typography>
           </div>
 
@@ -709,19 +717,21 @@ function ItemActions({
 
           {/* Rollback */}
        <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-            <IconButton
-              color="secondary"
+           <PermissionIconButton
+              app="masteradmin"
+              module="item"
+              action="edit"
+              tooltip="Rollback"
               onClick={handleRollback}
-              className="icon-action-button"
-              size="small"
-              disabled={isAnyActionLoading}
-            >
-              {isDownloadingrollback ? (
+             icon={isDownloadingrollback ? (
                 <CircularProgress size={24} sx={{ color: 'primary.main' }} />
               ) : (
                 <UndoIcon className="icon-action-svg" />
               )}
-            </IconButton>
+            className="icon-action-button"
+              ariaLabel="Rollback"
+              disabled={isAnyActionLoading}
+            />
             <Typography className="icon-action-label">Rollback</Typography>
           </div>
 

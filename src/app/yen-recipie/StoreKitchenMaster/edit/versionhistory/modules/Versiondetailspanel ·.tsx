@@ -3,6 +3,7 @@
 import styles from "../../../skm.module.css";
 import { VersionDetail } from "../models/versionhistortmodel"
 import ItemsTable from "./ItemsTable";
+import { formatCurrency } from '@/utilities/formatters';
 
 interface VersionDetailsPanelProps {
   selectedVersion: VersionDetail | null;
@@ -64,12 +65,12 @@ export default function VersionDetailsPanel({
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
             <div className={styles.summaryLabel}>Making Cost</div>
-            <div className={styles.summaryValue}>₹{makingCost.toFixed(2)}</div>
+            <div className={styles.summaryValue}>{formatCurrency(makingCost)}</div>
           </div>
 
           <div className={styles.summaryCard}>
             <div className={styles.summaryLabel}>Sale Cost</div>
-            <div className={styles.summaryValue}>₹{salesCost.toFixed(2)}</div>
+            <div className={styles.summaryValue}>{formatCurrency(salesCost)}</div>
           </div>
 
           <div
@@ -83,7 +84,7 @@ export default function VersionDetailsPanel({
                 profit < 0 ? styles.summaryValueNegative : ""
               }`}
             >
-              ₹{profit.toFixed(2)}
+              {formatCurrency(profit)}
             </div>
           </div>
         </div>

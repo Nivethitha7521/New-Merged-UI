@@ -23,6 +23,7 @@ import { AppDispatch } from '../../../../redux/store';
 import { deleteConsumable, fetchConsumables } from '../Features/recipeSlice';
 import ActivateDeactivateConfirmationDialog from '@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog';
 import { VersionPreviewSnapshot } from '../Models/recipeModels';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface ProfitCard {
   label: string;
@@ -334,7 +335,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
                           onChange={(e) => handleConsumableValueChange(consumable, 'percentage', Number(e.target.value))}
                           renderValue={(selected) => {
                             const selPrice = (totalCost * (selected as number)) / 100;
-                            return `${selected}% (₹${selPrice.toFixed(2)})`;
+                            return `${selected}% (${formatCurrency(selPrice)})`;
                           }}
                           MenuProps={dropdownMenuProps}
                           sx={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' }}
@@ -343,7 +344,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
                             const optPrice = (totalCost * value) / 100;
                             return (
                              <MenuItem key={value} value={value} sx={{ fontSize: '11px', fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' }}>
-                                {`${value}% (₹${optPrice.toFixed(2)})`}
+                                {`${value}% (${formatCurrency(optPrice)})`}
                               </MenuItem>
                             );
                           })}
@@ -393,7 +394,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
                   fullWidth
                   size="small"
                   // value={`${totalConsumablePercentage}%`}
-                  value={`${totalConsumablePercentage}% (₹${consumablePrice.toFixed(2)})`}
+                  value={`${totalConsumablePercentage}% (${formatCurrency(consumablePrice)})`}
                  InputProps={{ readOnly: true, sx: { fontSize: '11px', fontWeight: 600, fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' } }}
                   InputLabelProps={{ sx: { fontSize: '11px', fontWeight: 700, fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' } }}
                 />
@@ -454,7 +455,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
       onChange={(e) => setWastage(Number(e.target.value))}
       renderValue={(selected) => {
         const price = (totalCost * (selected as number)) / 100;
-        return `${selected}% (₹${price.toFixed(2)})`;
+        return `${selected}% (${formatCurrency(price)})`;
       }}
       MenuProps={dropdownMenuProps}
       sx={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' }}
@@ -463,7 +464,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
         const optPrice = (totalCost * value) / 100;
         return (
          <MenuItem key={value} value={value} sx={{ fontSize: '11px', fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' }}>
-            {`${value}% (₹${optPrice.toFixed(2)})`}
+            {`${value}% (${formatCurrency(optPrice)})`}
           </MenuItem>
         );
       })}
@@ -487,7 +488,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
       }}
       renderValue={(selected) => {
         const price = (totalCost * (selected as number)) / 100;
-        return `${selected}% (₹${price.toFixed(2)})`;
+        return `${selected}% (${formatCurrency(price)})`;
       }}
       MenuProps={dropdownMenuProps}
      sx={{ fontSize: '11px', fontWeight: 600, fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' }}
@@ -496,7 +497,7 @@ const ConsumablesPage: React.FC<ConsumablesPageProps> = ({
         const optPrice = (totalCost * value) / 100;
         return (
           <MenuItem key={value} value={value} sx={{ fontSize: '11px', fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)' }}>
-            {`${value}% (₹${optPrice.toFixed(2)})`}
+            {`${value}% (${formatCurrency(optPrice)})`}
           </MenuItem>
         );
       })}

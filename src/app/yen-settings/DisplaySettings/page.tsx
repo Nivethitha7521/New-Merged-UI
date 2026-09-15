@@ -12,8 +12,6 @@ import {
   RadioGroup,
   Switch,
   Typography,
-  Select,
-  MenuItem,
 } from '@mui/material';
 import {
   DarkModeOutlined,
@@ -24,17 +22,12 @@ import {
   TextFieldsOutlined,
   TuneOutlined,
   LanguageOutlined,
-  PaymentsOutlined,
-  CheckCircleRounded,ViewSidebarOutlined,TabOutlined,AccessTimeOutlined,
-CalendarMonthOutlined,
-PublicOutlined,
+  CheckCircleRounded,
+  ViewSidebarOutlined,
+  TabOutlined,
 } from '@mui/icons-material';
 import {
-  formatDateTime
-} from '@/utils/dateTimeFormatter';
-import {
   DEFAULT_DISPLAY_SETTINGS,
-  DisplayCurrency,
   DisplayFont,
   DisplayFontSize,
   DisplayLanguage,
@@ -42,24 +35,26 @@ import {
   DisplaySettings,
   DisplayStyle,
   DisplayTheme,
-  DisplayTimezone,
-  DisplayDateFormat,
-  DisplayTimeFormat,
   useDisplaySettings,
 } from '@/contexts/DisplaySettingsContext';
 import './DisplaySettings.css';
 
 const ACCENT_COLORS = [
-  { name: 'Blue', value: '#155eef' },
-  { name: 'Green', value: '#039855' },
-  { name: 'Purple', value: '#7f56d9' },
-  { name: 'Orange', value: '#f79009' },
-  { name: 'Red', value: '#d92d20' },
-  { name: 'Pink', value: '#dd2590' },
-  { name: 'Yellow', value: '#eaaa08' },
-  { name: 'Teal', value: '#094a42' },
   { name: 'Indigo', value: '#444ce7' },
   { name: 'Gray', value: '#667085' },
+  { name: 'Purple', value: '#7f56d9' },
+  { name: 'Charcoal', value: '#3b403f' },
+  { name: 'Pink', value: '#dd2590' },
+];
+
+// Dark Mode gets its own accent palette. Emerald is first so it is the
+// default selection whenever the user switches into Dark Mode.
+const DARK_ACCENT_COLORS = [
+  { name: 'Emerald', value: '#10b981' },
+  { name: 'Orange', value: '#f79009' },
+  { name: 'Yellow', value: '#eaaa08' },
+  { name: 'Red', value: '#d92d20' },
+  { name: 'Blue', value: '#155eef' },
 ];
 const FONT_OPTIONS: DisplayFont[] = [
   'Inter',
@@ -84,70 +79,18 @@ const FONT_SIZE_PREVIEWS: Record<DisplayFontSize, string> = {
   medium: '15px',
   large: '17px',
 };
-const TIMEZONE_OPTIONS = [
-  {
-    value: 'Asia/Kolkata',
-    label: 'India (Kolkata)',
-    helper: 'UTC +05:30',
-  },
-  {
-    value: 'Asia/Dubai',
-    label: 'United Arab Emirates (Dubai)',
-    helper: 'UTC +04:00',
-  },
-  {
-    value: 'Asia/Singapore',
-    label: 'Singapore',
-    helper: 'UTC +08:00',
-  },
-  {
-    value: 'Europe/London',
-    label: 'United Kingdom (London)',
-    helper: 'Automatic daylight saving',
-  },
-  {
-    value: 'America/New_York',
-    label: 'United States (New York)',
-    helper: 'Automatic daylight saving',
-  },
-  {
-    value: 'UTC',
-    label: 'UTC',
-    helper: 'Coordinated Universal Time',
-  },
-] as const;
-
-
-const DATE_FORMAT_OPTIONS = [
-  {
-    value: 'DD/MM/YYYY',
-    example: '01/09/2026',
-  },
-  {
-    value: 'DD-MM-YYYY',
-    example: '01-09-2026',
-  },
-  {
-    value: 'YYYY-MM-DD',
-    example: '2026-09-01',
-  },
-  {
-    value: 'DD MMM YYYY',
-    example: '01 Sep 2026',
-  },
-  {
-    value: 'MMM DD, YYYY',
-    example: 'Sep 01, 2026',
-  },
-] as const;
 const optionClass = (active: boolean) => `display-option ${active ? 'is-active' : ''}`;
 
 export default function DisplaySettingsPage() {
-  const { settings, previewSettings, saveSettings, resetSettings } = useDisplaySettings();
+  const { settings, previewSettings, saveSettings } = useDisplaySettings();
   const [draft, setDraft] = useState<DisplaySettings>(settings);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => setDraft(settings), [settings]);
+
+  // Which accent palette to show: the existing/default list for Light Mode,
+  // the new Dark Mode palette when Dark Mode is selected.
+  const colorOptions = draft.theme === 'dark' ? DARK_ACCENT_COLORS : ACCENT_COLORS;
 
   const update = <K extends keyof DisplaySettings>(key: K, value: DisplaySettings[K]) => {
     const next = { ...draft, [key]: value };
@@ -173,8 +116,17 @@ const handleSave = async () => {
 };
 
   const handleReset = () => {
-    resetSettings();
-    setDraft(DEFAULT_DISPLAY_SETTINGS);
+    const next: DisplaySettings = {
+      ...DEFAULT_DISPLAY_SETTINGS,
+      timezone: draft.timezone,
+      dateFormat: draft.dateFormat,
+      timeFormat: draft.timeFormat,
+      showSeconds: draft.showSeconds,
+      currency: draft.currency,
+      exchangeRates: draft.exchangeRates,
+    };
+    setDraft(next);
+    previewSettings(next);
     setSaved(false);
   };
 
@@ -232,234 +184,31 @@ const handleSave = async () => {
             </Box>
           </CardContent>
         </Card>
-        <Card className="display-settings-card display-settings-card-wide">
-  <CardContent>
-
-    <Box className="display-section-title">
-      <AccessTimeOutlined />
-
-      <Box>
-        <Typography>
-          Date & Time
-        </Typography>
-
-        <span>
-          Control how dates and times appear
-          across this tenant workspace.
-        </span>
-      </Box>
-    </Box>
-
-
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          md: '1fr 1fr',
-        },
-        gap: 3,
-        mt: 2,
-      }}
-    >
-
-      <Box>
-        <Typography fontWeight={600} mb={1}>
-          Timezone
-        </Typography>
-
-        <FormControl fullWidth>
-          <Select
-            value={draft.timezone}
-            onChange={(event) =>
-              update(
-                'timezone',
-                event.target.value as DisplayTimezone
-              )
-            }
-          >
-            {TIMEZONE_OPTIONS.map((item) => (
-              <MenuItem
-                key={item.value}
-                value={item.value}
-              >
-                <Box>
-                  <Typography fontWeight={600}>
-                    {item.label}
-                  </Typography>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                  >
-                    {item.helper}
-                  </Typography>
-                </Box>
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
-
-      <Box>
-        <Typography fontWeight={600} mb={1}>
-          Date Format
-        </Typography>
-
-        <FormControl fullWidth>
-          <Select
-            value={draft.dateFormat}
-            onChange={(event) =>
-              update(
-                'dateFormat',
-                event.target.value as DisplayDateFormat
-              )
-            }
-          >
-            {DATE_FORMAT_OPTIONS.map((item) => (
-              <MenuItem
-                key={item.value}
-                value={item.value}
-              >
-                {item.value} — {item.example}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
-
-      <Box>
-        <Typography fontWeight={600} mb={1}>
-          Time Format
-        </Typography>
-
-        <RadioGroup
-          row
-          value={draft.timeFormat}
-          onChange={(event) =>
-            update(
-              'timeFormat',
-              event.target.value as DisplayTimeFormat
-            )
-          }
-        >
-          <FormControlLabel
-            value="12h"
-            control={<Radio />}
-            label="12 Hour — 02:30 PM"
-          />
-
-          <FormControlLabel
-            value="24h"
-            control={<Radio />}
-            label="24 Hour — 14:30"
-          />
-        </RadioGroup>
-      </Box>
-
-
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Box>
-          <Typography fontWeight={600}>
-            Show Seconds
-          </Typography>
-
-          <Typography
-            variant="body2"
-            color="text.secondary"
-          >
-            Show seconds in displayed time.
-          </Typography>
-        </Box>
-
-        <Switch
-          checked={draft.showSeconds}
-          onChange={(event) =>
-            update(
-              'showSeconds',
-              event.target.checked
-            )
-          }
-        />
-      </Box>
-
-    </Box>
-
-
-    <Box
-      sx={{
-        mt: 3,
-        p: 2.5,
-        borderRadius: 2,
-        border: '1px solid',
-        borderColor: 'divider',
-        backgroundColor: 'action.hover',
-      }}
-    >
-
-      <Typography
-        variant="caption"
-        color="text.secondary"
-      >
-        LIVE PREVIEW
-      </Typography>
-
-      <Typography
-        sx={{
-          fontSize: {
-            xs: '20px',
-            md: '26px',
-          },
-          fontWeight: 700,
-          mt: 1,
-        }}
-      >
-        {formatDateTime(
-          new Date(),
-          draft
-        )}
-      </Typography>
-
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ mt: 1 }}
-      >
-        This is how timestamps will appear
-        across your workspace.
-      </Typography>
-
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{
-          display: 'block',
-          mt: 1,
-        }}
-      >
-        Changing timezone only changes the
-        display. Existing saved timestamps are
-        not modified.
-      </Typography>
-
-    </Box>
-
-  </CardContent>
-</Card>
         <Card className="display-settings-card display-theme-card">
           <CardContent>
             <Box className="display-section-title"><TuneOutlined /><Box><Typography>Theme</Typography><span>Choose the application brightness.</span></Box></Box>
             <Box className="display-two-options">
               <button className={optionClass(draft.theme === 'light')} onClick={() => update('theme', 'light' as DisplayTheme)}><LightModeOutlined /><span>Light Mode</span></button>
-              <button className={optionClass(draft.theme === 'dark')} onClick={() => update('theme', 'dark' as DisplayTheme)}><DarkModeOutlined /><span>Dark Mode</span></button>
+              <button
+                className={optionClass(draft.theme === 'dark')}
+                onClick={() => {
+                  // Switching into Dark Mode: default to Emerald unless the
+                  // current accent already belongs to the Dark Mode palette.
+                  const isAlreadyDarkColor = DARK_ACCENT_COLORS.some(
+                    (color) => color.value === draft.accentColor.toLowerCase()
+                  );
+                  const next: DisplaySettings = {
+                    ...draft,
+                    theme: 'dark' as DisplayTheme,
+                    accentColor: isAlreadyDarkColor ? draft.accentColor : DARK_ACCENT_COLORS[0].value,
+                  };
+                  setDraft(next);
+                  previewSettings(next);
+                  setSaved(false);
+                }}
+              >
+                <DarkModeOutlined /><span>Dark Mode</span>
+              </button>
             </Box>
           </CardContent>
         </Card>
@@ -468,7 +217,7 @@ const handleSave = async () => {
           <CardContent>
             <Box className="display-section-title"><PaletteOutlined /><Box><Typography>Accent Color</Typography><span>Applied to interactive and selected UI elements.</span></Box></Box>
             <Box className="display-color-grid">
-              {ACCENT_COLORS.map((color) => (
+              {colorOptions.map((color) => (
                 <button key={color.value} className={`display-color-option ${draft.accentColor.toLowerCase() === color.value ? 'is-active' : ''}`} onClick={() => update('accentColor', color.value)}>
                   <span className="display-color-dot" style={{ backgroundColor: color.value }} />
                   <span>{color.name}</span>
@@ -600,16 +349,6 @@ const handleSave = async () => {
           </CardContent>
         </Card>
 
-        <Card className="display-settings-card">
-          <CardContent>
-            <Box className="display-section-title"><PaymentsOutlined /><Box><Typography>Currency Format</Typography><span>Used by the centralized currency formatter.</span></Box></Box>
-            <RadioGroup row value={draft.currency} onChange={(event) => update('currency', event.target.value as DisplayCurrency)}>
-              {(['INR', 'USD', 'EUR', 'GBP'] as DisplayCurrency[]).map((currency) => <FormControlLabel key={currency} value={currency} control={<Radio />} label={currency} />)}
-            </RadioGroup>
-          </CardContent>
-        </Card>
-
-        
       </Box>
     </Box>
   );

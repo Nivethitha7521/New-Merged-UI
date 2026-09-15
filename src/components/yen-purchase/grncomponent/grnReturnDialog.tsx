@@ -34,6 +34,7 @@ import { ReturnGRNRequest, ItemDetail, ReturnReason } from '@/Models/grnModel';
 import { AppDispatch, RootState } from '@/redux/store';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface EditedItem {
   returnedQuantity: number;
@@ -176,14 +177,14 @@ const poId =
     if (totalReturnAmount > availableReturnAmount && availableReturnAmount > 0) {
       return {
         isExceeded: true,
-        message: `Return amount ₹${totalReturnAmount.toFixed(2)} exceeds available limit ₹${availableReturnAmount.toFixed(2)}. Total returns cannot exceed GRN value ₹${grnOriginalAmount.toFixed(2)}.`
+        message: `Return amount ${formatCurrency(totalReturnAmount)} exceeds available limit ${formatCurrency(availableReturnAmount)}. Total returns cannot exceed GRN value ${formatCurrency(grnOriginalAmount)}.`
       };
     }
     
     if (totalReturnAmount > grnOriginalAmount) {
       return {
         isExceeded: true,
-        message: `Return amount ₹${totalReturnAmount.toFixed(2)} exceeds GRN original value ₹${grnOriginalAmount.toFixed(2)}.`
+        message: `Return amount ${formatCurrency(totalReturnAmount)} exceeds GRN original value ${formatCurrency(grnOriginalAmount)}.`
       };
     }
     
@@ -544,9 +545,9 @@ const poId =
           {availableReturnAmount > 0 && (
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
-                <strong>Return Limits:</strong> GRN Value: ₹{grnOriginalAmount.toFixed(2)} | 
-                Already Returned: ₹{totalExistingReturns.toFixed(2)} | 
-                Available: ₹{availableReturnAmount.toFixed(2)}
+                <strong>Return Limits:</strong> GRN Value: {formatCurrency(grnOriginalAmount)} | 
+                Already Returned: {formatCurrency(totalExistingReturns)} | 
+                Available: {formatCurrency(availableReturnAmount)}
               </Typography>
             </Alert>
           )}
@@ -558,7 +559,7 @@ const poId =
                 {amountLimitError}
               </Typography>
               <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                Total return amount: ₹{totalReturnAmount.toFixed(2)}
+                Total return amount: {formatCurrency(totalReturnAmount)}
               </Typography>
             </Alert>
           )}
@@ -570,13 +571,13 @@ const poId =
                 {backendErrorDetail.message || 'Return amount limit exceeded'}
               </Typography>
               {backendErrorDetail.original_payable_amount !== undefined && (
-                <Typography variant="body2">GRN Value: ₹{backendErrorDetail.original_payable_amount.toFixed(2)}</Typography>
+                <Typography variant="body2">GRN Value: {formatCurrency(backendErrorDetail.original_payable_amount)}</Typography>
               )}
               {backendErrorDetail.total_existing_debit !== undefined && (
-                <Typography variant="body2">Already Returned: ₹{backendErrorDetail.total_existing_debit.toFixed(2)}</Typography>
+                <Typography variant="body2">Already Returned: {formatCurrency(backendErrorDetail.total_existing_debit)}</Typography>
               )}
               {backendErrorDetail.available_amount !== undefined && (
-                <Typography variant="body2">Available: ₹{backendErrorDetail.available_amount.toFixed(2)}</Typography>
+                <Typography variant="body2">Available: {formatCurrency(backendErrorDetail.available_amount)}</Typography>
               )}
             </Alert>
           )}
@@ -585,12 +586,12 @@ const poId =
           {returnScenario && totalReturnAmount > 0 && !amountLimitError && (
             <Alert severity={totalReturnAmount <= availableReturnAmount ? "success" : "warning"} sx={{ mb: 2 }}>
               <Typography variant="body2">
-                <strong>Return Amount:</strong> ₹{totalReturnAmount.toFixed(2)}
+                <strong>Return Amount:</strong> {formatCurrency(totalReturnAmount)}
                 {totalReturnAmount <= availableReturnAmount && availableReturnAmount > 0 && (
-                  <span> ✓ Within limit (₹{availableReturnAmount.toFixed(2)} available)</span>
+                  <span> ✓ Within limit ({formatCurrency(availableReturnAmount)} available)</span>
                 )}
                 {totalReturnAmount > availableReturnAmount && availableReturnAmount > 0 && (
-                  <span style={{ color: 'red' }}> ✗ Exceeds available limit by ₹{(totalReturnAmount - availableReturnAmount).toFixed(2)}</span>
+                  <span style={{ color: 'red' }}> ✗ Exceeds available limit by {formatCurrency((totalReturnAmount - availableReturnAmount))}</span>
                 )}
               </Typography>
             </Alert>

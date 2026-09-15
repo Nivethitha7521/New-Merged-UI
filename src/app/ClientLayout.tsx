@@ -155,8 +155,9 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
     const yenerp = permissionObject.yenerp as Record<string, { read?: boolean }>;
     const excludeKeys = [
       'purchaseorderreport', 'posreport',
-      'physicalstockmodification', 'physicalstockvariancemodification', 'stockledger',
-      'warehousephysicalstockmodification', 'warehousephysicalstockvariancemodification', 'warehousestockledger',
+      'outletphysicalstock', 'outletstockvariance', 'outletapprovedstock', 'outletstockledger',
+      'warehousephysicalstock', 'warehousestockvariance', 'warehouseapprovedstock', 'warehousestockledger',
+      'recipe', 'storekitchenmaster',
       'outgoingpayment', 'advancepayment', 'partialpayment', 'paymentdone',
       'paymenthistory', 'ledger', 'purchasereturn', 'expensecategory',
       'expensesubcategory', 'expensename',
@@ -170,14 +171,29 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
     if (!permissionObject?.yenerp) return false;
     const yenerp = permissionObject.yenerp;
     const INVENTORY_KEYS = [
-      "physicalstockmodification",
-      "physicalstockvariancemodification",
-      "stockledger",
-      "warehousephysicalstockmodification",
-      "warehousephysicalstockvariancemodification",
+      "outletphysicalstock",
+      "outletstockvariance",
+      "outletapprovedstock",
+      "outletstockledger",
+      "warehousephysicalstock",
+      "warehousestockvariance",
+      "warehouseapprovedstock",
       "warehousestockledger",
     ];
-    return INVENTORY_KEYS.some((key) => yenerp[key]?.read === true);
+    return INVENTORY_KEYS.some((key) => {
+      const permission = yenerp[key];
+      return permission?.read === true && permission?.hide !== true && permission?.hide !== 1;
+    });
+  }, [permissionObject]);
+
+
+  const hasRecipeAccess = useMemo(() => {
+    if (!permissionObject?.yenerp) return false;
+    const yenerp = permissionObject.yenerp;
+    return ['recipe', 'storekitchenmaster'].some((key) => {
+      const permission = yenerp[key];
+      return permission?.read === true && permission?.hide !== true && permission?.hide !== 1;
+    });
   }, [permissionObject]);
 
   const hasBookAccess = useMemo(() => {
@@ -215,7 +231,7 @@ const isLoginRoute = useMemo(() => pathname === '/', [pathname]);
     // isUserActive = false → fallback check மட்டும் → TTL refresh வேண்டாம்
     const sendPing = async (isUserActive: boolean = false) => {
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8001";
         const browserSessionId = localStorage.getItem("browserSessionId") || "";
 
         const res = await fetch(`${API_BASE}/yenerpapi/ping`, {
@@ -440,7 +456,7 @@ if (menuItem.path === '/QlikReport') {
 
       try {
         if (token && ssoUsername) {
-          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/yenerpapi';
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001';
           const res = await fetch(`${API_BASE}/yenerpapi/sso/reports-ticket`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
@@ -506,29 +522,81 @@ if (menuItem.path === '/inventory-control-tower') {
   return;
 }
 
+
+if (menuItem.text === 'YEN RECIPE') {
+  setSelectedModule(menuItem.text);
+  setIsPurchaseSubMenuOpen(false);
+  setIsBookSubMenuOpen(false);
+  setIsMasterAdminSubMenuOpen(false);
+  setIsPosSubMenuOpen(false);
+  setIsWhatsAppSubMenuOpen(false);
+  setIsInventorySubMenuOpen(false);
+  setIsControlTowerSubMenuOpen(false);
+
+  const recipePermission = permissionObject?.yenerp?.recipe;
+  const storeKitchenPermission = permissionObject?.yenerp?.storekitchenmaster;
+  const canReadRecipe = recipePermission?.read === true && recipePermission?.hide !== true && recipePermission?.hide !== 1;
+  const canReadStoreKitchen = storeKitchenPermission?.read === true && storeKitchenPermission?.hide !== true && storeKitchenPermission?.hide !== 1;
+
+  const targetPath = canReadRecipe
+    ? '/yen-recipie/RecipeManagement'
+    : canReadStoreKitchen
+      ? '/yen-recipie/StoreKitchenMaster'
+      : null;
+
+  if (targetPath && pathname !== targetPath && !pathname?.startsWith(`${targetPath}/`)) {
+    router.push(targetPath);
+  }
+  return;
+}
+
 if (menuItem.path === '/yen-book') {
-  setIsBookSubMenuOpen((previous) => !previous);
+  setSelectedModule('Outgoing Payment');
+
+  // YEN Book submenu should initially stay collapsed
+  setIsBookSubMenuOpen(false);
+
   setIsPurchaseSubMenuOpen(false);
   setIsMasterAdminSubMenuOpen(false);
-setIsPosSubMenuOpen(false);
- setIsWhatsAppSubMenuOpen(false);
- setIsInventorySubMenuOpen(false);
-  if (!pathname?.startsWith('/yen-book')) {
-    router.push('/yen-book');
+  setIsPosSubMenuOpen(false);
+  setIsWhatsAppSubMenuOpen(false);
+  setIsInventorySubMenuOpen(false);
+  setIsControlTowerSubMenuOpen(false);
+  setIsRecipeSubMenuOpen(false);
+
+  // Directly open default YEN Book page
+  if (
+    pathname !== '/yen-book/OutgoingPaymentPage' &&
+    !pathname?.startsWith('/yen-book/OutgoingPaymentPage/')
+  ) {
+    router.push('/yen-book/OutgoingPaymentPage');
   }
 
   return;
 }
 if (menuItem.path === '/master-admin') {
-  setSelectedModule(menuItem.text);
+  setSelectedModule('Warehouse');
+
+  // Master Admin submenu initially collapsed
+  setIsMasterAdminSubMenuOpen(false);
+
   setIsPurchaseSubMenuOpen(false);
   setIsBookSubMenuOpen(false);
-setIsPosSubMenuOpen(false);
-setIsInventorySubMenuOpen(false);
-  if (!pathname?.startsWith('/master-admin')) {
-    router.push('/master-admin');
+  setIsPosSubMenuOpen(false);
+  setIsInventorySubMenuOpen(false);
+  setIsRecipeSubMenuOpen(false);
+  setIsWhatsAppSubMenuOpen(false);
+  setIsControlTowerSubMenuOpen(false);
+
+  // Open default Master Admin page directly
+  if (
+    pathname !== '/master-admin/WarehouseMaster' &&
+    !pathname?.startsWith('/master-admin/WarehouseMaster/')
+  ) {
+    router.push('/master-admin/WarehouseMaster');
   }
- return;
+
+  return;
 }
 
 if (menuItem.path === '/yen-pos') {
@@ -573,6 +641,7 @@ if (menuItem.path === '/WhatsApp') {
   showPurchaseMenu={hasPurchaseAccess}
   showBookMenu={hasBookAccess}
   showInventoryMenu={hasInventoryAccess}
+  showRecipeMenu={hasRecipeAccess}
   showReportsMenu={hasReportsAccess}
 />
           <div className="erp-app-main">
@@ -713,28 +782,22 @@ if (menuItem.path === '/WhatsApp') {
     }}
   />
 )}
-{!useTabNavigation && isBookRoute && isBookSubMenuOpen && (
-    <BookModuleSideMenu
-    onNavigate={(
-      menuItem: {
-        text: string;
-        path: string;
-      },
-    ) => {
+{!useTabNavigation && isBookRoute && (
+  <BookModuleSideMenu
+    expanded={isBookSubMenuOpen}
+    onToggle={() =>
+      setIsBookSubMenuOpen((previous) => !previous)
+    }
+    onNavigate={(menuItem) => {
       setSelectedModule(menuItem.text);
 
       const pageAlreadyOpen =
         pathname === menuItem.path ||
         pathname?.startsWith(`${menuItem.path}/`);
 
-      if (pageAlreadyOpen) {
-        setIsBookSubMenuOpen(false);
-        setPendingBookPath(null);
-        return;
+      if (!pageAlreadyOpen) {
+        router.push(menuItem.path);
       }
-
-      setPendingBookPath(menuItem.path);
-      router.push(menuItem.path);
     }}
   />
 )}

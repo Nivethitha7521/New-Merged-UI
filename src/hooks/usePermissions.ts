@@ -1,6 +1,17 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 
+const LEGACY_INVENTORY_PERMISSION_KEYS: Record<string, string> = {
+  outletphysicalstock: 'physicalstockmodification',
+  outletstockvariance: 'physicalstockvariancemodification',
+  outletapprovedstock: 'physicalstockvariancemodification',
+  outletstockledger: 'stockledger',
+  warehousephysicalstock: 'warehousephysicalstockmodification',
+  warehousestockvariance: 'warehousephysicalstockvariancemodification',
+  warehouseapprovedstock: 'warehousephysicalstockvariancemodification',
+  warehousestockledger: 'warehousestockledger',
+};
+
 export const usePermissions = () => {
   const authState = useSelector((state: RootState) => state.auth);
   
@@ -41,7 +52,7 @@ export const usePermissions = () => {
       }
       
       const appPerms = permissions[app] || {};
-      const modulePerms = appPerms[module] || {};
+      const modulePerms = appPerms[module] || appPerms[LEGACY_INVENTORY_PERMISSION_KEYS[module]] || {};
       
       const hasPerm = modulePerms[action] === true || modulePerms[action] === 1;
      
@@ -56,7 +67,7 @@ export const usePermissions = () => {
       if (!permissions || Object.keys(permissions).length === 0) return false;
       
       const appPerms = permissions[app] || {};
-      const modulePerms = appPerms[module] || {};
+      const modulePerms = appPerms[module] || appPerms[LEGACY_INVENTORY_PERMISSION_KEYS[module]] || {};
       
       const isVisible = !modulePerms.hide && 
                        (modulePerms.read === true || modulePerms.read === 1);

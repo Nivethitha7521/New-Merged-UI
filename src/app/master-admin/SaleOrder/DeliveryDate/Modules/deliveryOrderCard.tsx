@@ -246,7 +246,8 @@ import {
   DeliveryOrderItem,
   Config,
 } from "../Features/deliveryorderslice";
-
+import { usePermissions } from '@/hooks/usePermissions';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface EditData {
   noOfChangeableDate: string;
   configures: Config[];
@@ -438,15 +439,17 @@ const DeliveryOrderCard: React.FC<DeliveryOrderProps> = ({
                         </IconButton>
                       </>
                     ) : (
-                      <IconButton
+                     <PermissionIconButton
+                        app="masteradmin"
+                        module="deliverydate"
+                        action="edit"
+                        tooltip="Edit"
                         onClick={() => onEditClick(cfg)}
-                        size="small"
-                        disabled={order.status !== "enabled"}
+                       icon={<EditOutlinedIcon />}
                         className="purchase-master-action-button is-edit"
-                        title="Edit"
-                      >
-                      <EditOutlinedIcon />
-                      </IconButton>
+                       ariaLabel="Edit"
+                        disabled={order.status !== "enabled"}
+                      />
                     )}
                   </>
                 )}

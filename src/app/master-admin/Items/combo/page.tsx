@@ -33,6 +33,7 @@ import CreateConfirmationDialog from '@/app/Components/Dialogs/createConformatio
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import Checkbox from '@mui/material/Checkbox';
+import { formatCurrency } from '@/utilities/formatters';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -725,7 +726,7 @@ function ComboPage() {
                                                     fontFamily: "'Poppins', sans-serif",
                                                 }}
                                             >
-                                                {option.itemName} &nbsp;|&nbsp; ₹{option.price.toFixed(2)} &nbsp;|&nbsp; {option.uom}
+                                                {option.itemName} &nbsp;|&nbsp; {formatCurrency(option.price)} &nbsp;|&nbsp; {option.uom}
                                             </Typography>
                                         </Box>
                                     </li>
@@ -759,10 +760,10 @@ function ComboPage() {
                         {comboRows.length > 0 && (
                             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'flex-end', pb: 0.3, mt: 3.5 }}>
                                 <Chip label={`Items: ${comboRows.length}`} size="small" variant="outlined" sx={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.72rem' }} />
-                                <Chip label={`Total: ₹${grandOriginalTotal.toFixed(2)}`} size="small" variant="outlined" color="primary" sx={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.72rem' }} />
+                                <Chip label={`Total: ${formatCurrency(grandOriginalTotal)}`} size="small" variant="outlined" color="primary" sx={{ fontFamily: "'Poppins', sans-serif", fontSize: '0.72rem' }} />
                                 {entryPriceNum > 0 && (
                                     <Chip
-                                        label={`Discount: ₹${totalDiscount.toFixed(2)}`}
+                                        label={`Discount: ${formatCurrency(totalDiscount)}`}
                                         size="small"
                                         variant="outlined"
                                         color={totalDiscount < 0 ? 'error' : 'success'}
@@ -794,14 +795,14 @@ function ComboPage() {
                                 }}
                             >
                                 {[
-                                    { label: 'Variance Total Price', value: `₹${grandOriginalTotal.toFixed(2)}`, color: '#1e40af' },
-                                    { label: 'Entry (Combo) Price', value: `₹${entryPriceNum.toFixed(2)}`, color: '#15803d' },
+                                    { label: 'Variance Total Price', value: `${formatCurrency(grandOriginalTotal)}`, color: '#1e40af' },
+                                    { label: 'Entry (Combo) Price', value: `${formatCurrency(entryPriceNum)}`, color: '#15803d' },
                                     {
                                         label: 'Total Discount',
-                                        value: `₹${totalDiscount.toFixed(2)}${totalDiscount < 0 ? ' (Entry exceeds total!)' : ''}`,
+                                        value: `${formatCurrency(totalDiscount)}${totalDiscount < 0 ? ' (Entry exceeds total!)' : ''}`,
                                         color: totalDiscount < 0 ? '#dc2626' : '#b45309',
                                     },
-                                    { label: 'Adjusted Total', value: `₹${adjustedTotal.toFixed(2)}`, color: '#7c3aed' },
+                                    { label: 'Adjusted Total', value: `${formatCurrency(adjustedTotal)}`, color: '#7c3aed' },
                                 ].map((item, i, arr) => (
                                     <React.Fragment key={item.label}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
@@ -883,7 +884,7 @@ function ComboPage() {
                                             {/* Unit Price */}
                                             <td style={{ padding: '2px 4px' }}>
                                                 <Typography sx={{ fontSize: '0.75rem', fontFamily: "'Poppins', sans-serif", color: '#1e293b', paddingLeft: '8px', height: '32px', display: 'flex', alignItems: 'center', fontWeight: 500 }}>
-                                                    {row.originalPrice.toFixed(2)}
+                                                    {formatCurrency(row.originalPrice)}
                                                 </Typography>
                                             </td>
 
@@ -913,7 +914,7 @@ function ComboPage() {
                                             {/* Total Price (unit × qty) */}
                                             <td style={{ padding: '2px 4px' }}>
                                                 <Typography sx={{ fontSize: '0.75rem', fontFamily: "'Poppins', sans-serif", color: '#1e40af', paddingLeft: '8px', height: '32px', display: 'flex', alignItems: 'center', fontWeight: 600 }}>
-                                                    {row.totalOriginalPrice.toFixed(2)}
+                                                    {formatCurrency(row.totalOriginalPrice)}
                                                 </Typography>
                                             </td>
 
@@ -930,7 +931,7 @@ function ComboPage() {
                                             <td style={{ padding: '2px 4px' }}>
                                                 <Box sx={{ height: '32px', display: 'flex', alignItems: 'center', paddingLeft: '8px', minWidth: '110px', borderRadius: '6px', background: entryPriceNum > 0 && entryPriceNum < grandOriginalTotal ? '#f0fdf4' : 'transparent' }}>
                                                     <Typography sx={{ fontSize: '0.8rem', fontFamily: "'Poppins', sans-serif", color: entryPriceNum > 0 && entryPriceNum < grandOriginalTotal ? '#15803d' : '#1e293b', fontWeight: 600 }}>
-                                                        {row.adjustedPrice.toFixed(2)}
+                                                        {formatCurrency(row.adjustedPrice)}
                                                     </Typography>
                                                 </Box>
                                             </td>
@@ -954,13 +955,13 @@ function ComboPage() {
                                             TOTALS
                                         </td>
                                         <td style={{ padding: '8px', fontFamily: "'Poppins', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: '#1e40af', paddingLeft: '8px' }}>
-                                            ₹{grandOriginalTotal.toFixed(2)}
+                                            {formatCurrency(grandOriginalTotal)}
                                         </td>
                                         <td style={{ padding: '8px', fontFamily: "'Poppins', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: '#b45309', paddingLeft: '8px' }}>
-                                            {entryPriceNum > 0 && entryPriceNum < grandOriginalTotal ? `− ₹${totalDiscount.toFixed(2)}` : '—'}
+                                            {entryPriceNum > 0 && entryPriceNum < grandOriginalTotal ? `− ${formatCurrency(totalDiscount)}` : '—'}
                                         </td>
                                         <td style={{ padding: '8px', fontFamily: "'Poppins', sans-serif", fontSize: '0.78rem', fontWeight: 700, color: '#15803d', paddingLeft: '8px' }}>
-                                            ₹{adjustedTotal.toFixed(2)}
+                                            {formatCurrency(adjustedTotal)}
                                         </td>
                                         <td />
                                     </tr>

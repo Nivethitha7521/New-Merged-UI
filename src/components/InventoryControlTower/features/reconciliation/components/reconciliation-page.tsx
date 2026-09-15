@@ -6,6 +6,7 @@ import { Button, Card, DetailList, Input, Kpi, PageHeader, Pager, SectionHeader,
 import { DataTable } from "@/components/InventoryControlTower/shared/components/data-table";
 import { Modal, useActionCenter } from "@/components/InventoryControlTower/shared/components/action-center";
 import { apiRequest, downloadCsv } from "@/components/InventoryControlTower/shared/lib/api";
+import { formatCurrency } from '@/utilities/formatters';
 
 const initialRows = [
   { code: "SB", outlet: "SB Outlet", receipts: true, wastage: true, count: true, variance: 420, comment: "All good. Closing.", status: "Closed" },
@@ -83,7 +84,7 @@ export function ReconciliationPage() {
           <SectionHeader title="Outlet Reconciliation Status" action={<><Input className="w-44" placeholder="Search outlet..." value={query} onChange={(e) => setQuery(e.target.value)} /><Button variant="secondary" onClick={() => setQuery("")}>Filters</Button><Button variant="secondary" onClick={exportRows}><span className="flex items-center gap-2"><Download size={14} />Export</span></Button></>} />
           <DataTable headers={["Outlet", "Receipts Closed", "Wastage Approved", "Physical Count", "Variance", "In-charge Comments", "Status", "Action"]} rows={filtered.map((row) => [
             <button key="outlet" className="font-bold text-slate-900" onClick={() => setSelectedCode(row.code)}>{row.outlet}</button>, <Tick key="r" ok={row.receipts} />, <Tick key="w" ok={row.wastage} />, <Tick key="c" ok={row.count} />,
-            <span key="v" className={row.variance < 0 ? "font-bold text-rose-600" : "font-bold text-emerald-600"}>{row.variance === 0 ? "₹0" : `${row.variance < 0 ? "-" : ""}₹${Math.abs(row.variance).toLocaleString("en-IN")}`}</span>, row.comment, <StatusBadge key="s" value={row.status} />,
+            <span key="v" className={row.variance < 0 ? "font-bold text-rose-600" : "font-bold text-emerald-600"}>{row.variance === 0 ? "₹0" : `${row.variance < 0 ? "-" : ""}${formatCurrency(Math.abs(row.variance))}`}</span>, row.comment, <StatusBadge key="s" value={row.status} />,
             <Button key="a" disabled={busy} className="h-8 px-2.5 text-[10px]" onClick={() => runAction(row, row.status === "Closed" ? "report" : row.status === "Pending" ? (row.comment === "Not started" ? "start" : "remind") : "continue")}>{row.status === "Closed" ? "View Report" : row.status === "Pending" ? (row.comment === "Not started" ? "Start" : "Remind") : "Continue"}</Button>,
           ])} />
           <Pager page={page} pages={2} onChange={setPage} summary="Showing 1 to 8 of 15 outlets" />
@@ -92,7 +93,7 @@ export function ReconciliationPage() {
         <div className="space-y-4">
           <Card className="p-4">
             <div className="flex items-center justify-between"><h3 className="text-sm font-extrabold text-slate-900">{selected.outlet} — Reconciliation Summary</h3><StatusBadge value={selected.status} /></div>
-            <div className="mt-3"><DetailList rows={[["Opening Stock Value", "₹4,56,800"], ["Total Receipts Value", "₹1,28,450"], ["Total Outward Value", "₹1,20,450"], ["Total Wastage Value", "₹1,850"], ["Total Returns Value", "₹0"], ["Expected Closing Value", "₹4,42,950"], ["Physical Stock Value", "₹4,43,370"], ["Variance Value", <span key="vv" className={selected.variance < 0 ? "text-rose-600" : "text-emerald-600"}>{selected.variance < 0 ? "-" : "+"}₹{Math.abs(selected.variance).toLocaleString("en-IN")}</span>], ["Variance %", `${Math.abs(selected.variance / 443370 * 100).toFixed(2)}%`]]} /></div>
+            <div className="mt-3"><DetailList rows={[["Opening Stock Value", "₹4,56,800"], ["Total Receipts Value", "₹1,28,450"], ["Total Outward Value", "₹1,20,450"], ["Total Wastage Value", "₹1,850"], ["Total Returns Value", "₹0"], ["Expected Closing Value", "₹4,42,950"], ["Physical Stock Value", "₹4,43,370"], ["Variance Value", <span key="vv" className={selected.variance < 0 ? "text-rose-600" : "text-emerald-600"}>{selected.variance < 0 ? "-" : "+"}{formatCurrency(Math.abs(selected.variance))}</span>], ["Variance %", `${Math.abs(selected.variance / 443370 * 100).toFixed(2)}%`]]} /></div>
           </Card>
           <Card className="p-4">
             <h3 className="text-sm font-extrabold text-slate-900">Reconciliation Timeline</h3>
@@ -103,7 +104,7 @@ export function ReconciliationPage() {
       </div>
 
       <Modal open={dialogOpen} onClose={() => setDialogOpen(false)} title={`${selected.outlet} reconciliation`} description="Review the closing summary. Open outlets can be closed after all inventory controls are completed." footer={<><Button variant="secondary" onClick={() => setDialogOpen(false)}>Close</Button>{selected.status !== "Closed" ? <Button disabled={busy} onClick={closeDay}>{busy ? "Closing..." : "Close Day"}</Button> : null}</>}>
-        <DetailList rows={[["Status", <StatusBadge key="st" value={selected.status} />], ["Receipts", selected.receipts ? "Closed" : "Pending"], ["Wastage", selected.wastage ? "Approved" : "Pending"], ["Physical Count", selected.count ? "Completed" : "Pending"], ["Variance", `₹${selected.variance.toLocaleString("en-IN")}`]]} />
+        <DetailList rows={[["Status", <StatusBadge key="st" value={selected.status} />], ["Receipts", selected.receipts ? "Closed" : "Pending"], ["Wastage", selected.wastage ? "Approved" : "Pending"], ["Physical Count", selected.count ? "Completed" : "Pending"], ["Variance", `${formatCurrency(selected.variance)}`]]} />
         {selected.status !== "Closed" ? <textarea className="mt-4 min-h-24 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-indigo-400" placeholder="Closing remarks..." value={remarks} onChange={(e) => setRemarks(e.target.value)} /> : null}
       </Modal>
     </>

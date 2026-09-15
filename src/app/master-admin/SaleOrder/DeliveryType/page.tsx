@@ -28,7 +28,8 @@ import DeliveryDialogs from "../DeliveryType/Modules/deliveryDialog";
 import DeliveryTypeSnackbar from "../DeliveryType/Modules/snakbar";
 import { ConfirmationAction } from "../DeliveryType/Modules/type";
 import MenuPage from "../page";
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const DeliveryTypePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { types } = useSelector(
@@ -312,9 +313,16 @@ const [searchValue, setSearchValue] = useState('');
           >
             {!showDeactivatedTable && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton color="primary" onClick={handleAddNew} className="icon-action-button" title="Add">
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+             <PermissionIconButton
+                  app="masteradmin"
+                  module="deliverytype"
+                  action="add"
+                  tooltip="Add"
+                  onClick={handleAddNew}
+                  icon={<AddIcon className="icon-action-svg" />}
+                  className="icon-action-button"
+                  ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
             )}
@@ -372,14 +380,17 @@ const [searchValue, setSearchValue] = useState('');
           </Box>
         </Popover> */}
 
-      <DeliveryTypeTableComponent
-        filteredTypes={filteredTypes}
-        showDeactivatedTable={showDeactivatedTable}
-        onOpenEdit={handleOpenEdit}
-        onDeactivate={handleToggleStatus}
-        onActivate={handleToggleStatus}
-        visibleColumns={visibleColumns}
-      />
+  <ModuleVisibilityGuard app="masteradmin" module="deliverytype">
+        <DeliveryTypeTableComponent
+          filteredTypes={filteredTypes}
+          showDeactivatedTable={showDeactivatedTable}
+          onOpenEdit={handleOpenEdit}
+          onDeactivate={handleToggleStatus}
+          onActivate={handleToggleStatus}
+          visibleColumns={visibleColumns}
+        />
+      </ModuleVisibilityGuard>
+ 
 
       <DeliveryDialogs
         open={open}

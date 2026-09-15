@@ -31,7 +31,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { SFG } from "../Models/sfgModels";
 import ImportResultDialog, { ImportResultData } from '@/app/Components/ImportResultDialog';
-
+import { usePermissions } from '@/hooks/usePermissions';
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 
 interface SfgTableContainerProps {
   handleEdit: (sfg: SFG) => void;
@@ -63,6 +65,9 @@ const SfgTableContainer: React.FC<SfgTableContainerProps> = ({
     page,
     totalPages
   } = useSelector((state: RootState) => state.sfg);
+  const { hasPermission } = usePermissions();
+  const canEditSfg = hasPermission('masteradmin', 'sfg', 'edit');
+  const canDeleteSfg = hasPermission('masteradmin', 'sfg', 'delete');
 
   const displayedSfg = showDeactivated ? deactivatedItems : sfg;
   const [isDownloadingSample, setIsDownloadingSample] = useState(false);
@@ -320,32 +325,36 @@ const SfgTableContainer: React.FC<SfgTableContainerProps> = ({
           {!showDeactivated && (
             <>
               <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
+               <PermissionIconButton
+                  app="masteradmin"
+                  module="sfg"
+                  action="add"
+                  tooltip="Add"
                   onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
                   className="icon-action-button"
-                  title="Add"
+                  ariaLabel="Add"
                   disabled={isImporting}
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+               />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
 
               <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
+                <PermissionIconButton
+                  app="masteradmin"
+                  module="sfg"
+                  action="add"
+                  tooltip="Import"
                   onClick={handleImportClick}
-                  className="icon-action-button"
-                  size="small"
-                  disabled={isImporting}
-                >
-                  {isImporting ? (
+                 icon={isImporting ? (
                     <CircularProgress size={20} className="icon-action-svg" />
                   ) : (
                     <GetAppIcon className="icon-action-svg" />
                   )}
-                </IconButton>
+                className="icon-action-button"
+                  ariaLabel="Import"
+                  disabled={isImporting}
+                />
                 <Typography className="icon-action-label">
                   {isImporting ? 'Importing...' : 'Import'}
                 </Typography>
@@ -378,15 +387,17 @@ const SfgTableContainer: React.FC<SfgTableContainerProps> = ({
               </div>
 
               <div className="icon-action-wrapper">
-                <IconButton
-                  color="secondary"
+               <PermissionIconButton
+                  app="masteradmin"
+                  module="sfg"
+                  action="edit"
+                  tooltip="Rollback"
                   onClick={handleRollback}
+                  icon={<UndoIcon className="icon-action-svg" />}
                   className="icon-action-button"
-                  size="small"
+                  ariaLabel="Rollback"
                   disabled={isImporting}
-                >
-                  <UndoIcon className="icon-action-svg" />
-                </IconButton>
+              />
                 <Typography className="icon-action-label">Rollback</Typography>
               </div>
             </>
@@ -698,30 +709,36 @@ const SfgTableContainer: React.FC<SfgTableContainerProps> = ({
                     <td style={{ textAlign: 'center' }}>
                       <div className="flex justify-center gap-1">
                         {showDeactivated ? (
-                          <button
+                         canEditSfg && (
+                            <button
                             onClick={() => handleActivate(sfg)}
-                            className="activate-btn"
-                            title="Activate"
-                          >
+                              className="activate-btn"
+                              title="Activate"
+                            >
                             <RefreshIcon fontSize="small" />
-                          </button>
+                            </button>
+                                                      )
                         ) : (
                           <>
-                            <button
-                              onClick={() => handleEdit(sfg)}
-                              className="edit-btn"
-                              title="Edit"
-                              style={{ fontSize: "16px" }}
-                            >
-                              <EditIcon fontSize="small" />
-                            </button>
-                            <button
-                              onClick={() => handleDeactivate(sfg)}
-                              className="deactivate-btn"
-                              title="Deactivate"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </button>
+                            {canEditSfg && (
+                              <button
+                                onClick={() => handleEdit(sfg)}
+                                className="edit-btn"
+                                title="Edit"
+                                style={{ fontSize: "16px" }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </button>
+                            )}
+                            {canDeleteSfg && (
+                              <button
+                                onClick={() => handleDeactivate(sfg)}
+                                className="deactivate-btn"
+                                title="Deactivate"
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </button>
+                            )}
                           </>
                         )}
                       </div>

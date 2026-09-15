@@ -28,7 +28,8 @@ import {
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../redux/store";
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import {
   fetchDevices,
   addDevice,
@@ -622,14 +623,16 @@ const handleServerConflictConfirm = useCallback(async () => {
         <Box className="purchase-reference-actions item-master-actions">
             {!showDeactivated && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton
-                  color="primary"
+               <PermissionIconButton
+                  app="pos"
+                  module="pos_devices"
+               action="add"
+              tooltip="Add"
                   onClick={handleOpenAdd}
+                  icon={<AddIcon className="icon-action-svg" />}
                   className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+                ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
             )}
@@ -660,6 +663,7 @@ const handleServerConflictConfirm = useCallback(async () => {
           {error}
         </Alert>
       ) : (
+        <ModuleVisibilityGuard app="pos" module="pos_devices">
         <POSDeviceTable
           displayedDevices={displayedDevices}
           showDeactivated={showDeactivated}
@@ -680,6 +684,7 @@ const handleServerConflictConfirm = useCallback(async () => {
           }
           handleToggleDcStatus={handleToggleDcStatus}
         />
+         </ModuleVisibilityGuard>
       )}
 
       {/* Dialogs */}

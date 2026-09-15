@@ -54,6 +54,7 @@ import {
 import PODialog from '@/components/yen-purchase/OutgoingComponent/PODialog';
 import { fetchPoById, selectPurchaseListState, setPoDialogOpen, setSelectedPo } from '@/features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import { ItemDetailResponsePO, PoResponse } from '@/Models/purchaseModel';
+import { formatCurrency, formatDate } from '@/utilities/formatters';
 
 const getReturnGrnPermission = (permissions: any) => {
   return (
@@ -252,7 +253,7 @@ const GrnReturn: React.FC = () => {
         grn.randomId.toString(),
         grn.vendorName.toString(),
         totalItemsQuantity.toString(),
-        grn.grnDate ? format(new Date(grn.grnDate), 'dd-MM-yyyy') : '',
+        grn.grnDate ? formatDate(new Date(grn.grnDate)) : '',
         totalOrderAmount.toFixed(2).toString(),
         finalAmount.toFixed(2).toString(),
       ];
@@ -453,7 +454,7 @@ const GrnReturn: React.FC = () => {
         grn.randomId.toString(),
         grn.vendorName.toString(),
         totalItemsQuantity.toString(),
-        grn.grnDate ? format(new Date(grn.grnDate), 'dd-MM-yyyy') : '',
+        grn.grnDate ? formatDate(new Date(grn.grnDate)) : '',
         finalAmount.toFixed(2).toString(),
       ];
     }).filter(row => row !== null);
@@ -572,7 +573,7 @@ const GrnReturn: React.FC = () => {
     yOffset += 15;
 
     const today = new Date();
-    const currentDate = format(today, 'dd/MM/yyyy');
+    const currentDate = formatDate(today);
     const totalReturnedAmount = (filteredGrn.length > 0 ? filteredGrn : itemwise).reduce((sum, order) => sum + (order.totalReturnedAmount || 0), 0);
 
     doc.setFontSize(10);
@@ -689,7 +690,7 @@ const GrnReturn: React.FC = () => {
     const vendorDetailsRows = [[
       `Name: ${grn.vendorName || ''}\nGSTIN: ${grn.gstNumber || ''}\nAddress: ${grn.address || ''}\nCity: ${grn.city || ''}\nState: ${grn.state || ''}\nCountry: ${grn.country || ''}\nEmail: ${grn.contactpersonEmail || ''}`,
       `Shipping Address: ${grn.shippingAddress || ''}`,
-      `Po No: ${grn.poRandomID}\nGRN No: ${grn.randomId}\nGRN Date: ${grn.createdDate ? format(new Date(grn.createdDate), 'dd-MM-yyyy') : 'N/A'}\nPayment Terms: ${grn.paymentTerms || '15'} \nDue Date: ${format(dueDate, 'dd-MM-yyyy')}\nCurrency: INR`,
+      `Po No: ${grn.poRandomID}\nGRN No: ${grn.randomId}\nGRN Date: ${grn.createdDate ? formatDate(new Date(grn.createdDate)) : 'N/A'}\nPayment Terms: ${grn.paymentTerms || '15'} \nDue Date: ${formatDate(dueDate)}\nCurrency: INR`,
     ]];
 
     doc.autoTable({
@@ -1059,11 +1060,13 @@ const GrnReturn: React.FC = () => {
                       )}
                     </TableCell>
                     <TableCell>{grn.vendorName || 'N/A'}</TableCell>
-                    <TableCell>{grn.createdDate ? format(new Date(grn.createdDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                    <TableCell>{grn.createdDate ? formatDate(new Date(grn.createdDate)) : 'N/A'}</TableCell>
                     <TableCell>{grn.itemDetails?.length || 0}</TableCell>
                     <TableCell>{grn.itemDetails?.reduce((acc, item) => acc + (item.quantity || 0), 0) || 0}</TableCell>
                     <TableCell>{grn.itemDetails?.reduce((acc, item) => acc + (item.returnedQuantity || 0), 0) || 0}</TableCell>
-                    <TableCell>{(grn.totalReturnedAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell>
+  {formatCurrency(grn.totalReturnedAmount ?? 0)}
+</TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center">
                         <Tooltip title="View Details">
@@ -1200,7 +1203,7 @@ const GrnReturn: React.FC = () => {
                               <TableCell>{item.uom || 'N/A'}</TableCell>
                               <TableCell>{item.quantity || 0}</TableCell>
                               <TableCell>{item.returnedQuantity || 0}</TableCell>
-                              <TableCell>{(item.unitPrice || 0).toFixed(2)}</TableCell>
+                              <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
                               <TableCell>{history.date ? format(new Date(history.date), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}</TableCell>
                               <TableCell>{history.by || 'N/A'}</TableCell>
                               <TableCell>{`${history.totalUnits || 0} ${item.uom || 'N/A'}`}</TableCell>
@@ -1218,25 +1221,25 @@ const GrnReturn: React.FC = () => {
                             <>
                               <TableRow>
                                 <TableCell colSpan={8} align="right"><strong>SGST ({(parseFloat(rate) / 2).toFixed(2)}%):</strong></TableCell>
-                                <TableCell>{sgstAmount.toFixed(2)}</TableCell>
+                                <TableCell>{formatCurrency(sgstAmount)}</TableCell>
                               </TableRow>
                               <TableRow>
                                 <TableCell colSpan={8} align="right"><strong>CGST ({(parseFloat(rate) / 2).toFixed(2)}%):</strong></TableCell>
-                                <TableCell>{cgstAmount.toFixed(2)}</TableCell>
+                                <TableCell>{formatCurrency(cgstAmount)}</TableCell>
                               </TableRow>
                             </>
                           )}
                           {igstAmount > 0 && (
                             <TableRow>
                               <TableCell colSpan={8} align="right"><strong>IGST ({parseFloat(rate)}%):</strong></TableCell>
-                              <TableCell>{igstAmount.toFixed(2)}</TableCell>
+                              <TableCell>{formatCurrency(igstAmount)}</TableCell>
                             </TableRow>
                           )}
                         </React.Fragment>
                       ))}
                       <TableRow>
                         <TableCell colSpan={8} align="right"><strong>Final Returned Amount:</strong></TableCell>
-                        <TableCell>{totalReturnedAmount.toFixed(2)}</TableCell>
+                        <TableCell>{formatCurrency(totalReturnedAmount)}</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>

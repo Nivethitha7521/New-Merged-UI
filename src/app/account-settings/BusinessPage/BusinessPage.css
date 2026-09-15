@@ -1,0 +1,569 @@
+.business-details-page {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 18px 20px 32px;
+  display: grid;
+  gap: 18px;
+  color: var(--erp-text, #101828);
+  font-family: var(--erp-font-family, inherit);
+  font-size: calc(1rem * var(--erp-type-scale, 1));
+}
+
+.business-details-page * {
+  box-sizing: border-box;
+}
+
+.business-page-heading {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--erp-accent, #2563eb) 18%, var(--erp-border, #d8e1ec));
+  border-radius: var(--erp-radius-lg, 18px);
+  background:
+    radial-gradient(circle at 92% 18%, color-mix(in srgb, var(--erp-accent, #2563eb) 15%, transparent) 0, transparent 28%),
+    linear-gradient(135deg, var(--erp-surface, #fff), color-mix(in srgb, var(--erp-accent, #2563eb) 5%, var(--erp-surface, #fff)));
+  box-shadow: var(--erp-shadow-sm, 0 4px 14px rgba(16, 24, 40, .06));
+}
+
+.business-heading-icon,
+.business-section-icon,
+.business-setting-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--erp-accent, #2563eb);
+  background: color-mix(in srgb, var(--erp-accent, #2563eb) 10%, var(--erp-surface, #fff));
+  border: 1px solid color-mix(in srgb, var(--erp-accent, #2563eb) 20%, transparent);
+}
+
+.business-heading-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+}
+
+.business-page-heading h1 {
+  margin: 0;
+  font: inherit;
+  font-size: calc(1.35rem * var(--erp-type-scale, 1));
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+
+.business-page-heading p,
+.business-section-heading p {
+  margin: 3px 0 0;
+  color: var(--erp-text-muted, #667085);
+  font-size: calc(.875rem * var(--erp-type-scale, 1));
+}
+
+.business-details-page .account-settings-section {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid var(--erp-border, #d8e1ec);
+  border-radius: var(--erp-radius-lg, 18px);
+  background: var(--erp-surface, #fff);
+  box-shadow: var(--erp-shadow-sm, 0 4px 14px rgba(16, 24, 40, .06));
+}
+
+.business-section-heading {
+  min-height: 46px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding-right: 56px;
+}
+
+.business-section-heading-copy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.business-section-heading h2 {
+  margin: 0;
+  font: inherit;
+  font-size: calc(1.05rem * var(--erp-type-scale, 1));
+  font-weight: 750;
+}
+
+.business-section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.business-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #b7ebcc;
+  border-radius: 999px;
+  color: #087a43;
+  background: #ecfdf3;
+  font-size: calc(.75rem * var(--erp-type-scale, 1));
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.business-sync-badge svg {
+  width: 16px;
+  height: 16px;
+}
+
+.business-details-page .icon-button-outline {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid color-mix(in srgb, var(--erp-accent, #2563eb) 35%, var(--erp-border, #d8e1ec));
+  border-radius: 11px;
+  color: var(--erp-accent, #2563eb);
+  background: var(--erp-surface, #fff);
+}
+
+.business-details-page .icon-button-outline:hover {
+  background: color-mix(in srgb, var(--erp-accent, #2563eb) 8%, var(--erp-surface, #fff));
+}
+
+.business-details-page .icon-button-outline.Mui-disabled {
+  opacity: .42;
+}
+
+.business-record {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.business-profile-summary {
+  min-height: 178px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--erp-border, #d8e1ec);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--erp-surface-muted, #f5f7fa) 75%, var(--erp-surface, #fff));
+}
+
+.business-photo-upload {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 92px;
+  height: 92px;
+  border: 1px dashed color-mix(in srgb, var(--erp-accent, #2563eb) 48%, var(--erp-border, #d8e1ec));
+  border-radius: 16px;
+  background: var(--erp-surface, #fff);
+  cursor: pointer;
+}
+
+.business-logo-image {
+  width: 92px;
+  height: 92px;
+  flex: 0 0 auto;
+  border: 1px solid var(--erp-border, #d8e1ec);
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 7px 18px rgba(16, 24, 40, .1);
+}
+
+.business-profile-summary:has(.business-logo-image) .business-photo-upload {
+  display: none;
+}
+
+.business-profile-copy {
+  min-width: 0;
+}
+
+.business-profile-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.business-profile-title h3 {
+  width: 100%;
+  margin: 0;
+  font: inherit;
+  font-size: calc(1.05rem * var(--erp-type-scale, 1));
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.business-profile-title span,
+.business-profile-title em {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: calc(.7rem * var(--erp-type-scale, 1));
+  font-style: normal;
+  font-weight: 700;
+}
+
+.business-profile-title span {
+  color: var(--erp-accent, #2563eb);
+  background: color-mix(in srgb, var(--erp-accent, #2563eb) 10%, transparent);
+}
+
+.business-profile-title em {
+  color: #087a43;
+  background: #dcfae6;
+}
+
+.business-profile-copy p,
+.business-profile-copy small {
+  display: block;
+  margin: 3px 0;
+  color: var(--erp-text-muted, #667085);
+  font-size: calc(.78rem * var(--erp-type-scale, 1));
+  overflow-wrap: anywhere;
+}
+
+.business-profile-copy small {
+  margin-top: 9px;
+}
+
+.business-info-table,
+.business-shipping-table {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--erp-border, #d8e1ec);
+  border-radius: 15px;
+  box-shadow: none !important;
+  background: var(--erp-surface, #fff) !important;
+}
+
+.business-details-page .MuiTableHead-root .MuiTableCell-root {
+  padding: 11px 14px;
+  color: var(--erp-text-muted, #667085);
+  background: var(--erp-surface-muted, #f5f7fa);
+  border-color: var(--erp-border, #d8e1ec);
+  font-family: var(--erp-font-family, inherit);
+  font-size: calc(.72rem * var(--erp-type-scale, 1));
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.business-details-page .MuiTableBody-root .MuiTableCell-root {
+  padding: 10px 14px;
+  color: var(--erp-text, #101828);
+  border-color: var(--erp-border, #d8e1ec);
+  font-family: var(--erp-font-family, inherit);
+  font-size: calc(.82rem * var(--erp-type-scale, 1));
+}
+
+.business-info-table .MuiTableBody-root .MuiTableCell-root:first-child {
+  width: 190px;
+  color: var(--erp-text-muted, #667085);
+  font-weight: 650;
+}
+
+.business-details-page .MuiTableBody-root .MuiTableRow-root:hover {
+  background: color-mix(in srgb, var(--erp-accent, #2563eb) 3%, transparent);
+}
+
+.business-details-page .MuiTextField-root {
+  width: min(100%, 520px);
+}
+
+.business-table-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 7px 10px;
+  border-top: 1px solid var(--erp-border, #d8e1ec);
+  background: color-mix(in srgb, var(--erp-surface-muted, #f5f7fa) 70%, transparent);
+}
+
+.business-table-actions .MuiIconButton-root,
+.business-shipping-table .MuiIconButton-root {
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in srgb, var(--erp-accent, #2563eb) 24%, var(--erp-border, #d8e1ec));
+  border-radius: 9px;
+  color: var(--erp-accent, #2563eb);
+}
+
+.business-save-settings {
+  flex: 0 0 auto;
+  min-height: 38px;
+  border-radius: 10px !important;
+  background: var(--erp-accent, #2563eb) !important;
+  color: var(--erp-accent-contrast, #fff) !important;
+  font-family: var(--erp-font-family, inherit) !important;
+  font-size: calc(.78rem * var(--erp-type-scale, 1)) !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+}
+
+.business-display-section .business-section-heading {
+  padding-right: 0;
+}
+
+.business-regional-alert {
+  margin-bottom: 14px;
+  border-radius: 10px !important;
+}
+
+.business-regional-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.business-regional-field {
+  min-width: 0;
+  min-height: 138px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  border: 1px solid var(--erp-border, #d8e1ec);
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--erp-surface, #fff), color-mix(in srgb, var(--erp-accent, #2563eb) 3%, var(--erp-surface-muted, #f5f7fa)));
+}
+
+.business-regional-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.business-setting-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.business-setting-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.business-regional-label > div:last-child {
+  min-width: 0;
+}
+
+.business-regional-label label {
+  margin: 0;
+  color: var(--erp-text, #101828);
+  font-family: var(--erp-font-family, inherit);
+  font-size: calc(.83rem * var(--erp-type-scale, 1));
+  font-weight: 750;
+}
+
+.business-regional-label span {
+  display: block;
+  margin-top: 2px;
+  color: var(--erp-text-muted, #667085);
+  font-size: calc(.7rem * var(--erp-type-scale, 1));
+}
+
+.business-regional-field .MuiOutlinedInput-root {
+  min-height: 42px;
+  color: var(--erp-text, #101828);
+  background: var(--erp-surface, #fff);
+  border-radius: 10px;
+}
+
+.business-regional-field .MuiSelect-select,
+.business-regional-field .MuiInputBase-input,
+.business-regional-field .MuiFormControlLabel-label {
+  font-family: var(--erp-font-family, inherit) !important;
+  font-size: calc(.78rem * var(--erp-type-scale, 1)) !important;
+}
+
+.business-select-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.business-select-option strong {
+  font-size: calc(.79rem * var(--erp-type-scale, 1));
+}
+
+.business-select-option small {
+  color: var(--erp-text-muted, #667085);
+  font-size: calc(.68rem * var(--erp-type-scale, 1));
+}
+
+.business-time-options,
+.business-currency-options {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 5px 16px;
+  padding: 3px 8px;
+  border: 1px solid var(--erp-border, #d8e1ec);
+  border-radius: 10px;
+  background: var(--erp-surface, #fff);
+}
+
+.business-time-options .MuiFormControlLabel-root,
+.business-currency-options .MuiFormControlLabel-root {
+  margin: 0 10px 0 0;
+}
+
+.business-seconds-field {
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+}
+
+.business-currency-field,
+.business-rate-field {
+  min-height: 142px;
+}
+
+.business-regional-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 13px;
+}
+
+.business-regional-preview > div {
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--erp-accent, #2563eb) 18%, var(--erp-border, #d8e1ec));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--erp-accent, #2563eb) 5%, var(--erp-surface, #fff));
+}
+
+.business-regional-preview span,
+.business-regional-preview strong,
+.business-regional-preview small {
+  display: block;
+}
+
+.business-regional-preview span {
+  color: var(--erp-text-muted, #667085);
+  font-size: calc(.68rem * var(--erp-type-scale, 1));
+  font-weight: 750;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+.business-regional-preview strong {
+  margin-top: 7px;
+  color: var(--erp-text, #101828);
+  font-size: calc(.92rem * var(--erp-type-scale, 1));
+}
+
+.business-regional-preview small {
+  margin-top: 4px;
+  color: var(--erp-text-muted, #667085);
+  font-size: calc(.7rem * var(--erp-type-scale, 1));
+}
+
+.business-settings-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: color-mix(in srgb, var(--erp-accent, #2563eb) 76%, var(--erp-text, #101828));
+  background: color-mix(in srgb, var(--erp-accent, #2563eb) 7%, transparent);
+  font-size: calc(.75rem * var(--erp-type-scale, 1));
+}
+
+.business-settings-note svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.business-shipping-section .business-section-heading {
+  padding-right: 56px;
+}
+
+.business-shipping-table {
+  margin-top: 2px;
+}
+
+.business-shipping-table table {
+  min-width: 850px;
+}
+
+@media (max-width: 1200px) {
+  .business-record {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 900px) {
+  .business-details-page {
+    padding: 14px;
+  }
+
+  .business-regional-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .business-details-page {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .business-page-heading,
+  .business-details-page .account-settings-section {
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  .business-section-heading {
+    flex-direction: column;
+    padding-right: 48px;
+  }
+
+  .business-display-section .business-section-heading {
+    padding-right: 0;
+  }
+
+  .business-save-settings {
+    width: 100%;
+  }
+
+  .business-regional-form,
+  .business-regional-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .business-regional-field {
+    min-height: 124px;
+  }
+
+  .business-seconds-field {
+    min-height: 96px;
+  }
+
+  .business-profile-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .business-info-table table {
+    min-width: 560px;
+  }
+}

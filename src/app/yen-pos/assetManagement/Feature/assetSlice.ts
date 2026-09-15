@@ -8,7 +8,7 @@ import { RootState } from '../../../../redux/store';
 import { Asset, initialState, initialAsset } from "../Models/assetModels";
 
 
-const ASSET_API_URL = 'http://127.0.0.1:8000/yenerpapi/assetmanagements/';
+const ASSET_API_URL = 'http://127.0.0.1:8001/yenerpapi/assetmanagements/';
 
 
 

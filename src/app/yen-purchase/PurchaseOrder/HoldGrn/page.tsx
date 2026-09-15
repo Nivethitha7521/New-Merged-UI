@@ -44,6 +44,7 @@ import "jspdf-autotable";
 import ConfirmationDialog from "@/components/confirmationDialog";
 import FreightSelectionDialog, { FreightData } from "../../PurchaseOrder/Component/freightSelectionDialog";
 import purchaseApi from "@/utils/api";
+import { formatCurrency, formatDate } from '@/utilities/formatters';
 const customRoundDigit = (value: number): number => Math.round(value * 100) / 100;
 
 // Table Row Component - Same as Approved PO page
@@ -135,7 +136,7 @@ const displayItemTotal = totalPrice;  // 5 × 569 = 2845.00
         />
       </TableCell>
       <TableCell className='table-number-right'>
-  {displayTaxableAmount.toFixed(2)}
+  {formatCurrency(displayTaxableAmount)}
 </TableCell>
       <TableCell className='table-number-right'>
         <TextField
@@ -594,10 +595,10 @@ return (
                     <TableCell className="table-number-right">{(currentPage - 1) * pageSize + index + 1}</TableCell>
                     <TableCell>{grn.randomId || grn.grnId}</TableCell>
                     <TableCell>{grn.vendorName}</TableCell>
-                    <TableCell>{grn.grnDate ? format(new Date(grn.grnDate), "dd-MM-yyyy") : "-"}</TableCell>
+                    <TableCell>{grn.grnDate ? formatDate(new Date(grn.grnDate)) : "-"}</TableCell>
                    <TableCell>
   {grn.grnDate
-    ? format(new Date(grn.grnDate), "dd-MM-yyyy")
+    ? formatDate(new Date(grn.grnDate))
     : "-"}
 </TableCell>
                     <TableCell className="table-number-right">
@@ -846,7 +847,7 @@ return (
                     <TableRow key={key}>
                       <TableCell colSpan={SUMMARY_LABEL_COL} />
                       <TableCell><strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong></TableCell>
-                      <TableCell className='table-number-right'>{tax.amount.toFixed(2)}</TableCell>
+                      <TableCell className='table-number-right'>{formatCurrency(tax.amount)}</TableCell>
                     </TableRow>
                   ))}
 
@@ -854,7 +855,7 @@ return (
                   <TableRow>
                     <TableCell colSpan={SUMMARY_LABEL_COL} />
                     <TableCell><strong>Freight Amount:</strong></TableCell>
-                    <TableCell className='table-number-right'>{freightTotalAmount.toFixed(2)}</TableCell>
+                    <TableCell className='table-number-right'>{formatCurrency(freightTotalAmount)}</TableCell>
                   </TableRow>
 
                   {/* ── Freight Tax with Add/Edit button — light blue, same as Approved PO ── */}
@@ -931,7 +932,7 @@ return (
                   <TableRow>
                     <TableCell colSpan={SUMMARY_LABEL_COL} />
                     <TableCell><strong>Before RoundOff:</strong></TableCell>
-                    <TableCell className='table-number-right'>{totalOrderAmount.toFixed(2)}</TableCell>
+                    <TableCell className='table-number-right'>{formatCurrency(totalOrderAmount)}</TableCell>
                   </TableRow>
 
                   {/* ── Round Off Amount ── */}
@@ -959,7 +960,7 @@ return (
                   }}>
                     <TableCell colSpan={SUMMARY_LABEL_COL} />
                     <TableCell><strong>Tax Amount:</strong></TableCell>
-                    <TableCell className='table-number-right'>{totalTaxAmount.toFixed(2)}</TableCell>
+                    <TableCell className='table-number-right'>{formatCurrency(totalTaxAmount)}</TableCell>
                   </TableRow>
 
                   {/* ── Final Amount — light grey, same as Approved PO ── */}
@@ -973,7 +974,7 @@ return (
                       className='table-number-right'
                       sx={{ color: finalTotalAmount < 0 ? 'error.main' : 'primary.main' }}
                     >
-                      {finalTotalAmount.toFixed(2)}
+                      {formatCurrency(finalTotalAmount)}
                     </TableCell>
                   </TableRow>
                 </TableBody>

@@ -6,6 +6,7 @@ import { Button, Card, DetailList, FilterBar, Input, Kpi, PageHeader, Pager, Sel
 import { DataTable } from "@/components/InventoryControlTower/shared/components/data-table";
 import { Modal, useActionCenter } from "@/components/InventoryControlTower/shared/components/action-center";
 import { apiRequest } from "@/components/InventoryControlTower/shared/lib/api";
+import { formatCurrency } from '@/utilities/formatters';
 
 const initialRows = [
   { id: "WST-2026/07/265", outlet: "SB Outlet", date: "26 Jul 11:10 AM", product: "Milk Bread", reason: "Expired", qty: 35, uom: "Pcs", rate: 50, value: "₹1,750", requestedBy: "Karthik", role: "Store In-charge", status: "Pending", remark: "Expired yesterday. Not suitable for outward." },
@@ -102,7 +103,7 @@ export function WastagePage() {
             <h3 className="mt-4 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Product Information</h3>
             <DetailList rows={[["Product", selected.product], ["Category", selected.product.includes("Cake") ? "Cakes" : "Bakery"], ["Batch / Lot", "BRD-260725-01"], ["Mfg Date", "20 Jul 2026"], ["Exp Date", "25 Jul 2026"]]} />
             <h3 className="mt-4 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Wastage Details</h3>
-            <DetailList rows={[["Reason", selected.reason], ["Quantity", `${selected.qty} ${selected.uom}`], ["Rate", `₹${selected.rate.toFixed(2)}`], ["Total Value", selected.value], ["Remarks", selected.remark]]} />
+            <DetailList rows={[["Reason", selected.reason], ["Quantity", `${selected.qty} ${selected.uom}`], ["Rate", `${formatCurrency(selected.rate)}`], ["Total Value", selected.value], ["Remarks", selected.remark]]} />
             <div className="mt-4 grid grid-cols-3 gap-2">{[1,2,3].map((index) => <button key={index} onClick={() => notify(`Evidence attachment ${index} opened.`, "info")} className="flex aspect-[4/3] items-center justify-center rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-100 text-[10px] font-bold text-amber-700">Evidence {index}</button>)}</div>
           </div>
           <div className="border-t border-slate-100 p-5">

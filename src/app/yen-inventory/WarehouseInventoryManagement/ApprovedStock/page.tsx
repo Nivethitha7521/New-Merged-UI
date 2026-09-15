@@ -15,6 +15,7 @@ import { AppDispatch, RootState } from "@/redux/store";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const UI = {
   pageBg: "#f6f9fd",
@@ -33,6 +34,8 @@ const UI = {
 };
 
 const WarehouseApprovedStock: React.FC = () => {
+  const { isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "warehouseapprovedstock");
   // newly add this line 29 7 1
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch<AppDispatch>();
@@ -54,6 +57,8 @@ const WarehouseApprovedStock: React.FC = () => {
   const toggleFullScreen = useCallback(() => {
     dispatch(setIsFullScreen(!isFullScreen));
   }, [dispatch, isFullScreen]);
+
+  if (!canRead) return null;
 
   return (
     <Box
@@ -82,6 +87,7 @@ const WarehouseApprovedStock: React.FC = () => {
       {!isFullScreen && <WarehouseInventoryManagementPage />}
 
       <Paper
+        className="inventory-approved-banner"
         elevation={0}
         sx={{
           flexShrink: 0,
@@ -193,6 +199,7 @@ const WarehouseApprovedStock: React.FC = () => {
       </Paper>
 
       <Box
+        className="inventory-approved-content"
         sx={{
           flex: 1,
           minHeight: 0,

@@ -19,6 +19,7 @@ import {
   Divider,
   Pagination,TextField,
 } from '@mui/material';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import {
   Add as AddIcon,
   EditOutlined as EditIcon,
@@ -287,16 +288,32 @@ const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
             {!showDeactivated && (
               <>
                 <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                  <IconButton color="primary" onClick={handleOpen} className="icon-action-button" title="Add" disabled={isImporting}>
-                    <AddIcon className="icon-action-svg" />
-                  </IconButton>
+                 <PermissionIconButton
+                    app="masteradmin"
+                    module="itemcategory"
+                    action="add"
+                    tooltip="Add"
+                    onClick={handleOpen}
+                    icon={<AddIcon className="icon-action-svg" />}
+                    className="icon-action-button"
+                    ariaLabel="Add"
+                    disabled={isImporting}
+                  />
                   <Typography className="icon-action-label">Add</Typography>
                 </div>
 
                 <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                  <IconButton color="primary" onClick={handleImportClick} className="icon-action-button" size="small" disabled={isImporting}>
-                    {isImporting ? <CircularProgress size={20} className="icon-action-svg" /> : <GetAppIcon className="icon-action-svg" />}
-                  </IconButton>
+ <PermissionIconButton
+                    app="masteradmin"
+                    module="itemcategory"
+                    action="add"
+                    tooltip="Import"
+                    onClick={handleImportClick}
+                    icon={isImporting ? <CircularProgress size={20} className="icon-action-svg" /> : <GetAppIcon className="icon-action-svg" />}
+                    className="icon-action-button"
+                    ariaLabel="Import"
+                    disabled={isImporting}
+                  />
                   <Typography className="icon-action-label">{isImporting ? 'Importing...' : 'Import'}</Typography>
                 </div>
 
@@ -315,9 +332,17 @@ const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
                 </div>
 
                 <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                  <IconButton color="secondary" onClick={handleRollback} className="icon-action-button" size="small" disabled={isImporting}>
-                    <UndoIcon className="icon-action-svg" />
-                  </IconButton>
+                 <PermissionIconButton
+                    app="masteradmin"
+                    module="itemcategory"
+                    action="edit"
+                    tooltip="Rollback"
+                    onClick={handleRollback}
+                    icon={<UndoIcon className="icon-action-svg" />}
+                    className="icon-action-button"
+                    ariaLabel="Rollback"
+                    disabled={isImporting}
+                  />
                   <Typography className="icon-action-label">Rollback</Typography>
                 </div>
               </>
@@ -572,32 +597,39 @@ const CategoryTableContainer: React.FC<CategoryTableContainerProps> = ({
 <td className="item-master-actions-cell">
                       <div className="flex justify-center gap-1">
                         {showDeactivated ? (
-                          <IconButton
+                           <PermissionIconButton
+                            app="masteradmin"
+                            module="itemcategory"
+                            action="edit"
+                            rollback
+                            tooltip="Activate"
                             onClick={() => handleActivate(category)}
+                            icon={<RefreshIcon />}
                             className="purchase-master-action-button is-activate"
-                            title="Activate"
-                            size="small"
-                          >
-                           <RefreshIcon />
-                          </IconButton>
+                           ariaLabel="Activate"
+                          />
                         ) : (
                           <>
-                            <IconButton
+                             <PermissionIconButton
+                              app="masteradmin"
+                              module="itemcategory"
+                              action="edit"
+                              tooltip="Edit"
                               onClick={() => handleEdit(category)}
-                             className="purchase-master-action-button is-edit"
-                              title="Edit"
-                            size="small"
-                            >
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton
+                            icon={<EditIcon />}
+                              className="purchase-master-action-button is-edit"
+                              ariaLabel="Edit"
+                            />
+                            <PermissionIconButton
+                              app="masteradmin"
+                              module="itemcategory"
+                              action="delete"
+                              tooltip="Deactivate"
                               onClick={() => handleDeactivate(category)}
-                             className="purchase-master-action-button is-delete"
-                              title="Deactivate"
-                              size="small"
-                            >
-                              <DeleteIcon />
-                            </IconButton>
+                            icon={<DeleteIcon />}
+                              className="purchase-master-action-button is-delete"
+                              ariaLabel="Deactivate"
+                            />
                           </>
                         )}
                       </div>

@@ -11,7 +11,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/EditOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlineRounded";
@@ -99,7 +100,10 @@ const DiscountTableContainer: React.FC<DiscountTableContainerProps> = ({
 
     <Box className="discount-master-toolbar-actions">
       {!showDeactivated && (
-        <Button
+       <PermissionButton
+          app="masteradmin"
+          module="discount"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={<AddIcon />}
@@ -107,7 +111,7 @@ const DiscountTableContainer: React.FC<DiscountTableContainerProps> = ({
           className="purchase-reference-action-button"
         >
           Add New
-        </Button>
+        </PermissionButton>
       )}
 
       <Box className="purchase-reference-active-toggle">
@@ -240,53 +244,49 @@ const DiscountTableContainer: React.FC<DiscountTableContainerProps> = ({
                   <td className="discount-column-actions">
                     <Box className="purchase-master-actions">
                       {showDeactivated ? (
-                        <Tooltip
-                          title="Activate discount"
-                          arrow
-                        >
-                          <IconButton
-                            type="button"
-                            onClick={() =>
-                              handleActivate(discount)
-                            }
-                            className="purchase-master-action-button is-activate"
-                            aria-label={`Activate ${discount.discountName}`}
-                          >
-                            <RefreshIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                     <PermissionIconButton
+                          app="masteradmin"
+                          module="discount"
+                          action="edit"
+                          rollback
+                          tooltip="Activate discount"
+                          onClick={() => handleActivate(discount)}
+                          icon={<RefreshIcon fontSize="small" />}
+                          className="purchase-master-action-button is-activate"
+                          ariaLabel={`Activate ${discount.discountName}`}
+                        />
                       ) : (
                         <>
                           <Tooltip
                             title="Edit discount"
                             arrow
                           >
-                            <IconButton
-                              type="button"
-                              onClick={() =>
-                                handleEdit(discount)
-                              }
-                              className="purchase-master-action-button is-edit"
-                              aria-label={`Edit ${discount.discountName}`}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
+                            <PermissionIconButton
+  app="masteradmin"
+  module="discount"
+  action="edit"
+  tooltip="Edit discount"
+  onClick={() => handleEdit(discount)}
+  icon={<EditIcon fontSize="small" />}
+  className="purchase-master-action-button is-edit"
+  ariaLabel={`Edit ${discount.discountName}`}
+/>
                           </Tooltip>
 
                           <Tooltip
                             title="Deactivate discount"
                             arrow
                           >
-                            <IconButton
-                              type="button"
-                              onClick={() =>
-                                handleDeactivate(discount)
-                              }
-                              className="purchase-master-action-button is-delete"
-                              aria-label={`Deactivate ${discount.discountName}`}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
+                           <PermissionIconButton
+  app="masteradmin"
+  module="discount"
+  action="delete"
+  tooltip="Deactivate discount"
+  onClick={() => handleDeactivate(discount)}
+  icon={<DeleteIcon fontSize="small" />}
+  className="purchase-master-action-button is-delete"
+  ariaLabel={`Deactivate ${discount.discountName}`}
+/>
                           </Tooltip>
                         </>
                       )}

@@ -11,6 +11,7 @@ import {
   setSnackbarOpen,
 } from '../WhatsappMaster/Features/whatsAppMessage';
 import { WhatsApp, WhatsappMessage } from '../WhatsappMaster/Models/whatsappModels';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   Box,
   Typography,
@@ -49,7 +50,8 @@ const WhatsAppMessagesPage: React.FC = () => {
   const theme = useTheme();
   const { roles, messages, posting, snackbarOpen, snackbarMessage } =
     useSelector(selectWhatsappMessages);
-
+const { hasPermission, isModuleVisible } = usePermissions();
+  const canEdit = hasPermission('whatsapp', 'whatsapp_master', 'edit');
   const [actionDialog, setActionDialog] = useState<{
     open: boolean;
     type: 'add' | 'remove';
@@ -123,7 +125,9 @@ const WhatsAppMessagesPage: React.FC = () => {
   const ROLE_COL_W = 160;
   const SUBMOD_COL_W = 220;
   const tableMinWidth = SUBMOD_COL_W + activeRoles.length * ROLE_COL_W;
-
+if (!isModuleVisible('whatsapp', 'whatsapp_master')) {
+    return null;
+  }
   return (
     <Box
       sx={{
@@ -408,7 +412,8 @@ const WhatsAppMessagesPage: React.FC = () => {
                                   >
                                     <Checkbox
                                       checked={assigned || false}
-                                      onClick={() => handleCheckboxClick(row, role, !assigned)}
+                                     disabled={!canEdit}
+                                      onClick={() => canEdit && handleCheckboxClick(row, role, !assigned)}
                                       icon={
                                         <RadioButtonUncheckedRoundedIcon
                                           sx={{ fontSize: 19, color: '#D1D5DB' }}

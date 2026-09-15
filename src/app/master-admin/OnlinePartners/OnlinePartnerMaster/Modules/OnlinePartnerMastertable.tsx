@@ -3,7 +3,7 @@
 import React from "react"
 import { RootState } from "../../../../../redux/store";
 import { useSelector } from "react-redux";
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import {
   Box,
   FormControlLabel,
@@ -105,14 +105,16 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
           {!showDeactivated && (
             <>
               <div className="icon-action-wrapper">
-                <IconButton
-                  color="primary"
+               <PermissionIconButton
+                  app="masteradmin"
+                  module="onlinepartnermaster"
+                  action="add"
+                  tooltip="Add"
                   onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
                   className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+                   ariaLabel="Add"
+                />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
 
@@ -167,32 +169,40 @@ const OnlinePartnerTable: React.FC<OnlinePartnerTableProbs> = ({
                     <td style={{ textAlign: 'center' }}>{partner.partnerName}</td>
                     <td style={{ textAlign: 'center' }}>
                       {showDeactivated ? (
-                        <button
-                          color="primary"
-                          onClick={() => handleActivate(partner)}
+                        <PermissionIconButton
+                          app="masteradmin"
+                          module="onlinepartnermaster"
+                          action="edit"
+                          rollback
+                          tooltip="Activate"
+                           onClick={() => handleActivate(partner)}
+                          icon={<RefreshIcon />}
+                        
                           className="activate-btn"
-                          title="Activate"
-                        >
-                          <RefreshIcon />
-                        </button>
+                         ariaLabel="Activate"
+                        />
                       ) : (
                         <>
-                          <button
-                            color="primary"
+                          <PermissionIconButton
+                            app="masteradmin"
+                            module="onlinepartnermaster"
+                            action="edit"
+                            tooltip="Edit"
                             onClick={() => handleEdit(partner)}
+                            icon={<EditIcon />}
                             className="edit-btn"
-                            title="Edit"
-                          >
-                            <EditIcon />
-                          </button>
-                          <button
-                            color="primary"
+                            ariaLabel="Edit"
+                          />
+                          <PermissionIconButton
+                            app="masteradmin"
+                            module="onlinepartnermaster"
+                            action="delete"
+                            tooltip="Deactivate"
                             onClick={() => handleDeactivate(partner)}
+                            icon={<DeleteIcon />}
                             className="deactivate-btn"
-                            title="Deactivate"
-                          >
-                            <DeleteIcon />
-                          </button>
+                           ariaLabel="Deactivate"
+                          />
                         </>
                       )}
                     </td>

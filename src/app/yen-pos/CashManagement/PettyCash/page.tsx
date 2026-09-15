@@ -34,7 +34,7 @@ import { PettyCash } from '../PettyCash/Models/pettycashModels';   // adjust pat
 
 import { PettyCashDialog } from '../PettyCash/Modules/PettyCashDialog';   // <-- new
 import { PettyCashTable } from '../PettyCash/Modules/PettyCashTableContainer';     // <-- new
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import CloseConfirmationDialog from '../../../Components/Dialogs/CloseConfirmationDialog';
 import EditConfirmationDialog from '../../../Components/Dialogs/EditConfirmationDialog';
 import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/ActivateDeactivateConfirmationDialog';
@@ -329,16 +329,18 @@ const PettyCashPage: React.FC = () => {
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : (
-        <PettyCashTable
-          data={showDeactivated ? deactivatedItems : tableRows}
-          isDeactivatedView={showDeactivated}
-          onEdit={handleEdit}
-          onDeactivate={handleDeactivate}
-          onActivate={handleActivate}
-          onApplyAll={handleApplyAll}
-          applyingAll={applyingAll}
-          allBranches={allBranches}
-        />
+      <ModuleVisibilityGuard app="pos" module="petty_cash">
+          <PettyCashTable
+            data={showDeactivated ? deactivatedItems : tableRows}
+            isDeactivatedView={showDeactivated}
+            onEdit={handleEdit}
+            onDeactivate={handleDeactivate}
+            onActivate={handleActivate}
+            onApplyAll={handleApplyAll}
+            applyingAll={applyingAll}
+            allBranches={allBranches}
+          />
+        </ModuleVisibilityGuard>
       )}
 
       {/* ----- Dialog ----- */}

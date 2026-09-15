@@ -12,6 +12,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 import {
   AdminPanelSettingsOutlined,
   ChevronLeftRounded,
@@ -31,6 +33,7 @@ interface WhatsAppModuleItem {
   text: string;
   path: string;
   icon: React.ReactNode;
+  moduleKeys: string[];
 }
 
 const whatsappModules: WhatsAppModuleItem[] = [
@@ -38,11 +41,13 @@ const whatsappModules: WhatsAppModuleItem[] = [
     text: 'WhatsApp Admin',
     path: '/WhatsApp/WhatsappAdmin',
     icon: <AdminPanelSettingsOutlined />,
+     moduleKeys: ['whatsapp_admin'],
   },
   {
     text: 'WhatsApp Master',
     path: '/WhatsApp/WhatsappMaster',
     icon: <MessageOutlined />,
+    moduleKeys: ['whatsapp_master'],
   },
 ];
 
@@ -52,7 +57,22 @@ const WhatsAppModuleSideMenu: React.FC<WhatsAppModuleSideMenuProps> = ({
   onNavigate,
 }) => {
   const pathname = usePathname();
-  const visibleModules = useMemo(() => whatsappModules, []);
+
+  const role = useSelector((state: RootState) => state.auth.role);
+  const isSuperAdmin = role === 'Super Admin';
+  const whatsappPermissions = useSelector(
+    (state: RootState) => state.auth.permissions?.whatsapp || {}
+  );
+
+  const visibleModules = useMemo(() => {
+    if (isSuperAdmin) return whatsappModules;
+    return whatsappModules.filter((module) =>
+      module.moduleKeys.some((key) => {
+        const perm = whatsappPermissions?.[key];
+        return perm && perm.hide !== true && perm.read === true;
+      })
+    );
+  }, [isSuperAdmin, whatsappPermissions]);
 
   const isActive = (path: string) =>
     pathname === path || Boolean(pathname?.startsWith(`${path}/`));

@@ -91,6 +91,7 @@ import { fetchServiceById, returnServiceInvoice, selectReturnServiceError, selec
 import { ServiceData } from '@/app/yen-purchase/ServiceOrder/Models/servicepo';
 import GrnDialog from '@/components/yen-purchase/OutgoingComponent/GRNDialog';
 import PODialog from '@/components/yen-purchase/OutgoingComponent/PODialog';
+import { formatCurrency, formatDate, formatDateTime } from '@/utilities/formatters';
 import ServiceDialog from '@/app/yen-purchase/ServiceOrder/Components/ServiceDialog';
 
 interface TaxAmounts {
@@ -613,9 +614,9 @@ const confirmVerification = async () => {
         `GRN No: ${apinvoice.grnRandomId}\n` +
         `AP No: ${apinvoice.randomId}\n` +
         `Invoice No: ${apinvoice.invoiceNo}\n` +
-        `Invoice Date: ${apinvoice.invoiceDate ? format(new Date(apinvoice.invoiceDate), 'dd-MM-yyyy') : ''}\n` +
+        `Invoice Date: ${apinvoice.invoiceDate ? formatDate(new Date(apinvoice.invoiceDate)) : ''}\n` +
         `Payment Terms: ${apinvoice.paymentTerms || '15'} \n` +
-        `Due Date: ${format(dueDate, 'dd-MM-yyyy')}\n` +
+        `Due Date: ${formatDate(dueDate)}\n` +
         `Currency: ${'INR'}`,
       ]
     ];
@@ -660,8 +661,8 @@ const confirmVerification = async () => {
           `${index + 1}`,
           desc || 'Service Description',
           apinvoice.sacCode[index] || '',
-          apinvoice.from_dates[index] ? format(new Date(apinvoice.from_dates[index]), 'dd-MM-yyyy') : '',
-          apinvoice.to_dates[index] ? format(new Date(apinvoice.to_dates[index]), 'dd-MM-yyyy') : '',
+          apinvoice.from_dates[index] ? formatDate(new Date(apinvoice.from_dates[index])) : '',
+          apinvoice.to_dates[index] ? formatDate(new Date(apinvoice.to_dates[index])) : '',
           (apinvoice.quantity[index] || 1).toString(),
           (apinvoice.fees[index] || 0).toFixed(2),
           (apinvoice.desc_tax_amounts[index] || 0).toFixed(2),
@@ -904,7 +905,7 @@ const confirmVerification = async () => {
           ap.randomId.toString(),
           ap.vendorName.toString(),
           ap.descriptions.length > 0 ? ap.descriptions[0] : 'Service',
-          ap.apinvoiceDate ? format(new Date(ap.apinvoiceDate), 'dd-MM-yyyy') : '',
+          ap.apinvoiceDate ? formatDate(new Date(ap.apinvoiceDate)) : '',
           ap.invoiceAmount.toFixed(2).toString(),
         ];
       } else {
@@ -916,7 +917,7 @@ const confirmVerification = async () => {
           ap.randomId.toString(),
           ap.vendorName.toString(),
           totalItemsQuantity.toString(),
-          ap.apinvoiceDate ? format(new Date(ap.apinvoiceDate), 'dd-MM-yyyy') : '',
+          ap.apinvoiceDate ? formatDate(new Date(ap.apinvoiceDate)) : '',
           ap.invoiceAmount.toFixed(2).toString(),
         ];
       }
@@ -1001,8 +1002,8 @@ const confirmVerification = async () => {
           invoice.vendorName,
           desc || 'Service',
           invoice.sacCode[descIndex] || '',
-          invoice.from_dates[descIndex] ? format(new Date(invoice.from_dates[descIndex]), 'dd-MM-yyyy') : '',
-          invoice.to_dates[descIndex] ? format(new Date(invoice.to_dates[descIndex]), 'dd-MM-yyyy') : '',
+          invoice.from_dates[descIndex] ? formatDate(new Date(invoice.from_dates[descIndex])) : '',
+          invoice.to_dates[descIndex] ? formatDate(new Date(invoice.to_dates[descIndex])) : '',
           (invoice.fees[descIndex] || 0).toFixed(2),
           (invoice.desc_tax_amounts[descIndex] || 0).toFixed(2),
           (invoice.desc_totals[descIndex] || 0).toFixed(2),
@@ -1138,8 +1139,8 @@ const confirmVerification = async () => {
           invoice.vendorName,
           desc || 'Service',
           invoice.sacCode[descIndex] || '',
-          invoice.from_dates[descIndex] ? format(new Date(invoice.from_dates[descIndex]), 'dd-MM-yyyy') : '',
-          invoice.to_dates[descIndex] ? format(new Date(invoice.to_dates[descIndex]), 'dd-MM-yyyy') : '',
+          invoice.from_dates[descIndex] ? formatDate(new Date(invoice.from_dates[descIndex])) : '',
+          invoice.to_dates[descIndex] ? formatDate(new Date(invoice.to_dates[descIndex])) : '',
           (invoice.fees[descIndex] || 0).toFixed(2),
           (invoice.desc_tax_amounts[descIndex] || 0).toFixed(2),
           (invoice.desc_totals[descIndex] || 0).toFixed(2),
@@ -1244,7 +1245,7 @@ const confirmVerification = async () => {
         return [
           (index + 1).toString(),
           ap.randomId.toString(),
-          ap.invoiceDate ? format(new Date(ap.invoiceDate), 'dd-MM-yyyy') : '',
+          ap.invoiceDate ? formatDate(new Date(ap.invoiceDate)) : '',
           ap.invoiceNo,
           ap.vendorName.toString(),
           ap.descriptions.length > 0 ? ap.descriptions[0] : 'Service',
@@ -1258,7 +1259,7 @@ const confirmVerification = async () => {
         return [
           (index + 1).toString(),
           ap.randomId.toString(),
-          ap.invoiceDate ? format(new Date(ap.invoiceDate), 'dd-MM-yyyy') : '',
+          ap.invoiceDate ? formatDate(new Date(ap.invoiceDate)) : '',
           ap.invoiceNo,
           ap.vendorName.toString(),
           totalItemsQuantity.toString(),
@@ -1957,16 +1958,16 @@ onClick={() => {
                         <TableCell align="left">{invoice.invoiceNo}</TableCell>
                         <TableCell align="left">{invoice.vendorName}</TableCell>
                         <TableCell align="left">
-                          {invoice.invoiceDate ? format(new Date(invoice.invoiceDate), 'dd-MM-yyyy') : ''}
+                          {invoice.invoiceDate ? formatDate(new Date(invoice.invoiceDate)) : ''}
                         </TableCell>
                         <TableCell align="center">
                           {invoice.invoiceType === 'service' ? 'Service' : 'Goods'}
                         </TableCell>
-                        <TableCell align="right">{invoice.invoiceAmount.toFixed(2)}</TableCell>
+                        <TableCell align="right">{formatCurrency(invoice.invoiceAmount)}</TableCell>
                         <TableCell align="center">{invoice.status || 'Pending'}</TableCell>
                         <TableCell align="center">{invoice.verifiedBy || '-'}</TableCell>
                         <TableCell align="center">
-                          {invoice.verifiedDate ? format(new Date(invoice.verifiedDate), 'dd-MM-yyyy HH:mm') : '-'}
+                          {invoice.verifiedDate ? formatDateTime(new Date(invoice.verifiedDate)) : '-'}
                         </TableCell>
                         <TableCell>
                           <Box display="flex" alignItems="center">
@@ -2127,11 +2128,11 @@ onClick={() => {
                   <Typography variant="h6">
                     <strong>Invoice Date:</strong>{' '}
                     {selectedInvoice?.invoiceDate
-                      ? format(new Date(selectedInvoice.invoiceDate), 'dd-MM-yyyy')
+                      ? formatDate(new Date(selectedInvoice.invoiceDate))
                       : ''}
                   </Typography>
                   <Typography variant="h6">
-                    <strong>Total Amount:</strong> {selectedInvoice.invoiceAmount.toFixed(2)}
+                    <strong>Total Amount:</strong> {formatCurrency(selectedInvoice.invoiceAmount)}
                   </Typography>
                 </Box>
 {selectedInvoice.invoiceType !== "service" && isMultiPoApInvoice(selectedInvoice) ? (
@@ -2234,14 +2235,14 @@ onClick={() => {
                       <TableCell colSpan={13} align="right">
                         <strong>Tax Amount:</strong>
                       </TableCell>
-                      <TableCell>{poGroup.taxAmount.toFixed(2)}</TableCell>
+                      <TableCell>{formatCurrency(poGroup.taxAmount)}</TableCell>
                     </TableRow>
 
                     <TableRow>
                       <TableCell colSpan={13} align="right">
                         <strong>Freight Amount:</strong>
                       </TableCell>
-                      <TableCell>{poGroup.freightAmount.toFixed(2)}</TableCell>
+                      <TableCell>{formatCurrency(poGroup.freightAmount)}</TableCell>
                     </TableRow>
 
                     <TableRow>
@@ -2263,7 +2264,7 @@ onClick={() => {
                         <strong>{poGroup.poRandomId} Final Amount:</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>{poGroup.finalAmount.toFixed(2)}</strong>
+                        <strong>{formatCurrency(poGroup.finalAmount)}</strong>
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -2338,17 +2339,17 @@ onClick={() => {
                             <TableCell>{selectedInvoice.sacCode[index]}</TableCell>
                             <TableCell>
                               {selectedInvoice.from_dates[index]
-                                ? format(new Date(selectedInvoice.from_dates[index]), 'dd-MM-yyyy')
+                                ? formatDate(new Date(selectedInvoice.from_dates[index]))
                                 : ''}
                             </TableCell>
                             <TableCell>
                               {selectedInvoice.to_dates[index]
-                                ? format(new Date(selectedInvoice.to_dates[index]), 'dd-MM-yyyy')
+                                ? formatDate(new Date(selectedInvoice.to_dates[index]))
                                 : ''}
                             </TableCell>
                             <TableCell>{selectedInvoice.quantity[index] || 1}</TableCell>
                             <TableCell>{(selectedInvoice.fees[index] || 0).toFixed(2)}</TableCell>
-                            <TableCell>{(selectedInvoice.desc_tax_amounts[index] || 0).toFixed(2)}</TableCell>
+                            <TableCell>{formatCurrency(selectedInvoice.desc_tax_amounts[index])}</TableCell>
                             <TableCell>{(selectedInvoice.desc_totals[index] || 0).toFixed(2)}</TableCell>
                           </TableRow>
                         ))
@@ -2367,8 +2368,8 @@ onClick={() => {
                             <TableCell>{item.afTaxDiscount}</TableCell>
                             <TableCell>{item.purchasetaxName}</TableCell>
                             <TableCell>{item.unitPrice}</TableCell>
-                            <TableCell>{item.totalPrice.toFixed(2)}</TableCell>
-                            <TableCell>{item.finalPrice.toFixed(2)}</TableCell>
+                            <TableCell>{formatCurrency(item.totalPrice)}</TableCell>
+                            <TableCell>{formatCurrency(item.finalPrice)}</TableCell>
                           </TableRow>
                         ))
                       )}
@@ -2439,7 +2440,7 @@ onClick={() => {
                           <strong>Total Invoice Amount:</strong>
                         </TableCell>
                         <TableCell>
-                          {(selectedInvoice.invoiceAmount - (selectedInvoice.discountPrice || 0)).toFixed(2)}
+                          {formatCurrency(selectedInvoice.invoiceAmount - (selectedInvoice.discountPrice || 0))}
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -2670,7 +2671,7 @@ onClick={() => {
                 <DialogContentText sx={{ mb: 2 }}>
                   <strong>Service ID:</strong> {selectedInvoice?.serviceId || selectedInvoice?.invoiceId}<br />
                   <strong>Vendor:</strong> {selectedInvoice?.vendorName}<br />
-                  <strong>Amount:</strong> ₹{selectedInvoice?.invoiceAmount.toFixed(2)}
+                  <strong>Amount:</strong> {formatCurrency(selectedInvoice?.invoiceAmount)}
                 </DialogContentText>
 
                 <TextField

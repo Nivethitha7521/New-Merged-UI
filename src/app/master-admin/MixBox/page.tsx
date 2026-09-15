@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Alert, Snackbar } from '@mui/material';
 import { AppDispatch, RootState } from '../../../redux/store';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import MasterAdminMenu from '../page';
 import {
   activateMixBox,
@@ -359,15 +360,17 @@ const MixBoxComponent: React.FC = () => {
     <div className="mixbox-master-page">
       {/* <MasterAdminMenu /> */}
 
-      <MixBoxTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={(value) => dispatch(setShowDeactivated(value))}
-        searchQuery={searchQuery}
-      />
+<ModuleVisibilityGuard app="masteradmin" module="mixbox">
+        <MixBoxTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value) => dispatch(setShowDeactivated(value))}
+          searchQuery={searchQuery}
+        />
+      </ModuleVisibilityGuard>
 
       <MixBoxDialog
         open={dialogOpen !== 'none'}

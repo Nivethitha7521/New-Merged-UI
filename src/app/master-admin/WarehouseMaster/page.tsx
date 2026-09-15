@@ -19,6 +19,8 @@ import {
 } from "../WarehouseMaster/Features/warehouseSlice";
 import { WareHouse } from "../WarehouseMaster/Models/warehouseModels";
 import { AppDispatch, RootState } from "@/redux/store";
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import {
   Box,
   IconButton,
@@ -504,7 +506,10 @@ const WareHouseMaster: React.FC = () => {
   <Box className="purchase-reference-actions">
     {!showDeactivated && (
       <>
-        <Button
+       <PermissionButton
+          app="masteradmin"
+          module="warehousemaster"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={<AddIcon />}
@@ -513,9 +518,12 @@ const WareHouseMaster: React.FC = () => {
           className="purchase-reference-action-button"
         >
           Add New
-        </Button>
+       </PermissionButton>
 
-        <Button
+        <PermissionButton
+          app="masteradmin"
+          module="warehousemaster"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={
@@ -530,7 +538,7 @@ const WareHouseMaster: React.FC = () => {
           className="purchase-reference-action-button"
         >
           {isImporting ? "Importing..." : "Import"}
-        </Button>
+       </PermissionButton>
 
         <Button
           type="button"
@@ -554,7 +562,10 @@ const WareHouseMaster: React.FC = () => {
           Sample
         </Button>
 
-        <Button
+        <PermissionButton
+          app="masteradmin"
+          module="warehousemaster"
+          action="edit"
           type="button"
           variant="outlined"
           startIcon={<UndoIcon />}
@@ -563,7 +574,7 @@ const WareHouseMaster: React.FC = () => {
           className="purchase-reference-action-button"
         >
           Rollback
-        </Button>
+        </PermissionButton>
       </>
     )}
 
@@ -802,6 +813,7 @@ const WareHouseMaster: React.FC = () => {
       />
 
       {/* Warehouse table */}
+      <ModuleVisibilityGuard app="masteradmin" module="warehousemaster">
 <Box className="master-admin-table-area">
   <WareHouseTableComponent
     filteredTypes={wareHouse}
@@ -820,7 +832,7 @@ const WareHouseMaster: React.FC = () => {
     onCloseResultDialog={() => {}}
   />
 </Box>
-
+</ModuleVisibilityGuard>
       {/* ── Column filter popover ─────────────────────────────────────────── */}
       <Popover
         id={filterId}

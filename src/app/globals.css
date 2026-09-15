@@ -142,7 +142,21 @@
 .ct-scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 
 .erp-inventory-viewport {
-  zoom: 0.67;
+  min-width: 0;
+  min-height: 0;
+  background: #f4f7fa;
+}
+.erp-inventory-viewport > .erp-page-viewport {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 20px 34px 24px;
+  background: #f4f7fa;
+}
+@media (max-width: 900px) {
+  .erp-inventory-viewport > .erp-page-viewport {
+    padding: 16px 12px 20px;
+  }
 }
 /* Define global custom properties */
 :root {
@@ -159,21 +173,21 @@
     --background-end-rgb: 255, 255, 255; /* White background in dark mode */
   }
 }
-body:not([data-report-ui='true']) * {  font-family:'Source Sans 3', sans-serif !important;
+body:not([data-report-ui='true']) * {  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif) !important;
 }
 
 /* Global Body Styling */
 body {
   color: rgb(var(--foreground-rgb)); /* Text color */
   background: rgb(var(--background-start-rgb)); /* White background */
-  font-family:'Source Sans 3', sans-serif !important; /* Ensure ABeeZee is applied */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif) !important; /* Ensure ABeeZee is applied */
   min-height: 100vh !important; 
   overflow-y: auto !important; 
 }
 
 /* Global Button Styles */
 .MuiButton-root {
-  font-family:'Source Sans 3', sans-serif!important; /* Apply Roboto to MuiButton */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Apply Roboto to MuiButton */
   font-size: 16x !important; /* Set font size globally */
   padding: 4px 6px !important; /* Adjust button size */
   display: inline-flex;
@@ -190,7 +204,7 @@ body {
   /* width: 130px !important; */
 }
 .some .MuiInputBase-root.MuiOutlinedInput-root {
-  font-family:'Source Sans 3', sans-serif !important; /* Apply font */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif) !important; /* Apply font */
   width: 30% !important;  /* Default width */
   height: 30px !important;  /* Fixed height */
   padding: 6px 10px !important;  /* Adjust padding */
@@ -248,7 +262,7 @@ input::placeholder {
 /* Global Styling for MUI TextField Label */
 .MuiFormLabel-root {
   font-size: 14px !important; /* Set the font size to small */
-  font-family:'Source Sans 3', sans-serif !important; /* Ensure consistent font */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif) !important; /* Ensure consistent font */
   line-height: 1.2 !important; /* Adjust the line height */
   transform: translate(14px, 9px) scale(1) !important; /* Fix label positioning */
   transition: none !important; /* Prevent label from animating larger on focus */
@@ -262,7 +276,7 @@ input::placeholder {
 
 /* Globally style all MenuItem text */
 .MuiMenuItem-root {
-  font-family:'Source Sans 3', sans-serif!important; /* Ensure Roboto is used here too */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Ensure Roboto is used here too */
   font-size: 12px !important;  /* Change the font size */
 }
 
@@ -305,7 +319,7 @@ input::placeholder {
 
 /* Global Styles for Select Dropdown */
 .MuiSelect-select {
-  font-family:'Source Sans 3', sans-serif!important; /* Ensure Roboto is used here too */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Ensure Roboto is used here too */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -321,7 +335,7 @@ input::placeholder {
 
 /* Typography Global Styles */
 .MuiTypography-root {
-  font-family:'Source Sans 3', sans-serif!important; /* Ensure Roboto is used here too */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Ensure Roboto is used here too */
   font-size: 11px !important;
 }
 .fs12{
@@ -405,7 +419,7 @@ input::placeholder {
 
 /* Dialog Title Styling */
 .MuiDialogTitle-root {
-  font-family:'Source Sans 3', sans-serif!important; /* Ensure Roboto is used here too */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Ensure Roboto is used here too */
   font-weight: bold; /* Make dialog titles bold globally */
 }
 /* Ensure the Search field doesn't affect other inputs */
@@ -483,12 +497,12 @@ input::placeholder {
 
   /* Font Size Utilities */
   .fs12 {
-    font-family:'Source Sans 3', sans-serif!important; /* Apply Roboto */
+    font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Apply Roboto */
     font-size: 12px !important;
   }
 
   .fs10 {
-    font-family:'Source Sans 3', sans-serif!important; /* Apply Roboto */
+    font-family: var(--erp-font-family, 'Source Sans 3', sans-serif)!important; /* Apply Roboto */
     font-size: 10px !important; 
   }
 }
@@ -598,7 +612,7 @@ input::placeholder {
   background-color: #1976d2 !important;  /* Primary color */
   color: #fff !important;                /* White text color */
   font-size: 14px !important;            /* Font size */
-  font-family:'Source Sans 3', sans-serif; /* Font family */
+  font-family: var(--erp-font-family, 'Source Sans 3', sans-serif); /* Font family */
 }
 /* styles.css or global.css */
 .icon-button-outline {
@@ -681,7 +695,7 @@ table.MuiTable-root td:nth-child(1) {
   font-size: 18px !important;
 }
 /* =========================================================
-   YEN ERP 2026 visual system â€” shared across every screen
+   YEN ERP 2026 visual system ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â shared across every screen
    ========================================================= */
 :root {
   --erp-bg: #f3f6fa;
@@ -929,7 +943,7 @@ table td.MuiTableCell-root, .MuiTableCell-body {
 }
 
 /* =========================================================
-   Purchase workspace â€” reference-matched shared UI
+   Purchase workspace ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â reference-matched shared UI
    Scoped to /yen-purchase so business behavior is untouched.
    ========================================================= */
 .erp-purchase-viewport {
@@ -1769,7 +1783,7 @@ button.primary,
 }
 
 /* =========================================================
-   Dark mode â€” deep, high-contrast palette
+   Dark mode ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â deep, high-contrast palette
    ========================================================= */
 html[data-erp-theme='dark'] {
   --erp-bg: #0a0f1c;
@@ -1936,7 +1950,7 @@ html[data-erp-style='classic'] .erp-navbar {
 }
 
 /* =========================================================
-   Glassmorphism â€” premium frosted surfaces
+   Glassmorphism ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â premium frosted surfaces
    ========================================================= */
 html[data-erp-style='glass'] {
   --glass-bg: color-mix(in srgb, var(--erp-surface) 55%, transparent);
@@ -2044,7 +2058,7 @@ html[data-erp-style='glass'] .MuiPopover-paper {
   box-shadow: 0 25px 60px rgba(15, 23, 42, .25) !important;
 }
 
-/* DARK + GLASS combo â€” deeper tints */
+/* DARK + GLASS combo ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â deeper tints */
 html[data-erp-theme='dark'][data-erp-style='glass'] {
   --glass-bg: color-mix(in srgb, var(--erp-surface) 60%, transparent);
   --glass-border: color-mix(in srgb, #ffffff 10%, transparent);
@@ -2712,7 +2726,7 @@ a:not(.MuiButton-root):hover,
 }
 
 /* =========================================================
-   DARK MODE â€” Missing element color fixes
+   DARK MODE ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Missing element color fixes
    ========================================================= */
 
 /* Sidebar labels, icons, brand text */
@@ -2727,7 +2741,7 @@ html[data-erp-theme='dark'] .erp-sidebar-brand * {
   color: var(--erp-text) !important;
 }
 
-/* Sidebar active item â€” keep accent color */
+/* Sidebar active item ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â keep accent color */
 html[data-erp-theme='dark'] .erp-sidebar-item.is-active,
 html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-label,
 html[data-erp-theme='dark'] .erp-sidebar-item.is-active .erp-sidebar-icon,
@@ -2761,7 +2775,7 @@ html[data-erp-theme='dark'] .erp-breadcrumb-item {
   color: var(--erp-muted) !important;
 }
 
-/* Purchase submodule tab buttons (Purchase Category, SubCategory, UOMâ€¦) */
+/* Purchase submodule tab buttons (Purchase Category, SubCategory, UOMÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦) */
 html[data-erp-theme='dark'] .purchase-submodule-tab {
   background: var(--erp-surface-2) !important;
   color: var(--erp-text) !important;
@@ -2799,7 +2813,7 @@ html[data-erp-theme='dark'] .purchase-reference-summary-label {
 }
 
 
-/* Toolbar action buttons (Add New, Import, Export) â€” outlined variant already covered,
+/* Toolbar action buttons (Add New, Import, Export) ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â outlined variant already covered,
    but the "Add New" contained blue button needs proper text */
 html[data-erp-theme='dark'] .purchase-reference-action-button {
   background: var(--erp-surface-2) !important;
@@ -2869,7 +2883,7 @@ html[data-erp-theme='dark'] .MuiTypography-root:not(.purchase-reference-summary-
 
 
 /* =========================================================
-   DARK MODE â€” Secondary/module sidebar (Purchase, Book, Inventory)
+   DARK MODE ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Secondary/module sidebar (Purchase, Book, Inventory)
    ========================================================= */
 
 /* The panel/drawer itself */
@@ -2902,7 +2916,7 @@ html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiTypography-caption {
   color: var(--erp-muted) !important;
 }
 
-/* Menu list items (Purchase Master, Vendor, Purchase Itemâ€¦) */
+/* Menu list items (Purchase Master, Vendor, Purchase ItemÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦) */
 html[data-erp-theme='dark'] .purchase-module-item,
 html[data-erp-theme='dark'] .book-module-item,
 html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root,
@@ -2939,7 +2953,7 @@ html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root:ho
   color: var(--erp-accent) !important;
 }
 
-/* ACTIVE item â€” clean accent, no pink gradient */
+/* ACTIVE item ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â clean accent, no pink gradient */
 html[data-erp-theme='dark'] .purchase-module-item.is-active,
 html[data-erp-theme='dark'] .book-module-item.is-active,
 html[data-erp-theme='dark'] [class*="module-sidebar"] .MuiListItemButton-root.Mui-selected,
@@ -2986,7 +3000,7 @@ html[data-erp-theme='dark'] .purchase-module-sidebar .MuiIconButton-root:hover {
 }
 
 /* =========================================================
-   GLASS style â€” Secondary/module sidebar
+   GLASS style ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Secondary/module sidebar
    ========================================================= */
 html[data-erp-style='glass'] .purchase-module-sidebar,
 html[data-erp-style='glass'] .book-module-sidebar,
@@ -3002,7 +3016,7 @@ html[data-erp-style='glass'] [class*="module-sidebar"] .MuiDrawer-paper {
     12px 0 40px rgba(15, 23, 42, .18) !important;
 }
 
-/* Glass active item â€” gradient glow */
+/* Glass active item ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â gradient glow */
 html[data-erp-style='glass'] .purchase-module-item.is-active,
 html[data-erp-style='glass'] .book-module-item.is-active,
 html[data-erp-style='glass'] [class*="module-sidebar"] .Mui-selected {
@@ -3033,7 +3047,7 @@ html[data-erp-theme='dark'][data-erp-style='glass'] .purchase-module-sidebar .Mu
 }
 
 /* ============================================================
-   Global Search â€” result highlight styles
+   Global Search ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â result highlight styles
    Used by SearchHighlightWatcher.tsx (mounted once in
    ClientLayout.tsx) to flash the table row or form field that a
    search result navigated to. Applies app-wide, no per-page CSS
@@ -3084,4 +3098,47 @@ html[data-erp-theme='dark'][data-erp-style='glass'] .purchase-module-sidebar .Mu
     box-shadow: 0 0 0 8px rgba(255, 138, 0, 0);
     background-color: rgba(255, 176, 32, 0.2);
   }
+}
+
+
+/* =========================================================
+   GLOBAL DISPLAY SETTINGS FONT
+   ========================================================= */
+
+html,
+body {
+  font-family: var(
+    --erp-font-family,
+    Inter,
+    Arial,
+    sans-serif
+  ) !important;
+}
+
+body *,
+.MuiTypography-root,
+.MuiButton-root,
+.MuiInputBase-root,
+.MuiInputBase-input,
+.MuiFormLabel-root,
+.MuiMenuItem-root,
+.MuiTableCell-root,
+.MuiListItemText-root {
+  font-family: inherit !important;
+}
+
+/* =========================================================
+   SIDEBAR + INVENTORY MODULE — keep original fixed font
+   Display Settings font changes must NOT reach the main
+   sidebar or the Inventory module: their fixed-width labels,
+   table headers (nowrap) and row heights were sized against
+   this font, and switching fonts here reflows/resizes them.
+   Every other page still follows the Display Settings font
+   via the rules above; only these two areas are pinned back.
+   ========================================================= */
+html body .erp-sidebar,
+html body .erp-sidebar *,
+html body .erp-inventory-viewport,
+html body .erp-inventory-viewport * {
+  font-family: 'Source Sans 3', sans-serif !important;
 }

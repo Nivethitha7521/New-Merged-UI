@@ -21,7 +21,7 @@ import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/Ac
 import VariantDialog from '../../KOTMaster/variants/Modules/variantsDialog';
 import VariantTableContainer from '../../KOTMaster/variants/Modules/variantsTable';
 import { debounce } from 'lodash';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 interface Variant {
   id: string;
   variant: string;
@@ -313,14 +313,16 @@ const VariantComponent: React.FC = () => {
   return (
     <>
       {/* <MasterAdminMenu /> */}
-      <VariantTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={setShowDeactivated}
-      />
+<ModuleVisibilityGuard app="masteradmin" module="variant">
+        <VariantTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={setShowDeactivated}
+        />
+      </ModuleVisibilityGuard>
       <VariantDialog
         open={dialogOpen !== 'none'}
         handleClose={handleClose}

@@ -59,6 +59,7 @@ import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { Add as AddIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
 import ActivateDeactivateConfirmationDialog from '@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog';
 import SubkitKitUpdateDialog from '../Recipemanagement/SubkitKitUpdateDialog';
+import { formatCurrency } from '@/utilities/formatters';
 
 // ─── Wrapper ──────────────────────────────────────────────────────────────────
 const CreateRecipePageWrapper = () => {
@@ -2098,19 +2099,19 @@ background: 'var(--erp-success, #0b7a42)',
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: '10px', color: '#78716c' }}>Old RM Per Item Cost</Typography>
-                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#374151' }}>₹{selectedVariance.oldPerGramWeight.toFixed(2)}</Typography>
+                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#374151' }}>{formatCurrency(selectedVariance.oldPerGramWeight)}</Typography>
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: '10px', color: '#78716c' }}>New RM Per Item Cost</Typography>
-                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#dc2626' }}>₹{selectedVariance.newPerGramWeight.toFixed(2)}</Typography>
+                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#dc2626' }}>{formatCurrency(selectedVariance.newPerGramWeight)}</Typography>
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: '10px', color: '#78716c' }}>Old Total Cost</Typography>
-                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#374151' }}>₹{selectedVariance.oldTotalCost.toFixed(2)}</Typography>
+                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#374151' }}>{formatCurrency(selectedVariance.oldTotalCost)}</Typography>
                   </Box>
                   <Box>
                     <Typography sx={{ fontSize: '10px', color: '#78716c' }}>New Total Cost</Typography>
-                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#dc2626' }}>₹{selectedVariance.newTotalCost.toFixed(2)}</Typography>
+                    <Typography sx={{ fontSize: '13px', fontWeight: 700, color: '#dc2626' }}>{formatCurrency(selectedVariance.newTotalCost)}</Typography>
                   </Box>
                 </Box>
               </Box>
@@ -2137,8 +2138,8 @@ background: 'var(--erp-success, #0b7a42)',
                             <td align="center" style={{ color: change.priceChangePercent > 0 ? '#dc2626' : '#16a34a', fontWeight: 700 }}>
                               {change.priceChangePercent > 0 ? '+' : ''}{change.priceChangePercent.toFixed(2)}%
                             </td>
-                            <td align="right">₹{change.oldTotalCost.toFixed(2)}</td>
-                            <td align="right" style={{ color: '#dc2626', fontWeight: 700 }}>₹{change.newTotalCost.toFixed(2)}</td>
+                            <td align="right">{formatCurrency(change.oldTotalCost)}</td>
+                            <td align="right" style={{ color: '#dc2626', fontWeight: 700 }}>{formatCurrency(change.newTotalCost)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -2235,7 +2236,7 @@ background: 'var(--erp-success, #0b7a42)',
                         ) : '—'}
                       </td>
                      <td style={{ textAlign: 'right', fontSize: '11px', fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)', color: '#166534', fontWeight: 600 }}>
-                        ₹{(ver.totals?.totalIngCost ?? 0).toFixed(2)}
+                        {formatCurrency((ver.totals?.totalIngCost ?? 0))}
                       </td>
                       <td style={{ textAlign: 'right', fontSize: '11px', fontFamily: 'var(--erp-font-family, Inter, Arial, sans-serif)', color: '#16a34a', fontWeight: 700 }}>
                         {(ver.profit?.profitPercentage ?? 0).toFixed(2)}%

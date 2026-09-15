@@ -2,6 +2,7 @@
 
 import styles from "../../../skm.module.css";
 import { VersionDetail } from "../models/versionhistortmodel";
+import { formatCurrency } from '@/utilities/formatters';
 
 interface ItemsTableProps {
   items: VersionDetail["items"];
@@ -40,7 +41,7 @@ export default function ItemsTable({ items }: ItemsTableProps) {
               </td>
               <td className={`${styles.td} ${styles.tdRight}`}>
                 {item.totalPrice !== undefined ? (
-                  <span className={styles.priceText}>₹{item.totalPrice.toFixed(2)}</span>
+                  <span className={styles.priceText}>{formatCurrency(item.totalPrice)}</span>
                 ) : (
                   <span className={styles.priceEmpty}>—</span>
                 )}

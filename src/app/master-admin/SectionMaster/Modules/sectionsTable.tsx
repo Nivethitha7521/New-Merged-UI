@@ -31,6 +31,8 @@ import {
 DeleteOutlineRounded as DeleteIcon,
 RestoreRounded as RefreshIcon,
 } from '@mui/icons-material';
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import { useAppDispatch, useAppSelector } from '../../../../redux/store';
 import { Sections } from '../Models/sectionsModels';
 import {
@@ -276,7 +278,10 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
   <Box className="purchase-reference-actions section-master-actions">
     {!showDeactivated && (
       <>
-        <Button
+       <PermissionButton
+          app="masteradmin"
+          module="sectionmaster"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={<AddIcon />}
@@ -285,9 +290,12 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
           className="purchase-reference-action-button"
         >
           Add New
-        </Button>
+        </PermissionButton>
 
-        <Button
+        <PermissionButton
+          app="masteradmin"
+          module="sectionmaster"
+          action="add"
           type="button"
           variant="outlined"
           startIcon={
@@ -302,7 +310,7 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
           className="purchase-reference-action-button"
         >
           {isImporting ? 'Importing...' : 'Import'}
-        </Button>
+       </PermissionButton>
 
         <Button
           type="button"
@@ -326,7 +334,10 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
           Sample
         </Button>
 
-        <Button
+        <PermissionButton
+          app="masteradmin"
+          module="sectionmaster"
+          action="edit"
           type="button"
           variant="outlined"
           startIcon={<UndoIcon />}
@@ -335,7 +346,7 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
           className="purchase-reference-action-button"
         >
           Rollback
-        </Button>
+        </PermissionButton>
       </>
     )}
 
@@ -640,39 +651,40 @@ const SectionsTable: React.FC<SectionsTableContainerProps> = ({
               <td style={{ textAlign: 'center' }}>
                 <Box className="purchase-master-actions">
                   {showDeactivated ? (
-                    <Tooltip title="Activate section" arrow>
-                      <IconButton
-                        type="button"
-                        onClick={() => handleActivate(section)}
-                        className="purchase-master-action-button is-activate"
-                        aria-label="Activate section"
-                      >
-                        <RefreshIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+ <PermissionIconButton
+                      app="masteradmin"
+                      module="sectionmaster"
+                      action="edit"
+                      rollback
+                      tooltip="Activate section"
+                      onClick={() => handleActivate(section)}
+                      icon={<RefreshIcon fontSize="small" />}
+                      className="purchase-master-action-button is-activate"
+                      ariaLabel="Activate section"
+                    />
                   ) : (
                     <>
-                      <Tooltip title="Edit section" arrow>
-                        <IconButton
-                          type="button"
-                          onClick={() => handleEdit(section)}
-                          className="purchase-master-action-button is-edit"
-                          aria-label="Edit section"
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+ <PermissionIconButton
+                        app="masteradmin"
+                        module="sectionmaster"
+                        action="edit"
+                        tooltip="Edit section"
+                        onClick={() => handleEdit(section)}
+                        icon={<EditIcon fontSize="small" />}
+                        className="purchase-master-action-button is-edit"
+                        ariaLabel="Edit section"
+                      />
 
-                      <Tooltip title="Deactivate section" arrow>
-                        <IconButton
-                          type="button"
-                          onClick={() => handleDeactivate(section)}
-                          className="purchase-master-action-button is-delete"
-                          aria-label="Deactivate section"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <PermissionIconButton
+                        app="masteradmin"
+                        module="sectionmaster"
+                        action="delete"
+                        tooltip="Deactivate section"
+                        onClick={() => handleDeactivate(section)}
+                       icon={<DeleteIcon fontSize="small" />}
+                        className="purchase-master-action-button is-delete"
+                        ariaLabel="Deactivate section"
+                      />
                     </>
                   )}
                 </Box>

@@ -57,6 +57,7 @@ import PurchaseOrderRandomIdSearch from '../../../../components/yen-purchase/pen
 import { VendorSearch } from '@/Models/vendor';
 import { fetchGrnConvertedPurchaseOrders, selectGrnConvertedPurchaseList, selectTotalGrnConvertedItems } from '../../../../features/yen-purchase/PurchaseOrder/purchaseListSlice';
 import StockUpdateLogsDialog from '../Component/StockUpdateLogsPage';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 // Helper function to add footer with "Page X of Y" and "This is computer generated" centered at the bottom
 const addFooter = (doc: jsPDF, pageNumber: number, totalPages: number) => {
@@ -393,7 +394,7 @@ const generatePDF = () => {
         order.randomId?.toString() || 'N/A',
         order.vendorName?.toString() || 'N/A',
         totalItemsQuantity.toString(),
-        order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : format(new Date(), 'dd-MM-yyyy'),
+        order.orderDate ? formatDate(new Date(order.orderDate)) : formatDate(new Date()),
         totalOrderAmount.toFixed(2).toString(),
       ];
     });
@@ -707,7 +708,7 @@ const generateCSVContent = (): string => {
         order.randomId || 'N/A',
         order.vendorName || 'N/A',
         totalItemsQuantity,
-        order.orderDate ? format(new Date(order.orderDate), 'dd-MM-yyyy') : format(new Date(), 'dd-MM-yyyy'),
+        order.orderDate ? formatDate(new Date(order.orderDate)) : formatDate(new Date()),
         totalOrderAmount.toFixed(2)
       ].join(',');
     }).join('\n');
@@ -793,7 +794,7 @@ const downloadCSV = (csvContent: string, fileName: string): void => {
         `Phone: ${purchaseOrder.vendorContact || ''}`,
         `Shipping Address: ${purchaseOrder.billingAddress || ''}`,
         `PO No: ${purchaseOrder.randomId || ''}\n` +
-        `PO Date: ${purchaseOrder.orderDate ? format(new Date(purchaseOrder.orderDate), 'dd-MM-yyyy') : 'Not Provided'}\n` +
+        `PO Date: ${purchaseOrder.orderDate ? formatDate(new Date(purchaseOrder.orderDate)) : 'Not Provided'}\n` +
         `Status: ${purchaseOrder.poStatus}\n` +
         `Currency: INR`,
       ],
@@ -1587,12 +1588,12 @@ if (!canRead) {
                       <TableCell>{order.vendorName}</TableCell>
                       <TableCell>
                         {order.orderDate 
-                          ? format(new Date(order.orderDate), 'dd-MM-yyyy') 
-                          : format(new Date(), 'dd-MM-yyyy')}
+                          ? formatDate(new Date(order.orderDate)) 
+                          : formatDate(new Date())}
                       </TableCell>
                       <TableCell className='table-number-right'>{totalGrnQuantity}</TableCell>
                       <TableCell className='table-number-right'>
-                        {(order.totalOrderAmount + order.pendingOrderAmount || 0).toFixed(2)}
+                        {formatCurrency(order.totalOrderAmount + order.pendingOrderAmount)}
                       </TableCell>
                     <span className="purchase-master-status-pill is-converted">
   {order.poStatus || 'GRN Converted'}
@@ -1787,12 +1788,12 @@ if (!canRead) {
                         <TableCell>{item.hsnCode || 'N/A'}</TableCell>
                         <TableCell>{item.uom || 'N/A'}</TableCell>
                         <TableCell className='table-number-right'>{item.poQuantity || 0}</TableCell>
-                        <TableCell className='table-number-right'>{(item.newPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.newPrice)}</TableCell>
                         <TableCell className='table-number-right'>{itemDiscount.toFixed(2)}</TableCell>
                         <TableCell className='table-number-right'>{item.taxPercentage || 0}%</TableCell>
-                        <TableCell className='table-number-right'>{taxAmount.toFixed(2)}</TableCell>
-                        <TableCell className='table-number-right'>{(item.poQuantitypendingFinalPrice || 0).toFixed(2)}</TableCell>
-                        <TableCell>{item.expiryDate ? format(new Date(item.expiryDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(taxAmount)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.poQuantitypendingFinalPrice)}</TableCell>
+                        <TableCell>{item.expiryDate ? formatDate(new Date(item.expiryDate)) : 'N/A'}</TableCell>
                       </TableRow>
                     );
                   })
@@ -1803,7 +1804,7 @@ if (!canRead) {
                   <>
                     <TableRow>
                       <TableCell colSpan={9} align="right"><strong>Total Discount:</strong></TableCell>
-                      <TableCell className='table-number-right'><strong>{totalDiscountPrice.toFixed(2)}</strong></TableCell>
+                      <TableCell className='table-number-right'><strong>{formatCurrency(totalDiscountPrice)}</strong></TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                     {Object.entries(taxDetails).map(([key, tax]) => (
@@ -1811,13 +1812,13 @@ if (!canRead) {
                         <TableCell colSpan={9} align="right">
                           <strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong>
                         </TableCell>
-                        <TableCell className='table-number-right'><strong>{tax.amount.toFixed(2)}</strong></TableCell>
+                        <TableCell className='table-number-right'><strong>{formatCurrency(tax.amount)}</strong></TableCell>
                         <TableCell></TableCell>
                       </TableRow>
                     ))}
                     <TableRow sx={{ backgroundColor: '#E8F5E9' }}>
                       <TableCell colSpan={9} align="right"><strong>Total Order Amount:</strong></TableCell>
-                      <TableCell className='table-number-right'><strong>{totalOrderAmount.toFixed(2)}</strong></TableCell>
+                      <TableCell className='table-number-right'><strong>{formatCurrency(totalOrderAmount)}</strong></TableCell>
                       <TableCell></TableCell>
                     </TableRow>
                   </>

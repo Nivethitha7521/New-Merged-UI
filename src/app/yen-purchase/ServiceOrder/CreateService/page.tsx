@@ -40,6 +40,7 @@ import { ServiceSummary } from '../../PurchaseMaster/Service/Models/Service';
 import ServiceAutocomplete from '../../PurchaseMaster/Service/Components/ServiceAutocomplete';
 import { fetchPurchaseTaxes } from '@/features/yen-purchase/PurchaseMaster/purchaseTaxSlice';
 import FreightSelectionDialog, { FreightData } from '../../PurchaseOrder/Component/freightSelectionDialog';
+import { formatCurrency } from '@/utilities/formatters';
 
 // Helper functions
 const formatDate = (date: Date | null): string => {
@@ -1034,7 +1035,7 @@ const handleOverallDiscountChange = useCallback((e: ChangeEvent<HTMLInputElement
       // Amount mode - validate against subtotal
       const maxDiscount = totals.subTotal;
       if (parsedValue > maxDiscount) {
-        setDiscountInputError(`Discount amount cannot exceed ₹${maxDiscount.toFixed(2)}`);
+        setDiscountInputError(`Discount amount cannot exceed ${formatCurrency(maxDiscount)}`);
         return;
       }
       if (parsedValue < 0) {
@@ -1063,7 +1064,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
     if (newMode === 'percentage' && currentValue > 99) {
       setDiscountInputError('Discount percentage cannot exceed 99%');
     } else if (newMode === 'amount' && currentValue > subtotal) {
-      setDiscountInputError(`Discount amount cannot exceed ₹${subtotal.toFixed(2)}`);
+      setDiscountInputError(`Discount amount cannot exceed ${formatCurrency(subtotal)}`);
     }
   }
 
@@ -1088,7 +1089,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
   } else {
     const maxDiscount = totals.subTotal;
     if (overallDiscountValue > maxDiscount) {
-      dispatch(setSnackbarMessage(`Discount amount cannot exceed ₹${maxDiscount.toFixed(2)}`));
+      dispatch(setSnackbarMessage(`Discount amount cannot exceed ${formatCurrency(maxDiscount)}`));
       dispatch(setSnackbarOpen(true));
       return;
     }
@@ -1797,8 +1798,8 @@ const handleDiscountModeChange = useCallback((e: any) => {
                   </Typography>
                   <Typography variant="caption" display="block" fontWeight="bold">
                     Total ({newDescription.quantity || 1} ×
-                    {includeTax ? ` ₹${feeWithTax.toFixed(2)}` : ` ₹${(baseAmount + (baseAmount * newDescription.tax_per / 100)).toFixed(2)}`}):
-                    ₹{((newDescription.quantity || 1) * (includeTax ? feeWithTax : (baseAmount + (baseAmount * newDescription.tax_per / 100)))).toFixed(2)}
+                    {includeTax ? ` ${formatCurrency(feeWithTax)}` : ` ${formatCurrency((baseAmount + (baseAmount * newDescription.tax_per / 100)))}`}):
+                    {formatCurrency(((newDescription.quantity || 1) * (includeTax ? feeWithTax : (baseAmount + (baseAmount * newDescription.tax_per / 100)))))}
                   </Typography>
                 </Box>
               </Grid>
@@ -1885,21 +1886,31 @@ const handleDiscountModeChange = useCallback((e: any) => {
                             ? <Typography color="success.main" variant="body2">Yes</Typography>
                             : <Typography color="text.secondary" variant="body2">No</Typography>}
                         </TableCell>
-                        <TableCell align="right">
-                          <Tooltip title={desc.include_tax ? "Amount WITH tax per unit" : "Amount WITHOUT tax per unit"}>
-                            <Typography variant="body2">
-                              ₹{desc.include_tax ? (desc.fee || 0).toFixed(2) : (desc.base_amount || 0).toFixed(2)}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
+                      <TableCell align="right">
+  <Tooltip
+    title={
+      desc.include_tax
+        ? "Amount WITH tax per unit"
+        : "Amount WITHOUT tax per unit"
+    }
+  >
+    <Typography variant="body2">
+      {formatCurrency(
+        desc.include_tax
+          ? (desc.fee ?? 0)
+          : (desc.base_amount ?? 0)
+      )}
+    </Typography>
+  </Tooltip>
+</TableCell>
                         <TableCell align="right">{desc.tax_per?.toFixed(2)}%</TableCell>
-                        <TableCell align="right">₹{sgst.toFixed(2)}</TableCell>
-                        <TableCell align="right">₹{cgst.toFixed(2)}</TableCell>
-                        <TableCell align="right">₹{igst.toFixed(2)}</TableCell>
-                        <TableCell align="right">₹{individualDiscountAmount.toFixed(2)}</TableCell>
+                        <TableCell align="right">{formatCurrency(sgst)}</TableCell>
+                        <TableCell align="right">{formatCurrency(cgst)}</TableCell>
+                        <TableCell align="right">{formatCurrency(igst)}</TableCell>
+                        <TableCell align="right">{formatCurrency(individualDiscountAmount)}</TableCell>
                         <TableCell align="right">
                           <Typography fontWeight="bold" color="success.main" variant="body2">
-                            ₹{finalAmount.toFixed(2)}
+                            {formatCurrency(finalAmount)}
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
@@ -1915,15 +1926,15 @@ const handleDiscountModeChange = useCallback((e: any) => {
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                       <TableCell colSpan={8} align="right"><strong>Description Totals:</strong></TableCell>
                       <TableCell align="right">
-                        <strong>₹{(serviceData.desc_totals?.reduce((a, b) => a + b, 0) || 0).toFixed(2)}</strong>
+                        <strong>{formatCurrency((serviceData.desc_totals?.reduce((a, b) => a + b, 0) || 0))}</strong>
                       </TableCell>
                       <TableCell colSpan={4} />
                       <TableCell align="right">
-                        <strong>₹{(serviceData.desc_discount_amounts?.reduce((a, b) => a + b, 0) || 0).toFixed(2)}</strong>
+                        <strong>{formatCurrency((serviceData.desc_discount_amounts?.reduce((a, b) => a + b, 0) || 0))}</strong>
                       </TableCell>
                       <TableCell align="right">
                         <Typography fontWeight="bold" color="success.main">
-                          ₹{(serviceData.totalAmount || 0).toFixed(2)}
+                          {formatCurrency((serviceData.totalAmount || 0))}
                         </Typography>
                       </TableCell>
                       <TableCell />
@@ -1984,14 +1995,14 @@ const handleDiscountModeChange = useCallback((e: any) => {
                       <TableCell>
                         <Typography variant="caption" color="text.secondary">—</Typography>
                       </TableCell>
-                      <TableCell align="right">₹{freight.amt.toFixed(2)}</TableCell>
+                      <TableCell align="right">{formatCurrency(freight.amt)}</TableCell>
                       <TableCell align="right">{(freight.taxPercentage || 0).toFixed(2)}%</TableCell>
-                      <TableCell align="right">₹{(freight.sgst || 0).toFixed(2)}</TableCell>
-                      <TableCell align="right">₹{(freight.cgst || 0).toFixed(2)}</TableCell>
-                      <TableCell align="right">₹{(freight.igst || 0).toFixed(2)}</TableCell>
-                      <TableCell align="right">₹{freight.tAmt.toFixed(2)}</TableCell>
+                      <TableCell align="right">{formatCurrency((freight.sgst || 0))}</TableCell>
+                      <TableCell align="right">{formatCurrency((freight.cgst || 0))}</TableCell>
+                      <TableCell align="right">{formatCurrency((freight.igst || 0))}</TableCell>
+                      <TableCell align="right">{formatCurrency(freight.tAmt)}</TableCell>
                       <TableCell align="right">
-                        <Typography fontWeight="bold">₹{freight.totalAmt.toFixed(2)}</Typography>
+                        <Typography fontWeight="bold">{formatCurrency(freight.totalAmt)}</Typography>
                       </TableCell>
                       <TableCell align="right">
                         <IconButton size="small" onClick={() => handleDeleteFreight(index)}>
@@ -2016,10 +2027,10 @@ const handleDiscountModeChange = useCallback((e: any) => {
                   {freights.length > 0 && (
                     <TableRow sx={{ backgroundColor: '#e8f4fd' }}>
                       <TableCell colSpan={8} align="right"><strong>Freight Totals:</strong></TableCell>
-                      <TableCell align="right"><strong>₹{freightSubTotal.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{formatCurrency(freightSubTotal)}</strong></TableCell>
                       <TableCell colSpan={4} />
-                      <TableCell align="right"><strong>₹{freightTaxTotal.toFixed(2)}</strong></TableCell>
-                      <TableCell align="right"><strong>₹{freightGrandTotal.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{formatCurrency(freightTaxTotal)}</strong></TableCell>
+                      <TableCell align="right"><strong>{formatCurrency(freightGrandTotal)}</strong></TableCell>
                       <TableCell />
                     </TableRow>
                   )}
@@ -2029,20 +2040,20 @@ const handleDiscountModeChange = useCallback((e: any) => {
                     <TableCell colSpan={14} align="right">
                       <strong>Subtotal (Without Tax):</strong>
                     </TableCell>
-                    <TableCell align="right"><strong>₹{totals.subTotal.toFixed(2)}</strong></TableCell>
+                    <TableCell align="right"><strong>{formatCurrency(totals.subTotal)}</strong></TableCell>
                     <TableCell />
                   </TableRow>
 
                   <TableRow sx={{ backgroundColor: '#f9f9f9' }}>
                     <TableCell colSpan={14} align="right"><strong>Total Tax:</strong></TableCell>
-                    <TableCell align="right"><strong>₹{totals.taxAmount.toFixed(2)}</strong></TableCell>
+                    <TableCell align="right"><strong>{formatCurrency(totals.taxAmount)}</strong></TableCell>
                     <TableCell />
                   </TableRow>
 
                   {freights.length > 0 && (
                     <TableRow sx={{ backgroundColor: '#f9f9f9' }}>
                       <TableCell colSpan={14} align="right"><strong>Freight Amount:</strong></TableCell>
-                      <TableCell align="right"><strong>₹{totals.freightAmountTotal.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{formatCurrency(totals.freightAmountTotal)}</strong></TableCell>
                       <TableCell />
                     </TableRow>
                   )}
@@ -2050,7 +2061,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
                   {freights.length > 0 && (
                     <TableRow sx={{ backgroundColor: '#f9f9f9' }}>
                       <TableCell colSpan={14} align="right"><strong>Freight Tax:</strong></TableCell>
-                      <TableCell align="right"><strong>₹{totals.freightTaxTotal.toFixed(2)}</strong></TableCell>
+                      <TableCell align="right"><strong>{formatCurrency(totals.freightTaxTotal)}</strong></TableCell>
                       <TableCell />
                     </TableRow>
                   )}
@@ -2170,13 +2181,13 @@ const handleDiscountModeChange = useCallback((e: any) => {
                       )}
                     </TableCell>
                     <TableCell align="right" sx={{ whiteSpace: 'nowrap', pl: 2 }}>
-                      <strong>₹{totals.overallDiscountAmount.toFixed(2)}</strong>
+                      <strong>{formatCurrency(totals.overallDiscountAmount)}</strong>
                     </TableCell>
                     <TableCell />
                   </TableRow>
                   <TableRow sx={{ backgroundColor: '#f9f9f9' }}>
                     <TableCell colSpan={14} align="right"><strong>Total Discount:</strong></TableCell>
-                    <TableCell align="right"><strong>₹{totals.roundedTotalDiscount.toFixed(2)}</strong></TableCell>
+                    <TableCell align="right"><strong>{formatCurrency(totals.roundedTotalDiscount)}</strong></TableCell>
                     <TableCell />
                   </TableRow>
 
@@ -2208,7 +2219,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
                     </TableCell>
                     <TableCell align="right">
                       <Typography fontWeight="bold" color="primary.main">
-                        ₹{totals.roundedTotalOrderAmount.toFixed(2)}
+                        {formatCurrency(totals.roundedTotalOrderAmount)}
                       </Typography>
                     </TableCell>
                     <TableCell />
@@ -2222,7 +2233,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
                       </TableCell>
                       <TableCell align="right">
                         <Typography fontWeight="bold" color="primary.main">
-                          ₹{freightGrandTotal.toFixed(2)}
+                          {formatCurrency(freightGrandTotal)}
                         </Typography>
                       </TableCell>
                       <TableCell />
@@ -2241,7 +2252,7 @@ const handleDiscountModeChange = useCallback((e: any) => {
                         fontWeight="bold" color={finalPaymentAmount > serviceData.creditLimit ? 'error.main' : 'success.dark'}
                         sx={{ fontSize: '1.15rem' }}
                       >
-                        ₹{finalPaymentAmount.toFixed(2)}
+                        {formatCurrency(finalPaymentAmount)}
                       </Typography>
                       {finalPaymentAmount > serviceData.creditLimit && (
                         <Typography variant="caption" color="error.main" display="block">

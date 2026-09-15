@@ -14,7 +14,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
 import { prefix } from '../Models/prefixModel';
-
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface PrefixTableProps {
   handleOpen: () => void;
   handleEdit: (prefix: prefix) => void;
@@ -54,14 +54,16 @@ const displayedPrefix = showDeactivated ? deactivatedItems : prefixes;
           <Box className="purchase-reference-actions item-master-actions">
             {!showDeactivated && (
               <div className="icon-action-wrapper purchase-reference-action-button item-master-action">
-                <IconButton
-                  color="primary"
+               <PermissionIconButton
+                  app="pos"
+                  module="prefix_master"
+                  action="add"
+                  tooltip="Add"
                   onClick={handleOpen}
+                  icon={<AddIcon className="icon-action-svg" />}
                   className="icon-action-button"
-                  title="Add"
-                >
-                  <AddIcon className="icon-action-svg" />
-                </IconButton>
+ ariaLabel="Add"
+               />
                 <Typography className="icon-action-label">Add</Typography>
               </div>
             )}
@@ -115,32 +117,39 @@ const displayedPrefix = showDeactivated ? deactivatedItems : prefixes;
                     <td className="item-master-actions-cell">
                       <div>
                         {showDeactivated ? (
-                          <IconButton
+                        <PermissionIconButton
+                            app="pos"
+                            module="prefix_master"
+                            action="edit"
+                            rollback
+                            tooltip="Activate"
                             onClick={() => handleActivate(item)}
+                            icon={<RestoreRoundedIcon />}
                             className="purchase-master-action-button is-activate"
-                            title="Activate"
-                            size="small"
-                          >
-                          <RestoreRoundedIcon />
-                          </IconButton>
+                           ariaLabel="Activate"
+                         />
                         ) : (
                           <>
-                            <IconButton
+                            <PermissionIconButton
+                              app="pos"
+                              module="prefix_master"
+                              action="edit"
+                              tooltip="Edit"
                               onClick={() => handleEdit(item)}
+                              icon={<EditOutlinedIcon />}
                               className="purchase-master-action-button is-edit"
-                              title="Edit"
-                              size="small"
-                            >
-                              <EditOutlinedIcon />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => handleDeactivate(item)}
-                              className="purchase-master-action-button is-delete"
-                              title="Deactivate"
-                              size="small"
-                            >
-                              <DeleteOutlineRoundedIcon />
-                            </IconButton>
+ariaLabel="Edit"
+                            />
+                         <PermissionIconButton
+  app="pos"
+  module="prefix_master"
+  action="delete"
+  tooltip="Deactivate"
+  onClick={() => handleDeactivate(item)}
+  icon={<DeleteOutlineRoundedIcon />}
+  className="purchase-master-action-button is-delete"
+  ariaLabel="Deactivate"
+/>
                           </>
                         )}
                       </div>

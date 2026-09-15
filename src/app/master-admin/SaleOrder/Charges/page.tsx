@@ -23,6 +23,7 @@ import CloseConfirmationDialog from "../../../Components/Dialogs/CloseConfirmati
 import EditConfirmationDialog from "../../../Components/Dialogs/EditConfirmationDialog";
 import ActivateDeactivateConfirmationDialog from "../../../Components/Dialogs/ActivateDeactivateConfirmationDialog";
 import ChargeDialog from "../Charges/Modules/chargeDialog";
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import MenuPage from "../page";
 
 const ChargeTable: React.FC = () => {
@@ -182,17 +183,18 @@ const ChargeTable: React.FC = () => {
       {/* <MenuPage /> */}
 
 
-
-      <ChargeTableComponent
-        items={charge}
-        loading={loading}
-        viewDeactivated={viewDeactivated}
-        setViewDeactivated={setViewDeactivated}
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-      />
+<ModuleVisibilityGuard app="masteradmin" module="charges">
+        <ChargeTableComponent
+          items={charge}
+          loading={loading}
+          viewDeactivated={viewDeactivated}
+          setViewDeactivated={setViewDeactivated}
+          handleOpen={handleOpen}
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+        />
+      </ModuleVisibilityGuard>
 
       <ChargeDialog
         open={dialogOpen !== "none"}

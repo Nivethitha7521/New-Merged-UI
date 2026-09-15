@@ -33,6 +33,7 @@ import {
   BackendRecipeItemPayload,
 } from "../newRecipe/Models/newrecipeModels";
 import styles from "../skm.module.css";
+import { formatCurrency } from '@/utilities/formatters';
 export interface RecipeItem {
   frontendKey: string;
   realCode: string;
@@ -200,7 +201,7 @@ export default function NewRecipePage() {
   const prevPackingSearchRef = useRef<string>("");
   const fetchedForRecipeRef = useRef<string | null>(null);
 
-  const NEXT_PUBLIC_API_BASE_URL = " http://127.0.0.1:8000/yenerpapi/"
+  const NEXT_PUBLIC_API_BASE_URL = " http://127.0.0.1:8001/yenerpapi/"
 
   const isEditingExisting = Boolean(recipeIdFromUrl || draftRecipe?.recipeId);
 
@@ -923,7 +924,7 @@ export default function NewRecipePage() {
               <div className={styles.newRecipeTotalField}>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Total Items Cost</label>
                   <input
-                    value={`₹${totalItemsCost.toFixed(2)}`}
+                    value={`${formatCurrency(totalItemsCost)}`}
                     readOnly
                     disabled
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed font-semibold text-green-700"
@@ -1232,7 +1233,7 @@ export default function NewRecipePage() {
                 <div className="flex justify-between"><span className="text-gray-500">Recipe Name</span><span className="font-medium text-gray-800 text-right max-w-[60%] truncate">{recipeName}</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Cost</span><span className="font-medium text-gray-800">₹{cost}</span></div>
                 <div className="flex justify-between"><span className="text-gray-500">Total Items</span><span className="font-medium text-gray-800">{recipeItems.length}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Total Items Cost</span><span className="font-medium text-green-700">₹{totalItemsCost.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Total Items Cost</span><span className="font-medium text-green-700">{formatCurrency(totalItemsCost)}</span></div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Items without qty</span>
                   <span className={`font-medium ${recipeItems.filter((i) => !i.quantity || Number(i.quantity) === 0).length > 0 ? "text-red-600" : "text-green-600"}`}>

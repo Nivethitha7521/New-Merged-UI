@@ -20,7 +20,7 @@ import EditConfirmationDialog from "../../../Components/Dialogs/EditConfirmation
 import ActivateDeactivateConfirmationDialog from "../../../Components/Dialogs/ActivateDeactivateConfirmationDialog";
 import EventDialog from "../Events/Modules/EventDialog";
 import MenuPage from "../page";
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const EventTable: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -179,16 +179,18 @@ const EventTable: React.FC = () => {
 
 
 
-      <EventTableComponent
-        items={items}
-        loading={loading}
-        viewDeactivated={viewDeactivated}
-        setViewDeactivated={setViewDeactivated}
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="events">
+        <EventTableComponent
+          items={items}
+          loading={loading}
+          viewDeactivated={viewDeactivated}
+          setViewDeactivated={setViewDeactivated}
+          handleOpen={handleOpen}
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+        />
+      </ModuleVisibilityGuard>
 
       <EventDialog
         open={dialogOpen !== "none"}

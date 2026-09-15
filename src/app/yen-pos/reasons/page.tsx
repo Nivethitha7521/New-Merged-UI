@@ -22,7 +22,7 @@ import EditConfirmationDialog from "../../Components/Dialogs/EditConfirmationDia
 import ActivateDeactivateConfirmationDialog from "../../Components/Dialogs/ActivateDeactivateConfirmationDialog";
 import ReasonDialog from "../reasons/Modules/reasonDialog";
 import MenuPage from "../page";
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const ReasonPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { reasons, loading, dialogOpen, snackbarOpen, snackbarMessage, reasonData } = useSelector(
@@ -185,16 +185,18 @@ const ReasonPage: React.FC = () => {
     <>
       {/* <MenuPage /> */}
 
-      <ReasonTableComponent
-        items={reasons}
-        loading={loading}
-        viewDeactivated={viewDeactivated}
-        setViewDeactivated={setViewDeactivated}
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-      />
+<ModuleVisibilityGuard app="pos" module="reasons">
+  <ReasonTableComponent
+    items={reasons}
+    loading={loading}
+    viewDeactivated={viewDeactivated}
+    setViewDeactivated={setViewDeactivated}
+    handleOpen={handleOpen}
+    handleEdit={handleEdit}
+    handleDeactivate={handleDeactivate}
+    handleActivate={handleActivate}
+  />
+</ModuleVisibilityGuard>
 
       <ReasonDialog
         open={dialogOpen !== "none"}

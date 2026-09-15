@@ -42,6 +42,7 @@ import { useBeforeUnload } from 'react-use';
 import { VendorSummary } from '@/Models/vendor';
 import FreightSelectionDialog, { FreightData } from '../Component/freightSelectionDialog'; // Updated import
 import { UnifiedDatePicker } from '../Component/UnifiedDatePicker';
+import { formatCurrency } from '@/utilities/formatters';
 // Validation schema
 const validationSchema = Yup.object({
   vendorName: Yup.string().required('Vendor name is required'),
@@ -2586,14 +2587,14 @@ useEffect(() => {
                         </TableCell>
                         <TableCell className='table-number-right'>{item.pendingTotalQuantity || 0}</TableCell>
                         <TableCell className='table-text-left'>{item.uom}</TableCell>
-                        <TableCell className='table-number-right'>{(item.existingPrice || 0).toFixed(2)}</TableCell>
-                        <TableCell className='table-number-right'>{(item.newPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.existingPrice)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.newPrice)}</TableCell>
                         <TableCell className='table-number-right'>
                           {`${(item.befTaxDiscount || item.afTaxDiscount || item.befTaxDiscountAmount || item.afTaxDiscountAmount || 0).toFixed(2)}%`}
                         </TableCell>
                         <TableCell className='table-number-right'>{item.taxPercentage}%</TableCell>
-                        <TableCell className='table-number-right'>{(item.pendingTotalPrice || 0).toFixed(2)}</TableCell>
-                        <TableCell className='table-number-right'>{(item.pendingFinalPrice || 0).toFixed(2)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.pendingTotalPrice)}</TableCell>
+                        <TableCell className='table-number-right'>{formatCurrency(item.pendingFinalPrice)}</TableCell>
                         <TableCell className='table-number-right'>
 <Box className="purchase-order-actions">
   <IconButton
@@ -2677,7 +2678,7 @@ useEffect(() => {
                       <strong>Total Item Tax:</strong>
                     </TableCell>
                     <TableCell className='table-number-right' align="right">
-                      <strong>{totals.taxAmount.toFixed(2)}</strong>
+                      <strong>{formatCurrency(totals.taxAmount)}</strong>
                     </TableCell>
                     <TableCell />
                     <TableCell />
@@ -2688,7 +2689,7 @@ useEffect(() => {
                       <strong>Freight Amount:</strong>
                     </TableCell>
                     <TableCell className='table-number-right' align="right">
-                      <strong>{totals.freightAmountTotal.toFixed(2)}</strong>
+                      <strong>{formatCurrency(totals.freightAmountTotal)}</strong>
                     </TableCell>
                     <TableCell />
                     <TableCell />
@@ -2718,7 +2719,7 @@ useEffect(() => {
                       <strong>Item-wise Discount:</strong>
                     </TableCell>
                     <TableCell className='table-number-right'>
-                      <strong>{totals.itemDiscountAmount.toFixed(2)}</strong>
+                      <strong>{formatCurrency(totals.itemDiscountAmount)}</strong>
                     </TableCell>
                     <TableCell />
                     <TableCell />
@@ -2817,7 +2818,7 @@ useEffect(() => {
                       <strong style={{ fontSize: '1.2em' }}>FINAL AMOUNT:</strong>
                     </TableCell>
                     <TableCell className='table-number-right' sx={{ fontSize: '1.2em', fontWeight: 'bold' }}>
-                      <strong>{totals.roundedTotalOrderAmount.toFixed(2)}</strong>
+                      <strong>{formatCurrency(totals.roundedTotalOrderAmount)}</strong>
                     </TableCell>
                     <TableCell />
                     <TableCell />
@@ -2891,7 +2892,7 @@ useEffect(() => {
                     {/* Totals Row */}
                     <TableRow sx={{ backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>
                       <TableCell>Freight Totals:</TableCell>
-                      <TableCell align="right">{totals.freightAmountTotal.toFixed(2)}</TableCell>
+                      <TableCell align="right">{formatCurrency(totals.freightAmountTotal)}</TableCell>
                       <TableCell colSpan={3} />
                       <TableCell align="right">
                         {freights.reduce((sum, f) => sum + f.sgst, 0).toFixed(2)}

@@ -18,7 +18,6 @@ import {
   FormLabel,
   Chip,
   Stack,
-  IconButton,
   Divider,
   FormControl,
   Container
@@ -28,7 +27,6 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import TodayIcon from '@mui/icons-material/Today';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import {
@@ -42,12 +40,11 @@ import {
   clearError
 } from '../Features/PurchaseDateSettingSlice';
 import { format, addDays, subDays } from 'date-fns';
-import { useRouter } from 'next/navigation';
 import { RestrictionType, UpdateRestrictionPayload } from '../Models/Datesetting';
+import { formatDate, formatDateTime } from '@/utilities/formatters';
 
 const DateSettingsPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
 
   const { settings, loading, error, lastUpdated } = useSelector(
     (state: RootState) => state.purchaseDateSettings
@@ -164,7 +161,7 @@ const handleSave = async () => {
         return (
           <Chip
             icon={<TodayIcon />}
-            label={`Only today's date (${format(today, 'dd/MM/yyyy')})`}
+            label={`Only today's date (${formatDate(today)})`}
             color="info"
             variant="outlined"
             size="small"
@@ -174,7 +171,7 @@ const handleSave = async () => {
   return (
     <Chip
       icon={<EventAvailableIcon />}
-      label={`From ${format(subDays(today, daysValue || 0), 'dd/MM/yyyy')} to today`}
+      label={`From ${formatDate(subDays(today, daysValue || 0))} to today`}
       color="info"
       variant="outlined"
       size="small"
@@ -184,7 +181,7 @@ case 'days_after':
   return (
     <Chip
       icon={<EventAvailableIcon />}
-      label={`From today to ${format(addDays(today, daysValue || 0), 'dd/MM/yyyy')}`}
+      label={`From today to ${formatDate(addDays(today, daysValue || 0))}`}
       color="info"
       variant="outlined"
       size="small"
@@ -197,7 +194,7 @@ case 'days_after':
   return isValidStart && isValidEnd ? (
     <Chip
       icon={<DateRangeIcon />}
-      label={`${format(new Date(startDate), 'dd/MM/yyyy')} to ${format(new Date(endDate), 'dd/MM/yyyy')}`}
+      label={`${formatDate(new Date(startDate))} to ${formatDate(new Date(endDate))}`}
       color="info"
       variant="outlined"
       size="small"
@@ -315,46 +312,16 @@ case 'days_after':
 
   if (loading && !settings) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="220px">
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ 
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      bgcolor: '#f5f5f5',
-      overflow: 'hidden'
-    }}>
-      {/* Fixed Header */}
-      <Box sx={{ 
-        p: 2, 
-        bgcolor: 'white', 
-        borderBottom: 1, 
-        borderColor: 'divider',
-        boxShadow: 1,
-        zIndex: 10
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', maxWidth: 1200, mx: 'auto' }}>
-          <IconButton onClick={() => router.push('/yen-settings')} sx={{ mr: 2 }} size="small">
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h5" fontWeight="bold">
-            Date Settings
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Scrollable Content */}
-      <Box sx={{ 
-        flex: 1,
-        overflow: 'auto',
-        p: 2
-      }}>
-        <Container maxWidth="lg" sx={{ height: '100%' }}>
+    <Box sx={{ width: '100%', minWidth: 0 }}>
+      <Box sx={{ width: '100%' }}>
+        <Container maxWidth={false} disableGutters>
           {/* Alerts */}
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => dispatch(clearError())} >
@@ -411,7 +378,7 @@ case 'days_after':
                     <Grid item xs={12} sm={6}>
                       <Typography variant="caption" color="textSecondary">
                         Example: Order today + {settings.expectedDeliveryDays} days ={' '}
-                        <strong>{format(addDays(new Date(), settings.expectedDeliveryDays), 'dd/MM/yyyy')}</strong>
+                        <strong>{formatDate(addDays(new Date(), settings.expectedDeliveryDays))}</strong>
                       </Typography>
                     </Grid>
                   </Grid>
@@ -451,7 +418,7 @@ case 'days_after':
               {/* Last Updated */}
               {lastUpdated && (
                 <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 2 }}>
-                  Last updated: {format(new Date(lastUpdated), 'dd/MM/yyyy HH:mm')}
+                  Last updated: {formatDateTime(new Date(lastUpdated))}
                 </Typography>
               )}
 

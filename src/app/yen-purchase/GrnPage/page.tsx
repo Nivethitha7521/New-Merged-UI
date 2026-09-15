@@ -72,6 +72,7 @@ import {
   setSnackbarMessage as setOutgoingSnackbarMessage,
   setSnackbarOpen as setOutgoingSnackbarOpen
 } from '@/features/yen-purchase/Outgoing/outgoingPaymentSlice';
+import { formatCurrency, formatDate } from '@/utilities/formatters';
 import PODialog from '@/components/yen-purchase/OutgoingComponent/PODialog';
 import RevertStockUpdateDialog from './Components/RevertStockUpdate';
 import { UnifiedDatePicker } from '../PurchaseOrder/Component/UnifiedDatePicker';
@@ -733,9 +734,9 @@ const handleVendorChange = (vendor: VendorSearch | null) => {
         `Shipping Address: ${grncheck.shippingAddress || ''}`,
         `PO No: ${grncheck.poRandomID || ''}\n` +
         `GRN No: ${grncheck.randomId || ''}\n` +
-        `GRN Date: ${grncheck.createdDate ? format(new Date(grncheck.createdDate), 'dd-MM-yyyy') : 'Not Provided'}\n` +
+        `GRN Date: ${grncheck.createdDate ? formatDate(new Date(grncheck.createdDate)) : 'Not Provided'}\n` +
         `Payment Terms: ${grncheck.paymentTerms || ''}\n` +
-        `Due Date: ${dueDate ? format(new Date(dueDate), 'dd-MM-yyyy') : 'Not Provided'}\n` +
+        `Due Date: ${dueDate ? formatDate(new Date(dueDate)) : 'Not Provided'}\n` +
         `Currency: INR`,
       ],
     ];
@@ -1241,7 +1242,7 @@ const result = await dispatch(
         grn.randomId.toString(),
         grn.vendorName.toString(),
         totalItemsQuantity.toString(),
-        grn.grnDate ? format(new Date(grn.grnDate), 'dd-MM-yyyy') : '', // Format grn.grnDate
+        grn.grnDate ? formatDate(new Date(grn.grnDate)) : '', // Format grn.grnDate
         totalOrderAmount.toFixed(2).toString(),
         finalAmount.toFixed(2).toString(),
       ];
@@ -1455,7 +1456,7 @@ const result = await dispatch(
         grn.randomId.toString(),
         grn.vendorName.toString(),
         totalItemsQuantity.toString(),
-        grn.grnDate ? format(new Date(grn.grnDate), 'dd-MM-yyyy') : '', // Format grn.grnDate
+        grn.grnDate ? formatDate(new Date(grn.grnDate)) : '', // Format grn.grnDate
         totalOrderAmount.toFixed(2).toString(),
         finalAmount.toFixed(2).toString(),
       ];
@@ -2059,8 +2060,8 @@ const handleFilterClose = () => {
 
 <TableCell>{grn.vendorName}</TableCell>
                       <TableCell>{grn.invoiceNo}</TableCell>
-                      <TableCell>{grn.invoiceDate ? format(grn.invoiceDate, 'dd-MM-yyyy') : ''}</TableCell>
-                      <TableCell>{grn.grnDate ? format(grn.grnDate, 'dd-MM-yyyy') : ''}</TableCell>
+                      <TableCell>{grn.invoiceDate ? formatDate(grn.invoiceDate) : ''}</TableCell>
+                      <TableCell>{grn.grnDate ? formatDate(grn.grnDate) : ''}</TableCell>
                       <TableCell className='table-number-right'>{grn.agingDay}</TableCell>
                       <TableCell className='table-number-right'>{customRound(grn.grnAmount)}</TableCell>
                       <TableCell>
@@ -2266,12 +2267,12 @@ const handleFilterClose = () => {
 
   <Typography variant="body2">
     <strong>Invoice Date:</strong>{" "}
-    {selectedGrn?.invoiceDate ? format(new Date(selectedGrn.invoiceDate), "dd-MM-yyyy") : "N/A"}
+    {selectedGrn?.invoiceDate ? formatDate(new Date(selectedGrn.invoiceDate)) : "N/A"}
   </Typography>
 
   <Typography variant="body2">
     <strong>GRN Date:</strong>{" "}
-    {selectedGrn?.grnDate ? format(new Date(selectedGrn.grnDate), "dd-MM-yyyy") : "N/A"}
+    {selectedGrn?.grnDate ? formatDate(new Date(selectedGrn.grnDate)) : "N/A"}
   </Typography>
 
   <Box sx={{ width: 165 }}>
@@ -2298,7 +2299,7 @@ const handleFilterClose = () => {
                             padding: '16px 14px', // Match date picker padding
                           }}>
                             <Typography variant="body1" sx={{ whiteSpace: 'nowrap', fontSize: '0.875rem' }}>
-                              GRN Date: {selectedGrn?.grnDate ? format(new Date(selectedGrn.grnDate), 'dd-MM-yyyy') : 'N/A'}
+                              GRN Date: {selectedGrn?.grnDate ? formatDate(new Date(selectedGrn.grnDate)) : 'N/A'}
                             </Typography>
                           </Box>
                         </Grid>
@@ -2443,7 +2444,7 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
               </Typography>
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography variant="subtitle2" fontWeight="bold" color="primary">
-                  PO Final Amount: ₹{poFinalTotal.toFixed(2)}
+                  PO Final Amount: {formatCurrency(poFinalTotal)}
                 </Typography>
                 <Typography sx={{ color: 'primary.main', fontSize: 18 }}>
                   {collapsed ? '▼' : '▲'}
@@ -2521,10 +2522,10 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
                           </TableCell>
                         ))}
                         {sortedSelectedHeaders.includes('totalPrice') && (
-                          <TableCell align="right">{(item.totalPrice || 0).toFixed(2)}</TableCell>
+                          <TableCell align="right">{formatCurrency(item.totalPrice)}</TableCell>
                         )}
                         {sortedSelectedHeaders.includes('finalPrice') && (
-                          <TableCell align="right">{(editedItems[item.itemId]?.finalPrice || item.finalPrice || 0).toFixed(2)}</TableCell>
+                          <TableCell align="right">{formatCurrency(editedItems[item.itemId]?.finalPrice || item.finalPrice)}</TableCell>
                         )}
                       </TableRow>
                     ))}
@@ -2750,10 +2751,10 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
                               </TableCell>
                             ))}
                           {sortedSelectedHeaders.includes('totalPrice') && (
-                            <TableCell>{item.totalPrice.toFixed(2)}</TableCell>
+                            <TableCell>{formatCurrency(item.totalPrice)}</TableCell>
                           )}
                           {sortedSelectedHeaders.includes('finalPrice') && (
-                            <TableCell>{(editedItems[item.itemId]?.finalPrice || item.finalPrice).toFixed(2)}</TableCell>
+                            <TableCell>{formatCurrency(editedItems[item.itemId]?.finalPrice || item.finalPrice)}</TableCell>
                           )}
                         </TableRow>
                       ))}
@@ -2801,7 +2802,7 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
                           <strong>New AP Total:</strong>
                         </TableCell>
                         <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1em' }}>
-                          {((selectedGrn?.grnAmount || 0) + apRoundOff).toFixed(2)}
+                          {formatCurrency((selectedGrn?.grnAmount || 0) + apRoundOff)}
                         </TableCell>
                       </TableRow>
                       {/* Tax Breakdown Section - Sorted by rate */}
@@ -2820,7 +2821,7 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
                                   <TableCell>
                                     <strong>SGST @{(sgstRate || parseFloat(rate) / 2).toFixed(2)}%:</strong>
                                   </TableCell>
-                                  <TableCell>{sgstAmount.toFixed(2)}</TableCell>
+                                  <TableCell>{formatCurrency(sgstAmount)}</TableCell>
                                 </TableRow>
                               )}
                               {cgstAmount > 0 && (
@@ -2829,7 +2830,7 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
                                   <TableCell>
                                     <strong>CGST @{(cgstRate || parseFloat(rate) / 2).toFixed(2)}%:</strong>
                                   </TableCell>
-                                  <TableCell>{cgstAmount.toFixed(2)}</TableCell>
+                                  <TableCell>{formatCurrency(cgstAmount)}</TableCell>
                                 </TableRow>
                               )}
                               {/* Show IGST if it exists */}
@@ -2839,7 +2840,7 @@ const poFreight = (selectedGrn?.totalFreightAmount || 0) / Object.keys(groups).l
                                   <TableCell>
                                     <strong>IGST @{(igstRate || parseFloat(rate)).toFixed(2)}%:</strong>
                                   </TableCell>
-                                  <TableCell>{igstAmount.toFixed(2)}</TableCell>
+                                  <TableCell>{formatCurrency(igstAmount)}</TableCell>
                                 </TableRow>
                               )}
                             </React.Fragment>

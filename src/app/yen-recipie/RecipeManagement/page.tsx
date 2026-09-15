@@ -69,7 +69,11 @@ import { Pagination } from "@mui/material";
 import { PerGramBreakdown, Recipe, RecipeListItem } from "./Models/recipeModels"; // ✅ Import Recipe from models
 import ActivateDeactivateConfirmationDialog from "@/app/Components/Dialogs/ActivateDeactivateConfirmationDialog";
 import { buildPerGramBreakdown } from "./Pages/perGramBreakdown";
+import { formatCurrency } from '@/utilities/formatters';
 import "./recipeViewDialog.css";
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
+import { usePermissions } from '@/hooks/usePermissions';
 
 // ✅ Remove the duplicate IngredientItem interface - use the one from models
 export interface IngredientItem {
@@ -93,6 +97,7 @@ export interface IngredientItem {
 const RecipeManagementPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const { isModuleVisible } = usePermissions();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [actionType, setActionType] = useState<'deactivate' | 'activate' | null>(null);
@@ -561,6 +566,8 @@ const RecipeManagementPage: React.FC = () => {
   const displayedRecipes = showDeactivated ? deactivatedGetRecipe : getRecipe;
   const displayedOldRecipe = showDeactivated ? deactivatedRecipes : recipes;
 
+  if (!isModuleVisible('yenerp', 'recipe')) return null;
+
 return (
   <Box className="master-admin-module-page recipe-master-page">
     
@@ -617,8 +624,10 @@ return (
             : "Generate Kit Book"}
         </Button>
 
-        <Button
-          type="button"
+        <PermissionButton
+          app="yenerp"
+          module="recipe"
+          action="add"
           variant="outlined"
           startIcon={<AddIcon />}
           onClick={() =>
@@ -630,7 +639,7 @@ return (
           className="purchase-reference-action-button"
         >
           Add New
-        </Button>
+        </PermissionButton>
 
         <Button
           type="button"
@@ -778,31 +787,30 @@ return (
                   >
 <Box className="purchase-master-actions">
   {showDeactivated ? (
-    <Tooltip title="Activate recipe" arrow>
-      <IconButton
-        type="button"
-        onClick={() => handleActivate(recipe)}
-        className="purchase-master-action-button is-activate"
-        aria-label="Activate recipe"
-      >
-        <RefreshIcon fontSize="small" />
-      </IconButton>
-    </Tooltip>
+    <PermissionIconButton
+      app="yenerp"
+      module="recipe"
+      action="edit"
+      rollback
+      tooltip="Activate recipe"
+      onClick={() => handleActivate(recipe)}
+      className="purchase-master-action-button is-activate"
+      ariaLabel="Activate recipe"
+      icon={<RefreshIcon fontSize="small" />}
+    />
   ) : (
     <>
-      <Tooltip title="Edit recipe" arrow>
-        <span>
-          <IconButton
-            type="button"
-            disabled={isExporting || isImporting}
-            onClick={() => handleEditClick(recipe.recipeId)}
-            className="purchase-master-action-button is-edit"
-            aria-label="Edit recipe"
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
+      <PermissionIconButton
+        app="yenerp"
+        module="recipe"
+        action="edit"
+        tooltip="Edit recipe"
+        disabled={isExporting || isImporting}
+        onClick={() => handleEditClick(recipe.recipeId)}
+        className="purchase-master-action-button is-edit"
+        ariaLabel="Edit recipe"
+        icon={<EditIcon fontSize="small" />}
+      />
 
       <Tooltip title="View ingredients" arrow>
         <span>
@@ -823,19 +831,17 @@ return (
         </span>
       </Tooltip>
 
-      <Tooltip title="Deactivate recipe" arrow>
-        <span>
-          <IconButton
-            type="button"
-            onClick={() => handleDeactivate(recipe)}
-            disabled={isExporting || isImporting}
-            className="purchase-master-action-button is-delete"
-            aria-label="Deactivate recipe"
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
+      <PermissionIconButton
+        app="yenerp"
+        module="recipe"
+        action="delete"
+        tooltip="Deactivate recipe"
+        onClick={() => handleDeactivate(recipe)}
+        disabled={isExporting || isImporting}
+        className="purchase-master-action-button is-delete"
+        ariaLabel="Deactivate recipe"
+        icon={<DeleteIcon fontSize="small" />}
+      />
 
       <Tooltip title="Export recipe" arrow>
         <span>
@@ -1212,7 +1218,7 @@ return (
                   </Box>
                   <Box className="recipe-view-profit-metric recipe-view-profit-metric--consumables">
                     <span>Consumables</span>
-                    <strong>{(currentRecipe?.profit?.consumablePrice || 0).toFixed(2)}</strong>
+                    <strong>{formatCurrency(currentRecipe?.profit?.consumablePrice ?? 0)}</strong>
                   </Box>
                   <Box className="recipe-view-profit-metric recipe-view-profit-metric--gst">
                     <span>GST</span>

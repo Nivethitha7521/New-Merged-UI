@@ -82,6 +82,7 @@ import ServiceDialog from '@/app/yen-purchase/ServiceOrder/Components/ServiceDia
 import { fetchServiceById } from '@/app/yen-purchase/ServiceOrder/Features/servicelist';
 import { usePermissions } from "@/hooks/usePermissions";
 import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
+import { formatDate, formatDateTime, formatCurrency } from '@/utilities/formatters';
 
 const OutgoingPaymentComponent = React.memo(() => {
   const dispatch = useDispatch<AppDispatch>();
@@ -842,7 +843,7 @@ const handlePoClick = async (poIds: string | string[]) => {
         outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo || "N/A",
-        outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
         outgoing.payableAmount?.toFixed(2) || "0.00",
         outgoing.totalPaid?.toFixed(2) || "0.00",
         outgoing.totalPayableAmount?.toFixed(2) || "0.00",
@@ -883,7 +884,7 @@ const handlePoClick = async (poIds: string | string[]) => {
         outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo || "N/A",
-        outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
         outgoing.totalPrice?.toFixed(2) || "0.00",
         outgoing.taxDetails || "N/A",
         outgoing.discountDetails?.toFixed(2) || "0.00",
@@ -964,7 +965,7 @@ const handlePoClick = async (poIds: string | string[]) => {
     const vendorDetailsRows = [[
       `Vendor Name: ${outgoingdetail.vendorName || ''}\nGSTIN: ${outgoingdetail.gstNumber || ''}\nAddress: ${outgoingdetail.address || ''}\nCity: ${outgoingdetail.city || ''}\nState: ${outgoingdetail.state || ''}\nCountry: ${outgoingdetail.country || ''}\nEmail: ${outgoingdetail.contactpersonEmail || ''}`,
       `Business Name: ${business?.companyName || ''}\nGSTIN: ${business?.gstIn || ''}\nAddress: ${business?.address1 || ''}\nPhone: ${business?.phoneNo || ''}\nEmail: ${business?.emailId || ''}`,
-      `Outgoing No: ${outgoingdetail.randomId}\nPO No: ${outgoingdetail.poRandomId}\nGRN No: ${getRandomId(outgoingdetail.grnId)}\nAP No: ${outgoingdetail.apRandomId}\nDate: ${outgoingdetail.createdDate ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy') : ''}`
+      `Outgoing No: ${outgoingdetail.randomId}\nPO No: ${outgoingdetail.poRandomId}\nGRN No: ${getRandomId(outgoingdetail.grnId)}\nAP No: ${outgoingdetail.apRandomId}\nDate: ${outgoingdetail.createdDate ? formatDate(new Date(outgoingdetail.createdDate)) : ''}`
     ]];
     doc.autoTable({
       head: [['Vendor Details', 'Business Details', 'Outgoing Payment Details']],
@@ -985,7 +986,7 @@ const handlePoClick = async (poIds: string | string[]) => {
       const taxAmount = withoutTaxValue * (item.purchasetaxName / 100);
       return [
         outgoingdetail.invoiceNo || '-',
-        outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoingdetail.invoiceDate ? formatDate(new Date(outgoingdetail.invoiceDate)) : 'Not Provided',
         outgoingdetail.vendorName || '-',
         item.itemName,
         `${item.purchasetaxName}%`,
@@ -993,7 +994,7 @@ const handlePoClick = async (poIds: string | string[]) => {
         outgoingdetail.totalPrice?.toFixed(2),
         outgoingdetail.payableAmount?.toFixed(2),
       ];
-    }) : [[outgoingdetail.invoiceNo || '', outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided', outgoingdetail.vendorName || '-', '-', '-', '0.00', '0.00', '0.00']];
+    }) : [[outgoingdetail.invoiceNo || '', outgoingdetail.invoiceDate ? formatDate(new Date(outgoingdetail.invoiceDate)) : 'Not Provided', outgoingdetail.vendorName || '-', '-', '-', '0.00', '0.00', '0.00']];
     doc.autoTable({
       head: [itemHeader],
       body: tableRows,
@@ -1164,10 +1165,10 @@ const handlePoClick = async (poIds: string | string[]) => {
           {/* Total Payable Amount */}
           <Grid item>
             <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '14px' }}>
-              Total Payable: ₹{displayTotalPayableAmount.toFixed(2)}
+              Total Payable: {formatCurrency(displayTotalPayableAmount)}
               {selectedRows.length > 0 && (
                 <span style={{ color: 'blue', marginLeft: '10px', fontSize: '13px' }}>
-                  ( ₹{selectedPaymentsTotal.toFixed(2)} ({selectedOutgoings.length}) )
+                  ( {formatCurrency(selectedPaymentsTotal)} ({selectedOutgoings.length}) )
                 </span>
               )}
             </Typography>
@@ -1474,13 +1475,13 @@ const handlePoClick = async (poIds: string | string[]) => {
                               case 'invoiceDate':
                                 return (
                                   <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
-                                    {payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : ''}
+                                    {payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : ''}
                                   </TableCell>
                                 );
                               case 'invoiceAmount':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.totalPrice || 0).toFixed(2)}
+                                    {formatCurrency(payment.totalPrice)}
                                   </TableCell>
                                 );
                               case 'taxDetails':
@@ -1504,19 +1505,19 @@ const handlePoClick = async (poIds: string | string[]) => {
                               case 'total':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.payableAmount || 0).toFixed(2)}
+                                    {formatCurrency(payment.payableAmount)}
                                   </TableCell>
                                 );
                               case 'paidAmount':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.paidAmount || 0).toFixed(2)}
+                                    {formatCurrency(payment.paidAmount ?? 0)}
                                   </TableCell>
                                 );
                               case 'remainingAmount':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.totalPayableAmount || 0).toFixed(2)}
+                                    {formatCurrency(payment.totalPayableAmount)}
                                   </TableCell>
                                 );
                               case 'dueDays':
@@ -1548,7 +1549,7 @@ const handlePoClick = async (poIds: string | string[]) => {
                               case 'verifiedDate':
                                 return (
                                   <TableCell key={column.id} align="center" sx={{ whiteSpace: 'nowrap' }}>
-                                    {payment.verifiedDate ? format(new Date(payment.verifiedDate), 'dd-MM-yyyy HH:mm') : '-'}
+                                    {payment.verifiedDate ? formatDateTime(new Date(payment.verifiedDate)) : '-'}
                                   </TableCell>
                                 );
                               case 'action':

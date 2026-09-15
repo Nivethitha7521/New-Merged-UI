@@ -64,12 +64,22 @@ const SideMenu: React.FC<SideMenuProps> = ({
   const role = useSelector((state: RootState) => state.auth.role);
   const isSuperAdmin = role === 'Super Admin';
   const permissions = useSelector((state: RootState) => state.auth.permissions?.yenerp || {});
+  const masterAdminPermissions = useSelector((state: RootState) => state.auth.permissions?.masteradmin || {});
+const posPermissions = useSelector((state: RootState) => state.auth.permissions?.pos || {});
+const whatsappPermissions = useSelector((state: RootState) => state.auth.permissions?.whatsapp || {});
   const hasSettingsRead = (() => {
     const modulePermission = permissions?.settings;
     if (!modulePermission || modulePermission.hide === true) return false;
     return modulePermission.read === true;
   })();
+const hasAnyModuleAccess = (modulePermissions: Record<string, any>) =>
+  Object.values(modulePermissions || {}).some(
+    (m: any) => m && m.hide !== true && m.read === true
+  );
 
+const hasMasterAdminAccess = isSuperAdmin || hasAnyModuleAccess(masterAdminPermissions);
+const hasPosAccess = isSuperAdmin || hasAnyModuleAccess(posPermissions);
+const hasWhatsappAccess = isSuperAdmin || hasAnyModuleAccess(whatsappPermissions);
   const isActive = (path: string) => activePath === path || activePath.startsWith(`${path}/`);
 
   const visibleItems = menuItems.filter((menuItem) => {
@@ -79,9 +89,10 @@ const SideMenu: React.FC<SideMenuProps> = ({
     if (menuItem.text === 'YEN REPORTS' && !showReportsMenu) return false;
     if (menuItem.text === 'ACCOUNT SETTINGS' && !isSuperAdmin) return false;
     if (menuItem.text === 'SETTINGS') return hasSettingsRead;
-    if (menuItem.text === 'MASTER-ADMIN' && !isSuperAdmin) return false;
-    if (menuItem.text === 'YEN POS' && !isSuperAdmin) return false;
-    if (menuItem.text === 'WHATSAPP' && !isSuperAdmin) return false;
+if (menuItem.text === 'MASTER-ADMIN') return hasMasterAdminAccess;
+if (menuItem.text === 'YEN POS') return hasPosAccess;
+if (menuItem.text === 'WHATSAPP' && !isSuperAdmin) return false; // WhatsApp permissions not wired up yet
+if (menuItem.text === 'WHATSAPP') return hasWhatsappAccess;
     return true;
   });
 

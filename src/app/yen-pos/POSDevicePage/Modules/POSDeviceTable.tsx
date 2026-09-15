@@ -257,7 +257,8 @@ import {
   DialogActions,
   Pagination, Typography,
 } from '@mui/material';
-
+import { usePermissions } from '@/hooks/usePermissions';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RestoreRoundedIcon from '@mui/icons-material/RestoreRounded';
@@ -288,6 +289,8 @@ const POSDeviceTable: React.FC<POSDeviceTableProps> = ({
 handleToggleDcStatus,
 }) => {
   const displayedDevice = displayedDevices;
+  const { hasPermission } = usePermissions();
+  const canEdit = hasPermission('pos', 'pos_devices', 'edit');
 
   // ---- Dialog state for full description ----
   const [openDescDialog, setOpenDescDialog] = React.useState(false);
@@ -363,8 +366,9 @@ handleToggleDcStatus,
                   <td>
                     <button
                       type="button"
-                      onClick={() => handleOpenStatusDialog(device)}
-                      title="Click to change status"
+                    onClick={() => canEdit && handleOpenStatusDialog(device)}
+                      disabled={!canEdit}
+                      title={canEdit ? 'Click to change status' : "You don't have permission for this action"}
                       className={`purchase-master-status-pill yen-pos-clickable-status ${
                         isActiveStatus(device.dcStatus) ? 'is-active' : 'is-inactive'
                       }`}
@@ -411,34 +415,41 @@ handleToggleDcStatus,
                     <td className="item-master-actions-cell">
                     <div>
                       {!showDeactivated && (
-                        <IconButton
+                       <PermissionIconButton
+                          app="pos"
+                          module="pos_devices"
+                          action="edit"
+                          tooltip="Edit"
                           onClick={() => handleEditDevice(device)}
+                           icon={<EditOutlinedIcon />}
                           className="purchase-master-action-button is-edit"
-                          title="Edit"
-                          size="small"
-                        >
-                          <EditOutlinedIcon />
-                        </IconButton>
+                         ariaLabel="Edit"
+                        />
                       )}
 
                       {!showDeactivated ? (
-                        <IconButton
+                      <PermissionIconButton
+                          app="pos"
+                          module="pos_devices"
+                          action="delete"
+                          tooltip="Deactivate"
                           onClick={() => handleDeactivate(device)}
+                           icon={<DeleteOutlineRoundedIcon />}
                           className="purchase-master-action-button is-delete"
-                          title="Deactivate"
-                          size="small"
-                        >
-                          <DeleteOutlineRoundedIcon />
-                        </IconButton>
+                         ariaLabel="Deactivate"
+                        />
                       ) : (
-                        <IconButton
+                      <PermissionIconButton
+                          app="pos"
+                          module="pos_devices"
+                          action="edit"
+                          rollback
+                          tooltip="Activate"
                           onClick={() => handleActivate(device)}
+                          icon={<RestoreRoundedIcon />}
                           className="purchase-master-action-button is-activate"
-                          title="Activate"
-                          size="small"
-                        >
-                          <RestoreRoundedIcon />
-                        </IconButton>
+                           ariaLabel="Activate"
+                        />
                       )}
                     </div>
     

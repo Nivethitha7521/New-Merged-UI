@@ -16,7 +16,8 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 interface AddOn {
   id: string;
   addOn: string;
@@ -77,7 +78,10 @@ const visibleAddOns = showDeactivated ? deactivatedItems : addOns;
 
        <Box className="kot-master-toolbar-actions">
           {!showDeactivated && (
-            <Button
+            <PermissionButton
+              app="masteradmin"
+              module="addon"
+              action="add"
               type="button"
               variant="outlined"
               startIcon={<AddRoundedIcon />}
@@ -85,7 +89,7 @@ const visibleAddOns = showDeactivated ? deactivatedItems : addOns;
               className="purchase-reference-action-button kot-master-action-button"
             >
               Add
-            </Button>
+           </PermissionButton>
           )}
  <Box className="purchase-reference-active-toggle kot-master-status-toggle">
             <FormControlLabel
@@ -137,36 +141,40 @@ const visibleAddOns = showDeactivated ? deactivatedItems : addOns;
                 </td>
                 <td className="kot-master-actions-cell">
                   {showDeactivated ? (
-                    <button
-                      type="button"
+                  <PermissionIconButton
+                      app="masteradmin"
+                      module="addon"
+                      action="edit"
+                      rollback
+                      tooltip="Activate"
                       onClick={() => handleActivate(addOn)}
+                      icon={<RefreshRoundedIcon />}
                       className="activate-btn kot-master-row-action"
-                      title="Activate"
-                      aria-label={`Activate ${addOn.addOn}`}
-                    >
-                      <RefreshRoundedIcon />
-                    </button>
+                    ariaLabel={`Activate ${addOn.addOn}`}
+                    />
                   ) : (
                     <>
 
-                      <button
-type="button"
-                        onClick={() => handleEdit(addOn)}
-                        className="edit-btn kot-master-row-action"
-                        title="Edit"
-                        aria-label={`Edit ${addOn.addOn}`}
-                      >
-                       <EditOutlinedIcon />
-                      </button>
-                    <button
-                        type="button"
+                                          <PermissionIconButton
+  app="masteradmin"
+  module="addon"
+  action="edit"
+  tooltip="Edit"
+  onClick={() => handleEdit(addOn)}
+  icon={<EditOutlinedIcon />}
+  className="edit-btn kot-master-row-action"
+  ariaLabel={`Edit ${addOn.addOn}`}
+/>
+                    <PermissionIconButton
+                        app="masteradmin"
+                        module="addon"
+                        action="delete"
+                        tooltip="Deactivate"
                         onClick={() => handleDeactivate(addOn)}
+                        icon={<DeleteOutlineRoundedIcon />}
                         className="deactivate-btn kot-master-row-action"
-                        title="Deactivate"
-                        aria-label={`Deactivate ${addOn.addOn}`}
-                      >
-                        <DeleteOutlineRoundedIcon />
-                      </button>
+                        ariaLabel={`Deactivate ${addOn.addOn}`}
+                      />
                     </>
                   )}
                 </td>

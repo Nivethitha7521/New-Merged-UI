@@ -75,16 +75,10 @@ import {
   fetchAllDebitNotes,
   downloadAllDebitNotesPdf,
 } from '@/features/debitNotesAllSlice';
+import { formatCurrency } from '@/utilities/formatters';
 
 // Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-};
+
 
 // Format date
 const formatDate = (dateString: string) => {

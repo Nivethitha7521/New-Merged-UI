@@ -18,6 +18,7 @@ import {
   resetDiscountData,
   setShowDeactivated,
 } from '../Discount/Features/discountSlice';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 import CloseConfirmationDialog from '../../Components/Dialogs/CloseConfirmationDialog';
 import EditConfirmationDialog from '../../Components/Dialogs/EditConfirmationDialog';
 import ActivateDeactivateConfirmationDialog from '../../Components/Dialogs/ActivateDeactivateConfirmationDialog';
@@ -316,14 +317,16 @@ const DiscountComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <DiscountTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={handleSetShowDeactivated}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="discount">
+        <DiscountTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={handleSetShowDeactivated}
+        />
+      </ModuleVisibilityGuard>
 
       <DiscountDialog
         open={dialogOpen !== 'none'}

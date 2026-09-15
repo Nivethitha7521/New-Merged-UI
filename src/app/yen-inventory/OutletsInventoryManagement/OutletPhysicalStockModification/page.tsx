@@ -46,6 +46,7 @@ import InventoryActionSnackbar from "@/components/Inventory/shared/InventoryActi
 import { useInventoryAsyncAction } from "@/components/Inventory/shared/useInventoryAsyncAction";
 import { withApiReason } from "@/components/Inventory/shared/apiError";
 import FeedbackSnackbar from "@/components/Inventory/physcialstockvarience/feedbackSnakbar";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface SearchParams {
   itemName: string[];
@@ -71,6 +72,9 @@ export interface TableRow {
 
 const OutletPhysicalStockModification: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { hasPermission, isModuleVisible } = usePermissions();
+  const canRead = isModuleVisible("yenerp", "outletphysicalstock");
+  const canEdit = hasPermission("yenerp", "outletphysicalstock", "edit");
   const branches = useSelector(selectBranches);
   const filteredItems = useSelector(selectFilteredItems);
   const items = useSelector(selectItems);
@@ -606,6 +610,11 @@ const OutletPhysicalStockModification: React.FC = () => {
   );
   // Submit
   const handleSubmitClick = useCallback(() => {
+    if (!canEdit) {
+      setEditMessage("You do not have Edit permission for Physical Stock.");
+      setOpenSnackbar(true);
+      return;
+    }
     if (changes.length > 0) {
       setUpdatedStocks(changes);
       setOpenDialog(true);
@@ -613,10 +622,10 @@ const OutletPhysicalStockModification: React.FC = () => {
       setEditMessage("No changes to submit.");
       setOpenSnackbar(true);
     }
-  }, [changes]);
+  }, [changes, canEdit]);
 
   const handleConfirmSubmit = useCallback(async () => {
-    if (isSubmittingRef.current || actionGuard.disableAllActions) return;
+    if (isSubmittingRef.current || actionGuard.disableAllActions || !canEdit) return;
     const actionId = actionGuard.startAction("saving", "Saving changes. Please wait...");
     if (!actionId) return;
     isSubmittingRef.current = true;
@@ -833,10 +842,12 @@ const OutletPhysicalStockModification: React.FC = () => {
     }
   };
 
+  if (!canRead) return null;
+
   return (
     <Box sx={{ height: "calc(100dvh - var(--app-topbar-height, 64px))", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", pt: "env(safe-area-inset-top)", pb: "env(safe-area-inset-bottom)" }}>
       <OutletsInventoryManagementPage />
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap", overflow: "visible", flexShrink: 0, minWidth: 0, position: "relative", zIndex: 100 }}>
+      <Box className="inventory-filter-area" sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap", overflow: "visible", flexShrink: 0, minWidth: 0, position: "relative", zIndex: 100 }}>
         <FilterBar
           skipNextSearchRef={skipNextSearchRef}
           onRefresh={handleRefresh}
@@ -862,7 +873,7 @@ const OutletPhysicalStockModification: React.FC = () => {
         />
       </Box>
 
-      <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+      <Box className="inventory-table-area" sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
         <Box
           sx={{
             width: "100%",
@@ -886,7 +897,7 @@ const OutletPhysicalStockModification: React.FC = () => {
             selectedBranches={selectedBranches}
             onPhysicalStockChange={handlePhysicalStockChange}
             loading={loading}
-            disabled={actionGuard.disableAllActions}
+            disabled={actionGuard.disableAllActions || !canEdit}
           />
         </Box>
       </Box>
@@ -904,7 +915,7 @@ const OutletPhysicalStockModification: React.FC = () => {
             onPreviousPage={loadPreviousPage}
             onNextPage={loadNextPage}
             onSubmitClick={handleSubmitClick}
-            disabled={actionGuard.disableAllActions}
+            disabled={actionGuard.disableAllActions || !canEdit}
           />
         </Box>
       )}

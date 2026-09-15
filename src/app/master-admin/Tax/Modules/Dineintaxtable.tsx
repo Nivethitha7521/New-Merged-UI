@@ -14,7 +14,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../redux/store';
 import { DineInTax } from '../Models/dineInTaxModels';
-
+import PermissionButton from '@/components/Permissions/PermissionButton';
+import PermissionIconButton from '@/components/Permissions/PermissionIconButton';
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Base column count: S.NO + Name + Percentage + HSN + Actions */
@@ -67,14 +68,18 @@ const Toolbar = React.memo<ToolbarProps>(
     <Box className="tax-master-toolbar-actions">
 
         {!showDeactivated && (
-            <Button
+            
+            <PermissionButton
+                app="masteradmin"
+                module="dineintax"
+                action="add"
                 variant="outlined"
                 startIcon={<AddIcon />}
                 onClick={onAdd}
                 className="purchase-reference-action-button"
             >
                 Add New
-            </Button>
+            </PermissionButton>
         )}
 
         <Box className="purchase-reference-active-toggle">
@@ -204,42 +209,40 @@ return (
   <td className="tax-column-actions">
     <Box className="purchase-master-actions">
       {showDeactivated ? (
-        <Tooltip title="Activate DineIn tax" arrow>
-          <IconButton
-            type="button"
-            onClick={handleActivate}
-            className="purchase-master-action-button is-activate"
-            aria-label={`Activate ${tax.DineInTaxName}`}
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+       <PermissionIconButton
+          app="masteradmin"
+          module="dineintax"
+          action="edit"
+          rollback
+          tooltip="Activate DineIn tax"
+          onClick={handleActivate}
+          icon={<RefreshIcon fontSize="small" />}
+          className="purchase-master-action-button is-activate"
+          ariaLabel={`Activate ${tax.DineInTaxName}`}
+        />
       ) : (
         <>
-          <Tooltip title="Edit DineIn tax" arrow>
-            <IconButton
-              type="button"
-              onClick={handleEdit}
-              className="purchase-master-action-button is-edit"
-              aria-label={`Edit ${tax.DineInTaxName}`}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+ <PermissionIconButton
+           app="masteradmin"
+            module="dineintax"
+            action="edit"
+            tooltip="Edit DineIn tax"
+            onClick={handleEdit}
+            icon={<EditIcon fontSize="small" />}
+            className="purchase-master-action-button is-edit"
+            ariaLabel={`Edit ${tax.DineInTaxName}`}
+          />
 
-          <Tooltip
-            title="Deactivate DineIn tax"
-            arrow
-          >
-            <IconButton
-              type="button"
-              onClick={handleDeactivate}
-              className="purchase-master-action-button is-delete"
-              aria-label={`Deactivate ${tax.DineInTaxName}`}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <PermissionIconButton
+            app="masteradmin"
+            module="dineintax"
+            action="delete"
+            tooltip="Deactivate DineIn tax"
+            onClick={handleDeactivate}
+            icon={<DeleteIcon fontSize="small" />}
+            className="purchase-master-action-button is-delete"
+            ariaLabel={`Deactivate ${tax.DineInTaxName}`}
+          />
         </>
       )}
     </Box>

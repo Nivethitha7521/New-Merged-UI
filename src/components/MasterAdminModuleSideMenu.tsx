@@ -13,7 +13,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 import {
   ChevronLeftRounded,
   ChevronRightRounded,
@@ -50,6 +51,7 @@ interface MasterAdminModuleItem {
   text: string;
   path: string;
   icon: React.ReactNode;
+  moduleKeys: string[]; 
 }
 
 
@@ -63,61 +65,73 @@ const masterAdminModules: MasterAdminModuleItem[] = [
     text: 'Warehouse',
     path: '/master-admin/WarehouseMaster',
     icon: <WarehouseOutlined />,
+    moduleKeys: ['warehousemaster'],
   },
   {
     text: 'Locations',
     path: '/master-admin/Locations',
     icon: <LocationOnOutlined />,
+    moduleKeys: ['location'],
   },
   {
     text: 'Item Master',
     path: '/master-admin/Items',
     icon: <Inventory2Outlined />,
+    moduleKeys: ['itemcategory', 'itemsubcategory', 'itemgroup', 'item', 'inventorytype', 'measurementtype', 'ordertype', 'sfg'],
   },
   {
     text: 'UOM',
     path: '/master-admin/Uom',
     icon: <StraightenOutlined />,
+    moduleKeys: ['uom'],
   },
   {
     text: 'Tax',
     path: '/master-admin/Tax',
     icon: <ReceiptLongOutlined />,
+    moduleKeys: ['tax', 'dineintax'],
   },
   {
     text: 'Vehicle',
     path: '/master-admin/Vehicle',
     icon: <LocalShippingOutlined />,
+    moduleKeys: ['vehicle'],
   },
   {
     text: 'Discount',
     path: '/master-admin/Discount',
     icon: <LocalOfferOutlined />,
+    moduleKeys: ['discount'],
   },
   {
     text: 'Online Partners',
     path: '/master-admin/OnlinePartners',
     icon: <LanguageOutlined />,
+    moduleKeys: ['onlinepartnermaster', 'onlinepartnertemplate'],
   },
   {
     text: 'MixBox',
     path: '/master-admin/MixBox',
     icon: <AllInboxOutlined />,
+    moduleKeys: ['mixbox'],
   },
   {
     text: 'KOT Master',
     path: '/master-admin/KOTMaster',
     icon: <RestaurantMenuOutlined />,
+    moduleKeys: ['tablemaster', 'addon', 'variant'],
   },
   {
     text: 'Sale Order',
     path: '/master-admin/SaleOrder',
     icon: <AssignmentOutlined />,
+    moduleKeys: ['advanceamount', 'charges', 'deliverydate', 'deliverytype', 'events', 'paymenttype'],
   },
   {
     text: 'Section',
     path: '/master-admin/SectionMaster',
     icon: <ViewModuleOutlined />,
+    moduleKeys: ['sectionmaster'],
   },
 ];
 
@@ -134,10 +148,21 @@ const MasterAdminModuleSideMenu: React.FC<
 }) => {
   const pathname = usePathname();
 
-  const visibleModules = useMemo<MasterAdminModuleItem[]>(
-    () => masterAdminModules,
-    []
+  const role = useSelector((state: RootState) => state.auth.role);
+  const isSuperAdmin = role === 'Super Admin';
+  const masterAdminPermissions = useSelector(
+    (state: RootState) => state.auth.permissions?.masteradmin || {}
   );
+
+  const visibleModules = useMemo<MasterAdminModuleItem[]>(() => {
+    if (isSuperAdmin) return masterAdminModules;
+    return masterAdminModules.filter((module) =>
+      module.moduleKeys.some((key) => {
+        const perm = masterAdminPermissions?.[key];
+        return perm && perm.hide !== true && perm.read === true;
+      })
+    );
+  }, [isSuperAdmin, masterAdminPermissions]);
 
   const isActive = (path: string): boolean =>
     pathname === path ||

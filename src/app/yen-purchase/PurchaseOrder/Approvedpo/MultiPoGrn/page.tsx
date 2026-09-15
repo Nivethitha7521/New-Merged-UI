@@ -30,6 +30,7 @@ import { UnifiedDatePicker } from "../../Component/UnifiedDatePicker";
 import { PurchaseOrderWithItems, ItemWithCalculations, OverallDiscountResponse, OverallDiscountResponseItem } from '@/app/yen-purchase/PurchaseOrder/Models/Itemcalculation';
 import { isValid } from "date-fns";
 import FreightSelectionDialog, { FreightData } from "../../Component/freightSelectionDialog";
+import { formatCurrency } from '@/utilities/formatters';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const customRound = (v: number) => Math.round(v * 100) / 100;
@@ -428,7 +429,7 @@ setCollapsedPos(initCollapsed);
         });
         setBefDiscount(newBef);
         setAftDiscount(newAft);
-        setSnackbarMessage(`Discount of ₹${discountAmt.toFixed(2)} applied (${discType} tax)`);
+        setSnackbarMessage(`Discount of ${formatCurrency(discountAmt)} applied (${discType} tax)`);
         setSnackbarOpen(true);
       }
     } catch (err: any) {
@@ -825,7 +826,7 @@ if (activeDraftId) {
   {/* RIGHT: Amount + Chevron only */}
   <Box display="flex" alignItems="center" gap={1}>
     <Typography variant="subtitle2" fontWeight="bold" color="primary">
-      PO Final Amount: ₹{totals.finalTotal.toFixed(2)}
+      PO Final Amount: {formatCurrency(totals.finalTotal)}
     </Typography>
     {collapsedPos[pid]
       ? <ExpandMoreIcon sx={{ color: "primary.main" }} />
@@ -902,7 +903,9 @@ if (activeDraftId) {
                           </TableCell>
 
                           {/* Taxable Amt */}
-                          <TableCell align="right">{(item.calculatedTaxableAmount || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right">
+  {formatCurrency(item.calculatedTaxableAmount ?? 0)}
+</TableCell>
 
                           {/* BefTax Discount */}
                           <TableCell align="right" sx={{ px: 0.5 }}>
@@ -960,7 +963,7 @@ if (activeDraftId) {
                           </TableCell>
 
                           {/* Item Total */}
-                          <TableCell align="right">{(item.calculatedFinalPrice || 0).toFixed(2)}</TableCell>
+                          <TableCell align="right">{formatCurrency(item.calculatedFinalPrice ?? 0)}</TableCell>
                         </TableRow>
                       );
                     })}
@@ -977,7 +980,7 @@ if (activeDraftId) {
                         <TableCell colSpan={13} align="right">
                           <strong>{tax.type} ({tax.percentage.toFixed(2)}%):</strong>
                         </TableCell>
-                        <TableCell align="right">{tax.amount.toFixed(2)}</TableCell>
+                        <TableCell align="right">{formatCurrency(tax.amount)}</TableCell>
                       </TableRow>
                     ))}
 
@@ -1147,7 +1150,7 @@ if (activeDraftId) {
               Grand Total ({selectedOrders.length} POs)
             </Typography>
             <Typography variant="h6" fontWeight="bold" color="primary">
-              ₹ {grandTotal.toFixed(2)}
+              {formatCurrency(grandTotal)}
             </Typography>
           </Box>
         </Paper>
@@ -1224,13 +1227,13 @@ if (activeDraftId) {
               return (
                 <Box key={order.purchaseOrderId} display="flex" justifyContent="space-between" mb={0.5}>
                   <Typography variant="body2">{order.randomId}</Typography>
-                  <Typography variant="body2">₹ {totals?.finalTotal.toFixed(2)}</Typography>
+                  <Typography variant="body2">{formatCurrency(totals?.finalTotal)}</Typography>
                 </Box>
               );
             })}
             <Box display="flex" justifyContent="space-between" sx={{ borderTop: "1px solid #eee", pt: 1, mt: 1 }}>
               <Typography variant="body2" fontWeight="bold">Grand Total:</Typography>
-              <Typography variant="body2" fontWeight="bold">₹ {grandTotal.toFixed(2)}</Typography>
+              <Typography variant="body2" fontWeight="bold">{formatCurrency(grandTotal)}</Typography>
             </Box>
           </Box>
         </DialogContent>

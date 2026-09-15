@@ -28,7 +28,7 @@ import ActivateDeactivateConfirmationDialog from '../../../Components/Dialogs/Ac
 import AddOnDialog from "../addOn/Modules/addOnDialog";
 import AddOnTableContainer from "../addOn/Modules/addOnTable";
 import { debounce } from 'lodash';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 interface AddOn {
   id: string;
   addOn: string;
@@ -337,14 +337,16 @@ const AddOnComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <AddOnTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={setShowDeactivated}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="addon">
+        <AddOnTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={setShowDeactivated}
+        />
+      </ModuleVisibilityGuard>
       <AddOnDialog
         open={dialogOpen !== 'none'}
         handleClose={handleClose}

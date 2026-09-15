@@ -358,6 +358,113 @@
   }
 
   /* -------------------------------------------------------
+     Inventory module sidebar
+     Keep it at the exact same desktop density as Purchase.
+     Presentation only: navigation state and handlers are untouched.
+     ------------------------------------------------------- */
+
+  .inventory-module-sidebar,
+  .inventory-module-sidebar.is-collapsed {
+    position: relative !important;
+    inset: auto !important;
+    width: calc(var(--erp-ui) * 9.5) !important;
+    min-width: calc(var(--erp-ui) * 9.5) !important;
+    height: calc(100vh - (var(--erp-ui) * 8)) !important;
+    box-shadow: none;
+  }
+
+  .inventory-module-sidebar.is-expanded {
+    width: calc(var(--erp-ui) * 28.5) !important;
+    min-width: calc(var(--erp-ui) * 28.5) !important;
+  }
+
+  .inventory-module-sidebar-header {
+    min-height: calc(var(--erp-ui) * 10.25) !important;
+    padding: calc(var(--erp-ui) * 1.75) calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .inventory-module-sidebar.is-expanded .inventory-module-sidebar-header {
+    min-height: calc(var(--erp-ui) * 13.125) !important;
+    padding: calc(var(--erp-ui) * 2.5) calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .inventory-module-brand {
+    gap: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+  .inventory-module-logo {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: var(--erp-compact-radius) !important;
+  }
+
+  .inventory-module-logo svg {
+    font-size: calc(var(--erp-ui) * 2.625) !important;
+  }
+
+  .inventory-module-brand-content.is-visible {
+    max-width: calc(var(--erp-ui) * 18.125) !important;
+  }
+
+  .inventory-module-sidebar-caption {
+    margin-bottom: calc(var(--erp-ui) * 0.5) !important;
+    font-size: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .inventory-module-sidebar-title {
+    font-size: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .inventory-module-sidebar-description {
+    margin-top: calc(var(--erp-ui) * 0.375) !important;
+    font-size: calc(var(--erp-ui) * 1.3125) !important;
+  }
+
+  .inventory-module-toggle {
+    right: calc(var(--erp-ui) * -1.75) !important;
+    width: calc(var(--erp-ui) * 3.5) !important;
+    min-width: calc(var(--erp-ui) * 3.5) !important;
+    height: calc(var(--erp-ui) * 3.5) !important;
+  }
+
+  .inventory-module-toggle svg {
+    font-size: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .inventory-module-list {
+    padding: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .inventory-module-item {
+    min-height: calc(var(--erp-ui) * 6) !important;
+    margin-bottom: calc(var(--erp-ui) * 0.75) !important;
+    border-radius: var(--erp-compact-radius) !important;
+  }
+
+  .inventory-module-sidebar.is-expanded .inventory-module-item {
+    padding-inline: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .inventory-module-icon {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  .inventory-module-icon svg {
+    font-size: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .inventory-module-label-wrapper.is-visible {
+    max-width: calc(var(--erp-ui) * 18.75) !important;
+  }
+
+  .inventory-module-label {
+    font-size: calc(var(--erp-ui) * 1.5625) !important;
+  }
+
+  /* -------------------------------------------------------
      Shared desktop controls
      ------------------------------------------------------- */
 
@@ -790,7 +897,8 @@
   }
 
   .erp-sidebar-label,
-  .purchase-module-label {
+  .purchase-module-label,
+  .inventory-module-label {
     font-size: calc(var(--erp-ui) * 1.65) !important;
   }
 
@@ -1008,7 +1116,8 @@
   }
 
   .erp-sidebar-section,
-  .purchase-module-sidebar-caption {
+  .purchase-module-sidebar-caption,
+  .inventory-module-sidebar-caption {
     font-size: calc(var(--erp-ui) * 1.32 * var(--erp-type-scale)) !important;
   }
 
@@ -1017,11 +1126,13 @@
     font-size: calc(var(--erp-ui) * 1.22 * var(--erp-type-scale)) !important;
   }
 
-  .purchase-module-sidebar-title {
+  .purchase-module-sidebar-title,
+  .inventory-module-sidebar-title {
     font-size: calc(var(--erp-ui) * 2 * var(--erp-type-scale)) !important;
   }
 
-  .purchase-module-sidebar-description {
+  .purchase-module-sidebar-description,
+  .inventory-module-sidebar-description {
     font-size: calc(var(--erp-ui) * 1.3125 * var(--erp-type-scale)) !important;
   }
 

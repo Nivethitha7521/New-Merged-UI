@@ -11,7 +11,7 @@ import ItemActions from '../itemComponets/itemaction';
 import ItemsTable from '../itemComponets/itemteble';
 import { Item } from '../../../master-admin/Items/Item/Models/itemsModels';
 import { useRouter } from 'next/navigation';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 const headerMapping: Record<string, string> = {
   itemImage: 'Image',
   itemName: 'Item Name',
@@ -193,17 +193,19 @@ function Items() {
         />
       </Box>
 
-      <ItemsTable
-        //    allItems={items}
-        allItems={showDeactivated ? deactivatedItems : items}
-        selectedHeaders={filteredHeaders}
-        headerMapping={headerMapping}
-        setOpenEdit={handleEditItem}
-        setOpenEditVariance={() => { }}
-        setIsPriceOverrideDialogOpen={() => { }}
-        search={search}
-        currentPage={currentPage}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="item">
+        <ItemsTable
+          //    allItems={items}
+          allItems={showDeactivated ? deactivatedItems : items}
+          selectedHeaders={filteredHeaders}
+          headerMapping={headerMapping}
+          setOpenEdit={handleEditItem}
+          setOpenEditVariance={() => { }}
+          setIsPriceOverrideDialogOpen={() => { }}
+          search={search}
+          currentPage={currentPage}
+        />
+      </ModuleVisibilityGuard>
 
       {/* <Pagination
         count={totalPages}

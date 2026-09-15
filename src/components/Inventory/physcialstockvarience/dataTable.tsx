@@ -43,6 +43,7 @@ interface DataTableProps {
   inputRefs: React.MutableRefObject<{ [key: string]: HTMLInputElement | null }>;
   isFullScreen: boolean;
   handleApproveClick: (item: Branchitem) => void;
+  canApprove?: boolean;
   loading: boolean;
   tableContainerRef?: React.RefObject<HTMLDivElement>;
   selectedApprovalItemCodes?: string[];
@@ -100,7 +101,7 @@ interface EditHistoryEntry {
 // replace the part 13 8 2
 const DataTable: React.FC<DataTableProps> = ({
   filteredItems, visibleColumns, fieldTypes, totalColspan,
-  isLoadingMore, loading, handleApproveClick, onScroll, scrollContainerRef,
+  isLoadingMore, loading, handleApproveClick, canApprove = false, onScroll, scrollContainerRef,
   selectedLocation, editableRows, onCellEdit, inputRefs, isFullScreen,
   selectedApprovalItemCodes, onToggleSelectRow, onSelectAll,
   onSortChange,
@@ -230,10 +231,10 @@ const DataTable: React.FC<DataTableProps> = ({
   };
   const renderActionButton = (row: Branchitem) => {
     const status = normalizeStatus(row.approvalStatus);
-    const canApprove = isRowApprovable(row);
+    const rowCanApprove = isRowApprovable(row);
 
-    if (canApprove) {
-      return <Button variant="primary" size="xs" onClick={() => handleApproveClick(row)} className={ACTION_BUTTON_WIDTH}>Approve</Button>;
+    if (rowCanApprove) {
+      return <Button variant="primary" size="xs" onClick={() => handleApproveClick(row)} disabled={!canApprove} className={ACTION_BUTTON_WIDTH}>Approve</Button>;
     }
     if (status === "approved") {
       return <Button variant="outline" size="xs" disabled className={cn(ACTION_BUTTON_WIDTH, "bg-success-50 text-success-700 border-success-200")}>Approved</Button>;
@@ -256,8 +257,8 @@ const DataTable: React.FC<DataTableProps> = ({
 
 
   return (
-    <div className="w-full h-full min-h-0 bg-white relative">
-      <div ref={scrollContainerRef} onScroll={handleTableScroll} className="w-full h-full max-h-full overflow-auto border border-border rounded-xl bg-white" style={{ scrollbarWidth: "thin" }}>
+    <div className="inventory-data-table-shell w-full h-full min-h-0 bg-white relative">
+      <div ref={scrollContainerRef} onScroll={handleTableScroll} className="inventory-data-table-card w-full h-full max-h-full overflow-auto border border-border rounded-xl bg-white" style={{ scrollbarWidth: "thin" }}>
         <table className="w-full border-separate border-spacing-0 text-left" style={{ minWidth: tableMinWidth(visibleColumnCount), tableLayout: "fixed" }}>
           <thead className="sticky top-0 z-20">
             <tr>
@@ -396,7 +397,7 @@ const DataTable: React.FC<DataTableProps> = ({
                               className="w-3.5 h-3.5 rounded-sm border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                               checked={selectedApprovalItemCodes?.includes(row.itemCode) || false}
                               onChange={() => onToggleSelectRow?.(row.itemCode)}
-                              disabled={!isRowApprovable(row)}
+                              disabled={!canApprove || !isRowApprovable(row)}
                             />
                           </div>
                         </td>

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Snackbar, Alert, debounce, } from '@mui/material';
-
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 // import MasterAdminMenu from '../page';
 import {
   activateSubCategory,
@@ -257,16 +257,18 @@ const SubCategoryComponent: React.FC = () => {
     <>
       {/* <MasterAdminMenu /> */}
 
-      <SubcategoryTableContainer
-        handleEdit={handleEdit}
-        handleDeactivate={handleDeactivate}
-        handleActivate={handleActivate}
-        handleOpen={handleOpen}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={handleSetShowDeactivated}
-        searchValue={searchValue}                 
-        setSearchValue={setSearchValue}
-      />
+ <ModuleVisibilityGuard app="masteradmin" module="itemsubcategory">
+        <SubcategoryTableContainer
+          handleEdit={handleEdit}
+          handleDeactivate={handleDeactivate}
+          handleActivate={handleActivate}
+          handleOpen={handleOpen}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={handleSetShowDeactivated}
+          searchValue={searchValue}                 
+          setSearchValue={setSearchValue}
+        />
+      </ModuleVisibilityGuard>
 
       <SubcategoryDialog
         open={dialogOpen !== 'none'}

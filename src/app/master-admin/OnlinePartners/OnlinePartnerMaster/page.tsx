@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../../redux/store';
 import { Snackbar, Alert, } from '@mui/material';
+import ModuleVisibilityGuard from '@/components/Permissions/ModuleVisibilityGuard';
 //import MasterAdminMenu from '../page';
 import {
   fetchOnlinePartners,
@@ -256,15 +257,16 @@ const OnlinePartnersComponent: React.FC = () => {
   return (
     <>
 
-
-      <OnlinePartnerTable
-        handleOpen={handleOpen}
-        handleEdit={handleEdit}
-        handleActivate={handleActivate}
-        handleDeactivate={handleDeactivate}
-        showDeactivated={showDeactivated}
-        setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
-      />
+      <ModuleVisibilityGuard app="masteradmin" module="onlinepartnermaster">
+        <OnlinePartnerTable
+          handleOpen={handleOpen}
+          handleEdit={handleEdit}
+          handleActivate={handleActivate}
+          handleDeactivate={handleDeactivate}
+          showDeactivated={showDeactivated}
+          setShowDeactivated={(value: boolean) => dispatch(setShowDeactivated(value))}
+        />
+      </ModuleVisibilityGuard>
 
       <OnlinePartnerDialog
         open={dialogOpen !== 'none'}

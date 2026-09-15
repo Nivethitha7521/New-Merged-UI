@@ -51,6 +51,7 @@ import moment from 'moment';
 import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
 import ServiceIdSearch from '../ServiceOrder/Components/ServiceIDSeacrh';
 import { debounce } from 'lodash';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 declare module 'jspdf' {
   interface jsPDF {
@@ -448,7 +449,7 @@ const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read"
 
     const totalOrderedAmount = memoizedServices.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
     const today = new Date();
-    const currentDate = format(today, 'dd/MM/yyyy');
+    const currentDate = formatDate(today);
 
     doc.setFontSize(10);
     const totalText = `Total Pending Amount: ${totalOrderedAmount.toFixed(2)}`;
@@ -461,7 +462,7 @@ const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read"
     const headers = [["S.No", "Service ID", "Vendor Name", "Total Descriptions", "Order Date", "Total Amount", "Status"]];
     const rows = memoizedServices.map((service: ServiceData, index: number) => {
       const totalDescs = service.descriptions.length;
-      const orderDate = service.workOrderDate ? format(new Date(service.workOrderDate), 'dd-MM-yyyy') : '';
+      const orderDate = service.workOrderDate ? formatDate(new Date(service.workOrderDate)) : '';
       return [
         (index + 1).toString(),
         service.serviceId,
@@ -510,7 +511,7 @@ const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read"
     const headers = 'SNO,Service ID,Vendor Name,Total Descriptions,Order Date,Total Amount,Status\n';
     const rows = memoizedServices.map((service: ServiceData, index: number) => {
       const totalDescs = service.descriptions.length;
-      const orderDate = service.workOrderDate ? format(new Date(service.workOrderDate), 'dd-MM-yyyy') : '';
+      const orderDate = service.workOrderDate ? formatDate(new Date(service.workOrderDate)) : '';
       return [
         (index + 1),
         service.serviceId,
@@ -572,7 +573,7 @@ const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read"
 
     const totalOrderedAmount = memoizedServices.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
     const today = new Date();
-    const currentDate = format(today, 'dd/MM/yyyy');
+    const currentDate = formatDate(today);
 
     doc.setFontSize(10);
     const totalText = `Total Pending Amount: ${totalOrderedAmount.toFixed(2)}`;
@@ -587,8 +588,8 @@ const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read"
       const descriptions = getDescriptionsFromFlatArrays(service);
       return descriptions.map((desc: ServiceDescription, dIndex: number) => {
         const globalIndex = sIndex * descriptions.length + dIndex + 1;
-        const fromDate = desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : '';
-        const toDate = desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : '';
+        const fromDate = desc.from_date ? formatDate(new Date(desc.from_date)) : '';
+        const toDate = desc.to_date ? formatDate(new Date(desc.to_date)) : '';
         return [
           globalIndex.toString(),
           service.serviceId,
@@ -636,8 +637,8 @@ const canReadRejected = hasPermission("yenerp", "serviceorders_rejected", "read"
       const descriptions = getDescriptionsFromFlatArrays(service);
       return descriptions.map((desc: ServiceDescription, dIndex: number) => {
         const globalIndex = sIndex * descriptions.length + dIndex + 1;
-        const fromDate = desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : '';
-        const toDate = desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : '';
+        const fromDate = desc.from_date ? formatDate(new Date(desc.from_date)) : '';
+        const toDate = desc.to_date ? formatDate(new Date(desc.to_date)) : '';
         return [
           globalIndex,
           service.serviceId,
@@ -894,10 +895,10 @@ if (!canRead) {
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{desc.description}</TableCell>
                       <TableCell>
-                        {desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : ''}
+                        {desc.from_date ? formatDate(new Date(desc.from_date)) : ''}
                       </TableCell>
                       <TableCell>
-                        {desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : ''}
+                        {desc.to_date ? formatDate(new Date(desc.to_date)) : ''}
                       </TableCell>
                       <TableCell align="right">
                         {desc.base_amount ? desc.base_amount.toFixed(2) : '0.00'}
@@ -918,7 +919,7 @@ if (!canRead) {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography>Total Service Fee:</Typography>
                   <Typography fontWeight="bold">
-                    ₹ {selectedDescriptions.reduce((sum, desc) => sum + desc.fee, 0).toFixed(2)}
+                    {formatCurrency(selectedDescriptions.reduce((sum, desc) => sum + desc.fee, 0))}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -1040,7 +1041,7 @@ if (!canRead) {
                     <TableCell>
                       {getDescriptionsFromFlatArrays(service).length}
                     </TableCell>
-                    <TableCell align="right">{(service.totalAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell align="right">{formatCurrency(service.totalAmount)}</TableCell>
                     <TableCell> {service.status} </TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center">

@@ -348,7 +348,11 @@ const DateRangeDialog: React.FC<DateRangeDialogProps> = ({ selectionRange, setSe
 
   return (
     <div>
-      <Button variant="outline" onClick={handleOpen}>
+      <Button
+        variant="outline"
+        onClick={handleOpen}
+        className="inventory-ledger-date-button"
+      >
         {selectionRange.startDate && selectionRange.endDate
           ? `${formatDate(selectionRange.startDate)} - ${formatDate(selectionRange.endDate)}`
           : "Date Filter"}
