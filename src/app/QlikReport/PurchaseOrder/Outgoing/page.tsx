@@ -2,8 +2,8 @@
 
 import { OutgoingReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { outgoingConfig } from '../../configs/outgoing.config'; // Adjust path if needed
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { outgoingConfig } from '@/features/purchase-order/reports/outgoing.config'; // Adjust path if needed
 
 // This selector uses the 'key' from your config (key: 'outgoing')
 const selector = (s: RootState) => s.outgoing;

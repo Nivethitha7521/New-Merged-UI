@@ -12,6 +12,11 @@ export interface ItemDetails {
 export interface Outgoing {
   outgoingId: string;
   purchaseOrderId?: string;
+  purchaseOrderIds?: string[];
+poRandomIds?: string[];
+poCount?: number;
+grnSource?: string;
+poRandomID?: string;
   serviceId:string;
   serOId:string;
   invoiceType:string;

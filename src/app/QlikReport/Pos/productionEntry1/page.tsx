@@ -2,8 +2,8 @@
  
 import {  productionEntryReport }  from '@/redux/reportRegistry';
 import { RootState }              from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { productionEntryConfig } from '@/app/QlikReport/configs/productionEntry.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { productionEntryConfig } from '@/features/pos/reports/productionEntry.config';
  
 // FIX: Select 'productionEntry' (the key defined in your config)
 // This matches the state created by reportReducers in store.ts

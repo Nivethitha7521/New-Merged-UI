@@ -2,8 +2,8 @@
 
 import { GrnAgainstReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { grnAgainstConfig } from '../../configs/grnAgainst.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { grnAgainstConfig } from '@/features/purchase-order/reports/grnAgainst.config';
 
 // Select 'grnAgainst' (the key defined in your config)
 const selector = (s: RootState) => s.grnAgainst;

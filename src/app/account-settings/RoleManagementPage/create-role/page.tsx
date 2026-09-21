@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { addRoleLocally } from '@/features/account-setting/roleSlice';
 import { Snackbar, Alert } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
+import { authFetch } from '@/utils/authFetch';
 import {
   Dialog,
   DialogTitle,
@@ -31,6 +32,7 @@ const getBackendSubmoduleKey = (submoduleId: string, submoduleName: string): str
     'po_approved': 'purchaseorders_approved',
     'po_rejected': 'purchaseorders_rejected',
     'po_grn_converted': 'purchaseorders_grn_converted',
+    'po_hold_grn': 'holdgrn',
     // SERVICE ORDER
     'so_pending': 'serviceorders_pending',
     'so_approved': 'serviceorders_approved',
@@ -44,13 +46,20 @@ const getBackendSubmoduleKey = (submoduleId: string, submoduleName: string): str
     
      // YEN_INVENTORY submodules (MATCH DB EXACTLY)
 
-'oi_psm': 'physicalstockmodification',
-'oi_psvm': 'physicalstockvariancemodification',
-'oi_sl': 'stockledger',
+'oi_psm': 'outletphysicalstock',
+'oi_psvm': 'outletstockvariance',
+'oi_approved': 'outletapprovedstock',
+'oi_sl': 'outletstockledger',
 
-'wi_psm': 'warehousephysicalstockmodification',
-'wi_psvm': 'warehousephysicalstockvariancemodification',
+'wi_psm': 'warehousephysicalstock',
+'wi_psvm': 'warehousestockvariance',
+'wi_approved': 'warehouseapprovedstock',
 'wi_sl': 'warehousestockledger',
+
+// YEN_RECIPE submodules
+'recipe_default': 'recipe',
+'recipe_store_kitchen': 'storekitchenmaster',
+
 'rpt_po': 'purchaseorderreport',
 'rpt_pos': 'posreport',
     // YEN_BOOK submodules
@@ -63,10 +72,10 @@ const getBackendSubmoduleKey = (submoduleId: string, submoduleName: string): str
     'op_return': 'purchasereturn',
 'settings_date': 'settings',
 
-    // OUTLET MANAGER submodules
-'om_so': 'sale_order',
-'om_lst': 'location_stock_transfer',
-'om_sfg': 'sfg_to_fg',
+//     // OUTLET MANAGER submodules
+// 'om_so': 'sale_order',
+// 'om_lst': 'location_stock_transfer',
+// 'om_sfg': 'sfg_to_fg',
 
 // POS submodules
 'pos_order_mgmt': 'order_management',
@@ -78,9 +87,47 @@ const getBackendSubmoduleKey = (submoduleId: string, submoduleName: string): str
 'pos_credit_customer': 'credit_customer',
 'pos_device_config': 'device_configurations',
 'pos_customer_mgmt': 'customer_management',
+// YEN_POS submodules (real pages)
+    'pos_opening_cash': 'opening_cash',
+    'pos_petty_cash': 'petty_cash',
+    'pos_devices': 'pos_devices',
+    'pos_reasons': 'reasons',
+    'pos_prefix_master': 'prefix_master',
+    // WHATSAPP submodules
+    'wa_admin': 'whatsapp_admin',
+    'wa_master': 'whatsapp_master',
+
 'pos_customor_mgmt': 'customor_management',
 
-
+ // MASTER_ADMIN submodules
+    'ma_tax_tax': 'tax',
+    'ma_tax_dinein': 'dineintax',
+    'ma_so_advance': 'advanceamount',
+    'ma_so_charges': 'charges',
+    'ma_so_deliverydate': 'deliverydate',
+    'ma_so_deliverytype': 'deliverytype',
+    'ma_so_events': 'events',
+    'ma_so_paymenttype': 'paymenttype',
+   'ma_vehicle_default': 'vehicle',
+    'ma_op_master': 'onlinepartnermaster',
+    'ma_op_template': 'onlinepartnertemplate',
+    'ma_location_default': 'location',
+    'ma_section_default': 'sectionmaster',
+    'ma_mixbox_default': 'mixbox',
+    'ma_uom_default': 'uom',
+    'ma_kot_table': 'tablemaster',
+    'ma_kot_addon': 'addon',
+    'ma_kot_variant': 'variant',
+    'ma_item_category': 'itemcategory',
+    'ma_item_subcategory': 'itemsubcategory',
+    'ma_item_group': 'itemgroup',
+    'ma_item_default': 'item',
+    'ma_item_inventorytype': 'inventorytype',
+    'ma_item_measurementtype': 'measurementtype',
+    'ma_item_ordertype': 'ordertype',
+    'ma_item_sfg': 'sfg',
+    'ma_discount_default': 'discount',
+    'ma_warehouse_default': 'warehousemaster',
   };
   
   return idMap[submoduleId] || submoduleName.toLowerCase().replace(/\s+/g, '');
@@ -106,89 +153,63 @@ type AppPermissions = { appName: string; modules: ModuleItem[] };
 
 const transformPermissionsForBackend = (frontendPermissions: AppPermissions[]): any => {
   const backendPermissions: any = {};
-  
- 
-  
+
   frontendPermissions.forEach(app => {
-    // ✅ CHANGE: Map both YEN_PURCHASE and YEN_BOOK to "yenerp"
-  let appName: string;
+    let appName: string;
 
-if (
-  app.appName === "YEN_PURCHASE" ||
-  app.appName === "YEN_BOOK" ||
-  app.appName === "YEN_INVENTORY" ||
-  app.appName === "YEN_REPORTS" ||
-  app.appName === "YEN_SETTINGS"
-) {
-  appName = "yenerp";
-}
-else if (app.appName === "YEN_OUTLET_MANAGER") {
-  appName = "outlet_manager"; // 🔥 THIS IS THE KEY FIX
-  } else if (app.appName === "YEN_POS") {
-  appName = "pos";
+    if (
+      app.appName === "YEN_PURCHASE" ||
+      app.appName === "YEN_BOOK" ||
+      app.appName === "YEN_INVENTORY" ||
+      app.appName === "YEN_RECIPE" ||
+      app.appName === "YEN_REPORTS" ||
+      app.appName === "YEN_SETTINGS"
+    ) {
+      appName = "yenerp";
+    } else if (app.appName === "YEN_OUTLET_MANAGER") {
+      appName = "outlet_manager";
+    } else if (app.appName === "YEN_POS") {
+      appName = "pos";
+    } else if (app.appName === "MASTER_ADMIN") {
+      appName = "masteradmin";
+    } else if (app.appName === "WHATSAPP") {
+      appName = "whatsapp";
+    } else {
+      appName = app.appName.toLowerCase();
+    }
 
-
-} else {
-  appName = app.appName.toLowerCase();
-}
-
-    
-   
-    
     if (!backendPermissions[appName]) {
       backendPermissions[appName] = {};
     }
-    
+
     app.modules.forEach(module => {
-     
-      
       module.submodules.forEach(submodule => {
         const submoduleKey = getBackendSubmoduleKey(submodule.id, submodule.name);
-        
-       
-       
-       
-        // Check if any permission is true (except hide)
-        const hasAnyPermission = 
-          submodule.actions.read || 
-          submodule.actions.add || 
-          submodule.actions.edit || 
-          submodule.actions.delete || 
-          submodule.actions.approve||
-          submodule.actions.hide;
-        
-       
-       // ✅ detect completely empty row
-const noPermissionSelected =
-  !submodule.actions.read &&
-  !submodule.actions.add &&
-  !submodule.actions.edit &&
-  !submodule.actions.delete &&
-  !submodule.actions.approve &&
-  !submodule.actions.hide;
 
-// ✅ FINAL RULE:
-backendPermissions[appName][submoduleKey] = {
-  add: submodule.actions.add,
-  edit: submodule.actions.edit,
-  delete: submodule.actions.delete,
-  read: submodule.actions.read,
-  approve: submodule.actions.approve || false,
-  hide: noPermissionSelected ? true : submodule.actions.hide,
+        const noPermissionSelected =
+          !submodule.actions.read &&
+          !submodule.actions.add &&
+          !submodule.actions.edit &&
+          !submodule.actions.delete &&
+          !submodule.actions.approve &&
+          !submodule.actions.hide;
 
-  ...(submodule.editSubActions &&
-  Object.values(submodule.editSubActions).some(v => v)
-    ? { edit_actions: submodule.editSubActions }
-    : {}),
-};
+        backendPermissions[appName][submoduleKey] = {
+          add: submodule.actions.add,
+          edit: submodule.actions.edit,
+          delete: submodule.actions.delete,
+          read: submodule.actions.read,
+          approve: submodule.actions.approve || false,
+          hide: noPermissionSelected ? true : submodule.actions.hide,
 
-
-
-      }); // ✅ submodule loop CLOSE
-    });   // ✅ module loop CLOSE
-  });     // ✅ app loop CLOSE
-
-
+          ...(submodule.editSubActions &&
+          Object.values(submodule.editSubActions).some(v => v)
+            ? { edit_actions: submodule.editSubActions }
+            : {}),
+        };
+      });
+    });
+  });
 
   return backendPermissions;
 };
@@ -243,6 +264,18 @@ const HARD_MODULES: AppPermissions[] = [
   id: "po_grn_converted", 
   name: "GRN Converted", 
   actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } 
+},
+{
+  id: "po_hold_grn",
+  name: "Hold GRN",
+  actions: {
+    read: false,
+    add: false,
+    edit: false,
+    delete: false,
+    hide: false,
+    approve: false
+  }
 },
 
         ]
@@ -319,23 +352,12 @@ const HARD_MODULES: AppPermissions[] = [
 
     {
       id: "outlet_inventory",
-      name: "Outlet Inventory Management",
+      name: "Outlets Inventory Management",
       submodules: [
-        {
-          id: "oi_psm",
-          name: "Physical Stock Modification",
-          actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false }
-        },
-        {
-          id: "oi_psvm",
-          name: "Physical Stock Variance Modification",
-          actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false }
-        },
-        {
-          id: "oi_sl",
-          name: "Stock Ledger",
-          actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false }
-        }
+        { id: "oi_psm", name: "Outlet Physical Stock", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "oi_psvm", name: "Outlet Stock Variance", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "oi_approved", name: "Outlet Approved Stock", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "oi_sl", name: "Outlet Stock Ledger", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } }
       ]
     },
 
@@ -343,24 +365,26 @@ const HARD_MODULES: AppPermissions[] = [
       id: "warehouse_inventory",
       name: "Warehouse Inventory Management",
       submodules: [
-        {
-          id: "wi_psm",
-          name: "Physical Stock Modification",
-          actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false }
-        },
-        {
-          id: "wi_psvm",
-          name: "Physical Stock Variance Modification",
-          actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false }
-        },
-        {
-          id: "wi_sl",
-          name: "Stock Ledger",
-          actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false }
-        }
+        { id: "wi_psm", name: "Warehouse Physical Stock", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "wi_psvm", name: "Warehouse Stock Variance", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "wi_approved", name: "Warehouse Approved Stock", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "wi_sl", name: "Warehouse Stock Ledger", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } }
       ]
     }
 
+  ]
+},
+{
+  appName: "YEN_RECIPE",
+  modules: [
+    {
+      id: "recipe_management",
+      name: "Recipe Management",
+      submodules: [
+        { id: "recipe_default", name: "Recipe", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } },
+        { id: "recipe_store_kitchen", name: "Store Kitchen Master", actions: { read:false, add:false, edit:false, delete:false, hide:false, approve:false } }
+      ]
+    }
   ]
 },
 {
@@ -401,54 +425,191 @@ const HARD_MODULES: AppPermissions[] = [
     }
   ]
 },
-  {
-  appName: "YEN_OUTLET_MANAGER",
+//   {
+//   appName: "YEN_OUTLET_MANAGER",
+//   modules: [
+//     {
+//       id: "outlet_manager",
+//       name: "Outlet Manager",
+//       submodules: [
+//         {
+//           id: "om_so",
+//           name: "Sale Order",
+//           actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false }
+//         },
+//         {
+//           id: "om_lst",
+//           name: "Location Stock Transfer",
+//           actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false }
+//         },
+//         {
+//           id: "om_sfg",
+//           name: "SFG to FG",
+//           actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false }
+//         }
+//       ]
+//     }
+//   ]
+// },
+{
+  appName: "YEN_POS",
   modules: [
     {
-      id: "outlet_manager",
-      name: "Outlet Manager",
+      id: "pos_cash_management",
+      name: "Cash Management",
       submodules: [
-        {
-          id: "om_so",
-          name: "Sale Order",
-          actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false }
-        },
-        {
-          id: "om_lst",
-          name: "Location Stock Transfer",
-          actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false }
-        },
-        {
-          id: "om_sfg",
-          name: "SFG to FG",
-          actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false }
-        }
+       { id: "pos_opening_cash", name: "Opening Cash", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+        { id: "pos_petty_cash", name: "Petty Cash", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+      ]
+    },
+    {
+      id: "pos_devices_group",
+      name: "POS Devices",
+      submodules: [
+        { id: "pos_devices", name: "POS Devices", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+      ]
+    },
+    {
+      id: "pos_reasons_group",
+      name: "Reasons",
+      submodules: [
+        { id: "pos_reasons", name: "Reasons", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+       
+      ]
+     },
+    {
+      id: "pos_prefix_group",
+      name: "Prefix Master",
+      submodules: [
+        { id: "pos_prefix_master", name: "Prefix Master", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+      ]
+   }
+  ]
+},
+{
+  appName: "WHATSAPP",
+  modules: [
+    {
+      id: "wa_admin_group",
+      name: "WhatsApp Admin",
+      submodules: [
+        { id: "wa_admin", name: "WhatsApp Admin", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+      ]
+    },
+    {
+      id: "wa_master_group",
+      name: "WhatsApp Master",
+      submodules: [
+        { id: "wa_master", name: "WhatsApp Master", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
       ]
     }
   ]
 },
 {
-  appName: "YEN_POS",
+  appName: "MASTER_ADMIN",
   modules: [
     {
-      id: "pos",
-      name: "POS",
+      id: "ma_tax",
+      name: "Tax",
       submodules: [
-        { id: "pos_order_mgmt", name: "Order Management", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_sales_return", name: "Sales Return", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_payment_settings", name: "Payment Settings", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_bill_sale_order", name: "Bill Settings Sale Order", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_bill_takeaway", name: "Bill Settings Takeaway", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_gst_settings", name: "GST Settings", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_credit_customer", name: "Credit Customer", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_device_config", name: "Device Configurations", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-        { id: "pos_customer_mgmt", name: "Customer Management", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
-       
+          { id: "ma_tax_tax", name: "Tax", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_tax_dinein", name: "DineIn Tax", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
       ]
-    } 
+    },
+    {
+      id: "ma_saleorder",
+      name: "Sale Order",
+      submodules: [
+          { id: "ma_so_advance", name: "Advance Amount", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_so_charges", name: "Charges", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_so_deliverydate", name: "Delivery Date", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_so_deliverytype", name: "Delivery Type", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_so_events", name: "Events", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_so_paymenttype", name: "Payment Type", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_vehicle",
+      name: "Vehicle",
+      submodules: [
+          { id: "ma_vehicle_default", name: "Vehicle", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_onlinepartners",
+      name: "Online Partners",
+      submodules: [
+          { id: "ma_op_master", name: "Online Partner Master", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_op_template", name: "Online Partner Template", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_locations",
+      name: "Locations",
+      submodules: [
+          { id: "ma_location_default", name: "Locations", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_sectionmaster",
+      name: "Section Master",
+      submodules: [
+          { id: "ma_section_default", name: "Section Master", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_mixbox",
+      name: "Mix Box",
+      submodules: [
+          { id: "ma_mixbox_default", name: "Mix Box", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_uom",
+      name: "UOM",
+      submodules: [
+          { id: "ma_uom_default", name: "UOM", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_kotmaster",
+      name: "KOT Master",
+      submodules: [
+          { id: "ma_kot_table", name: "Table Master", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_kot_addon", name: "Add On", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_kot_variant", name: "Variants", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_items",
+      name: "Items",
+      submodules: [
+          { id: "ma_item_category", name: "Item Category", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_subcategory", name: "Item Subcategory", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_group", name: "Item Group", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_default", name: "Item", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_inventorytype", name: "Inventory Type", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_measurementtype", name: "Measurement Type", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_ordertype", name: "Order Type", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } },
+          { id: "ma_item_sfg", name: "SFG", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_discount",
+      name: "Discount",
+      submodules: [
+          { id: "ma_discount_default", name: "Discount", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    },
+    {
+      id: "ma_warehouse",
+      name: "Warehouse Master",
+      submodules: [
+          { id: "ma_warehouse_default", name: "Warehouse Master", actions: { read: false, add: false, edit: false, delete: false, hide: false, approve: false } }
+      ]
+    }
   ]
 },
-
 ];
 
 const cloneModules = (): AppPermissions[] => JSON.parse(JSON.stringify(HARD_MODULES));
@@ -469,6 +630,87 @@ const PERMISSION_INFO = {
   delete: "Delete: Allows users to deactivate or remove records.",
   hide: "Hide: Restricts the module from being visible in the menu and screens.",
   approve: "Approve: Allows users to approve the order and move it to the next stage.",
+};
+
+// Maps a frontend appName section to its backend permissions group key.
+// Mirrors the grouping used in transformPermissionsForBackend (the reverse direction).
+const getBackendAppGroup = (appName: string): string => {
+  if (
+    appName === "YEN_PURCHASE" ||
+    appName === "YEN_BOOK" ||
+    appName === "YEN_INVENTORY" ||
+    appName === "YEN_REPORTS" ||
+    appName === "YEN_SETTINGS"
+  ) {
+    return "yenerp";
+  } else if (appName === "YEN_OUTLET_MANAGER") {
+    return "outlet_manager";
+  } else if (appName === "YEN_POS") {
+    return "pos";
+      } else if (appName === "MASTER_ADMIN") {
+    return "masteradmin";
+    } else if (appName === "WHATSAPP") {
+    return "whatsapp";
+  }
+  return appName.toLowerCase();
+};
+
+// Builds a fresh frontend permissions template pre-filled with a predefined
+// role's actual saved permissions (as returned by GET /permissions/{role_name}).
+// Any submodule the backend has no entry for (e.g. Outlet Manager/POS, which the
+// current predefined roles don't grant) is left at its default all-false / hidden state.
+const buildPermissionsFromBackend = (backendData: Record<string, any> | null | undefined): AppPermissions[] => {
+  const template = cloneModules();
+  if (!backendData) return template;
+
+  template.forEach(app => {
+    const group = getBackendAppGroup(app.appName);
+    const groupData = backendData?.[group];
+    if (!groupData) return;
+
+    app.modules.forEach(module => {
+      module.submodules.forEach(submodule => {
+        const key = getBackendSubmoduleKey(submodule.id, submodule.name);
+        const backendPerm = groupData[key];
+        if (!backendPerm) return;
+
+        submodule.actions = {
+          read: !!backendPerm.read,
+          add: !!backendPerm.add,
+          edit: !!backendPerm.edit,
+          delete: !!backendPerm.delete,
+          hide: !!backendPerm.hide,
+          approve: !!backendPerm.approve,
+        };
+
+        if (submodule.editSubActions !== undefined) {
+          submodule.editSubActions = {
+            convert_to_ap: !!backendPerm.edit_actions?.convert_to_ap,
+            return_grn: !!backendPerm.edit_actions?.return_grn,
+            revert_to_po: !!backendPerm.edit_actions?.revert_to_po,
+          };
+        }
+      });
+    });
+  });
+
+  return template;
+};
+
+// Recomputes each module's "select all" checkbox from the actual permission
+// values, so the header checkbox reflects reality right after an autofill.
+const computeModuleCheckboxes = (permissions: AppPermissions[]): Record<string, boolean> => {
+  const result: Record<string, boolean> = {};
+  permissions.forEach(app => {
+    app.modules.forEach(module => {
+      result[module.id] =
+        module.submodules.length > 0 &&
+        module.submodules.every(
+          s => s.actions.read && s.actions.add && s.actions.edit && s.actions.delete && s.actions.approve
+        );
+    });
+  });
+  return result;
 };
 const SUBMODULE_INFO: Record<string, React.ReactNode> = {
   pm_pc: (
@@ -755,20 +997,20 @@ const MODULE_INFO: Record<string, React.ReactNode> = {
       </ul>
     </div>
   ),
-   outlet_manager: (   // ✅ ADD THIS
-    <div>
-      <div className="font-semibold mb-1">Outlet Manager</div>
-      <ul className="list-disc pl-4 space-y-1">
-        <li>Used to access Outlet Manager operational screens.</li>
-        <li>
-          <b>Read permission:</b> Enables full access to Sale Order, Location Stock Transfer, and SFG to FG screens.
-        </li>
-        <li>
-          <b>Hide permission:</b> Completely hides Outlet Manager from menus and screens.
-        </li>
-      </ul>
-    </div>
-  ),
+  //  outlet_manager: (   // ✅ ADD THIS
+  //   <div>
+  //     <div className="font-semibold mb-1">Outlet Manager</div>
+  //     <ul className="list-disc pl-4 space-y-1">
+  //       <li>Used to access Outlet Manager operational screens.</li>
+  //       <li>
+  //         <b>Read permission:</b> Enables full access to Sale Order, Location Stock Transfer, and SFG to FG screens.
+  //       </li>
+  //       <li>
+  //         <b>Hide permission:</b> Completely hides Outlet Manager from menus and screens.
+  //       </li>
+  //     </ul>
+  //   </div>
+  // ),
 };
 const EditActionPopover = ({
   submoduleId,
@@ -893,8 +1135,91 @@ const [confirmOpen, setConfirmOpen] = useState(false);
   const [formPermissions, setFormPermissions] = useState<AppPermissions[]>(cloneModules());
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const [moduleCheckboxes, setModuleCheckboxes] = useState<Record<string, boolean>>({});
-  const formRoleName = selectedPredefinedRole || customRoleName;
+  // Every role created on this page is a Custom role — a predefined role is only
+  // ever used as a starting template. The final name always comes from the
+  // Custom Role Name field, never from the predefined dropdown.
+  const formRoleName = customRoleName;
  const [isSaving, setIsSaving] = useState(false);
+
+  // Cache of { roleName: backendPermissionsDict } for every predefined role,
+  // fetched once up front so switching the dropdown applies instantly with
+  // no per-selection network wait.
+  const [predefinedPermissionsCache, setPredefinedPermissionsCache] = useState<Record<string, any>>({});
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadAllTemplates = async () => {
+      setTemplatesLoading(true);
+      try {
+        const results = await Promise.all(
+          ROLE_OPTIONS.map(async (role) => {
+            try {
+              const res = await authFetch(
+                `http://127.0.0.1:8001/yenerpapi/permissions/${encodeURIComponent(role)}`
+              );
+              if (!res.ok) return [role, null] as const;
+              const data = await res.json();
+              return [role, data?.permissions ?? null] as const;
+            } catch {
+              return [role, null] as const;
+            }
+          })
+        );
+
+        if (cancelled) return;
+
+        const cache: Record<string, any> = {};
+        results.forEach(([role, perms]) => {
+          if (perms) cache[role] = perms;
+        });
+        setPredefinedPermissionsCache(cache);
+      } finally {
+        if (!cancelled) setTemplatesLoading(false);
+      }
+    };
+
+    loadAllTemplates();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Applies a predefined role's permissions to the form instantly. Falls back
+  // to an on-demand fetch only if the prefetch cache hasn't warmed up yet
+  // (e.g. the admin picks a role in the first instant the page loads).
+  const applyPredefinedTemplate = async (role: string) => {
+    if (!role) {
+      setFormPermissions(cloneModules());
+      setModuleCheckboxes({});
+      return;
+    }
+
+    const cached = predefinedPermissionsCache[role];
+    if (cached) {
+      const filled = buildPermissionsFromBackend(cached);
+      setFormPermissions(filled);
+      setModuleCheckboxes(computeModuleCheckboxes(filled));
+      return;
+    }
+
+    // Rare fallback: cache not ready yet, fetch this one role directly.
+    try {
+      const res = await authFetch(
+        `http://127.0.0.1:8001/yenerpapi/permissions/${encodeURIComponent(role)}`
+      );
+      const data = res.ok ? await res.json() : null;
+      const perms = data?.permissions ?? null;
+      if (perms) setPredefinedPermissionsCache(prev => ({ ...prev, [role]: perms }));
+      const filled = buildPermissionsFromBackend(perms);
+      setFormPermissions(filled);
+      setModuleCheckboxes(computeModuleCheckboxes(filled));
+    } catch {
+      setFormPermissions(cloneModules());
+      setModuleCheckboxes({});
+    }
+  };
 
   useEffect(() => {
     const allExpanded: Record<string, boolean> = {};
@@ -1049,7 +1374,7 @@ const saveRole = async () => {
   if (!formRoleName.trim()) {
    setSnackbar({
   open: true,
-  message: "Please enter or select a role name",
+  message: "Please enter a custom role name",
   severity: "error",
 });
 return;
@@ -1069,7 +1394,7 @@ return;
 
    
 
-    const roleResponse = await fetch("https://yenerp.com/purchasetestapi/roles", {
+    const roleResponse = await authFetch("http://127.0.0.1:8001/yenerpapi/roles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(rolePayload)
@@ -1119,7 +1444,7 @@ return;
 
    
 
-    const permResponse = await fetch("https://yenerp.com/purchasetestapi/permissions", {
+    const permResponse = await authFetch("http://127.0.0.1:8001/yenerpapi/permissions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(permissionPayload)
@@ -1182,18 +1507,14 @@ const handleConfirmCreate = () => {
   saveRole(); // actual API call
 };
   return (
-    <div className="h-screen bg-gray-50 flex flex-col"> 
-      
-      {/* Main Content - Takes full screen with NO margins */}
-      <div className="flex-1 flex flex-col bg-white m-0 rounded-none overflow-hidden"> 
+<div className="account-settings-role-editor account-role-editor-create h-screen bg-gray-50 flex flex-col">          {/* Main Content - Takes full screen with NO margins */}
+     <div className="account-role-editor-card flex-1 flex flex-col bg-white m-0 rounded-none overflow-hidden"> 
         
         {/* Header - With Back Button */}
-        <div className="flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">
-          {/* Back Button - Left Corner - SAME COLOR AS CREATE ROLE BUTTON */}
+ <div className="account-role-editor-header flex justify-between items-center px-6 py-2 border-b border-gray-200 flex-shrink-0">          {/* Back Button - Left Corner - SAME COLOR AS CREATE ROLE BUTTON */}
           <button
             onClick={() => router.push("/account-settings/")}
-            className="flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 text-sm font-semibold shadow-sm min-w-[110px]"
-          >
+ className="account-role-back-button flex items-center gap-2 px-5 py-2 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 text-sm font-semibold shadow-sm min-w-[110px]"          >
             {/* Left Arrow Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1209,24 +1530,29 @@ const handleConfirmCreate = () => {
           </button>
           
           {/* Page Title - Centered - UPDATED: Bold and Black */}
-          <h2 className="text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">
-            Create Role
+ <h2 className="account-role-editor-title text-xl font-bold text-black text-center absolute left-1/2 transform -translate-x-1/2">            Create Role
           </h2>
           
           {/* Empty div for spacing */}
           <div className="min-w-[110px]"></div>
         </div>
 
-        {/* Role Name Section - Compact */}
-        <div className="px-6 py-3 flex-shrink-0">
-          <div className="flex gap-3">
+{/* Role Name Section - Compact */}
+      <div className="account-role-editor-fields px-6 py-3 flex-shrink-0">
+         <div className="account-role-editor-fields-grid flex gap-3">
             {/* Predefined Roles Dropdown */}
-           <div className="w-1/2">
+         <div className="account-role-editor-field w-1/2">
   <label className="block text-sm font-bold text-black mb-0.5">Select Predefined Roles</label>
-  <p className="text-xs text-gray-500 mb-2">Choose a ready-made role template</p>
+  <p className="text-xs text-gray-500 mb-2">
+    Choose a ready-made role template — its permissions fill in below instantly, as a starting point you can adjust.
+  </p>
   <select
                 value={selectedPredefinedRole}
-                onChange={(e) => setSelectedPredefinedRole(e.target.value)}
+                onChange={(e) => {
+                  const role = e.target.value;
+                  setSelectedPredefinedRole(role);
+                  applyPredefinedTemplate(role);
+                }}
                 className="border border-gray-300 rounded-md p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-300 focus:outline-none transition-all duration-200 w-full text-sm"
               >
                 <option value="">-- Select role --</option>
@@ -1239,9 +1565,13 @@ const handleConfirmCreate = () => {
             </div>
 
             {/* Custom Role Input */}
-            <div className="w-1/2">
-  <label className="block text-sm font-bold text-black mb-0.5">Create a New Custom Role</label>
-  <p className="text-xs text-gray-500 mb-2">Type a unique name for your role</p>
+          <div className="account-role-editor-field w-1/2">
+  <label className="block text-sm font-bold text-black mb-0.5">
+    Create a New Custom Role <span className="text-red-600">*</span>
+  </label>
+  <p className="text-xs text-gray-500 mb-2">
+    Required — this is the name your new role will be saved as, even if you started from a template above.
+  </p>
   <input
                 value={customRoleName}
                 onChange={(e) => setCustomRoleName(e.target.value)}
@@ -1253,8 +1583,7 @@ const handleConfirmCreate = () => {
         </div>
 
         {/* Table Header - ORDER CHANGED: Read, Add, Edit, Delete, Hide, Approve - UPDATED: Bold and Black */}
-     <div className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr,1fr,1fr] items-center gap-2 px-6 py-2 text-sm flex-shrink-0 bg-gray-50">
-  <div className="text-sm font-bold text-black">Modules / Submodules</div>
+<div className="account-role-permission-grid account-role-permission-header grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 px-6 py-2 text-sm flex-shrink-0 bg-gray-50">  <div className="text-sm font-bold text-black">Modules / Submodules</div>
 
   <HeaderWithHelp label="Read" info={PERMISSION_INFO.read} />
   <HeaderWithHelp label="Add" info={PERMISSION_INFO.add} />
@@ -1266,22 +1595,19 @@ const handleConfirmCreate = () => {
 
 
         {/* Scrollable Permission Section */}
-        <div className="flex-1 overflow-y-auto px-6 min-h-0"> 
-          <div className="space-y-2 py-2">
+       <div className="account-role-permission-scroll flex-1 overflow-y-auto px-6 min-h-0"> 
+          <div className="account-role-permission-stack space-y-2 py-2">
             {formPermissions.map((app, ai) => (
-              <div key={app.appName} className="mb-3">
+            <div key={app.appName} className="account-role-app mb-3">
                 {/* UPDATED: Only YEN_PURCHASE and YEN_BOOK in Blue */}
-                <div className="text-sm font-bold text-blue-600 mb-2 bg-blue-50 p-2 rounded">
-                  {app.appName}
+ <div className="account-role-app-title text-sm font-bold text-blue-600 mb-2 bg-blue-50 p-2 rounded">                  {app.appName}
                 </div>
                 <div className="space-y-2">
                   {app.modules.map((m, mi) => (
-                    <div key={m.id} className="border border-gray-200 rounded bg-white">
-                      {/* Module Header - UPDATED: Checkbox on left, dropdown on right - UPDATED: Bold and Black */}
+ <div key={m.id} className="account-role-module border border-gray-200 rounded bg-white">                      {/* Module Header - UPDATED: Checkbox on left, dropdown on right - UPDATED: Bold and Black */}
 <div
   onClick={() => toggleExpand(m.id)}
-  className="font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 rounded text-sm"
->
+className="account-role-module-header font-bold text-black p-2 flex items-center justify-between cursor-pointer select-none hover:bg-gray-50 rounded text-sm">
                         <div className="flex items-center">
                           {/* Checkbox for selecting all submodules */}
                           <button
@@ -1336,8 +1662,7 @@ const handleConfirmCreate = () => {
                           {m.submodules.map((s, si) => (
                             <div
   key={s.id}
-  className="grid grid-cols-[2fr,1fr,1fr,1fr,1fr,1fr,1fr] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
->
+className="account-role-permission-grid account-role-permission-row grid grid-cols-[2fr_repeat(6,1fr)] items-center gap-2 p-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm">
                               {/* UPDATED: Bold and Black for Submodule Names */}
                              <div className="text-black font-medium pl-8 text-sm flex items-center">
   <span>{s.name}</span>
@@ -1384,14 +1709,11 @@ const handleConfirmCreate = () => {
               </div>
             ))}
             
-            {/* Footer ku munadi extra space */}
-            <div className="h-6 bg-transparent"></div>
           </div>
         </div>
 
         {/* Fixed Footer - Always visible above taskbar */}
-        <div className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white px-6 py-4 shadow-lg z-50">
-          <div className="flex justify-end gap-3 max-w-7xl mx-auto">
+<div className="account-role-editor-footer border-t border-gray-200 bg-white shadow-lg">         <div className="flex justify-end gap-3 max-w-7xl mx-auto">
             <button 
              onClick={() => router.push("/account-settings/")}
               className="px-5 py-2 rounded-lg border-2 border-gray-400 hover:bg-gray-100 transition-all duration-200 text-sm font-semibold text-gray-700 bg-white shadow-sm hover:shadow-md min-w-[110px]" 
@@ -1399,7 +1721,19 @@ const handleConfirmCreate = () => {
               Cancel
             </button>
 <button 
-onClick={() => setConfirmOpen(true)}
+onClick={() => {
+  if (!customRoleName.trim()) {
+    setSnackbar({
+      open: true,
+      message: selectedPredefinedRole
+        ? `Please enter a custom role name — "${selectedPredefinedRole}" is only used as a starting template.`
+        : "Please enter a custom role name.",
+      severity: "error",
+    });
+    return;
+  }
+  setConfirmOpen(true);
+}}
   disabled={isSaving}
   className={`px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-semibold shadow-sm hover:shadow-md min-w-[110px] ${
     isSaving ? 'opacity-50 cursor-not-allowed' : ''
@@ -1409,7 +1743,7 @@ onClick={() => setConfirmOpen(true)}
 </button>
           </div>
         </div>
-        <div className="pb-20"></div>
+      
         {/* ✅ Snackbar */}
 <Snackbar
   open={snackbar.open}

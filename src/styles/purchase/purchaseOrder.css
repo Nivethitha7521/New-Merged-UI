@@ -1,0 +1,387 @@
+/* ==========================================================================
+   Purchase Order Module
+   Uses the same visual system as Purchase Master.
+   ========================================================================== */
+
+.erp-purchase-viewport .purchase-order-module-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.erp-purchase-viewport .purchase-order-content {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 16px 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Purchase Order tabs
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-order-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  margin: 4px 0 12px;
+  padding: 4px;
+
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.erp-purchase-viewport .purchase-order-tab-button {
+  position: relative;
+
+  min-width: max-content !important;
+  height: 36px !important;
+  padding: 0 15px !important;
+
+  color: var(--erp-muted, #475467) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 10px !important;
+
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.erp-purchase-viewport .purchase-order-tab-button:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+}
+
+.erp-purchase-viewport .purchase-order-tab-button.is-active {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent, #155eef) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.06),
+    0 5px 12px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.16) !important;
+}
+
+.erp-purchase-viewport .purchase-order-tab-button.is-active:hover {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+  background: var(--erp-accent-hover, #124bc0) !important;
+}
+
+.erp-purchase-viewport .purchase-order-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 18px;
+  height: 18px;
+  margin-left: 7px;
+  padding: 0 5px;
+
+  color: #ffffff;
+  background: #d92d20;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Filter/action toolbar
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-order-toolbar {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.erp-purchase-viewport .purchase-order-toolbar-icon {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+
+  color: var(--erp-text, #475467) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: 10px !important;
+
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.erp-purchase-viewport .purchase-order-toolbar-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+}
+
+.erp-purchase-viewport .purchase-order-toolbar-icon:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+}
+
+.erp-purchase-viewport .purchase-order-toolbar-icon.is-clear:hover {
+  color: #d92d20 !important;
+  background: #fff1f0 !important;
+  border-color: #fecaca !important;
+}
+
+.erp-purchase-viewport .purchase-order-toolbar-icon.Mui-disabled {
+  color: #98a2b3 !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border-color: var(--erp-border, #dfe5ec) !important;
+
+  opacity: 0.55 !important;
+  box-shadow: none !important;
+}
+
+.erp-purchase-viewport .purchase-order-toolbar-button {
+  height: 40px !important;
+  min-width: max-content !important;
+}
+
+.erp-purchase-viewport .purchase-order-create-button {
+  font-weight: 650 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Purchase Order tables
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-order-table {
+  width: 100%;
+  margin: 0 !important;
+}
+
+.erp-purchase-viewport .purchase-order-table .MuiTable-root {
+  min-width: 1050px;
+}
+
+.erp-purchase-viewport
+  .purchase-order-table
+  .MuiTableCell-head:last-child,
+.erp-purchase-viewport
+  .purchase-order-table
+  .MuiTableCell-body:last-child {
+  text-align: center !important;
+}
+
+.erp-purchase-viewport .purchase-order-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* --------------------------------------------------------------------------
+   Purchase Order statuses
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-pending {
+  color: #b54708 !important;
+  background: #fffaeb !important;
+  border-color: #fedf89 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-pending::before {
+  background: #f79009 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-approved {
+  color: #067647 !important;
+  background: #ecfdf3 !important;
+  border-color: #abefc6 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-approved::before {
+  background: #17b26a !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-rejected {
+  color: #b42318 !important;
+  background: #fef3f2 !important;
+  border-color: #fecdca !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-rejected::before {
+  background: #f04438 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-converted {
+  color: #3538cd !important;
+  background: #eef4ff !important;
+  border-color: #c7d7fe !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-converted::before {
+  background: #6172f3 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-hold {
+  color: #93370d !important;
+  background: #fff6ed !important;
+  border-color: #f9dbaf !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-status-pill.is-hold::before {
+  background: #ef6820 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Purchase Order table action behaviour
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport
+  .purchase-master-action-button.is-view:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent-border, #b8cbf8) !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-action-button.is-download:hover {
+  color: #6941c6 !important;
+  background: #f4f3ff !important;
+  border-color: #d9d6fe !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-action-button.is-approve:hover,
+.erp-purchase-viewport
+  .purchase-master-action-button.is-convert:hover {
+  color: #067647 !important;
+  background: #ecfdf3 !important;
+  border-color: #abefc6 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-action-button.is-reject:hover {
+  color: #d92d20 !important;
+  background: #fff1f0 !important;
+  border-color: #fecaca !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-action-button.is-history:hover {
+  color: #b54708 !important;
+  background: #fffaeb !important;
+  border-color: #fedf89 !important;
+}
+
+.erp-purchase-viewport
+  .purchase-master-action-button.is-draft:hover {
+  color: #5925dc !important;
+  background: #f4f3ff !important;
+  border-color: #d9d6fe !important;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-order-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  width: 100%;
+  margin-top: 12px;
+}
+
+.erp-purchase-viewport
+  .purchase-order-pagination
+  .purchase-item-pagination-label {
+  margin: 0 14px;
+
+  color: var(--erp-muted, #475467);
+
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Create Purchase Order form
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-order-form-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.erp-purchase-viewport .purchase-order-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 16px;
+}
+
+.erp-purchase-viewport .purchase-order-form-actions {
+  padding: 10px 16px;
+
+  background: var(--erp-surface, #ffffff);
+
+  border-top: 1px solid var(--erp-border, #dfe5ec);
+}
+
+/* --------------------------------------------------------------------------
+   Dark mode
+   -------------------------------------------------------------------------- */
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-order-tab-button,
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-order-toolbar-icon {
+  color: var(--erp-text, #f8fafc) !important;
+  background: var(--erp-surface, #172033) !important;
+  border-color: var(--erp-border, #344054) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .erp-purchase-viewport .purchase-order-content {
+    padding: 8px 10px 14px;
+  }
+
+  .erp-purchase-viewport .purchase-order-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .erp-purchase-viewport .purchase-order-toolbar {
+    overflow-x: auto;
+  }
+
+  .erp-purchase-viewport .purchase-order-form-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .erp-purchase-viewport .purchase-order-pagination {
+    justify-content: center;
+  }
+}

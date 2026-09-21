@@ -2,8 +2,8 @@
 
 import { PurchaseReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { purchaseConfig } from '../../configs/purchase.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { purchaseConfig } from '@/features/purchase-order/reports/purchase.config';
 
 // Select 'purchase' (the key defined in your config)
 const selector = (s: RootState) => s.purchase;

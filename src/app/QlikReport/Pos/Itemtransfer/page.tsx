@@ -2,8 +2,8 @@
 
 import { ItemTransferReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { itemTransferConfig } from '../../configs/itemTransfer.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { itemTransferConfig } from '@/features/pos/reports/itemTransfer.config';
 
 // Select 'itemTransfer' (the key defined in your config)
 const selector = (s: RootState) => s.itemTransfer;

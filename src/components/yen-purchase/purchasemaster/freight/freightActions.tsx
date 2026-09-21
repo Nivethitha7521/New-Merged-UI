@@ -3,7 +3,6 @@ import React, { useRef, useState } from 'react';
 import {
   Box,
   TextField,
-  IconButton,
   Typography,
   Switch,
   Dialog,
@@ -14,8 +13,13 @@ import {
   Button,
   CircularProgress,
 } from '@mui/material';
-import { Add as AddIcon, InsertDriveFile as InsertDriveFileIcon, GetApp as GetAppIcon, Upload as UploadIcon } from '@mui/icons-material';
-
+import {
+  Add as AddIcon,
+  DescriptionOutlined as SampleIcon,
+  FileUploadOutlined as ImportIcon,
+  FileDownloadOutlined as ExportIcon,
+  SearchRounded as SearchIcon,
+} from '@mui/icons-material';
 interface FreightActionsProps {
   searchQuery: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -79,176 +83,98 @@ const FreightActions: React.FC<FreightActionsProps> = ({
   };
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-        <TextField
-          className="some"
-          autoComplete="off"
-          label="Search"
-          variant="outlined"
-          value={searchQuery}
-          onChange={onSearchChange}
-          sx={{ flex: 1 }}
-        />
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <IconButton
-              color="primary"
-              onClick={onDialogOpen}
-              className="icon-button-outline"
-              size="small"
-              sx={{ p: 0.3,
-                opacity: canAdd ? 1 : 0.5, }}
-           disabled={!canAdd} 
-           >
-              <AddIcon />
-            </IconButton>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-                 color: canAdd ? 'text.primary' : 'grey.500', // ✅ TEXT COLOR BASED ON PERMISS
-              }}
-            >
-              Add
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <IconButton
-              color="primary"
-              onClick={onSampleCSV}
-              className="icon-button-outline"
-              size="small"
-              sx={{ p: 0.3 }}
-            >
-              <InsertDriveFileIcon />
-            </IconButton>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              Sample
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <input
-              id="import-csv-file"
-              type="file"
-              accept=".csv"
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-              disabled={importing}
-              ref={fileInputRef}
-            />
-            <span>
-              <IconButton
-                color="primary"
-                className="icon-button-outline"
-                sx={{ p: 0.3 }}
-                size="small"
-                disabled={importing}
-                onClick={handleImportClick}
-              >
-                {importing ? <CircularProgress size={16} /> : <GetAppIcon />}
-              </IconButton>
-            </span>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              Import
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <span>
-              <IconButton
-                color="primary"
-                onClick={onExportCSV}
-                className="icon-button-outline"
-                sx={{ p: 0.3 }}
-                size="small"
-                disabled={exporting}
-              >
-                {exporting ? <CircularProgress size={16} /> : <UploadIcon />}
-              </IconButton>
-            </span>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              Export
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 60,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              {showDeactivated ? 'Deactivated' : 'Activated'}
-            </Typography>
-            <Switch
-              checked={showDeactivated}
-              onChange={onToggleShowDeactivated}
-              name="showDeactivated"
-              size="small"
-              sx={{ height: 24 }}
-            />
-          </Box>
-        </Box>
-      </Box>
+<Box className="purchase-reference-toolbar">
+  <TextField
+    autoComplete="off"
+    placeholder="Search by freight name or ID..."
+    variant="outlined"
+    value={searchQuery}
+    onChange={onSearchChange}
+    className="purchase-reference-search"
+    InputProps={{
+      startAdornment: (
+        <SearchIcon className="purchase-reference-search-icon" />
+      ),
+    }}
+  />
+
+  <Box className="purchase-reference-actions">
+    <Button
+      type="button"
+      variant="outlined"
+      startIcon={<AddIcon />}
+      onClick={onDialogOpen}
+      disabled={!canAdd}
+      className="purchase-reference-action-button"
+    >
+      Add New
+    </Button>
+
+    <Button
+      type="button"
+      variant="outlined"
+      startIcon={<SampleIcon />}
+      onClick={onSampleCSV}
+      className="purchase-reference-action-button"
+    >
+      Sample
+    </Button>
+
+    <input
+      id="import-csv-file-freight"
+      type="file"
+      accept=".csv"
+      hidden
+      onChange={handleFileChange}
+      disabled={importing}
+      ref={fileInputRef}
+    />
+
+    <Button
+      type="button"
+      variant="outlined"
+      startIcon={
+        importing
+          ? <CircularProgress size={15} />
+          : <ImportIcon />
+      }
+      onClick={handleImportClick}
+      disabled={importing}
+      className="purchase-reference-action-button"
+    >
+      Import
+    </Button>
+
+    <Button
+      type="button"
+      variant="outlined"
+      startIcon={
+        exporting
+          ? <CircularProgress size={15} />
+          : <ExportIcon />
+      }
+      onClick={onExportCSV}
+      disabled={exporting}
+      className="purchase-reference-action-button"
+    >
+      Export
+    </Button>
+
+    <Box className="purchase-reference-active-toggle">
+      <Typography component="span">
+        Show Active Only
+      </Typography>
+
+      <Switch
+        checked={!showDeactivated}
+        onChange={onToggleShowDeactivated}
+        name="showDeactivated"
+        size="small"
+        disabled={importing || exporting}
+      />
+    </Box>
+  </Box>
+
       <Dialog
         open={confirmationDialogOpen}
         onClose={handleCancelImport}

@@ -31,6 +31,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { fetchFreightItems } from '@/features/yen-purchase/PurchaseMaster/FreightMasterSlice';
 import { fetchPurchaseTaxes } from '@/features/yen-purchase/PurchaseMaster/purchaseTaxSlice';
 import { calculateFreightTotals } from '@/features/yen-purchase/PurchaseOrder/purchaseOrderSlice';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface FreightSelectionDialogProps {
   open: boolean;
@@ -423,7 +424,7 @@ const handleSaveAll = () => {
               {existingFreights.map((freight: any, index: number) => (
                 <Chip
                   key={index}
-                  label={`${freight.name}: ₹${(freight.totalAmt || 0).toFixed(2)}`}
+                  label={`${freight.name}: ${formatCurrency((freight.totalAmt || 0))}`}
                   variant="outlined"
                   color="primary"
                   size="small"

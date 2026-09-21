@@ -60,6 +60,7 @@ import {
   fetchAllDebitNotesForDocument,
 } from '@/features/yen-purchase/DebitNoteSlice';
 import { ComprehensiveDebitNoteView } from '@/features/yen-purchase/DebitNoteSlice';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -93,14 +94,7 @@ const formatDocumentType = (docType: string | undefined) => {
 };
 
 // Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-};
+
 
 // Get status icon
 const getStatusIcon = (status: string) => {

@@ -18,6 +18,7 @@ export interface PurchaseItem {
     randomId: string;
     purchasetaxName: string;
     reorderLevel: number;
+    targetStockLevel: number;
     itemType: string;
     itemTypeId:string;
     hsnCode: string;
@@ -192,6 +193,7 @@ export const initialState: PurchaseItemState = {
     purchasePrice: 0,
     purchasetaxName: '',
     reorderLevel: 0,
+    targetStockLevel: 0,
     itemType: '',
     hsnCode: '',
     shelfLife: '',

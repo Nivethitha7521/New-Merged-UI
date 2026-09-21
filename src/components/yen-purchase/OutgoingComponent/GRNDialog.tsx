@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { GrnResponse, ItemDetailResponse } from '@/Models/grnModel';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { formatDate } from '@/utilities/formatters';
 interface GrnDialogProps {
   open: boolean;
   onClose: () => void;
@@ -104,7 +105,7 @@ const toggleFullScreen = () => {
           </Typography>
           <Typography variant="h6" gutterBottom>
             <strong>GRN Date:</strong>{' '}
-            {grn.grnDate ? format(new Date(grn.grnDate), 'dd-MM-yyyy') : 'N/A'}
+            {grn.grnDate ? formatDate(new Date(grn.grnDate)) : 'N/A'}
           </Typography>
         </Box>
         <TableContainer component={Paper} sx={{ mt: 2 }}>

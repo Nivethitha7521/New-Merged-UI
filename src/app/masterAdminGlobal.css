@@ -1,0 +1,1577 @@
+/* app/masterAdminGlobal.css */
+/* Scoped version of masteradmin globals.css - every selector prefixed with .ma-scope */
+
+.ma-scope {
+  font-family: "Poppins", sans-serif;
+}
+
+.ma-scope body {
+  font-family: "Poppins", sans-serif;
+}
+
+
+
+
+  /* ========== MASTER ADMIN NAV BUTTONS ========== */
+  .ma-scope .nav-section-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-left: 2rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.35rem;
+  }
+
+
+  .ma-scope .subnav-section-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-left: 2.2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+
+
+  .ma-scope .nav-btn-strip-wrapper {
+    position: relative;
+    margin-left: 1.6rem;
+    margin-right: 1rem;
+    border-bottom: 0.5px solid #e5e7eb;
+    padding-bottom: 0.7rem;
+  }
+
+  .ma-scope .subnav-btn-strip-wrapper {
+    position: relative;
+    margin-left: 2.2rem;
+    margin-right: 1rem;
+    /* border-bottom: 0.5px solid #e5e7eb; */
+    padding-bottom: 0.7rem;
+  }
+
+  .ma-scope .nav-btn-strip {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 2px;
+    /* avoids clipping box-shadow on pills */
+    padding-right: 4px;
+
+    /* hide scrollbar visually, keep it functional */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+  }
+
+  .ma-scope .nav-btn-strip::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+  }
+
+  .ma-scope .nav-btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: "Poppins", sans-serif;
+    color: #374151;
+    /* dark enough to read clearly */
+    background-color: #f3f4f6;
+    border: 1.3px solid #d1d5db;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    /* never squish — key for single-row scroll */
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+
+  .ma-scope .nav-btn-pill i {
+    font-size: 13px;
+    line-height: 1;
+    color: #6b7280;
+    flex-shrink: 0;
+  }
+
+  .ma-scope .nav-btn-pill:hover {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-color: #93c5fd;
+  }
+
+  .ma-scope .nav-btn-pill:hover i {
+    color: #1e40af;
+  }
+
+  .ma-scope .nav-btn-pill.active {
+    background-color: #1d4ed8;
+    color: #ffffff;
+    border-color: #1d4ed8;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(29, 78, 216, 0.35);
+  }
+
+  .ma-scope .nav-btn-pill.active i {
+    color: #ffffff;
+  }
+
+
+  /* ========== TABLE STYLES ========== */
+  .ma-scope .table-container {
+    width: 97.8%;
+    max-height: 500px;
+    overflow-x: auto;
+    overflow-y: auto;
+    border-radius: 0.2rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: 0.2px solid #e5e7eb;
+    margin-left: 25px;
+
+  }
+
+  .ma-scope .custom-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ma-scope .custom-table thead {
+    background: #f9fafb !important;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .custom-table th {
+    padding: 0.6rem 1rem;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    background: #e5e7eb !important;
+    color: #000000;
+  }
+
+  .ma-scope .custom-table tbody tr {
+    transition: background-color 0.2s;
+  }
+
+  .ma-scope .custom-table tbody tr:hover {
+    background-color: rgb(249, 250, 251);
+  }
+
+  .ma-scope .custom-table tbody tr:nth-child(even) {
+    background-color: rgba(187, 181, 181, 0.041);
+  }
+
+  .ma-scope .custom-table td {
+    padding: 0rem 1.5rem;
+    font-size: 0.7rem;
+    color: rgb(55, 65, 81);
+    text-align: left;
+    white-space: nowrap;
+    /* border: 1.5px solid #e5e7eb; */
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+
+
+
+  .ma-scope .custom-tables {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ma-scope .custom-tables thead {
+    background: #f9fafb !important;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .custom-tables th {
+    padding: 0.6rem 1rem;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    background: #e5e7eb !important;
+    color: #000000;
+  }
+
+  .ma-scope .custom-tables tbody tr {
+    transition: background-color 0.2s;
+  }
+
+  .ma-scope .custom-tables tbody tr:hover {
+    background-color: rgb(249, 250, 251);
+  }
+
+  .ma-scope .custom-tables tbody tr:nth-child(even) {
+    background-color: rgba(187, 181, 181, 0.041);
+  }
+
+  .ma-scope .custom-tables td {
+    padding: 0.4rem 1.5rem;
+    font-size: 0.7rem;
+    color: rgb(55, 65, 81);
+    text-align: left;
+    white-space: nowrap;
+    /* border: 1.5px solid #e5e7eb; */
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+
+
+  /* ========== CUSTOME TABLES FOR MAIN TABLE INGREDIENT VIEW ========== */
+
+  .ma-scope .custom-tabless {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ma-scope .custom-tabless td {
+    padding: 0.3rem 1.1rem;
+    font-size: 0.7rem;
+    color: rgb(0, 0, 0);
+    text-align: left;
+    white-space: nowrap;
+    border: 1.5px solid #f8fafc;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+  .ma-scope .custom-tabless th {
+    padding: 0.6rem 1rem;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc !important;
+    color: #000000;
+  }
+
+  .ma-scope .custom-tabless td[align="right"] {
+    text-align: right !important;
+  }
+
+  .ma-scope .custom-tabless td[align="center"] {
+    text-align: center !important;
+  }
+
+  .ma-scope .custom-tabless td[align="left"] {
+    text-align: left !important;
+  }
+
+
+  .ma-scope .custom-tabless td .MuiTypography-root {
+    font-size: 0.7rem !important;
+    font-family: "Poppins", sans-serif !important;
+    line-height: 1.4;
+  }
+
+
+
+  /* ========== BUTTON STYLES ========== */
+  .ma-scope .edit-btn {
+    padding: 0rem;
+    color: #5e5e5f !important;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .edit-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+
+  .ma-scope .edit-single {
+    padding: 0.5rem;
+    color: #5e5e5f !important;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .edit-single svg {
+    width: 30px !important;
+    height: 20px !important;
+  }
+
+
+
+  .ma-scope .print-btn {
+    padding: 0rem;
+    color: #2563EB !important;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .print-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+
+  .ma-scope .print-btns {
+    padding: 0rem;
+    color: #2563EB !important;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .print-btns svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+
+  .ma-scope .deactivate-btn {
+    padding: 0.5rem;
+    color: #5e5e5f;
+    transition: background-color 0.15s;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .deactivate-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+
+
+  .ma-scope .deactivate-btns {
+    padding: 0.25rem;
+    color: #5e5e5f;
+    transition: background-color 0.15s;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .deactivate-btns svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .ma-scope .delete-btn {
+    padding: 0.3rem;
+    color: rgb(220, 38, 38);
+    transition: background-color 0.15s;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ma-scope .delete-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+
+  .ma-scope .btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(to right, rgb(220, 38, 38), rgb(220, 38, 38));
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px 0 rgba(59, 130, 246, 0.3);
+  }
+
+  .ma-scope .activate-btn {
+    /* color: rgb(22, 163, 74); */
+    color: #1976d2;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.15s;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* .ma-scope .activate-btn:hover {
+    background-color: rgb(202, 175, 175);
+  } */
+
+  /* ========== STATUS BADGES ========== */
+  .ma-scope .status-active {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: rgb(220, 252, 231);
+    color: rgb(22, 101, 52);
+  }
+
+  .ma-scope .status-inactive {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background-color: rgb(254, 226, 226);
+    color: rgb(153, 27, 27);
+  }
+
+  .ma-scope .empty-state {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 6px 20px !important;
+    font-size: 1.1rem;
+    color: #666;
+  }
+
+  /* ========== DIALOG STYLES ========== */
+
+
+  .ma-scope .dialog-paper {
+    border-radius: 0.2rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    max-width: 900px !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+  .ma-scope .dialog-paper-big {
+    border-radius: 0.2rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    max-width: 1100px !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+  .ma-scope .dialog-paper-medium {
+    border-radius: 0.2rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    max-width: 700px !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .dialog-paper-small {
+    border-radius: 0.2rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    max-width: 350px !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  /* Dialog Header/Title */
+  .ma-scope .dialog-title {
+    padding: 1.25rem 1.1rem !important;
+    padding-bottom: 0.5rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: rgb(31, 41, 55) !important;
+    border-bottom: 1px solid rgb(229, 231, 235) !important;
+    background: linear-gradient(to right, rgb(249, 250, 251), rgb(255, 255, 255)) !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  /* Dialog Content Area */
+  .ma-scope .dialog-content {
+    padding: 0.8rem !important;
+    max-height: 71vh !important;
+    overflow-y: auto !important;
+    background-color: rgb(255, 255, 255) !important;
+  }
+
+  /* Custom Scrollbar for Dialog Content */
+  .ma-scope .dialog-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .ma-scope .dialog-content::-webkit-scrollbar-track {
+    /* Dialog Inside Scroll */
+    background: rgb(243, 244, 246);
+    border-radius: 4px;
+  }
+
+  .ma-scope .dialog-content::-webkit-scrollbar-thumb {
+    background: rgb(212, 219, 209);
+    border-radius: 4px;
+  }
+
+  .ma-scope .dialog-content::-webkit-scrollbar-thumb:hover {
+    /* Dialog Inside Scroll */
+    background: #31363b !important;
+    width: 8px;
+  }
+
+  /* Dialog Footer/Actions */
+  .ma-scope .dialog-actions {
+    padding: 0.3rem 1.5rem !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 0.75rem !important;
+    border-top: 1px solid rgb(229, 231, 235) !important;
+    background-color: rgb(249, 250, 251) !important;
+  }
+
+  /* Dialog Section Container */
+  .ma-scope .dialog-section {
+    margin-bottom: 0.5rem;
+  }
+
+  .ma-scope .dialog-section:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Dialog Section Title/Header */
+  .ma-scope .dialog-section-title {
+    font-size: 0.2rem;
+    font-weight: 600;
+    color: rgb(55, 65, 81);
+    margin-bottom: 0.3rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 0.5px solid rgb(229, 231, 235);
+    display: flex;
+    align-items: center;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  /* Primary Button */
+.ma-scope .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.45rem 1rem;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  color: var(--erp-accent-contrast, #ffffff) !important;
+
+  background: var(--erp-accent, #155eef) !important;
+
+  border: 1px solid var(--erp-accent, #155eef) !important;
+  border-radius: 0.5rem;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+
+  box-shadow:
+    0 2px 5px
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.22) !important;
+}
+
+.ma-scope .btn-primary:hover:not(:disabled) {
+  color: var(--erp-accent-contrast, #ffffff) !important;
+
+  background: var(--erp-accent-hover, #124bc0) !important;
+
+  border-color: var(--erp-accent-hover, #124bc0) !important;
+
+  box-shadow:
+    0 4px 10px
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.28) !important;
+
+  transform: translateY(-1px);
+}
+
+.ma-scope .btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ma-scope .btn-primary:disabled {
+  color: #ffffff !important;
+  background: #98a2b3 !important;
+  border-color: #98a2b3 !important;
+
+  cursor: not-allowed;
+
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+  .ma-scope .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .ma-scope .btn-primary:disabled {
+    background: rgb(156, 163, 175);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+
+
+  .ma-scope .btn-primary-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(to right, rgb(223, 49, 49), rgb(223, 38, 38));
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px 0 rgba(59, 130, 246, 0.3);
+  }
+
+  /* Secondary Button */
+  .ma-scope .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(55, 65, 81);
+    background-color: white;
+    border: 1px solid rgb(209, 213, 219);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ma-scope .btn-secondary:hover {
+    background-color: rgb(249, 250, 251);
+    border-color: rgb(156, 163, 175);
+  }
+
+  .ma-scope .btn-secondary:active {
+    background-color: rgb(243, 244, 246);
+  }
+
+  /* Checkbox Group */
+  .ma-scope .checkbox-group {
+    gap: 1rem;
+    margin-top: -0.6rem;
+  }
+
+  .ma-scope .checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0rem;
+    font-size: 0.5rem;
+    font-weight: 400;
+    color: rgb(55, 65, 81);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+  }
+
+  .ma-scope .checkbox-label:hover {
+    color: rgb(59, 130, 246);
+  }
+
+  /* Loading Spinner */
+  .ma-scope .loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    border-left-color: rgb(59, 130, 246);
+    border-radius: 50%;
+    animation: ma-scope-spin 0.8s linear infinite;
+  }
+
+  @keyframes ma-scope-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Error Message Box */
+  .ma-scope .error-message {
+    padding: 0.875rem 1rem;
+    margin-top: 1rem;
+    background-color: rgb(254, 242, 242);
+    border: 1px solid rgb(254, 226, 226);
+    border-left: 4px solid rgb(220, 38, 38);
+    border-radius: 0.5rem;
+    color: rgb(153, 27, 27);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Success Message Box */
+  .ma-scope .success-message {
+    padding: 0.875rem 1rem;
+    margin-top: 1rem;
+    background-color: rgb(240, 253, 244);
+    border: 1px solid rgb(220, 252, 231);
+    border-left: 4px solid rgb(22, 163, 74);
+    border-radius: 0.5rem;
+    color: rgb(22, 101, 52);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Warning Message Box */
+  .ma-scope .warning-message {
+    padding: 0.875rem 1rem;
+    margin-top: 1rem;
+    background-color: rgb(254, 252, 232);
+    border: 1px solid rgb(254, 240, 138);
+    border-left: 4px solid rgb(234, 179, 8);
+    border-radius: 0.5rem;
+    color: rgb(133, 77, 14);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Info Message Box */
+  .ma-scope .info-message {
+    padding: 0.875rem 1rem;
+    margin-top: 1rem;
+    background-color: rgb(239, 246, 255);
+    border: 1px solid rgb(219, 234, 254);
+    border-left: 4px solid rgb(59, 130, 246);
+    border-radius: 0.5rem;
+    color: rgb(30, 64, 175);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+
+
+
+  /* ===== POPUP / POPOVER GLOBAL STYLES ===== */
+
+  .ma-scope .custom-popover {
+    padding: 8px;
+    max-height: 500px;
+    /* Better height */
+    overflow-y: auto;
+    min-width: 180px;
+    /* Increased width */
+    background: #ffffff;
+    border-radius: 1.5rem;
+  }
+
+  .ma-scope .custom-popover h4 {
+    padding: 6px 4px;
+    margin: 0;
+    font-size: 11px;
+    font-weight: 500;
+    color: #333333;
+    font-family: "Poppins", sans-serif !important;
+    /* clean font */
+  }
+
+  .ma-scope .custom-popover h4:hover {
+    background: #f3f4f6;
+    /* soft hover */
+    border-radius: 60px;
+  }
+
+
+  /* ========== ICON ACTION BUTTONS (Add, Import, Export) ========== */
+  .ma-scope .icon-action-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ma-scope .icon-action-button {
+    padding: 3px !important;
+    border-radius: 0.45rem !important;
+    border: 1.5px solid #1976d2 !important;
+    background: white !important;
+    width: 26px !important;
+    height: 26px !important;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .ma-scope .icon-action-button:hover {
+    background: #ebf5ff !important;
+    transform: translateY(1px);
+    box-shadow: 0 4px 8px rgba(25, 118, 210, 0.2);
+  }
+
+  .ma-scope .icon-action-svg {
+    font-size: 1.05rem !important;
+    /* ~16-17px icons */
+  }
+
+  .ma-scope .icon-action-label {
+    font-size: 0.7rem !important;
+    color: #374151;
+    font-weight: 500;
+    white-space: nowrap;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  /* ========== FILTER ICON BUTTON ========== */
+  .ma-scope .filter-icon-button {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(209, 213, 219);
+    background-color: white;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .ma-scope .filter-icon-button:hover {
+    background-color: rgb(249, 250, 251);
+    border-color: rgb(156, 163, 175);
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .ma-scope .filter-icon-svg {
+    color: rgb(75, 85, 99);
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* ========== FORM CONTROL LABEL (Switch) ========== */
+  .ma-scope .switch-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(55, 65, 81);
+  }
+
+  .ma-scope .switch-label .MuiSwitch-root {
+    margin-left: 0.5rem;
+  }
+
+  .ma-scope .switch-label .MuiSwitch-track {
+    background-color: rgb(209, 213, 219);
+  }
+
+  .ma-scope .switch-label .MuiSwitch-thumb {
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .ma-scope .switch-label .Mui-checked+.MuiSwitch-track {
+    background-color: rgb(147, 51, 234);
+  }
+
+  .ma-scope .switch-label .Mui-checked .MuiSwitch-thumb {
+    background-color: rgb(126, 34, 206);
+  }
+
+  /* ========== FORM SECTION STYLES ========== */
+  .ma-scope .form-section {
+    margin-bottom: 0.2rem;
+    background-color: rgb(255, 255, 255);
+    border-radius: 0.2rem;
+    border: 1.5px solid rgb(229, 231, 235);
+    padding: 0.8rem;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .form-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .ma-scope .form-section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgb(0, 0, 0);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+
+  .ma-scope .form-section-subtitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgb(55, 65, 81);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+  }
+
+  /* ========== FORM GRID LAYOUTS ========== */
+  .ma-scope .form-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* GRID LAYOUT */
+    gap: 0.6rem;
+  }
+
+  .ma-scope .form-grid-manager {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+
+  /* Form Field Wrapper */
+  .ma-scope .form-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Form Field Span Variants */
+  .ma-scope .form-field-span-2 {
+    grid-column: span 2;
+  }
+
+  .ma-scope .form-field-span-3 {
+    grid-column: span 2;
+  }
+
+  .ma-scope .form-field-span-4 {
+    grid-column: span 4;
+  }
+
+  /* ========== CUSTOM TEXTFIELD STYLES ========== */
+  .ma-scope .custom-textfield {
+    width: 100%;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  /* TextField Root Container */
+  .ma-scope .custom-textfield .MuiOutlinedInput-root {
+    transition: all 0.2s;
+    border-radius: 0.375rem;
+    background-color: rgb(255, 255, 255);
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root:hover {
+    background-color: rgb(249, 250, 251);
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: rgb(156, 163, 175);
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-focused {
+    background-color: rgb(255, 255, 255);
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    /* FIELD BORDER COLOR */
+    border-color: rgba(0, 0, 0, 0.39) !important;
+    border-width: 2px !important;
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-notchedOutline {
+    border-color: rgb(209, 213, 219);
+  }
+
+  /* Label Styling - Larger and More Prominent */
+  .ma-scope .custom-label {
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    color: rgb(55, 65, 81) !important;
+    transform: translate(14px, 9px) scale(1) !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .custom-label.MuiInputLabel-shrink {
+    /* FIELD NAME COLOR */
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    color: rgb(0, 0, 0) !important;
+    transform: translate(14px, -9px) scale(0.85) !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  /* Input Field Styling - Smaller Text */
+  .ma-scope .custom-input input {
+    font-size: 0.753rem !important;
+    font-weight: 400 !important;
+    color: rgb(17, 24, 39) !important;
+    padding: 13px 14px !important;
+    font-family: "Poppins", sans-serif !important;
+  }
+
+  .ma-scope .custom-input {
+    background-color: rgb(255, 255, 255);
+    border-radius: 0.375rem;
+  }
+
+  /* Placeholder Styling */
+  .ma-scope .custom-input input::placeholder {
+    color: rgb(156, 163, 175);
+    font-size: 0.713rem !important;
+    opacity: 1;
+  }
+
+  /* Helper Text Styling */
+  .ma-scope .custom-textfield .MuiFormHelperText-root {
+    font-size: 0.75rem !important;
+    margin-top: 0.25rem;
+    margin-left: 0.25rem;
+  }
+
+  .ma-scope .custom-textfield .MuiFormHelperText-root.Mui-error {
+    color: rgb(220, 38, 38) !important;
+    font-weight: 500;
+  }
+
+  /* Disabled State */
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-disabled {
+    background-color: rgb(243, 244, 246);
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-disabled .MuiOutlinedInput-notchedOutline {
+    border-color: rgb(229, 231, 235);
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-disabled input {
+    color: rgb(107, 114, 128);
+    -webkit-text-fill-color: rgb(107, 114, 128);
+  }
+
+  /* Focus Visible Enhancement */
+  .ma-scope .custom-textfield input:focus-visible {
+    outline: none;
+  }
+
+  /* Error State */
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline {
+    border-color: rgb(220, 38, 38) !important;
+  }
+
+  .ma-scope .custom-textfield .MuiOutlinedInput-root.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: rgb(220, 38, 38) !important;
+    border-width: 2px !important;
+  }
+
+  /* ========== RESPONSIVE ADJUSTMENTS ========== */
+  @media (max-width: 640px) {
+
+    .ma-scope .form-grid,
+    .ma-scope .form-grid-manager {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+
+    .ma-scope .form-section {
+      padding: 0.6rem;
+    }
+
+    .ma-scope .dialog-content {
+      padding: 0.6rem !important;
+    }
+
+  }
+
+  @media (max-width: 768px) and (min-width: 641px) {
+    .ma-scope .form-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ma-scope .form-grid-manager {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+/* =========================================================
+   GLOBAL ACCENT COLOR SYSTEM
+   Applies selected Display Settings accent across the ERP
+   ========================================================= */
+
+:root {
+  --erp-accent: #155eef;
+  --erp-accent-rgb: 21, 94, 239;
+  --erp-accent-contrast: #ffffff;
+
+  --erp-accent-hover:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 86%,
+      black
+    );
+
+  --erp-accent-soft:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 14%,
+      white
+    );
+
+  --erp-accent-soft-hover:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 22%,
+      white
+    );
+
+  --erp-accent-border:
+    color-mix(
+      in srgb,
+      var(--erp-accent) 38%,
+      white
+    );
+
+  --erp-accent-ring:
+    rgba(
+      var(--erp-accent-rgb),
+      0.16
+    );
+}
+
+/* =========================================================
+   Primary buttons and selected controls
+   ========================================================= */
+
+.MuiButton-contained,
+.MuiButton-containedPrimary,
+.MuiButton-containedSecondary,
+.primary-button,
+button.primary,
+.purchase-submodule-tab.is-active,
+.MuiTab-root.Mui-selected,
+.MuiToggleButton-root.Mui-selected,
+.MuiPaginationItem-root.Mui-selected,
+.MuiSpeedDial-fab,
+.MuiFab-primary,
+.MuiStepIcon-root.Mui-active,
+.MuiStepIcon-root.Mui-completed {
+  color:
+    var(--erp-accent-contrast) !important;
+
+  background-color:
+    var(--erp-accent) !important;
+
+  border-color:
+    var(--erp-accent) !important;
+}
+
+.MuiButton-contained:hover,
+.MuiButton-containedPrimary:hover,
+.MuiButton-containedSecondary:hover,
+.primary-button:hover,
+button.primary:hover,
+.purchase-submodule-tab.is-active:hover,
+.MuiTab-root.Mui-selected:hover,
+.MuiToggleButton-root.Mui-selected:hover,
+.MuiPaginationItem-root.Mui-selected:hover,
+.MuiFab-primary:hover {
+  color:
+    var(--erp-accent-contrast) !important;
+
+  background-color:
+    var(--erp-accent-hover) !important;
+
+  border-color:
+    var(--erp-accent-hover) !important;
+}
+
+/* =========================================================
+   Links and accent text
+   ========================================================= */
+
+a,
+.MuiLink-root,
+.accent-text,
+.text-primary,
+.erp-accent-text {
+  color:
+    var(--erp-accent) !important;
+}
+
+a:hover,
+.MuiLink-root:hover,
+.accent-text:hover,
+.text-primary:hover,
+.erp-accent-text:hover {
+  color:
+    var(--erp-accent-hover) !important;
+}
+
+/* =========================================================
+   Sidebar active and hover states
+   ========================================================= */
+
+.erp-sidebar-item.is-active {
+  color:
+    var(--erp-accent) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+
+  border-color:
+    var(--erp-accent-border) !important;
+
+  box-shadow:
+    0 5px 14px
+    rgba(
+      var(--erp-accent-rgb),
+      0.11
+    ) !important;
+}
+
+.erp-sidebar-item.is-active
+  .erp-sidebar-icon,
+.erp-sidebar-item.is-active
+  .erp-sidebar-label,
+.erp-sidebar-item.is-active
+  .erp-sidebar-icon-label {
+  color:
+    var(--erp-accent) !important;
+}
+
+.erp-sidebar-item:hover {
+  color:
+    var(--erp-accent) !important;
+
+  background:
+    var(--erp-accent-soft-hover) !important;
+
+  border-color:
+    var(--erp-accent-border) !important;
+}
+
+.erp-sidebar-item:hover
+  .erp-sidebar-icon,
+.erp-sidebar-item:hover
+  .erp-sidebar-label,
+.erp-sidebar-item:hover
+  .erp-sidebar-icon-label {
+  color:
+    var(--erp-accent) !important;
+}
+
+/* =========================================================
+   Purchase and Book secondary sidebars
+   ========================================================= */
+
+.purchase-module-item.is-active,
+.book-module-item.is-active {
+  color:
+    var(--erp-accent-contrast) !important;
+
+  background:
+    var(--erp-accent) !important;
+
+  border-color:
+    var(--erp-accent) !important;
+
+  box-shadow:
+    0 5px 14px
+    rgba(
+      var(--erp-accent-rgb),
+      0.16
+    ) !important;
+}
+
+.purchase-module-item.is-active
+  .purchase-module-icon,
+.purchase-module-item.is-active
+  .purchase-module-label,
+.book-module-item.is-active
+  .book-module-icon,
+.book-module-item.is-active
+  .book-module-label {
+  color:
+    var(--erp-accent-contrast) !important;
+}
+
+.purchase-module-item:hover,
+.book-module-item:hover {
+  color:
+    var(--erp-accent) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+
+  transform:
+    translateX(1px);
+}
+
+/* =========================================================
+   Inputs, forms and focus states
+   ========================================================= */
+
+.MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline,
+.MuiInput-underline::after,
+.MuiFilledInput-underline::after {
+  border-color:
+    var(--erp-accent) !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused {
+  box-shadow:
+    0 0 0 3px
+    var(--erp-accent-ring) !important;
+}
+
+.MuiFormLabel-root.Mui-focused,
+.MuiInputLabel-root.Mui-focused {
+  color:
+    var(--erp-accent) !important;
+}
+
+/* =========================================================
+   Checkbox, radio and switches
+   ========================================================= */
+
+.MuiCheckbox-root.Mui-checked,
+.MuiCheckbox-root.MuiCheckbox-indeterminate,
+.MuiRadio-root.Mui-checked,
+.MuiSwitch-switchBase.Mui-checked {
+  color:
+    var(--erp-accent) !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked
+  + .MuiSwitch-track {
+  background-color:
+    var(--erp-accent) !important;
+
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   Tabs and navigation selections
+   ========================================================= */
+
+.MuiTabs-indicator {
+  background-color:
+    var(--erp-accent) !important;
+}
+
+.MuiBottomNavigationAction-root.Mui-selected,
+.MuiListItemButton-root.Mui-selected,
+.MuiMenuItem-root.Mui-selected {
+  color:
+    var(--erp-accent) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+}
+
+.MuiListItemButton-root.Mui-selected:hover,
+.MuiMenuItem-root.Mui-selected:hover {
+  background:
+    var(--erp-accent-soft-hover) !important;
+}
+
+/* =========================================================
+   Icons and icon buttons
+   ========================================================= */
+
+.icon-button-outline {
+  color:
+    var(--erp-accent) !important;
+
+  border-color:
+    var(--erp-accent) !important;
+}
+
+.icon-button-outline:hover {
+  color:
+    var(--erp-accent-contrast) !important;
+
+  background-color:
+    var(--erp-accent) !important;
+
+  border-color:
+    var(--erp-accent) !important;
+}
+
+.MuiIconButton-colorPrimary {
+  color:
+    var(--erp-accent) !important;
+}
+
+.MuiIconButton-colorPrimary:hover {
+  background:
+    var(--erp-accent-soft) !important;
+}
+
+/* =========================================================
+   Progress indicators
+   ========================================================= */
+
+.MuiCircularProgress-root,
+.MuiLinearProgress-bar,
+.MuiSlider-thumb,
+.MuiSlider-track,
+.MuiRating-iconFilled {
+  color:
+    var(--erp-accent) !important;
+}
+
+.MuiLinearProgress-bar,
+.MuiSlider-track {
+  background-color:
+    var(--erp-accent) !important;
+}
+
+.MuiLinearProgress-root,
+.MuiSlider-rail {
+  background-color:
+    var(--erp-accent-soft) !important;
+}
+
+/* =========================================================
+   Purchase module accent pills
+   ========================================================= */
+
+.erp-purchase-viewport
+  .purchase-reference-view-pill,
+.erp-purchase-viewport
+  .MuiChip-colorInfo,
+.erp-purchase-viewport
+  .status-info {
+  color:
+    var(--erp-accent) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-view-pill:hover {
+  color:
+    var(--erp-accent-hover) !important;
+
+  background:
+    var(--erp-accent-soft-hover) !important;
+}
+
+/* =========================================================
+   Hover for normal outlined buttons
+   ========================================================= */
+
+.MuiButton-outlined:hover,
+.purchase-reference-action-button:hover {
+  color:
+    var(--erp-accent) !important;
+
+  border-color:
+    var(--erp-accent-border) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+}
+
+/* =========================================================
+   Selected table rows
+   ========================================================= */
+
+.MuiTableRow-root.Mui-selected
+  .MuiTableCell-body,
+.MuiTableRow-root[aria-selected='true']
+  .MuiTableCell-body {
+  background:
+    var(--erp-accent-soft) !important;
+}
+
+.MuiTableRow-root.Mui-selected:hover
+  .MuiTableCell-body,
+.MuiTableRow-root[aria-selected='true']:hover
+  .MuiTableCell-body {
+  background:
+    var(--erp-accent-soft-hover) !important;
+}
+
+/* =========================================================
+   Tooltip and snackbar primary treatment
+   ========================================================= */
+
+.MuiTooltip-tooltip {
+  background:
+    var(--erp-accent) !important;
+
+  color:
+    var(--erp-accent-contrast) !important;
+}
+
+.MuiTooltip-arrow {
+  color:
+    var(--erp-accent) !important;
+}
+
+.MuiSnackbarContent-root {
+  background-color:
+    var(--erp-accent) !important;
+
+  color:
+    var(--erp-accent-contrast) !important;
+}
+
+/* =========================================================
+   Scrollbar accent
+   ========================================================= */
+
+* {
+  scrollbar-color:
+    var(--erp-accent-border)
+    transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background:
+    var(--erp-accent-border) !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background:
+    var(--erp-accent) !important;
+}
+
+/* =========================================================
+   Selection highlight
+   ========================================================= */
+
+::selection {
+  color:
+    var(--erp-accent-contrast);
+
+  background:
+    var(--erp-accent);
+}

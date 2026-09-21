@@ -19,6 +19,7 @@ import {
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import { ServiceData } from '../Models/servicepo';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface ServiceDialogProps {
   open: boolean;
@@ -182,20 +183,20 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({ open, onClose, service })
                       {service.quantity?.[index]?.toFixed(2) || '1.00'}
                     </TableCell>
                     <TableCell align="right">
-                      ₹{(service.fees?.[index] || 0).toFixed(2)}
+                      {formatCurrency((service.fees?.[index] || 0))}
                     </TableCell>
                     <TableCell align="right">
-                      ₹{((service.desc_discount_amounts?.[index] || 0) + 
-                         (service.desc_discount_percentages?.[index] || 0)).toFixed(2)}
+                      {formatCurrency(((service.desc_discount_amounts?.[index] || 0) + 
+                         (service.desc_discount_percentages?.[index] || 0)))}
                     </TableCell>
                     <TableCell align="right">
                       {(service.desc_tax_pers?.[index] || 0).toFixed(1)}%
                     </TableCell>
                     <TableCell align="right">
-                      ₹{(service.desc_tax_amounts?.[index] || 0).toFixed(2)}
+                      {formatCurrency((service.desc_tax_amounts?.[index] || 0))}
                     </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                      ₹{(service.desc_totals?.[index] || 0).toFixed(2)}
+                      {formatCurrency((service.desc_totals?.[index] || 0))}
                     </TableCell>
                   </TableRow>
                 )) || (
@@ -211,11 +212,11 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({ open, onClose, service })
             {/* Totals Summary */}
             <Box sx={{ mt: 4, textAlign: 'right', pr: 2 }}>
               <Typography><strong>Subtotal (Fees):</strong> ₹{(service.base_amounts || 0)}</Typography>
-              <Typography><strong>Total Tax:</strong> ₹{(service.totalTax || 0).toFixed(2)}</Typography>
-              <Typography><strong>Total Discount:</strong> -₹{(service.totalDiscount || 0).toFixed(2)}</Typography>
-              <Typography><strong>Round Off:</strong> ₹{(service.roundOffValue || 0).toFixed(2)}</Typography>
+              <Typography><strong>Total Tax:</strong> {formatCurrency((service.totalTax || 0))}</Typography>
+              <Typography><strong>Total Discount:</strong> -{formatCurrency((service.totalDiscount || 0))}</Typography>
+              <Typography><strong>Round Off:</strong> {formatCurrency((service.roundOffValue || 0))}</Typography>
               <Typography variant="h6" sx={{ mt: 1, color: 'primary.main' }}>
-                <strong>Grand Total: ₹{(service.totalAmount || 0).toFixed(2)}</strong>
+                <strong>Grand Total: {formatCurrency((service.totalAmount || 0))}</strong>
               </Typography>
             </Box>
 

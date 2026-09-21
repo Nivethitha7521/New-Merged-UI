@@ -21,6 +21,7 @@ import {
 import VendorToolbar from '../../../../components/yen-purchase/vendorcomponent/vendortypecomponent/vendorToolbar';
 import VendorTable from '../../../../components/yen-purchase/vendorcomponent/vendortypecomponent/vendorTable';
 import VendorTypeDialog from '../../../../components/yen-purchase/vendorcomponent/vendortypecomponent/vendortypedialog';
+// import MenuPage from '../page';
 import MenuPage from '../page';
 import { usePermissions } from '../../../../hooks/usePermissions'; 
 interface VendorType {
@@ -262,9 +263,11 @@ if (!isModuleVisible("yenerp", "vendortype")) {
   // );
 }
 
-  return (
-    <Box mx={1}>
-      <MenuPage />
+return (
+  <Box className="purchase-page-shell vendor-module-page">
+    <MenuPage />
+
+    <Box className="purchase-module-content">
       <VendorToolbar
         searchQuery={searchQuery}
         showDeactivated={showDeactivated}
@@ -303,6 +306,7 @@ if (!isModuleVisible("yenerp", "vendortype")) {
         </Box>
       </Backdrop>
     </Box>
+     </Box>
   );
 };
 

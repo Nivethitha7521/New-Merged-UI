@@ -1,0 +1,219 @@
+/* =========================================================================
+   YEN ERP — LEGACY SNACKBAR / TOAST BRIDGE
+   -------------------------------------------------------------------------
+   ~220 existing pages render their own <Snackbar><Alert/></Snackbar> with
+   different positions (bottom-left / center / right / top), hard-coded blue
+   backgrounds and different sizes, and react-toastify has a third look.
+
+   This file restyles those EXISTING components (visual only, no JS, no page
+   edits) so they look identical to the new notify.* toasts:
+     same position (top-right, under the navbar), same card, same severity
+     colours, light + dark theme aware.
+
+   It only touches `.MuiSnackbar-root …` and `.Toastify …`. Inline
+   <Alert> banners inside forms/dialogs are NOT affected.
+
+   ROLLBACK: remove the `legacy-bridge.css` import from app/layout.tsx.
+   Positions/colours come from the --yen-fb-* tokens in feedback.css.
+   ========================================================================= */
+
+/* ---------- MUI <Snackbar> : position ---------- */
+
+html body .MuiSnackbar-root {
+  --yen-fb-tone: var(--yen-fb-info, #155eef); /* default; severity rules below override on the Alert */
+  position: fixed !important;
+  z-index: 1900 !important;
+  bottom: var(--yen-fb-bottom, 24px) !important;
+  left: var(--yen-fb-left, 24px) !important;
+  top: auto !important;
+  right: auto !important;
+  transform: none !important;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start !important;
+  /* !important: master-admin has `.erp-master-admin-viewport > * { width:100% !important }` */
+  width: min(420px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 560px) {
+  html body .MuiSnackbar-root {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+/* ---------- MUI <Snackbar><Alert> : card look ---------- */
+
+/* Alert is a MUI <Paper>; globals.css forces radius/shadow on every Paper with a
+   4-class selector, so the class is repeated below purely to out-rank it. */
+html body .MuiSnackbar-root .MuiAlert-root.MuiAlert-root.MuiAlert-root {
+  box-sizing: border-box;
+  align-items: flex-start !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 12px 10px 12px 14px !important;
+  color: var(--yen-fb-text, #101828) !important;
+  background: var(--yen-fb-surface, #ffffff) !important;
+  background-image: none !important;
+  border: 1px solid var(--yen-fb-border, #dfe5ec) !important;
+  border-left: 4px solid var(--yen-fb-tone) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--yen-fb-toast-shadow, 0 10px 30px rgba(16, 24, 40, 0.16)) !important;
+  font-size: calc(14px * var(--yen-fb-scale, 1)) !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+}
+
+html body .MuiSnackbar-root .MuiAlert-standardSuccess,
+html body .MuiSnackbar-root .MuiAlert-filledSuccess,
+html body .MuiSnackbar-root .MuiAlert-outlinedSuccess { --yen-fb-tone: var(--yen-fb-success, #0b7a42); }
+
+html body .MuiSnackbar-root .MuiAlert-standardError,
+html body .MuiSnackbar-root .MuiAlert-filledError,
+html body .MuiSnackbar-root .MuiAlert-outlinedError { --yen-fb-tone: var(--yen-fb-danger, #d92d20); }
+
+html body .MuiSnackbar-root .MuiAlert-standardWarning,
+html body .MuiSnackbar-root .MuiAlert-filledWarning,
+html body .MuiSnackbar-root .MuiAlert-outlinedWarning { --yen-fb-tone: var(--yen-fb-warning, #b54708); }
+
+html body .MuiSnackbar-root .MuiAlert-standardInfo,
+html body .MuiSnackbar-root .MuiAlert-filledInfo,
+html body .MuiSnackbar-root .MuiAlert-outlinedInfo { --yen-fb-tone: var(--yen-fb-info, #155eef); }
+
+html body .MuiSnackbar-root .MuiAlert-icon {
+  margin: 0 10px 0 0 !important;
+  padding: 1px 0 !important;
+  color: var(--yen-fb-tone) !important;
+  opacity: 1 !important;
+}
+html body .MuiSnackbar-root .MuiAlert-icon .MuiSvgIcon-root {
+  width: 22px !important;
+  height: 22px !important;
+  color: var(--yen-fb-tone) !important;
+  font-size: 22px !important;
+}
+
+html body .MuiSnackbar-root .MuiAlert-message {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1px 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+html body .MuiSnackbar-root .MuiAlertTitle-root {
+  margin: 0 0 2px !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: 700 !important;
+}
+
+html body .MuiSnackbar-root .MuiAlert-action {
+  margin: -2px 0 0 8px !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+}
+html body .MuiSnackbar-root .MuiAlert-action .MuiIconButton-root {
+  color: var(--yen-fb-muted, #667085) !important;
+  border-radius: 8px !important;
+}
+html body .MuiSnackbar-root .MuiAlert-action .MuiIconButton-root:hover {
+  color: var(--yen-fb-text, #101828) !important;
+  background: var(--yen-fb-surface-muted, #f6f8fb) !important;
+}
+
+/* ---------- MUI <Snackbar message="…"> (no <Alert>) ---------- */
+
+html body .MuiSnackbar-root .MuiSnackbarContent-root.MuiSnackbarContent-root.MuiSnackbarContent-root {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 12px 14px !important;
+  color: var(--yen-fb-text, #101828) !important;
+  background: var(--yen-fb-surface, #ffffff) !important;
+  border: 1px solid var(--yen-fb-border, #dfe5ec) !important;
+  border-left: 4px solid var(--yen-fb-tone) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--yen-fb-toast-shadow, 0 10px 30px rgba(16, 24, 40, 0.16)) !important;
+  font-size: calc(14px * var(--yen-fb-scale, 1)) !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+}
+html body .MuiSnackbar-root .MuiSnackbarContent-message { padding: 0 !important; }
+
+/* ---------- react-toastify ---------- */
+
+html body .Toastify {
+  --toastify-color-success: var(--yen-fb-success, #0b7a42);
+  --toastify-color-error: var(--yen-fb-danger, #d92d20);
+  --toastify-color-warning: var(--yen-fb-warning, #b54708);
+  --toastify-color-info: var(--yen-fb-info, #155eef);
+  --toastify-icon-color-success: var(--yen-fb-success, #0b7a42);
+  --toastify-icon-color-error: var(--yen-fb-danger, #d92d20);
+  --toastify-icon-color-warning: var(--yen-fb-warning, #b54708);
+  --toastify-icon-color-info: var(--yen-fb-info, #155eef);
+  --toastify-color-progress-success: var(--yen-fb-success, #0b7a42);
+  --toastify-color-progress-error: var(--yen-fb-danger, #d92d20);
+  --toastify-color-progress-warning: var(--yen-fb-warning, #b54708);
+  --toastify-color-progress-info: var(--yen-fb-info, #155eef);
+}
+
+html body .Toastify .Toastify__toast-container--top-right,
+html body .Toastify .Toastify__toast-container--top-center,
+html body .Toastify .Toastify__toast-container--top-left,
+html body .Toastify .Toastify__toast-container--bottom-right,
+html body .Toastify .Toastify__toast-container--bottom-center,
+html body .Toastify .Toastify__toast-container--bottom-left {
+  bottom: var(--yen-fb-bottom, 24px) !important;
+  left: var(--yen-fb-left, 24px) !important;
+  top: auto !important;
+  right: auto !important;
+  transform: none !important;
+  width: min(420px, calc(100vw - 32px)) !important;
+  z-index: 1900 !important;
+}
+
+html body .Toastify .Toastify__toast {
+  margin-bottom: 10px !important;
+  min-height: 0 !important;
+  padding: 12px 10px 12px 14px !important;
+  color: var(--yen-fb-text, #101828) !important;
+  background: var(--yen-fb-surface, #ffffff) !important;
+  border: 1px solid var(--yen-fb-border, #dfe5ec);
+  border-left: 4px solid var(--yen-fb-info, #155eef);
+  border-radius: 12px !important;
+  box-shadow: var(--yen-fb-toast-shadow, 0 10px 30px rgba(16, 24, 40, 0.16)) !important;
+  font-size: calc(14px * var(--yen-fb-scale, 1)) !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+}
+html body .Toastify .Toastify__toast--success { border-left-color: var(--yen-fb-success, #0b7a42); }
+html body .Toastify .Toastify__toast--error   { border-left-color: var(--yen-fb-danger, #d92d20); }
+html body .Toastify .Toastify__toast--warning { border-left-color: var(--yen-fb-warning, #b54708); }
+html body .Toastify .Toastify__toast--info    { border-left-color: var(--yen-fb-info, #155eef); }
+html body .Toastify .Toastify__toast-body { padding: 0 !important; margin: 0 !important; }
+html body .Toastify .Toastify__close-button { color: var(--yen-fb-muted, #667085) !important; opacity: 1 !important; }
+
+@media (max-width: 560px) {
+  html body .Toastify .Toastify__toast-container--top-right,
+  html body .Toastify .Toastify__toast-container--top-center,
+  html body .Toastify .Toastify__toast-container--top-left,
+  html body .Toastify .Toastify__toast-container--bottom-right,
+  html body .Toastify .Toastify__toast-container--bottom-center,
+  html body .Toastify .Toastify__toast-container--bottom-left {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    width: auto !important;
+  }
+}

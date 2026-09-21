@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { Button, Box, Paper, Alert } from '@mui/material';
+import { Button, Box} from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveSection, selectActiveSection } from '../../../features/yen-purchase/purchaseMasterSlice';
 import PurchaseCategoryPage from './PurchaseCategory/page';
@@ -10,11 +10,11 @@ import GroupMasterPage from './GroupItem/page';
 import PurchaseTaxPage from './PurchaseTax/page';
 import StorageLocationPage from './StorageLocation/page';
 import ItemTypePage from './ItemType/page';
-import YenPurchasePage from '../page';
 import FreightPage from './Freight/page';
 import ServicePage from './Service/page';
 import BrandPage from './Brands/page';  // ✅ ADD BRAND IMPORT
 import { usePermissions } from "../../../hooks/usePermissions";
+import { useSearchParams } from 'next/navigation';
 
 const PurchaseMasterItemPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -52,7 +52,17 @@ const PurchaseMasterItemPage: React.FC = () => {
       }
     }
   }, []); // runs once on mount
-
+  // Deep-link support: /yen-purchase/PurchaseMaster/?section=purchase-category
+  // lets Global Search jump straight to a specific tab. Declared after the
+  // visibility-check effect above so it wins on mount if both fire.
+const searchParams = useSearchParams();
+React.useEffect(() => {
+  const section = searchParams?.get('section');   // ✅ optional chaining added
+  if (section) {
+    dispatch(setActiveSection(section));
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [searchParams]);
   const handleSectionClick = (section: string) => {
     dispatch(setActiveSection(section));
   };
@@ -80,188 +90,164 @@ const PurchaseMasterItemPage: React.FC = () => {
     return current.comp;
   };
 
-  return (
-    <Box sx={{ ml: 1.2 }}>
-      <YenPurchasePage />
-      <Box sx={{ px: 2, pt: 1 }}>
-        <Box sx={{ mb: 0.5, display: 'flex', justifyContent: 'start', flexWrap: 'wrap', gap: 1 }}>
+return (
+  <Box className="purchase-page-shell">
+    <Box className="purchase-submodule-tabs">
           {canShow("purchasecategory") && (
-            <Button
-              onClick={() => handleSectionClick('purchase-category')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'purchase-category' ? 'black' : 'white',
-                backgroundColor: activeSection === 'purchase-category' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'purchase-category' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Purchase Category
-            </Button>
+          <Button
+  onClick={() =>
+    handleSectionClick('purchase-category')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'purchase-category'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Purchase Category
+</Button>
           )}
           
           {canShow("purchasesubcategory") && (
             <Button
-              onClick={() => handleSectionClick('purchase-subcategory')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'purchase-subcategory' ? 'black' : 'white',
-                backgroundColor: activeSection === 'purchase-subcategory' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'purchase-subcategory' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Purchase SubCategory
-            </Button>
+  onClick={() =>
+    handleSectionClick('purchase-subcategory')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'purchase-subcategory'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Purchase SubCategory
+</Button>
           )}
           
           {canShow("purchaseuom") && (
-            <Button
-              onClick={() => handleSectionClick('uom')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'uom' ? 'black' : 'white',
-                backgroundColor: activeSection === 'uom' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'uom' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Purchase UOM
-            </Button>
+          <Button
+  onClick={() => handleSectionClick('uom')}
+  className={`purchase-submodule-tab ${
+    activeSection === 'uom'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Purchase UOM
+</Button>
           )}
           
           {canShow("itemgroup") && (
-            <Button
-              onClick={() => handleSectionClick('group-master')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'group-master' ? 'black' : 'white',
-                backgroundColor: activeSection === 'group-master' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'group-master' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Group Item
-            </Button>
+           <Button
+  onClick={() =>
+    handleSectionClick('group-master')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'group-master'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Group Item
+</Button>
           )}
           
           {canShow("purchasetax") && (
-            <Button
-              onClick={() => handleSectionClick('purchase-tax')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'purchase-tax' ? 'black' : 'white',
-                backgroundColor: activeSection === 'purchase-tax' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'purchase-tax' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Purchase Tax
-            </Button>
+          <Button
+  onClick={() =>
+    handleSectionClick('purchase-tax')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'purchase-tax'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Purchase Tax
+</Button>
           )}
           
           {canShow("storagelocation") && (
-            <Button
-              onClick={() => handleSectionClick('storage-location')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'storage-location' ? 'black' : 'white',
-                backgroundColor: activeSection === 'storage-location' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'storage-location' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Storage Location
-            </Button>
+          <Button
+  onClick={() =>
+    handleSectionClick('storage-location')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'storage-location'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Storage Location
+</Button>
           )}
           
           {canShow("itemtype") && (
-            <Button
-              onClick={() => handleSectionClick('item-type')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'item-type' ? 'black' : 'white',
-                backgroundColor: activeSection === 'item-type' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'item-type' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Item Type
-            </Button>
+          <Button
+  onClick={() =>
+    handleSectionClick('item-type')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'item-type'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Item Type
+</Button>
           )}
           
           {canShow("freight") && (
-            <Button
-              onClick={() => handleSectionClick('freight')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'freight' ? 'black' : 'white',
-                backgroundColor: activeSection === 'freight' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'freight' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Freight
-            </Button>
+         <Button
+  onClick={() =>
+    handleSectionClick('freight')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'freight'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Freight
+</Button>
           )}
           
           {canShow("service") && (
-            <Button
-              onClick={() => handleSectionClick('service')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'service' ? 'black' : 'white',
-                backgroundColor: activeSection === 'service' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'service' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Service
-            </Button>
+           <Button
+  onClick={() =>
+    handleSectionClick('service')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'service'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Service
+</Button>
           )}
           
           {/* ✅ ADD BRAND BUTTON */}
           {canShow("brand") && (
-            <Button
-              onClick={() => handleSectionClick('brand')}
-              variant="contained"
-              sx={{
-                color: activeSection === 'brand' ? 'black' : 'white',
-                backgroundColor: activeSection === 'brand' ? 'white' : 'primary.main',
-                textTransform: 'capitalize',
-                '&:hover': {
-                  backgroundColor: activeSection === 'brand' ? 'white' : 'primary.dark',
-                },
-              }}
-            >
-              Brand
-            </Button>
+           <Button
+  onClick={() =>
+    handleSectionClick('brand')
+  }
+  className={`purchase-submodule-tab ${
+    activeSection === 'brand'
+      ? 'is-active'
+      : ''
+  }`}
+>
+  Brand
+</Button>
           )}
         </Box>
         
-        <Paper sx={{ p: 1, mb: 1 }}>
-          {renderContent()}
-        </Paper>
+<Box className="purchase-module-content">
+  {renderContent()}
+</Box>
       </Box>
-    </Box>
+   
   );
 };
 

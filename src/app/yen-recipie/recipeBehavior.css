@@ -1,0 +1,27 @@
+/*
+ * Recipe behavior preservation.
+ *
+ * Yenerp gives every table cell a surface background.
+ * That background would otherwise hide conditional row colors
+ * applied by Recipe Management.
+ */
+
+.erp-master-admin-viewport
+.recipe-native-table
+tbody
+tr.recipe-negative-profit-row
+> td {
+  background-color: #f8b5bfff !important;
+}
+
+/*
+ * The original Recipe UI keeps the warning color visible
+ * while the pointer is over the row.
+ */
+.erp-master-admin-viewport
+.recipe-native-table
+tbody
+tr.recipe-negative-profit-row:hover
+> td {
+  background-color: #f8b5bfff !important;
+}

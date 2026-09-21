@@ -1,0 +1,353 @@
+/* =========================================================
+   YEN RECIPE MODULE
+   Uses the existing Yenerp theme variables
+   ========================================================= */
+
+.recipe-module {
+  width: 100%;
+  min-height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  color: var(--erp-text, #101828);
+  background: var(--erp-bg, #f3f6fa);
+}
+
+/* =========================
+   Tables
+   ========================= */
+
+.table-container,
+.table-containers {
+  width: 100%;
+  max-width: 100%;
+  max-height: 500px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--erp-border, #dfe5ec);
+  border-radius: 10px;
+  background: var(--erp-surface, #ffffff);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+
+.custom-table,
+.custom-tables {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  color: var(--erp-text, #101828);
+  background: var(--erp-surface, #ffffff);
+}
+
+.custom-table thead,
+.custom-tables thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.custom-table th,
+.custom-tables th {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--erp-border, #dfe5ec);
+  background: var(--erp-bg, #f3f6fa);
+  color: var(--erp-text, #101828);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.custom-table td,
+.custom-tables td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--erp-border, #dfe5ec);
+  color: var(--erp-text, #101828);
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.custom-table tbody tr,
+.custom-tables tbody tr {
+  background: var(--erp-surface, #ffffff);
+  transition: background-color 0.15s ease;
+}
+
+.custom-table tbody tr:hover,
+.custom-tables tbody tr:hover {
+  background: var(--erp-bg, #f3f6fa);
+}
+
+.custom-table tbody tr:last-child td,
+.custom-tables tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.custom-table td[align="right"],
+.custom-tables td[align="right"] {
+  text-align: right !important;
+}
+
+.custom-table td[align="center"],
+.custom-tables td[align="center"] {
+  text-align: center !important;
+}
+
+.custom-table td[align="left"],
+.custom-tables td[align="left"] {
+  text-align: left !important;
+}
+
+/* =========================
+   Forms and sections
+   ========================= */
+
+.form-section {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid var(--erp-border, #dfe5ec);
+  border-radius: 10px;
+  background: var(--erp-surface, #ffffff);
+}
+
+.form-section-title {
+  margin: 0 0 12px;
+  color: var(--erp-text, #101828);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-section-subtitle {
+  margin: 0 0 10px;
+  color: var(--erp-muted, #667085);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.custom-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--erp-text, #101828);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.custom-textfield {
+  width: 100%;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+}
+
+/* =========================
+   Action icons
+   ========================= */
+
+.icon-action-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.icon-action-button,
+.edit-btn,
+.print-btn,
+.print-btns,
+.activate-btn,
+.deactivate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 5px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--erp-accent, #155eef);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.icon-action-button:hover,
+.edit-btn:hover,
+.print-btn:hover,
+.print-btns:hover,
+.activate-btn:hover,
+.deactivate-btn:hover {
+  color: var(--erp-accent, #155eef);
+  background: var(--erp-accent-soft, #e8efff);
+}
+
+.icon-action-svg,
+.icon-action-button svg,
+.edit-btn svg,
+.print-btn svg,
+.print-btns svg,
+.activate-btn svg,
+.deactivate-btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.icon-action-label {
+  color: var(--erp-muted, #667085);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-primary {
+  border: 1px solid var(--erp-accent, #155eef);
+  color: var(--erp-accent-contrast, #ffffff);
+  background: var(--erp-accent, #155eef);
+}
+
+.btn-primary:hover {
+  background: var(--erp-accent-hover, #124fc9);
+  border-color: var(--erp-accent-hover, #124fc9);
+}
+
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.16));
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  border: 1px solid var(--erp-border, #dfe5ec);
+  color: var(--erp-text, #101828);
+  background: var(--erp-surface, #ffffff);
+}
+
+.btn-secondary:hover {
+  border-color: var(--erp-accent, #155eef);
+  color: var(--erp-accent, #155eef);
+  background: var(--erp-bg, #f3f6fa);
+}
+
+/* =========================
+   MUI dialogs
+   ========================= */
+
+.dialog-paper,
+.dialog-paper-big,
+.dialog-paper-medium,
+.dialog-paper-small {
+  border: 1px solid var(--erp-border, #dfe5ec);
+  border-radius: 12px !important;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  color: var(--erp-text, #101828) !important;
+  box-shadow: 0 20px 45px rgba(16, 24, 40, 0.16) !important;
+}
+
+.dialog-paper {
+  max-width: 900px !important;
+}
+
+.dialog-paper-big {
+  max-width: 1150px !important;
+}
+
+.dialog-paper-medium {
+  max-width: 700px !important;
+}
+
+.dialog-paper-small {
+  max-width: 400px !important;
+}
+
+.dialog-title {
+  padding: 16px 20px !important;
+  border-bottom: 1px solid var(--erp-border, #dfe5ec) !important;
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.dialog-content {
+  max-height: 72vh;
+  padding: 18px 20px !important;
+  overflow-y: auto;
+  color: var(--erp-text, #101828);
+  background: var(--erp-surface, #ffffff);
+}
+
+.dialog-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 12px 20px !important;
+  border-top: 1px solid var(--erp-border, #dfe5ec) !important;
+  background: var(--erp-bg, #f3f6fa) !important;
+}
+
+/* =========================
+   Empty state
+   ========================= */
+
+.empty-state {
+  padding: 24px !important;
+  color: var(--erp-muted, #667085) !important;
+  font-size: 13px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* =========================
+   Responsive layout
+   ========================= */
+
+@media (max-width: 768px) {
+  .recipe-module {
+    padding: 10px;
+  }
+
+  .custom-table th,
+  .custom-table td,
+  .custom-tables th,
+  .custom-tables td {
+    padding: 8px 10px;
+  }
+
+  .dialog-content {
+    padding: 14px !important;
+  }
+
+  .dialog-actions {
+    padding: 10px 14px !important;
+  }
+}

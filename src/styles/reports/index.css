@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 0.875rem; /* equivalent to small text size */
+  }
+  body {
+    @apply bg-gray-800 text-white; /* Apply the same background and text color */
+  }
+}
+body, input, button, select, textarea {
+  @apply text-black;
+}

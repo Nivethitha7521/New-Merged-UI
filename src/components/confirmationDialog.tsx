@@ -1,5 +1,6 @@
 import React from 'react';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import { ConfirmDialogView } from '@/components/feedback/ConfirmDialogView';
+import type { ConfirmTone } from '@/components/feedback/feedbackBus';
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -9,7 +10,11 @@ interface ConfirmationDialogProps {
   description: string | React.ReactNode; // Allow string or ReactNode
   confirmText?: string; // Optional with default value
   cancelText?: string;  // Optional with default value
+  /** Optional. When omitted, destructive wording (deactivate/delete/remove/reject/discard) is shown in red. */
+  tone?: ConfirmTone;
 }
+
+const DESTRUCTIVE = /deactivat|delet|remov|reject|discard|cancel order|\bvoid\b/i;
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   open,
@@ -19,26 +24,22 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   description,
   confirmText = 'Confirm', // Default value
   cancelText = 'Cancel',   // Default value
+  tone,
 }) => {
+  const resolvedTone: ConfirmTone =
+    tone ?? (DESTRUCTIVE.test(`${confirmText} ${title}`) ? 'danger' : 'primary');
+
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        {typeof description === 'string' ? (
-          <DialogContentText>{description}</DialogContentText>
-        ) : (
-          <>{description}</> // Render JSX directly
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
-          {cancelText}
-        </Button>
-        <Button onClick={onConfirm} color="primary" autoFocus>
-          {confirmText}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <ConfirmDialogView
+      open={open}
+      title={title}
+      message={description}
+      confirmText={confirmText}
+      cancelText={cancelText}
+      tone={resolvedTone}
+      onCancel={onClose}
+      onConfirm={onConfirm}
+    />
   );
 };
 

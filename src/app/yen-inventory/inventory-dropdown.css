@@ -1,0 +1,258 @@
+/*
+ * Shared Inventory dropdown portal.
+ * The menu is mounted under document.body, so these styles intentionally do
+ * not depend on the .yen-inventory-ui wrapper.
+ */
+.inventory-filter-dropdown-panel,
+.inventory-filter-dropdown-panel *,
+.inventory-collapsible-filter-trigger {
+  box-sizing: border-box;
+  font-family: var(--erp-font-family, Inter, Arial, sans-serif);
+}
+
+.inventory-filter-dropdown-panel {
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--erp-ui, 8px) * 1.1) !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: calc(var(--erp-ui, 8px) * 1.5) !important;
+  box-shadow: 0 calc(var(--erp-ui, 8px) * 1.5)
+    calc(var(--erp-ui, 8px) * 4) rgba(16, 24, 40, 0.18) !important;
+  opacity: 0;
+  transform: translateY(calc(var(--erp-ui, 8px) * -0.5)) scale(0.985);
+  transform-origin: top center;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.inventory-filter-dropdown-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.inventory-dropdown-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.inventory-dropdown-search {
+  display: flex !important;
+  flex: 0 0 auto;
+  align-items: center !important;
+  gap: calc(var(--erp-ui, 8px) * 0.9) !important;
+  width: 100%;
+  height: calc(var(--erp-ui, 8px) * 4.5);
+  margin: 0 !important;
+  padding: 0 calc(var(--erp-ui, 8px) * 1.15) !important;
+  color: var(--erp-muted, #667085);
+  background: var(--erp-bg, #f8fafc);
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: calc(var(--erp-ui, 8px) * 1.05);
+  transition: border-color 140ms ease, box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.inventory-dropdown-search:focus-within {
+  background: var(--erp-surface, #ffffff);
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 calc(var(--erp-ui, 8px) * 0.3)
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.14);
+}
+
+.inventory-dropdown-search-icon {
+  flex: 0 0 auto;
+  width: calc(var(--erp-ui, 8px) * 1.65) !important;
+  height: calc(var(--erp-ui, 8px) * 1.65) !important;
+  color: var(--erp-muted, #667085) !important;
+}
+
+.inventory-dropdown-search-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--erp-text, #101828) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  font-size: calc(var(--erp-ui, 8px) * 1.72 * var(--erp-type-scale, 1)) !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+.inventory-dropdown-search-input::placeholder {
+  color: var(--erp-muted, #98a2b3) !important;
+  opacity: 0.78;
+}
+
+.inventory-dropdown-search-clear {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--erp-ui, 8px) * 2.75) !important;
+  min-width: calc(var(--erp-ui, 8px) * 2.75) !important;
+  height: calc(var(--erp-ui, 8px) * 2.75) !important;
+  min-height: calc(var(--erp-ui, 8px) * 2.75) !important;
+  padding: 0 !important;
+  color: var(--erp-muted, #667085) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  cursor: pointer;
+}
+
+.inventory-dropdown-search-clear:hover {
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-border, #eaecf0) !important;
+}
+
+.inventory-dropdown-list {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: calc(var(--erp-ui, 8px) * 5);
+  margin-top: calc(var(--erp-ui, 8px) * 0.75);
+  padding: 0 calc(var(--erp-ui, 8px) * 0.35) 0 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--erp-border, #d0d5dd) transparent;
+  scrollbar-width: thin;
+}
+
+.inventory-dropdown-list::-webkit-scrollbar {
+  width: calc(var(--erp-ui, 8px) * 0.65);
+}
+
+.inventory-dropdown-list::-webkit-scrollbar-thumb {
+  background: var(--erp-border, #d0d5dd);
+  border-radius: 999px;
+}
+
+.inventory-dropdown-option {
+  display: flex !important;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 calc(var(--erp-ui, 8px) * 0.35);
+  padding: calc(var(--erp-ui, 8px) * 1.05)
+    calc(var(--erp-ui, 8px) * 1.15) !important;
+  color: var(--erp-text, #101828) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: calc(var(--erp-ui, 8px) * 0.9) !important;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.inventory-dropdown-option:hover {
+  background: var(--erp-bg, #f4f7fa) !important;
+}
+
+.inventory-dropdown-option.is-selected {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+}
+
+.inventory-dropdown-option > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--erp-ui, 8px);
+  width: 100%;
+  min-width: 0;
+}
+
+.inventory-dropdown-option-title {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: inherit !important;
+  font-size: calc(var(--erp-ui, 8px) * 1.72 * var(--erp-type-scale, 1)) !important;
+  font-weight: 550 !important;
+  line-height: 1.25 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-dropdown-option.is-selected .inventory-dropdown-option-title {
+  font-weight: 650 !important;
+}
+
+.inventory-dropdown-option-group {
+  display: block;
+  max-width: 75%;
+  margin: calc(var(--erp-ui, 8px) * 0.3) 0 0 auto;
+  overflow: hidden;
+  color: var(--erp-muted, #667085) !important;
+  font-size: calc(var(--erp-ui, 8px) * 1.38 * var(--erp-type-scale, 1)) !important;
+  font-weight: 550 !important;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-dropdown-empty,
+.inventory-dropdown-loading {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--erp-ui, 8px) * 0.75);
+  min-height: calc(var(--erp-ui, 8px) * 6);
+  padding: calc(var(--erp-ui, 8px) * 1.5) !important;
+  color: var(--erp-muted, #667085) !important;
+  font-size: calc(var(--erp-ui, 8px) * 1.55 * var(--erp-type-scale, 1)) !important;
+  font-weight: 550 !important;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.inventory-dropdown-date-input {
+  width: 100%;
+  height: calc(var(--erp-ui, 8px) * 4.5);
+  padding: 0 calc(var(--erp-ui, 8px) * 1.15) !important;
+  color: var(--erp-text, #101828) !important;
+  background: var(--erp-bg, #f8fafc) !important;
+  border: 1px solid var(--erp-border, #dfe5ec) !important;
+  border-radius: calc(var(--erp-ui, 8px) * 1.05) !important;
+  outline: 0 !important;
+  font-size: calc(var(--erp-ui, 8px) * 1.72 * var(--erp-type-scale, 1)) !important;
+}
+
+.inventory-dropdown-date-input:focus {
+  background: var(--erp-surface, #ffffff) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+  box-shadow: 0 0 0 calc(var(--erp-ui, 8px) * 0.3)
+    rgba(var(--erp-accent-rgb, 21, 94, 239), 0.14) !important;
+}
+
+@media (max-width: 560px) {
+  .inventory-filter-dropdown-panel {
+    border-radius: 10px !important;
+  }
+
+  .inventory-dropdown-search,
+  .inventory-dropdown-option {
+    min-height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inventory-filter-dropdown-panel,
+  .inventory-dropdown-option {
+    transition: none;
+  }
+}

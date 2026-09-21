@@ -6,7 +6,9 @@ import {
   Box,
   Tooltip // ✅ ADD TOOLTIP
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import { PurchaseGroupItem } from '@/Models/itemgroup';
 
 interface ItemGroupTableProps {
@@ -57,8 +59,9 @@ const ItemGroupTable: React.FC<ItemGroupTableProps> = ({
   };
 
   return (
-    <Box>
+    <Box className="purchase-master-table-shell">
       <TableContainer
+      className="purchase-master-table"
         component={Paper}
         sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
@@ -90,16 +93,38 @@ const ItemGroupTable: React.FC<ItemGroupTableProps> = ({
               items.slice().reverse().map((item, index) => (
                 <TableRow key={item.randomId}>
                   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{item.randomId}</TableCell>
-                  <TableCell>{item.itemgroupName}</TableCell>
-                  <TableCell>{item.status}</TableCell>
+                 <TableCell>
+  <span className="purchase-master-id-pill">
+    {item.randomId}
+  </span>
+</TableCell>
+                 <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(item.itemgroupName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{item.itemgroupName}</span>
+  </Box>
+</TableCell>
+                 <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(item.itemgroupName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{item.itemgroupName}</span>
+  </Box>
+</TableCell>
                   <TableCell>
+                    <Box className="purchase-master-actions">
                     {item.status === 'active' ? (
                       <>
                         {/* Edit Button with Permission */}
                         <Tooltip title={!canEdit ? "No permission to edit" : "Edit Item Group"}>
                           <span>
                             <IconButton 
+                            className="purchase-master-action-button is-edit"
                               onClick={() => handleEdit(item.itemgroupId)}
                               disabled={!canEdit}
                               sx={{ 
@@ -119,6 +144,7 @@ const ItemGroupTable: React.FC<ItemGroupTableProps> = ({
                         <Tooltip title={!canDelete ? "No permission to deactivate" : "Deactivate Item Group"}>
                           <span>
                             <IconButton 
+                            className="purchase-master-action-button is-delete"
                               onClick={() => handleOpenDialog(item.itemgroupId, 'deactivate')}
                               disabled={!canDelete}
                               sx={{ 
@@ -139,6 +165,7 @@ const ItemGroupTable: React.FC<ItemGroupTableProps> = ({
                       <Tooltip title={!canDelete ? "No permission to activate" : "Activate Item Group"}>
                         <span>
                           <IconButton 
+                          className="purchase-master-action-button is-activate"
                             onClick={() => handleOpenDialog(item.itemgroupId, 'activate')}
                             disabled={!canDelete}
                             sx={{ 
@@ -154,6 +181,7 @@ const ItemGroupTable: React.FC<ItemGroupTableProps> = ({
                         </span>
                       </Tooltip>
                     )}
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))

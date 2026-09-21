@@ -53,6 +53,7 @@ require('react-date-range/dist/theme/default.css');
 import { fetchVendorNames } from '@/features/yen-purchase/PurchaseMaster/vendorSlice';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { formatDate, formatDateTime, formatCurrency } from '@/utilities/formatters';
 
 // Define the interface (assuming it's not imported; add it here or import from appropriate file)
 export interface VendorNameGet {
@@ -87,19 +88,10 @@ const LedgerPage = () => {
   };
 
   // Format date helper
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return '';
-    try {
-      return format(parseISO(dateString), 'dd-MM-yyyy');
-    } catch (error) {
-      return format(new Date(dateString), 'dd-MM-yyyy');
-    }
-  };
+  
 
   // Format currency helper
-  const formatCurrency = (amount: number): string => {
-    return '₹ ' + formatAmount(amount);
-  };
+  
 
   // Format amount without symbol
   const formatAmount = (amount: number): string => {
@@ -229,8 +221,8 @@ const LedgerPage = () => {
     }
 
     // Period information
-    const startDate = moment(selectionRange.startDate).format('DD-MM-YYYY');
-    const endDate = moment(selectionRange.endDate).format('DD-MM-YYYY');
+    const startDate = formatDate(selectionRange.startDate);
+    const endDate = formatDate(selectionRange.endDate);
     doc.text(`Period: ${startDate} to ${endDate}`, 20, currentY);
     currentY += 6;
 
@@ -355,7 +347,7 @@ const LedgerPage = () => {
         const totalPages = (doc as any).internal.getNumberOfPages();
 
         doc.text(`Page ${currentPage}`, 105, pageHeight - 12, { align: 'center' });
-        doc.text(`Generated on ${moment().format('DD-MM-YYYY HH:mm')}`, 105, pageHeight - 6, { align: 'center' });
+        doc.text(`Generated on ${formatDateTime(new Date())}`, 105, pageHeight - 6, { align: 'center' });
       }
     });
     // Alternative method to add footer and table borders to all pages
@@ -374,7 +366,7 @@ const LedgerPage = () => {
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.text(`Page ${i} of ${totalPages}`, 105, pageHeight - 12, { align: 'center' });
-      doc.text(`Generated on ${moment().format('DD-MM-YYYY HH:mm')}`, 105, pageHeight - 6, { align: 'center' });
+      doc.text(`Generated on ${formatDateTime(new Date())}`, 105, pageHeight - 6, { align: 'center' });
     }
     // Save PDF
     const fileName = `${selectedVendorName || 'Ledger'}_Statement_${moment().format('DDMMYYYY_HHmm')}.pdf`;
@@ -936,7 +928,7 @@ const LedgerPage = () => {
               Choose the format to download the ledger statement for <strong>{selectedVendorName}</strong>
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Period: {moment(selectionRange.startDate).format('DD-MM-YYYY')} to {moment(selectionRange.endDate).format('DD-MM-YYYY')}
+              Period: {formatDate(selectionRange.startDate)} to {formatDate(selectionRange.endDate)}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 2, gap: 1 }}>

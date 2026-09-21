@@ -1,0 +1,294 @@
+.yen-settings-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+  min-height: 100%;
+  padding: 0;
+  background: var(--erp-bg, #f6f8fb);
+  box-sizing: border-box;
+}
+
+.yen-settings-nav-card,
+.yen-settings-content-card {
+  border: 1px solid var(--erp-border, #e3e8ef) !important;
+  border-radius: 10px !important;
+  background: var(--erp-surface, #ffffff) !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+.yen-settings-nav-card {
+  align-self: start;
+  position: sticky;
+  top: 12px;
+  overflow: hidden;
+  max-height: calc(100vh - 98px);
+}
+
+.yen-settings-nav-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--erp-border, #e3e8ef);
+}
+
+.yen-settings-nav-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  color: var(--erp-accent);
+  background: var(--erp-accent-soft, rgba(68, 76, 231, 0.1));
+}
+
+.yen-settings-nav-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.yen-settings-nav-title.MuiTypography-root {
+  margin: 0;
+  color: var(--erp-text, #1f2937);
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 750;
+}
+
+.yen-settings-nav-subtitle.MuiTypography-root {
+  margin-top: 2px;
+  color: var(--erp-muted, #667085);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.yen-settings-menu-list {
+  padding: 7px !important;
+}
+
+.yen-settings-main-item {
+  margin: 0;
+}
+
+.yen-settings-menu-button.MuiListItemButton-root {
+  min-height: 36px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  color: var(--erp-text, #344054);
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.yen-settings-menu-button.MuiListItemButton-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 5%, transparent);
+}
+
+.yen-settings-menu-button.Mui-selected,
+.yen-settings-menu-button.Mui-selected:hover {
+  color: var(--erp-accent);
+  background: var(--erp-accent-soft, rgba(68, 76, 231, 0.1));
+}
+
+.yen-settings-menu-button.Mui-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--erp-accent);
+}
+
+.yen-settings-menu-icon.MuiListItemIcon-root {
+  min-width: 30px;
+  color: inherit;
+}
+
+.yen-settings-menu-text.MuiTypography-root {
+  font-size: 11.5px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+.yen-settings-expand-icon {
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--erp-muted, #667085);
+}
+
+.yen-settings-sub-list {
+  position: relative;
+  margin: 2px 0 4px 15px;
+  padding-left: 8px !important;
+  border-left: 1px solid var(--erp-border, #e3e8ef);
+}
+
+.yen-settings-sub-button.MuiListItemButton-root {
+  min-height: 42px;
+  margin: 2px 0;
+  padding: 5px 7px;
+  border-radius: 7px;
+  color: var(--erp-text, #475467);
+  align-items: flex-start;
+}
+
+.yen-settings-sub-button.MuiListItemButton-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 4%, transparent);
+}
+
+.yen-settings-sub-button.Mui-selected,
+.yen-settings-sub-button.Mui-selected:hover {
+  color: var(--erp-accent);
+  background: var(--erp-accent-soft, rgba(68, 76, 231, 0.1));
+}
+
+.yen-settings-sub-icon.MuiListItemIcon-root {
+  min-width: 26px;
+  padding-top: 1px;
+  color: inherit;
+}
+
+.yen-settings-sub-title.MuiTypography-root {
+  font-size: 10.8px;
+  line-height: 1.3;
+  font-weight: 650;
+  color: inherit;
+}
+
+.yen-settings-sub-description.MuiTypography-root {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 1px;
+  color: var(--erp-muted, #667085);
+  font-size: 9px;
+  line-height: 1.25;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.yen-settings-content-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.yen-settings-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 66px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--erp-border, #e3e8ef);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--erp-accent) 2.5%, var(--erp-surface, #ffffff)),
+    var(--erp-surface, #ffffff)
+  );
+}
+
+.yen-settings-eyebrow.MuiTypography-root {
+  margin-bottom: 2px;
+  color: var(--erp-accent);
+  font-size: 9px;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.yen-settings-content-title.MuiTypography-root {
+  color: var(--erp-text, #1f2937);
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 750;
+}
+
+.yen-settings-content-description.MuiTypography-root {
+  margin-top: 2px;
+  color: var(--erp-muted, #667085);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.yen-settings-content-body {
+  min-width: 0;
+  padding: 0;
+}
+
+.yen-settings-content-body > * {
+  max-width: 100%;
+}
+
+.yen-settings-access-denied {
+  margin-top: 70px;
+  padding: 32px;
+  text-align: center;
+}
+
+.yen-settings-access-icon {
+  margin-bottom: 8px;
+  color: #98a2b3;
+  font-size: 48px !important;
+}
+
+@media (max-width: 1100px) {
+  .yen-settings-shell {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 10px;
+    padding: 0;
+  }
+
+  .yen-settings-content-body {
+    padding: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .yen-settings-shell {
+    display: block;
+    min-height: auto;
+    padding: 0;
+  }
+
+  .yen-settings-nav-card {
+    position: static;
+    max-height: none;
+    margin-bottom: 10px;
+  }
+
+  .yen-settings-menu-list {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 7px !important;
+  }
+
+  .yen-settings-main-item {
+    min-width: 180px;
+  }
+
+  .yen-settings-sub-list {
+    margin-left: 0;
+    padding-left: 0 !important;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .yen-settings-shell {
+    padding: 0;
+  }
+
+  .yen-settings-nav-header,
+  .yen-settings-content-header,
+  .yen-settings-content-body {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .yen-settings-content-header {
+    min-height: 58px;
+  }
+}

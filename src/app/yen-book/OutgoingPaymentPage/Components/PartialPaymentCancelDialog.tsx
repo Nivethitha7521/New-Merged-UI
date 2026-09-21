@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import {
   Dialog,
@@ -29,6 +30,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 
 import moment from 'moment';
+import { formatDate } from '@/utilities/formatters';
 
 interface Props {
   open: boolean;
@@ -43,7 +45,10 @@ const PartialPaymentCancelDialog = ({
   payment,
   onCancel,
 }: Props) => {
-
+  const paymentDonePermissions = useSelector(
+    (state: any) => state.auth?.permissions?.yenerp?.paymentdone || {}
+  );
+  const canEdit = paymentDonePermissions?.edit ?? false;
   const [selectedIds, setSelectedIds] =
     useState<string[]>([]);
 const [confirmDialogOpen,
@@ -237,20 +242,18 @@ const pendingAmount =
 
               <span>
 
-                <IconButton
+            <IconButton
   sx={{
     color: "#1976d2",
     "&:hover": {
       backgroundColor: "rgba(25, 118, 210, 0.08)",
     },
   }}
-                  disabled={
-                    selectedIds.length === 0
-                  }
-                  onClick={handleBulkCancel}
-                >
-                  <CancelIcon />
-                </IconButton>
+  disabled={selectedIds.length === 0 || !canEdit}
+  onClick={handleBulkCancel}
+>
+  <CancelIcon />
+</IconButton>
 
               </span>
 
@@ -372,11 +375,7 @@ const pendingAmount =
                       <TableCell>
 
                         {history.date
-                          ? moment(
-                              history.date
-                            ).format(
-                              'DD-MM-YYYY'
-                            )
+                          ? formatDate(history.date)
                           : '-'}
 
                       </TableCell>
@@ -396,23 +395,23 @@ const pendingAmount =
 
                           <Tooltip title="Cancel Payment">
 
-                          <IconButton
+                 <IconButton
   sx={{
     color: "#1976d2",
     "&:hover": {
       backgroundColor: "rgba(25, 118, 210, 0.08)",
     },
   }}
-                              onClick={() =>
-                                handleSingleCancel(
-  history.historyId ||
-  index.toString()
-)
-
-                              }
-                            >
-                              <CancelIcon />
-                            </IconButton>
+  disabled={!canEdit}
+  onClick={() =>
+    handleSingleCancel(
+      history.historyId ||
+      index.toString()
+    )
+  }
+>
+  <CancelIcon />
+</IconButton>
 
                           </Tooltip>
 

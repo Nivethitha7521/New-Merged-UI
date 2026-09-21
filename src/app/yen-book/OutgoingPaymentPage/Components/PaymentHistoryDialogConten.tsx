@@ -53,6 +53,7 @@ import {
 } from '@/features/yen-purchase/Outgoing/paymentHistory'; 
 import { usePermissions } from '@/hooks/usePermissions';
 import PaymentHistoryFilters from './PaymentHistory';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 interface PaymentHistoryDialogContentProps {
   onRequestClose?: () => void;
@@ -275,20 +276,11 @@ const handlePDFExport = async () => {
     console.error('PDF export failed:', err);
   }
 };
-  const formatDate = (dateString: string): string => {
-    return moment(dateString).format('DD-MM-YYYY');
-  };
+  
 
-  const formatAmount = (amount: number): string => {
-    return new Intl.NumberFormat('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  };
+  
 
-  const formatCurrency = (amount: number): string => {
-    return `₹ ${formatAmount(amount)}`;
-  };
+  
 
 const getStatusColor = (
   status: string,

@@ -1,0 +1,24 @@
+/* =========================================================
+   RECIPE MANAGEMENT — INTERNAL TABLE SCROLL ONLY
+   ========================================================= */
+
+.erp-master-admin-viewport
+.recipe-master-page
+.purchase-native-table-wrapper {
+  max-height: calc(100dvh - 115px);
+  overflow-x: auto;
+  overflow-y: auto !important;
+}
+
+/* Keep table column header visible while rows scroll */
+.erp-master-admin-viewport
+.recipe-master-page
+.recipe-native-table
+thead
+th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* =========================================================

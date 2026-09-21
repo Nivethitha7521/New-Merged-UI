@@ -72,13 +72,17 @@ import { AutocompleteChangeReason } from "@mui/material/Autocomplete";
 import PaymentHistoryDialog from "../Components/PaymentHistoryDialog";
 import { VendorSearch } from "@/Models/vendor";
 import VendorSearchAutocomplete from "@/components/vendorsearchautocomplete";
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 const PaidPaymentComponent = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { hasPermission, isModuleVisible } = usePermissions();
   const canReadpaymentdone = hasPermission("yenerp", "paymentdone", "read");
 const [openPaymentHistoryDialog, setOpenPaymentHistoryDialog] = useState(false);
-
+  const paymentDonePermissions = useSelector(
+    (state: any) => state.auth?.permissions?.yenerp?.paymentdone || {}
+  );
+  const canEdit = paymentDonePermissions?.edit ?? false;
 
   const { outgoings, loading, snackbarOpen, snackbarMessage, outgoingvendor } = useSelector(selectOutgoings);
   const { itemwise } = useSelector(selectGrn);
@@ -471,7 +475,7 @@ const handleConfirmRevert = async () => {
         `${index + 1}`,
         payment.randomId ? payment.randomId.toString() : "N/A",
         payment.vendorName ? payment.vendorName.toString() : "N/A",
-        payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : 'Not Provided',
         totalPaid.toFixed(2),  // Use calculated total paid
         totalPayable.toFixed(2),
         payment.status || "Unknown"
@@ -532,7 +536,7 @@ const handleConfirmRevert = async () => {
         `${index + 1}`,
         payment.randomId ? payment.randomId.toString() : "N/A",
         payment.vendorName ? payment.vendorName.toString() : "N/A",
-        payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : 'Not Provided',
         totalPaid.toFixed(2),  // Use calculated total paid
         totalPayable.toFixed(2),
         payment.status || "Unknown"
@@ -602,7 +606,7 @@ const handleConfirmRevert = async () => {
         `Email: ${business?.emailId || ''}`,
         `Outgoing No: ${outgoingdetail.randomId}\n` +
         `Date: ${outgoingdetail.createdDate
-          ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy')
+          ? formatDate(new Date(outgoingdetail.createdDate))
           : 'Not Provided'}\n` +
         `Total Paid: ${totalPaidAmount.toFixed(2)}`
       ]
@@ -627,7 +631,7 @@ const handleConfirmRevert = async () => {
     if (outgoingdetail.paymentHistory && outgoingdetail.paymentHistory.length > 0) {
       const paymentHeaders = ['Date', 'Payment Method', 'Reference No', 'Type', 'Amount'];
       const paymentRows = outgoingdetail.paymentHistory.map((payment: any) => [
-        payment.date ? format(new Date(payment.date), 'dd-MM-yyyy') : 'N/A',
+        payment.date ? formatDate(new Date(payment.date)) : 'N/A',
         payment.paymentMethod || 'N/A',
         payment.neftNo || payment.rtgsNo || payment.chequeNo || 'N/A',
         payment.paymentType || 'Regular',
@@ -929,10 +933,10 @@ const handleConfirmRevert = async () => {
                         <TableCell>{payment.randomId}</TableCell>
                         <TableCell>{payment.vendorName}</TableCell>
                         <TableCell>{payment.invoiceNo || "N/A"}</TableCell>
-                        <TableCell>{payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                        <TableCell>{payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : 'N/A'}</TableCell>
                         <TableCell>₹{payment.totalPayableAmount?.toFixed(2) || '0.00'}</TableCell>
-                        <TableCell>₹{totalPaidAmount.toFixed(2)}</TableCell>
-                        <TableCell>{payment.paymentDate ? format(new Date(payment.paymentDate), 'dd-MM-yyyy') : 'N/A'}</TableCell>
+                        <TableCell>{formatCurrency(totalPaidAmount)}</TableCell>
+                        <TableCell>{payment.paymentDate ? formatDate(new Date(payment.paymentDate)) : 'N/A'}</TableCell>
                         <TableCell>
                           <Box
                             sx={{
@@ -960,6 +964,7 @@ const handleConfirmRevert = async () => {
                           </IconButton>
                          <Tooltip title="Cancel Payment">
 <IconButton
+disabled={!canEdit}
   sx={{
     color: "#1976d2",
     "&:hover": {
@@ -1057,7 +1062,7 @@ const handleConfirmRevert = async () => {
                     </TableRow>
                     <TableRow>
                       <TableCell><strong>Total Paid Amount:</strong></TableCell>
-                      <TableCell>₹{calculateTotalPaid(selectedOutgoing).toFixed(2)}</TableCell>
+                      <TableCell>{formatCurrency(calculateTotalPaid(selectedOutgoing))}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell><strong>Status:</strong></TableCell>
@@ -1102,19 +1107,19 @@ const handleConfirmRevert = async () => {
   .map((payment: any, index: number) => (
   <TableRow key={index}>
                               <TableCell>
-                                {payment.date ? format(new Date(payment.date), 'dd-MM-yyyy') : 'N/A'}
+                                {payment.date ? formatDate(new Date(payment.date)) : 'N/A'}
                               </TableCell>
                               <TableCell>{payment.paymentMethod || 'N/A'}</TableCell>
                               <TableCell>
                                 {payment.neftNo || payment.rtgsNo || payment.chequeNo || 'N/A'}
                               </TableCell>
-                              <TableCell>₹{(payment.amount || 0).toFixed(2)}</TableCell>
+                              <TableCell>{formatCurrency((payment.amount || 0))}</TableCell>
                               <TableCell>{payment.paymentType || 'Regular'}</TableCell>
                             </TableRow>
                           ))}
                           <TableRow sx={{ backgroundColor: 'action.hover' }}>
                             <TableCell colSpan={4} align="right"><strong>Total Paid:</strong></TableCell>
-                            <TableCell><strong>₹{calculateTotalPaid(selectedOutgoing).toFixed(2)}</strong></TableCell>
+                            <TableCell><strong>{formatCurrency(calculateTotalPaid(selectedOutgoing))}</strong></TableCell>
                             <TableCell></TableCell>
                           </TableRow>
                         </TableBody>

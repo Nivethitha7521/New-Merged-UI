@@ -1,0 +1,609 @@
+.book-module-sidebar {
+  position: relative;
+
+  width: 76px;
+  min-width: 76px;
+
+  height: calc(100vh - 68px);
+
+  background: #ffffff;
+  border-right: 1px solid #e1e7ef;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: visible;
+
+  transition:
+    width 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 240ms ease;
+}
+
+
+/* =========================================================
+   EXPANDED / COLLAPSED
+   ========================================================= */
+
+.book-module-sidebar.is-expanded {
+  width: 228px;
+  min-width: 228px;
+
+  box-shadow:
+    8px 0 24px rgba(16, 24, 40, 0.04);
+}
+
+.book-module-sidebar.is-collapsed {
+  width: 60px;
+  min-width: 60px;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.book-module-sidebar-header {
+  position: relative;
+
+  min-height: 82px;
+
+  padding: 14px 12px;
+
+  border-bottom: 1px solid #edf0f4;
+
+  display: flex;
+  align-items: center;
+}
+
+.book-module-sidebar.is-expanded
+.book-module-sidebar-header {
+  min-height: 105px;
+  padding: 20px 18px;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.book-module-brand {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+}
+
+
+/* Icon */
+
+.book-module-logo {
+  width: 34px;
+  min-width: 34px;
+
+  height: 34px;
+
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--erp-accent),
+      rgba(var(--erp-accent-rgb), 0.78)
+    );
+
+  color: var(--erp-accent-contrast);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 7px 18px
+    rgba(var(--erp-accent-rgb), 0.22);
+}
+
+.book-module-logo svg {
+  font-size: 17px;
+}
+
+
+/* Brand text */
+
+.book-module-brand-content {
+  max-width: 0;
+
+  opacity: 0;
+
+  overflow: hidden;
+
+  transform: translateX(-5px);
+
+  white-space: nowrap;
+
+  pointer-events: none;
+
+  transition:
+    max-width 220ms ease,
+    opacity 160ms ease,
+    transform 220ms ease;
+}
+
+.book-module-brand-content.is-visible {
+  max-width: 150px;
+
+  opacity: 1;
+
+  transform: translateX(0);
+
+  pointer-events: auto;
+}
+
+
+/* =========================================================
+   HEADER TEXT
+   ========================================================= */
+
+.book-module-sidebar-caption {
+  margin-bottom: 4px !important;
+
+  color: #98a2b3 !important;
+
+  font-size: 9px !important;
+  font-weight: 700 !important;
+
+  letter-spacing: 0.18em !important;
+}
+
+.book-module-sidebar-title {
+  color: #101828 !important;
+
+  font-size: 16px !important;
+  font-weight: 750 !important;
+
+  line-height: 1.3 !important;
+}
+
+.book-module-sidebar-description {
+  margin-top: 3px !important;
+
+  color: #667085 !important;
+
+  font-size: 10.5px !important;
+}
+
+
+/* =========================================================
+   TOGGLE BUTTON
+   ========================================================= */
+
+.book-module-toggle {
+  position: absolute !important;
+
+  z-index: 5;
+
+  top: 50%;
+  right: -11px;
+
+  width: 22px !important;
+  height: 22px !important;
+
+  transform: translateY(-50%);
+
+  border:
+    1px solid #dfe5ec !important;
+
+  border-radius:
+    50% !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #667085 !important;
+
+  box-shadow:
+    0 4px 12px
+    rgba(16, 24, 40, 0.12) !important;
+
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease !important;
+}
+
+.book-module-toggle:hover {
+  color:
+    var(--erp-accent) !important;
+
+  border-color:
+    rgba(
+      var(--erp-accent-rgb),
+      0.3
+    ) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+
+  transform:
+    translateY(-50%)
+    scale(1.05);
+}
+
+.book-module-toggle svg {
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   LIST
+   ========================================================= */
+
+.book-module-list {
+  flex: 1;
+
+  min-height: 0;
+
+  padding:
+    8px !important;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
+/* =========================================================
+   ITEM
+   ========================================================= */
+
+.book-module-item {
+  position: relative;
+
+  min-height: 40px !important;
+
+  margin-bottom:
+    5px !important;
+
+  border-radius:
+    10px !important;
+
+  color:
+    #475467 !important;
+
+  display:
+    flex !important;
+
+  align-items:
+    center !important;
+
+  overflow:
+    hidden;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    padding 220ms ease;
+}
+
+
+/* Collapsed item */
+
+.book-module-sidebar.is-collapsed
+.book-module-item {
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+
+  height: 40px;
+  min-height: 40px !important;
+
+  margin: 4px auto !important;
+
+  justify-content:
+    center !important;
+
+  padding:
+    0 !important;
+}
+
+
+/* Expanded item */
+
+.book-module-sidebar.is-expanded
+.book-module-item {
+  justify-content:
+    flex-start !important;
+
+  padding:
+    0 12px !important;
+}
+
+
+/* Hover */
+
+.book-module-item:hover {
+  color:
+    var(--erp-accent) !important;
+
+  background:
+    var(--erp-accent-soft) !important;
+
+  transform:
+    translateX(2px);
+}
+
+
+/* Active */
+
+.book-module-item.is-active {
+  color:
+    var(--erp-accent-contrast) !important;
+
+  background:
+    var(--erp-accent) !important;
+
+  box-shadow:
+    0 5px 14px
+    rgba(
+      var(--erp-accent-rgb),
+      0.16
+    );
+}
+
+.book-module-item.is-active::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+
+  top: 9px;
+  bottom: 9px;
+
+  width: 3px;
+
+  border-radius:
+    0 4px 4px 0;
+
+  background:
+    currentColor;
+}
+
+
+/* =========================================================
+   ICON
+   ========================================================= */
+
+.book-module-icon {
+  min-width:
+    32px !important;
+
+  width:
+    32px;
+
+  height:
+    32px;
+
+  color:
+    inherit !important;
+
+  display:
+    flex !important;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  flex-shrink:
+    0;
+}
+
+.book-module-icon svg {
+  width: 16px !important;
+  height: 16px !important;
+
+  font-size:
+    16px !important;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.book-module-label-wrapper {
+  min-width: 0;
+
+  max-width: 0;
+
+  opacity: 0;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  transform:
+    translateX(-6px);
+
+  pointer-events: none;
+
+  transition:
+    max-width 220ms ease,
+    opacity 160ms ease,
+    transform 220ms ease;
+}
+
+.book-module-label-wrapper.is-visible {
+  max-width: 150px;
+
+  opacity: 1;
+
+  transform:
+    translateX(0);
+
+  pointer-events: auto;
+}
+
+.book-module-label {
+  color:
+    inherit !important;
+
+  font-size:
+    12.5px !important;
+
+  font-weight:
+    550 !important;
+}
+
+.book-module-item.is-active
+.book-module-label {
+  font-weight:
+    650 !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .book-module-sidebar.is-expanded {
+    width: 205px;
+    min-width: 205px;
+  }
+
+}
+
+
+/* =========================================================
+   COMPACT MODE
+   For zoomed-out / wider effective viewport
+   Example: Browser Zoom 80%
+   ========================================================= */
+
+@media (min-width: 1900px) {
+
+  /* ---------- collapsed YEN Book sidebar ---------- */
+
+  .book-module-sidebar.is-collapsed {
+    width: 60px;
+    min-width: 60px;
+  }
+
+
+  /* ---------- header ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-sidebar-header {
+    min-height: 68px;
+    padding: 8px 7px;
+    justify-content: center;
+  }
+
+
+  /* ---------- module/logo icon ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-logo {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+  }
+
+  .book-module-sidebar.is-collapsed
+  .book-module-logo svg {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 18px !important;
+  }
+
+
+  /* ---------- expand arrow ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-toggle {
+    right: -12px;
+
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .book-module-sidebar.is-collapsed
+  .book-module-toggle svg {
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 15px !important;
+  }
+
+
+  /* ---------- menu list ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-list {
+    padding: 9px 6px !important;
+  }
+
+
+  /* ---------- menu blue box ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-item {
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+
+    min-height: 46px !important;
+    height: 46px;
+
+    margin: 4px auto !important;
+    padding: 0 !important;
+
+    border-radius: 11px !important;
+
+    justify-content: center !important;
+  }
+
+
+  /* ---------- actual menu icon ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-icon {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .book-module-sidebar.is-collapsed
+  .book-module-icon svg {
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 17px !important;
+  }
+
+
+  /* ---------- active indication ---------- */
+
+  .book-module-sidebar.is-collapsed
+  .book-module-item.is-active::before {
+    top: 7px;
+    bottom: 7px;
+
+    width: 2px;
+  }
+}

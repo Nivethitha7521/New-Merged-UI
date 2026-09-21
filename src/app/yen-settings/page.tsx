@@ -1,30 +1,34 @@
 // src/app/yen-settings/page.tsx
 "use client";
 
-import React, { useMemo, useCallback, useState } from 'react';
-import Link from 'next/link';
-import { Button, Box, Typography, Paper, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, IconButton } from '@mui/material';
-import { usePathname, useRouter } from 'next/navigation';
-import SideMenu from '../../components/SideMenu';
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import React, { useState } from 'react';
+import {
+  Box,
+  Button,
+  Collapse,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Typography,
+} from '@mui/material';
+import { useRouter } from 'next/navigation';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import PriceCheckIcon from '@mui/icons-material/PriceCheck'; // ADD THIS IMPORT
+import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import BuildIcon from '@mui/icons-material/Build';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TuneIcon from '@mui/icons-material/Tune';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import Collapse from '@mui/material/Collapse';
-import { usePermissions } from '@/hooks/usePermissions';
 
-// Import your existing Date Settings component
+import { usePermissions } from '@/hooks/usePermissions';
 import DateSettingsPage from './DateSettings/page';
 import GRNPriceSettingPage from './GrnPriceSettingPage/page';
+import './YenSettings.css';
 
-// Define types
 interface SubSetting {
   id: string;
   title: string;
@@ -37,113 +41,47 @@ interface SettingsMenuItem {
   id: string;
   title: string;
   icon: React.ReactElement;
-  color: string;
-  type: "direct" | "nested";
+  type: 'direct' | 'nested';
   path?: string;
   component?: React.ComponentType;
   subSettings?: SubSetting[];
 }
 
 const YenSettingsPage = () => {
-  const pathname = usePathname();
   const router = useRouter();
-  //const role = useSelector((state: RootState) => state.auth.role);
-  //const isAdmin = role === "Admin";
-  const { hasPermission,isModuleVisible: checkModuleVisible } = usePermissions();
+  const { hasPermission } = usePermissions();
   const canReadSettings = hasPermission('yenerp', 'settings', 'read');
-  const [selectedMenuItem, setSelectedMenuItem] = useState<string>('datesettings');
-  const [selectedSubSetting, setSelectedSubSetting] = useState<string>('');
+
+  const [selectedMenuItem, setSelectedMenuItem] = useState<string>('purchase');
+  const [selectedSubSetting, setSelectedSubSetting] = useState<string>('date');
   const [openNested, setOpenNested] = useState<string | null>('purchase');
 
-
-  const permissions = useSelector(
-    (state: RootState) => state.auth.permissions?.yenerp || {}
-  );
-  const permissionsLoaded = Object.keys(permissions).length > 0;
-
-// CORRECT ✅ - isModuleVisible line முழுக்க delete பண்ணி இதை மட்டும் வை
-const isKeyVisible = (key: string) => {
-  const m = permissions?.[key];
-  if (!m) return false;
-  if (m.hide === true || m.hide === 1) return false;
-  const noActions = !m.read && !m.add && !m.edit && !m.delete && !m.approve;
-  if (noActions) return false;
-  return m.read === true || m.read === 1;
-};
-  // Purchase module permission keys (for sidebar only)
-  const purchaseKeys = [
-    "purchasecategory",
-    "purchasesubcategory",
-    "itemgroup",
-    "purchaseuom",
-    "purchasetax",
-    "storagelocation",
-    "freight",
-    "itemtype",
-    "service",
-    "vendors",
-    "vendortype",
-    "purchaseitem",
-    "purchaseorders_pending",
-    "purchaseorders_approved",
-    "purchaseorders_rejected",
-    "serviceorders_pending",
-    "serviceorders_approved",
-    "serviceorders_rejected",
-    "grns",
-    "grns_return",
-    "apinvoices",
-    "settings"
-  ];
-// Add these key arrays (same as other pages)
-const yenBookKeys = ["outgoingpayment", "advancepayment", "partialpayment", 
-  "paymentdone", "paymenthistory", "ledger", "purchasereturn"];
-
-const inventoryKeys = ["physicalstockmodification", "physicalstockvariancemodification", 
-  "stockledger", "warehousephysicalstockmodification", 
-  "warehousephysicalstockvariancemodification", "warehousestockledger"];
-
-
- const hidePurchaseMenu =
-  permissionsLoaded &&
-  !purchaseKeys.some((key: string) => isKeyVisible(key)); 
-// Add these computed values
-const hideBookMenu = permissionsLoaded && !yenBookKeys.some((key) => isKeyVisible(key));
-const showInventoryMenu = inventoryKeys.some((k) => isKeyVisible(k));
-const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorderreport");
-  const handleMenuClick = useCallback((menuItem: { path: string }) => {
-    router.push(menuItem.path);
-  }, [router]);
-
-  // Settings menu items
   const settingsMenu: SettingsMenuItem[] = [
- 
     {
-      id: "purchase",
-      title: "Purchase Settings",
-      icon: <ShoppingCartIcon sx={{ fontSize: 24 }} />,
-      color: "#2e7d32",
-      type: "nested",
+      id: 'purchase',
+      title: 'Purchase Settings',
+      icon: <ShoppingCartIcon sx={{ fontSize: 18 }} />,
+      type: 'nested',
       subSettings: [
         {
-          id: "date",
-          title: "Date Setting",
-          description: "Configure date restrictions for purchase orders",
-          icon: <DateRangeIcon sx={{ fontSize: 20 }} />,
-          component: DateSettingsPage // Using the same Date Settings component
+          id: 'date',
+          title: 'Date Setting',
+          description: 'Purchase order date restrictions',
+          icon: <DateRangeIcon sx={{ fontSize: 17 }} />,
+          component: DateSettingsPage,
         },
-            {
-        id: "grnprice",  // ADD THIS NEW SUB-SETTING
-        title: "GRN Price Setting",
-        description: "Configure GRN price tolerance (min: no restriction, max: configurable %)",
-        icon: <PriceCheckIcon sx={{ fontSize: 20 }} />,
-        component: GRNPriceSettingPage
-      },
         {
-          id: "common",
-          title: "Common Setting",
-          description: "Configure common purchase defaults and workflows",
-          icon: <TuneIcon sx={{ fontSize: 20 }} />,
+          id: 'grnprice',
+          title: 'GRN Price Setting',
+          description: 'GRN price tolerance controls',
+          icon: <PriceCheckIcon sx={{ fontSize: 17 }} />,
+          component: GRNPriceSettingPage,
+        },
+        {
+          id: 'common',
+          title: 'Common Setting',
+          description: 'Purchase defaults and workflows',
+          icon: <TuneIcon sx={{ fontSize: 17 }} />,
           component: () => (
             <Box>
               <Typography variant="h5" gutterBottom fontWeight="bold">
@@ -153,13 +91,13 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
                 Configure common defaults and workflows for purchase module
               </Typography>
             </Box>
-          )
+          ),
         },
         {
-          id: "general",
-          title: "General Setting",
-          description: "Configure general purchase preferences",
-          icon: <SettingsIcon sx={{ fontSize: 20 }} />,
+          id: 'general',
+          title: 'General Setting',
+          description: 'General purchase preferences',
+          icon: <SettingsIcon sx={{ fontSize: 17 }} />,
           component: () => (
             <Box>
               <Typography variant="h5" gutterBottom fontWeight="bold">
@@ -169,21 +107,25 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
                 Configure general preferences and system defaults for purchase module
               </Typography>
             </Box>
-          )
-        }
-      ]
+          ),
+        },
+      ],
     },
   ];
 
   const handleMenuItemClick = (item: SettingsMenuItem) => {
-    if (item.type === "direct") {
+    if (item.type === 'direct') {
       setSelectedMenuItem(item.id);
       setSelectedSubSetting('');
       setOpenNested(null);
-    } else if (item.type === "nested") {
-      setSelectedMenuItem(item.id);
-      setOpenNested(openNested === item.id ? null : item.id);
-      setSelectedSubSetting('date'); // Default to first sub-setting
+      return;
+    }
+
+    setSelectedMenuItem(item.id);
+    setOpenNested(openNested === item.id ? null : item.id);
+
+    if (!selectedSubSetting) {
+      setSelectedSubSetting(item.subSettings?.[0]?.id || '');
     }
   };
 
@@ -192,177 +134,116 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
   };
 
   const getActiveComponent = () => {
-    // Check if it's a direct settings item
-    const directItem = settingsMenu.find(item => item.id === selectedMenuItem && item.type === "direct");
-    if (directItem && directItem.component) {
-      return directItem.component;
-    }
-    
-    // Check if it's a nested purchase sub-setting
-    const purchaseItem = settingsMenu.find(item => item.id === "purchase");
-    const subSetting = purchaseItem?.subSettings?.find(s => s.id === selectedSubSetting);
+    const directItem = settingsMenu.find(
+      (item) => item.id === selectedMenuItem && item.type === 'direct'
+    );
+
+    if (directItem?.component) return directItem.component;
+
+    const selectedItem = settingsMenu.find((item) => item.id === selectedMenuItem);
+    const subSetting = selectedItem?.subSettings?.find(
+      (setting) => setting.id === selectedSubSetting
+    );
+
     return subSetting?.component || DateSettingsPage;
   };
 
-  const ActiveComponent = getActiveComponent();
-
-  // If not admin, show access denied
-  { /*
-  if (!isAdmin) {
-    return (
-      <div>
-        <SideMenu
-          onMenuClick={handleMenuClick}
-          activePath={pathname || '/'}
-          showPurchaseMenu={!hidePurchaseMenu}
-        />
-        <Box sx={{ p: 4, textAlign: 'center', mt: 8 }}>
-          <BuildIcon sx={{ fontSize: 60, color: '#ccc', mb: 2 }} />
-          <Typography variant="h5" color="error" gutterBottom>
-            Access Denied
-          </Typography>
-          <Typography color="textSecondary" sx={{ mb: 3 }}>
-           You don&apos;t have permission to access Settings. Contact your administrator.
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => router.push('/')}
-          >
-            Go to Dashboard
-          </Button>
-        </Box>
-      </div>
+  const getActiveSettingMeta = () => {
+    const selectedItem = settingsMenu.find((item) => item.id === selectedMenuItem);
+    const subSetting = selectedItem?.subSettings?.find(
+      (setting) => setting.id === selectedSubSetting
     );
-  }
-*/ }
- if (!canReadSettings) {
+
+    return {
+      sectionTitle: selectedItem?.title || 'Settings',
+      title: subSetting?.title || selectedItem?.title || 'Settings',
+      description: subSetting?.description || 'Configure your application settings',
+    };
+  };
+
+  const ActiveComponent = getActiveComponent();
+  const activeMeta = getActiveSettingMeta();
+
+
+
+  if (!canReadSettings) {
     return (
-      <div>
-        <SideMenu
-          onMenuClick={handleMenuClick}
-          activePath={pathname || '/'}
-          showPurchaseMenu={!hidePurchaseMenu}
-          showBookMenu={!hideBookMenu}         // ✅ add
-  showInventoryMenu={showInventoryMenu} // ✅ add
-  showReportsMenu={showReportsMenu}
-        />
-        <Box sx={{ p: 4, textAlign: 'center', mt: 8 }}>
-          <BuildIcon sx={{ fontSize: 60, color: '#ccc', mb: 2 }} />
-          <Typography variant="h5" color="error" gutterBottom>
+      <Box className="yen-settings-access-denied">
+          <BuildIcon className="yen-settings-access-icon" />
+          <Typography variant="h6" color="error" fontWeight={700}>
             Access Denied
           </Typography>
-          <Typography color="textSecondary" sx={{ mb: 3 }}>
+          <Typography color="textSecondary" sx={{ mb: 2 }}>
             You don&apos;t have permission to access Settings.
           </Typography>
           <Button variant="contained" onClick={() => router.push('/')}>
             Go to Dashboard
           </Button>
-        </Box>
-      </div>
+      </Box>
     );
   }
-  return (
-    <div>
-      <SideMenu
-        onMenuClick={handleMenuClick}
-        activePath={pathname || '/'}
-        showPurchaseMenu={!hidePurchaseMenu}
-        showBookMenu={!hideBookMenu}         // ✅ add
-  showInventoryMenu={showInventoryMenu} // ✅ add
-  showReportsMenu={showReportsMenu}
-      />
 
-      <Box sx={{ display: 'flex', p: 3 }}>
-        {/* Left Sidebar Menu */}
-        <Paper 
-          elevation={1} 
-          sx={{ 
-            width: 300, 
-            mr: 3, 
-            borderRadius: 2,
-            overflow: 'auto',
-            height: 'calc(100vh - 100px)',
-            position: 'sticky',
-            top: 20
-          }}
-        >
-          <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="h6" fontWeight="bold">
-              Settings
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Configure your application
-            </Typography>
+  return (
+    <Box className="yen-settings-shell">
+        <Paper elevation={0} className="yen-settings-nav-card">
+          <Box className="yen-settings-nav-header">
+            <Box className="yen-settings-nav-icon">
+              <SettingsIcon />
+            </Box>
+            <Box>
+              <Typography className="yen-settings-nav-title">Settings</Typography>
+              <Typography className="yen-settings-nav-subtitle">
+                Application configuration
+              </Typography>
+            </Box>
           </Box>
-          
-          <List sx={{ p: 0 }}>
+
+          <List className="yen-settings-menu-list" disablePadding>
             {settingsMenu.map((item) => (
               <React.Fragment key={item.id}>
-                <ListItem disablePadding>
-                  <ListItemButton 
+                <ListItem disablePadding className="yen-settings-main-item">
+                  <ListItemButton
                     onClick={() => handleMenuItemClick(item)}
                     selected={selectedMenuItem === item.id}
-                    sx={{
-                      '&.Mui-selected': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                        borderRight: '3px solid',
-                        borderRightColor: 'primary.main',
-                        '&:hover': {
-                          backgroundColor: 'rgba(25, 118, 210, 0.12)',
-                        }
-                      }
-                    }}
+                    className="yen-settings-menu-button"
                   >
-                    <ListItemIcon sx={{ minWidth: 40, color: item.color }}>
+                    <ListItemIcon className="yen-settings-menu-icon">
                       {item.icon}
                     </ListItemIcon>
-                    <ListItemText 
+                    <ListItemText
                       primary={item.title}
-                      primaryTypographyProps={{
-                        fontWeight: selectedMenuItem === item.id ? 600 : 400,
-                        fontSize: '0.9rem'
-                      }}
+                      primaryTypographyProps={{ className: 'yen-settings-menu-text' }}
                     />
-                    {item.type === "nested" && (
-                      openNested === item.id ? <ExpandLess /> : <ExpandMore />
-                    )}
+                    {item.type === 'nested' &&
+                      (openNested === item.id ? (
+                        <ExpandLess className="yen-settings-expand-icon" />
+                      ) : (
+                        <ExpandMore className="yen-settings-expand-icon" />
+                      ))}
                   </ListItemButton>
                 </ListItem>
-                
-                {item.type === "nested" && item.subSettings && (
+
+                {item.type === 'nested' && item.subSettings && (
                   <Collapse in={openNested === item.id} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding>
-                      {item.subSettings.map((subItem, index) => (
+                    <List component="div" disablePadding className="yen-settings-sub-list">
+                      {item.subSettings.map((subItem) => (
                         <ListItemButton
                           key={subItem.id}
                           selected={selectedSubSetting === subItem.id}
                           onClick={() => handleSubSettingClick(subItem.id)}
-                          sx={{
-                            pl: 4,
-                            py: 1,
-                            '&.Mui-selected': {
-                              backgroundColor: 'rgba(46, 125, 32, 0.08)',
-                              borderRight: '3px solid',
-                              borderRightColor: '#2e7d32',
-                              '&:hover': {
-                                backgroundColor: 'rgba(46, 125, 32, 0.12)',
-                              }
-                            }
-                          }}
+                          className="yen-settings-sub-button"
                         >
-                          <ListItemIcon sx={{ minWidth: 36, color: item.color }}>
+                          <ListItemIcon className="yen-settings-sub-icon">
                             {subItem.icon}
                           </ListItemIcon>
-                          <ListItemText 
+                          <ListItemText
                             primary={subItem.title}
                             secondary={subItem.description}
                             primaryTypographyProps={{
-                              fontWeight: selectedSubSetting === subItem.id ? 500 : 400,
-                              fontSize: '0.85rem'
+                              className: 'yen-settings-sub-title',
                             }}
                             secondaryTypographyProps={{
-                              fontSize: '0.7rem'
+                              className: 'yen-settings-sub-description',
                             }}
                           />
                         </ListItemButton>
@@ -370,28 +251,31 @@ const showReportsMenu = isKeyVisible("posreport") || isKeyVisible("purchaseorder
                     </List>
                   </Collapse>
                 )}
-                <Divider />
               </React.Fragment>
             ))}
           </List>
         </Paper>
 
-        {/* Right Content Area */}
-        <Paper 
-          elevation={1} 
-          sx={{ 
-            flex: 1, 
-            borderRadius: 2,
-            overflow: 'auto',
-            height: 'calc(100vh - 100px)'
-          }}
-        >
-          <Box sx={{ p: 3 }}>
+        <Paper elevation={0} className="yen-settings-content-card">
+          <Box className="yen-settings-content-header">
+            <Box>
+              <Typography className="yen-settings-eyebrow">
+                {activeMeta.sectionTitle}
+              </Typography>
+              <Typography className="yen-settings-content-title">
+                {activeMeta.title}
+              </Typography>
+              <Typography className="yen-settings-content-description">
+                {activeMeta.description}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box className="yen-settings-content-body">
             <ActiveComponent />
           </Box>
         </Paper>
-      </Box>
-    </div>
+    </Box>
   );
 };
 

@@ -13,27 +13,41 @@ interface VendorPaginationProps {
 const VendorPagination: React.FC<VendorPaginationProps> = ({ currentPage, totalVendors, pageSize, handlePageChange }) => {
   const totalPages = Math.max(1, Math.ceil(totalVendors / pageSize));
 
-  return (
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+return (
+  <Box
+    className="purchase-item-pagination vendor-pagination"
+    sx={{ justifyContent: 'flex-end' }}
+  >
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <IconButton
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
         size="small"
+        aria-label="Previous vendor page"
       >
         <ChevronLeft />
       </IconButton>
-      <Typography variant="body2" sx={{ mx: 2 }}>
+
+      <Typography
+        variant="body2"
+        className="purchase-item-pagination-label"
+        sx={{ mx: 2 }}
+      >
         Page {currentPage} of {totalPages}
       </Typography>
+
       <IconButton
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
         size="small"
+        aria-label="Next vendor page"
       >
         <ChevronRight />
       </IconButton>
     </Box>
-  );
+  </Box>
+);
+ 
 };
 
 export default VendorPagination;

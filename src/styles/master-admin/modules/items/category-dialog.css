@@ -1,0 +1,217 @@
+/* =========================================================
+   ITEM MASTER / CATEGORY DIALOG — 100% LAPTOP COMPACT FIT
+   UI-only override. Business logic remains in CategoryDialog.tsx.
+   The dialog is portalled to <body>, so these rules are deliberately
+   scoped to .category-form-dialog instead of .ma-scope.
+   ========================================================= */
+
+@media (min-width: 1024px) {
+  body .MuiDialog-root.category-form-dialog .dialog-paper-big {
+    width: min(1160px, calc(100vw - 56px)) !important;
+    max-width: 1160px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: calc(100vh - 64px) !important;
+    margin: 28px !important;
+
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 12px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    box-shadow: 0 18px 50px rgba(16, 24, 40, 0.18) !important;
+    overflow: hidden !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .dialog-title {
+    min-height: 0 !important;
+    padding: 14px 18px !important;
+    border-bottom: 1px solid var(--erp-border, #e5e7eb) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    background-image: none !important;
+    color: var(--erp-text, #101828) !important;
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .dialog-content {
+    padding: 16px 18px !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  /* Recreate the original Master Admin horizontal composition at 100% zoom. */
+  body .MuiDialog-root.category-form-dialog .category-dialog-layout {
+    display: grid !important;
+    grid-template-columns: 250px minmax(320px, 1fr) 132px 300px !important;
+    align-items: start !important;
+    column-gap: 14px !important;
+    row-gap: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-name-column,
+  body .MuiDialog-root.category-form-dialog .category-select-column,
+  body .MuiDialog-root.category-form-dialog .category-selected-column,
+  body .MuiDialog-root.category-form-dialog .category-transfer-actions {
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-name-column {
+    width: 250px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-select-column {
+    width: 100% !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-selected-column {
+    width: 300px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .custom-textfield {
+    width: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .custom-textfield .MuiOutlinedInput-root,
+  body .MuiDialog-root.category-form-dialog .MuiAutocomplete-root .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    border-radius: 6px !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .custom-textfield .MuiOutlinedInput-input,
+  body .MuiDialog-root.category-form-dialog .MuiAutocomplete-input {
+    min-width: 0 !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+    font-size: 12px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .MuiFormLabel-root {
+    font-size: 12px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .MuiFormHelperText-root {
+    margin-top: 4px !important;
+    margin-left: 3px !important;
+    font-size: 10px !important;
+  }
+
+  /* Keep both lists usable without making the whole dialog full-screen. */
+  body .MuiDialog-root.category-form-dialog .category-select-panel {
+    width: 100% !important;
+    height: 320px !important;
+    min-height: 320px !important;
+    max-height: 320px !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    border-radius: 7px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-selected-panel {
+    width: 100% !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
+    box-sizing: border-box !important;
+    border-radius: 7px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-selected-column > .MuiTypography-root {
+    height: auto !important;
+    min-height: 20px !important;
+    margin: 0 0 4px !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-transfer-actions {
+    align-self: center !important;
+    justify-self: stretch !important;
+    width: 132px !important;
+    padding-top: 0 !important;
+    gap: 8px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-transfer-actions .btn-primary,
+  body .MuiDialog-root.category-form-dialog .category-transfer-actions .btn-primary-delete {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 0 10px !important;
+    border-radius: 7px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .dialog-actions {
+    min-height: 0 !important;
+    padding: 10px 18px !important;
+    gap: 10px !important;
+    border-top: 1px solid var(--erp-border, #e5e7eb) !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .dialog-actions .btn-primary,
+  body .MuiDialog-root.category-form-dialog .dialog-actions .btn-secondary {
+    min-width: 88px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: 7px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1240px) {
+  body .MuiDialog-root.category-form-dialog .dialog-paper-big {
+    width: calc(100vw - 40px) !important;
+    margin: 20px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-dialog-layout {
+    grid-template-columns: 210px minmax(280px, 1fr) 112px 250px !important;
+    column-gap: 10px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-name-column {
+    width: 210px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-selected-column {
+    width: 250px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-transfer-actions {
+    width: 112px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-select-panel {
+    height: 292px !important;
+    min-height: 292px !important;
+    max-height: 292px !important;
+  }
+
+  body .MuiDialog-root.category-form-dialog .category-selected-panel {
+    height: 272px !important;
+    min-height: 272px !important;
+    max-height: 272px !important;
+  }
+}
+
+
+
+

@@ -1,0 +1,429 @@
+/* =========================================================
+   MASTER ADMIN PORTALLED DIALOG TYPOGRAPHY
+   Dimensions use the density unit; Display Settings affect
+   font-size only. These classes are unique to Master Admin.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.MuiDialog-paper, .master-admin-form-dialog-paper) {
+    border-radius: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.MuiDialogTitle-root, .master-admin-form-dialog-title, .dialog-title) {
+    padding: calc(var(--erp-ui) * 2.5) calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.MuiDialogContent-root, .master-admin-form-content, .dialog-content) {
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.MuiDialogActions-root, .master-admin-form-actions, .dialog-actions) {
+    min-height: auto !important;
+    padding: calc(var(--erp-ui) * 1.75) calc(var(--erp-ui) * 2.75)
+      calc(var(--erp-ui) * 2.5) !important;
+    gap: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    .form-section {
+    padding: calc(var(--erp-ui) * 2.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.form-grid, .form-grid-manager) {
+    gap: calc(var(--erp-ui) * 2) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    .custom-textfield
+    :is(.MuiInputBase-root, .MuiOutlinedInput-root) {
+    height: auto !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    .custom-input
+    :is(input, .MuiSelect-select) {
+    padding: calc(var(--erp-ui) * 1.25)
+      calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(
+      .btn-primary,
+      .btn-secondary,
+      .master-admin-dialog-button
+    ) {
+    min-width: calc(var(--erp-ui) * 13.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.master-admin-dialog-eyebrow, .MuiFormHelperText-root) {
+    font-size: calc(
+      var(--erp-ui) * 1.5 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.master-admin-dialog-title-text, .dialog-title) {
+    font-size: calc(
+      var(--erp-ui) * 2.7 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(
+      .master-admin-dialog-description,
+      .form-section-title,
+      .form-section-subtitle
+    ) {
+    font-size: calc(
+      var(--erp-ui) * 1.78 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(.custom-label, .MuiFormLabel-root, .checkbox-label) {
+    font-size: calc(
+      var(--erp-ui) * 1.65 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    .custom-input
+    :is(input, .MuiSelect-select),
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    .custom-input
+    input::placeholder,
+  html[data-erp-font-size]
+    body
+    :is(.location-form-dialog, .tax-form-dialog, .vehicle-form-dialog)
+    :is(
+      .btn-primary,
+      .btn-secondary,
+      .master-admin-dialog-button
+    ) {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+}
+
+/*
+ * Final cascade lock for page-specific rules declared earlier in this file.
+ * This contains no new design values; it only guarantees that the shared
+ * density values win over the old fixed-pixel declarations at desktop zoom.
+ */
+
+@media (min-width: 561px) {
+  .erp-master-admin-viewport
+    :is(.location-master-toolbar, .vehicle-master-toolbar) {
+    display: grid !important;
+    grid-template-columns:
+      minmax(calc(var(--erp-ui) * 15.625), auto)
+      minmax(calc(var(--erp-ui) * 32.5), calc(var(--erp-ui) * 45))
+      minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: calc(var(--erp-ui) * 2.25) !important;
+    row-gap: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search) {
+    width: 100% !important;
+    min-width: calc(var(--erp-ui) * 32.5) !important;
+    max-width: calc(var(--erp-ui) * 45) !important;
+    flex-basis: calc(var(--erp-ui) * 45) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .MuiOutlinedInput-root {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding-left: 0 !important;
+    padding-right: calc(var(--erp-ui) * 1.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .MuiOutlinedInput-input {
+    height: auto !important;
+    min-height: calc(var(--erp-ui) * 2.5) !important;
+    padding: calc(var(--erp-ui) * 1.125) var(--erp-ui) !important;
+    line-height: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .MuiInputAdornment-root {
+    margin: 0 calc(var(--erp-ui) * 0.5) 0
+      calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-search, .vehicle-master-search)
+    .purchase-reference-search-icon {
+    width: calc(var(--erp-ui) * 2.2) !important;
+    height: calc(var(--erp-ui) * 2.2) !important;
+    margin: 0 !important;
+    font-size: calc(var(--erp-ui) * 2.2) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.location-master-actions, .vehicle-master-actions) {
+    grid-column: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: calc(var(--erp-ui) * 1.125) !important;
+    padding: calc(var(--erp-ui) * 0.25)
+      calc(var(--erp-ui) * 0.125)
+      calc(var(--erp-ui) * 0.5) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button {
+    width: auto !important;
+    min-width: calc(var(--erp-ui) * 13.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+    border-width: calc(var(--erp-ui) * 0.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button {
+    font-size: calc(
+      var(--erp-ui) * 1.94 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button
+    .MuiButton-startIcon {
+    margin-left: 0 !important;
+    margin-right: calc(var(--erp-ui) * 0.8) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-action-button
+    svg {
+    width: calc(var(--erp-ui) * 2.15) !important;
+    height: calc(var(--erp-ui) * 2.15) !important;
+    font-size: calc(var(--erp-ui) * 2.15) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.15) 0
+      calc(var(--erp-ui) * 1.65) !important;
+    gap: calc(var(--erp-ui) * 0.9) !important;
+    border-width: calc(var(--erp-ui) * 0.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiTypography-root {
+    font-size: calc(
+      var(--erp-ui) * 1.88 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-root {
+    width: calc(var(--erp-ui) * 5.75) !important;
+    height: calc(var(--erp-ui) * 3.25) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase {
+    padding: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-thumb {
+    width: calc(var(--erp-ui) * 1.875) !important;
+    height: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase.Mui-checked {
+    transform: translateX(calc(var(--erp-ui) * 2.375)) !important;
+  }
+
+  .erp-master-admin-viewport
+    .location-master-actions
+    .purchase-reference-filter-button {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 !important;
+    border-width: calc(var(--erp-ui) * 0.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  .erp-master-admin-viewport
+    .location-master-actions
+    .purchase-reference-filter-button
+    svg {
+    width: calc(var(--erp-ui) * 2.25) !important;
+    height: calc(var(--erp-ui) * 2.25) !important;
+    font-size: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      [class*="warehouse-column-"],
+      [class*="location-column-"],
+      [class*="uom-column-"],
+      [class*="tax-column-"],
+      [class*="dinein-tax-column-"],
+      [class*="discount-column-"]
+    ) {
+    width: calc(var(--erp-ui) * var(--master-admin-column-units)) !important;
+    min-width: calc(
+      var(--erp-ui) * var(--master-admin-column-units)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.warehouse-column-sno, .location-column-sNo, .uom-column-sno, .discount-column-sno) {
+    max-width: calc(
+      var(--erp-ui) * var(--master-admin-column-units)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .location-native-table {
+    min-width: calc(var(--erp-ui) * 152.5) !important;
+  }
+
+  .erp-master-admin-viewport .uom-native-table {
+    min-width: calc(var(--erp-ui) * 112.5) !important;
+  }
+
+  .erp-master-admin-viewport .tax-native-table {
+    min-width: calc(var(--erp-ui) * 131.25) !important;
+  }
+
+  .erp-master-admin-viewport .discount-native-table {
+    min-width: calc(var(--erp-ui) * 116.25) !important;
+  }
+}

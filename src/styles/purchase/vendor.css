@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Vendor Module
+   Matches the Purchase Master visual system.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page layout
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .vendor-module-page {
+  width: 100%;
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Filter icon button
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .purchase-reference-filter-button {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  color: var(--erp-text, #475467) !important;
+  background: var(--erp-surface, #ffffff) !important;
+
+  border: 2px solid var(--erp-accent, #155eef) !important;
+  border-radius: 12px !important;
+
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.erp-purchase-viewport .purchase-reference-filter-button svg {
+  width: 18px !important;
+  height: 18px !important;
+  font-size: 18px !important;
+}
+
+.erp-purchase-viewport .purchase-reference-filter-button:hover {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+
+  box-shadow:
+    0 0 0 3px var(--erp-accent-ring, rgba(21, 94, 239, 0.12)),
+    0 5px 14px rgba(var(--erp-accent-rgb, 21, 94, 239), 0.12) !important;
+}
+
+.erp-purchase-viewport .purchase-reference-filter-button:focus-visible {
+  color: var(--erp-accent, #155eef) !important;
+  background: var(--erp-accent-soft, #eef4ff) !important;
+  border-color: var(--erp-accent, #155eef) !important;
+
+  box-shadow:
+    0 0 0 4px
+    var(--erp-accent-ring, rgba(21, 94, 239, 0.12)) !important;
+
+  outline: none !important;
+}
+
+.erp-purchase-viewport
+  .purchase-reference-filter-button.Mui-disabled {
+  color: #98a2b3 !important;
+  background: var(--erp-surface, #ffffff) !important;
+  border-color: var(--erp-border, #dfe5ec) !important;
+
+  opacity: 0.55 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+
+/* --------------------------------------------------------------------------
+   Vendor toolbar
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .vendor-reference-toolbar {
+  width: 100%;
+  min-width: 0;
+}
+
+.erp-purchase-viewport
+  .vendor-reference-toolbar
+  .purchase-reference-actions {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Vendor table widths
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .vendor-master-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.erp-purchase-viewport .vendor-master-table .MuiTable-root {
+  min-width: 1380px;
+}
+
+.erp-purchase-viewport .vendor-type-master-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.erp-purchase-viewport
+  .vendor-type-master-table
+  .MuiTable-root {
+  min-width: 760px;
+}
+
+/* --------------------------------------------------------------------------
+   Table action-column alignment
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport
+  .vendor-master-table
+  .MuiTableCell-head:last-child,
+.erp-purchase-viewport
+  .vendor-master-table
+  .MuiTableCell-body:last-child,
+.erp-purchase-viewport
+  .vendor-type-master-table
+  .MuiTableCell-head:last-child,
+.erp-purchase-viewport
+  .vendor-type-master-table
+  .MuiTableCell-body:last-child {
+  text-align: center !important;
+}
+
+.erp-purchase-viewport
+  .vendor-master-table
+  .purchase-master-actions,
+.erp-purchase-viewport
+  .vendor-type-master-table
+  .purchase-master-actions {
+  justify-content: center;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination
+   -------------------------------------------------------------------------- */
+
+.erp-purchase-viewport .vendor-pagination {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Dark mode
+   -------------------------------------------------------------------------- */
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-filter-button {
+  color: var(--erp-text, #f8fafc) !important;
+  background: var(--erp-surface, #172033) !important;
+}
+
+html[data-erp-theme='dark']
+  .erp-purchase-viewport
+  .purchase-reference-filter-button.Mui-disabled {
+  color: #667085 !important;
+  background: var(--erp-surface, #172033) !important;
+  border-color: var(--erp-border, #344054) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive layout
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1200px) {
+  .erp-purchase-viewport .vendor-reference-toolbar {
+    align-items: flex-start;
+  }
+
+  .erp-purchase-viewport
+    .vendor-reference-toolbar
+    .purchase-reference-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 1000px) {
+  .erp-purchase-viewport
+    .vendor-reference-toolbar
+    .purchase-reference-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .erp-purchase-viewport .vendor-reference-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .erp-purchase-viewport
+    .vendor-reference-toolbar
+    .purchase-reference-search {
+    width: 100%;
+  }
+
+  .erp-purchase-viewport
+    .vendor-reference-toolbar
+    .purchase-reference-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .erp-purchase-viewport .vendor-pagination {
+    justify-content: center !important;
+  }
+}

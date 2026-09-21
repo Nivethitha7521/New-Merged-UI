@@ -72,6 +72,7 @@ import AmountReturnDialog from '@/components/yen-purchase/OutgoingComponent/Amou
 import { usePermissions } from "@/hooks/usePermissions";
 import ReturnStockUpdateDialog from '@/app/yen-purchase/GrnPage/Components/ReturnStockUpdateDialog';
 import GrnDialog from '@/components/yen-purchase/OutgoingComponent/GRNDialog';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 const PurchaseReturnPage = React.memo(() => {
     const dispatch = useDispatch<AppDispatch>();
@@ -464,7 +465,7 @@ const handleReturnProcess = useCallback(async (outgoing: any) => {
             outgoing.randomId?.toString(),
             outgoing.vendorName?.toString(),
             outgoing.invoiceNo || "N/A",
-            outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+            outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
             (outgoing.totalPrice || 0).toFixed(2),
             (outgoing.payableAmount || 0).toFixed(2),
             (outgoing.totalPaid || 0).toFixed(2),
@@ -522,7 +523,7 @@ const handleReturnProcess = useCallback(async (outgoing: any) => {
             outgoing.randomId?.toString(),
             outgoing.vendorName?.toString(),
             outgoing.invoiceNo || "N/A",
-            outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+            outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
             (outgoing.totalPrice || 0).toFixed(2),
             (outgoing.payableAmount || 0).toFixed(2),
             (outgoing.totalPaid || 0).toFixed(2),
@@ -797,17 +798,29 @@ const ReturnActionButton = useCallback(({ payment, onClick, canEdit }: any) => {
                                             <TableCell>{payment.vendorName}</TableCell>
                                             <TableCell>{payment.invoiceNo || 'N/A'}</TableCell>
                                             <TableCell>
-                                                {payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : ''}
+                                                {payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : ''}
                                             </TableCell>
-                                            <TableCell align="right">{(payment.totalPrice || 0).toFixed(2)}</TableCell>
-                                            <TableCell align="right">{(payment.payableAmount || 0).toFixed(2)}</TableCell>
-                                            <TableCell align="right">{(payment.totalPaid || 0).toFixed(2)}</TableCell>
-                                            <TableCell align="right" sx={{ 
-                                                fontWeight: 'bold', 
-                                                color: (payment.totalPayableAmount || 0) > 0 ? 'red' : 'green'
-                                            }}>
-                                                {(payment.totalPayableAmount || 0).toFixed(2)}
-                                            </TableCell>
+                                           <TableCell align="right">
+  {formatCurrency(payment.totalPrice ?? 0)}
+</TableCell>
+
+<TableCell align="right">
+  {formatCurrency(payment.payableAmount ?? 0)}
+</TableCell>
+
+<TableCell align="right">
+  {formatCurrency(payment.totalPaid ?? 0)}
+</TableCell>
+
+<TableCell
+  align="right"
+  sx={{
+    fontWeight: 'bold',
+    color: (payment.totalPayableAmount ?? 0) > 0 ? 'red' : 'green'
+  }}
+>
+  {formatCurrency(payment.totalPayableAmount ?? 0)}
+</TableCell>
                                             <TableCell>
                                                 <Box display="flex" alignItems="center">
                                                     <ReturnActionButton

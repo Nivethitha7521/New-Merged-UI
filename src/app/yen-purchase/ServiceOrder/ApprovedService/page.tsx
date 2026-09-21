@@ -60,6 +60,7 @@ import ServiceIdSearch from '../Components/ServiceIDSeacrh';
 import FreightSelectionDialog, { FreightData } from '../../PurchaseOrder/Component/freightSelectionDialog';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 declare module 'jspdf' {
   interface jsPDF {
@@ -524,7 +525,7 @@ const handleDialogClose = () => {
 
     const totalOrderedAmount = approvedServices.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
     const today = new Date();
-    const currentDate = format(today, 'dd/MM/yyyy');
+    const currentDate = formatDate(today);
 
     doc.setFontSize(10);
     const totalText = `Total Approved Amount: ${totalOrderedAmount.toFixed(2)}`;
@@ -537,7 +538,7 @@ const handleDialogClose = () => {
     const headers = [["S.No", "Service ID", "Vendor Name", "Total Descriptions", "Order Date", "Total Amount", "Status"]];
     const rows = approvedServices.map((service: ServiceData, index: number) => {
       const totalDescs = service.descriptions.length;
-      const orderDate = service.workOrderDate ? format(new Date(service.workOrderDate), 'dd-MM-yyyy') : '';
+      const orderDate = service.workOrderDate ? formatDate(new Date(service.workOrderDate)) : '';
       return [
         (index + 1).toString(),
         service.serviceId,
@@ -586,7 +587,7 @@ const handleDialogClose = () => {
     const headers = 'SNO,Service ID,Vendor Name,Total Descriptions,Order Date,Total Amount,Status\n';
     const rows = approvedServices.map((service: ServiceData, index: number) => {
       const totalDescs = service.descriptions.length;
-      const orderDate = service.workOrderDate ? format(new Date(service.workOrderDate), 'dd-MM-yyyy') : '';
+      const orderDate = service.workOrderDate ? formatDate(new Date(service.workOrderDate)) : '';
       return [
         (index + 1),
         service.serviceId,
@@ -634,7 +635,7 @@ const handleDialogClose = () => {
 
     const totalOrderedAmount = approvedServices.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
     const today = new Date();
-    const currentDate = format(today, 'dd/MM/yyyy');
+    const currentDate = formatDate(today);
 
     doc.setFontSize(10);
     const totalText = `Total Approved Amount: ${totalOrderedAmount.toFixed(2)}`;
@@ -649,8 +650,8 @@ const handleDialogClose = () => {
       const descriptions = getDescriptionsFromFlatArrays(service);
       return descriptions.map((desc: ServiceDescription, dIndex: number) => {
         const globalIndex = sIndex * descriptions.length + dIndex + 1;
-        const fromDate = desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : '';
-        const toDate = desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : '';
+        const fromDate = desc.from_date ? formatDate(new Date(desc.from_date)) : '';
+        const toDate = desc.to_date ? formatDate(new Date(desc.to_date)) : '';
         return [
           globalIndex.toString(),
           service.serviceId,
@@ -698,8 +699,8 @@ const handleDialogClose = () => {
       const descriptions = getDescriptionsFromFlatArrays(service);
       return descriptions.map((desc: ServiceDescription, dIndex: number) => {
         const globalIndex = sIndex * descriptions.length + dIndex + 1;
-        const fromDate = desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : '';
-        const toDate = desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : '';
+        const fromDate = desc.from_date ? formatDate(new Date(desc.from_date)) : '';
+        const toDate = desc.to_date ? formatDate(new Date(desc.to_date)) : '';
         return [
           globalIndex,
           service.serviceId,
@@ -788,7 +789,7 @@ const handleDialogClose = () => {
         `Email: ${service.contactpersonEmail || ''}\n` +
         `Phone: ${service.vendorPhone || ''}`,
         `Service ID: ${service.serviceId}\n` +
-        `Order Date: ${service.workOrderDate ? format(new Date(service.workOrderDate), 'dd-MM-yyyy') : ''}\n` +
+        `Order Date: ${service.workOrderDate ? formatDate(new Date(service.workOrderDate)) : ''}\n` +
         `Status: ${service.status}\n` +
         `Currency: INR`
       ],
@@ -811,8 +812,8 @@ const handleDialogClose = () => {
     const descriptions = getDescriptionsFromFlatArrays(service);
     const itemHeader = ['S.No', 'Description', 'SAC Code', 'From Date', 'To Date', 'Fee', 'Tax %', 'Tax Amount', 'Total'];
     const tableRows = descriptions.map((desc: ServiceDescription, index: number) => {
-      const fromDate = desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : '';
-      const toDate = desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : '';
+      const fromDate = desc.from_date ? formatDate(new Date(desc.from_date)) : '';
+      const toDate = desc.to_date ? formatDate(new Date(desc.to_date)) : '';
       const taxAmount = desc.sgst + desc.cgst + desc.igst;
 
       return [
@@ -853,15 +854,26 @@ const handleDialogClose = () => {
     yOffset = doc.autoTable.previous.finalY + 10;
 
     // Total Summary
-    const totalFee = descriptions.reduce((sum, desc) => sum + desc.fee, 0);
-    const totalTax = descriptions.reduce((sum, desc) => sum + (desc.sgst + desc.cgst + desc.igst), 0);
-    const grandTotal = descriptions.reduce((sum, desc) => sum + desc.total, 0);
+   const totalFee = descriptions.reduce((sum, desc) => sum + desc.fee, 0);
+const totalTax = descriptions.reduce((sum, desc) => sum + (desc.sgst + desc.cgst + desc.igst), 0);
+const serviceTotal = descriptions.reduce((sum, desc) => sum + desc.total, 0);
 
-    const summaryRows = [
-      ['Total Fee:', totalFee.toFixed(2)],
-      ['Total Tax:', totalTax.toFixed(2)],
-      ['Grand Total:', grandTotal.toFixed(2)]
-    ];
+// Get freight totals from service object
+const freightAmount = service.totalFreightAmount || 0;
+const freightTaxAmount = service.totalFreightTaxAmount || 0;
+const freightGrandTotal = freightAmount + freightTaxAmount;
+
+const grandTotal = serviceTotal + freightGrandTotal;
+
+const summaryRows = [
+  ['Total Fee:', serviceTotal.toFixed(2)],
+  ['Total Tax:', totalTax.toFixed(2)],
+  ...(freightGrandTotal > 0 ? [
+    ['Freight Amount:', freightAmount.toFixed(2)],
+    ['Freight Tax:', freightTaxAmount.toFixed(2)],
+  ] : []),
+  ['Grand Total:', grandTotal.toFixed(2)]
+];
 
     doc.autoTable({
       body: summaryRows,
@@ -1095,12 +1107,12 @@ if (!canRead) {
                     <TableCell>{service.vendorName}</TableCell>
                     <TableCell>
                       {service.workOrderDate ?
-                        format(new Date(service.workOrderDate), 'dd-MM-yyyy') : ''}
+                        formatDate(new Date(service.workOrderDate)) : ''}
                     </TableCell>
                     <TableCell>
                       {getDescriptionsFromFlatArrays(service).length}
                     </TableCell>
-                    <TableCell align="right">{(service.totalAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell align="right">{formatCurrency(service.totalAmount)}</TableCell>
                     <TableCell>{service.status}</TableCell>
                     <TableCell>
                       <Box display="flex" alignItems="center">
@@ -1222,10 +1234,10 @@ if (!canRead) {
                       <TableCell>{desc.sacCode}</TableCell>
                       <TableCell>{desc.description}</TableCell>
                       <TableCell>
-                        {desc.from_date ? format(new Date(desc.from_date), 'dd-MM-yyyy') : ''}
+                        {desc.from_date ? formatDate(new Date(desc.from_date)) : ''}
                       </TableCell>
                       <TableCell>
-                        {desc.to_date ? format(new Date(desc.to_date), 'dd-MM-yyyy') : ''}
+                        {desc.to_date ? formatDate(new Date(desc.to_date)) : ''}
                       </TableCell>
                       <TableCell align="right">{desc.fee.toFixed(2)}</TableCell>
                       <TableCell align="center">{desc.tax_per}%</TableCell>
@@ -1249,7 +1261,7 @@ if (!canRead) {
                         Service Tax:
                       </TableCell>
                       <TableCell align="right" sx={{ border: 0, py: 0.5, whiteSpace: 'nowrap', width: '150px' }}>
-                        ₹ {selectedDescriptions.reduce((sum, d) => sum + (d.taxAmount || 0), 0).toFixed(2)}
+                        {formatCurrency(selectedDescriptions.reduce((sum, d) => sum + (d.taxAmount || 0), 0))}
                       </TableCell>
                     </TableRow>
 
@@ -1259,7 +1271,7 @@ if (!canRead) {
                         Freight Amount:
                       </TableCell>
                       <TableCell align="right" sx={{ border: 0, py: 0.5, whiteSpace: 'nowrap', width: '150px' }}>
-                        ₹ {freights.reduce((sum, f) => sum + f.amt, 0).toFixed(2)}
+                        {formatCurrency(freights.reduce((sum, f) => sum + f.amt, 0))}
                       </TableCell>
                     </TableRow>
 
@@ -1308,10 +1320,10 @@ if (!canRead) {
                       </TableCell>
                       <TableCell align="right" sx={{ border: 0, py: 1, whiteSpace: 'nowrap', color: 'success.main' }}>
                         <strong style={{ fontSize: '1.25em' }}>
-                          ₹ {(
+                          {formatCurrency((
                             (selectedOrder.totalAmount || 0) +
                             parseFloat(apRoundOff || '0')
-                          ).toFixed(2)}
+                          ))}
                         </strong>
                       </TableCell>
                     </TableRow>
@@ -1373,7 +1385,7 @@ if (!canRead) {
               <br /><br />
               <strong>Service ID:</strong> {selectedOrder?.serviceId}<br />
               <strong>Invoice No:</strong> {apInvoiceNo}<br />
-              <strong>Invoice Date:</strong> {apInvoiceDate ? format(new Date(apInvoiceDate), 'dd-MM-yyyy') : ''}<br />
+              <strong>Invoice Date:</strong> {apInvoiceDate ? formatDate(new Date(apInvoiceDate)) : ''}<br />
               <strong>Round Off:</strong> ₹ {apRoundOff || '0.00'}
               <br /><br />
               This action <strong>cannot be undone</strong>.

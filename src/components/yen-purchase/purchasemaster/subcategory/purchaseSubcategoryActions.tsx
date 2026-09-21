@@ -1,12 +1,25 @@
 'use client';
 import React, { useRef, useState } from 'react';
 import {
-  Box, TextField, IconButton, Tooltip, FormControlLabel, Switch,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button,
-  CircularProgress, Snackbar, Alert, Backdrop, Typography
+  Box,
+  TextField,
+  Switch,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  CircularProgress,
+  Backdrop,
+  Typography,
 } from '@mui/material';
 import {
-  Add as AddIcon, InsertDriveFile as InsertDriveFileIcon, GetApp as GetAppIcon, Upload as UploadIcon
+  Add as AddIcon,
+  DescriptionOutlined as SampleIcon,
+  FileUploadOutlined as ImportIcon,
+  FileDownloadOutlined as ExportIcon,
+  SearchRounded as SearchIcon,
 } from '@mui/icons-material';
 
 interface PurchaseSubcategoryActionsProps {
@@ -101,182 +114,104 @@ const PurchaseSubcategoryActions: React.FC<PurchaseSubcategoryActionsProps> = ({
   };
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-        <TextField
-          autoComplete='off'
-          label='Search'
-          className='some'
-          variant="outlined"
-          value={searchQuery}
-          onChange={onSearchChange}
-          sx={{ flex: 1 }}
-        />
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <IconButton
-              color="primary"
-              onClick={() => onDialogOpen('add')}
-              className="icon-button-outline"
-              size='small'
-              sx={{ p: 0.3,
-                opacity: add ? 1 : 0.5,
-                '&.Mui-disabled': {
-                  opacity: 0.5,
-                  borderColor: 'grey.400 !important',
-                  color: 'grey.500 !important'
-                } }}
-                disabled={!add}
-            >
-              <AddIcon />
-            </IconButton>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-                color: add ? 'text.primary' : 'grey.500',
-              }}
-            >
-              Add
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <IconButton
-              color="primary"
-              onClick={onSampleCSV}
-              className="icon-button-outline"
-              size='small'
-              sx={{ p: 0.3 }}
-            >
-              <InsertDriveFileIcon />
-            </IconButton>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              Sample
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+<Box className="purchase-reference-toolbar-section">
+  <Box className="purchase-reference-toolbar">
+    <TextField
+      autoComplete="off"
+      placeholder="Search by subcategory name or ID..."
+      variant="outlined"
+      value={searchQuery}
+      onChange={onSearchChange}
+      className="purchase-reference-search"
+      InputProps={{
+        startAdornment: (
+          <SearchIcon className="purchase-reference-search-icon" />
+        ),
+      }}
+    />
 
-            <input
-              id="import-csv-file-tax"
-              type="file"
-              accept=".csv"
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-              disabled={importStatus === 'loading'}
-              ref={fileInputRef}
-            />
-            <span>
-              <IconButton
-                color="primary"
-                className="icon-button-outline"
-                sx={{ p: 0.3 }}
-                size='small'
-                disabled={importStatus === 'loading'}
-                onClick={handleImportClick}
-              >
-                {importStatus === 'loading' ? <CircularProgress size={16} /> : <GetAppIcon />}
-              </IconButton>
-            </span>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              Import
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <span>
-              <IconButton
-                color="primary"
-                onClick={onExportCSV}
-                size='small'
-                className="icon-button-outline"
-                sx={{ p: 0.3 }}
-                disabled={exportStatus === 'loading'}
-              >
-                {exportStatus === 'loading' ? <CircularProgress size={16} /> : <UploadIcon />}
-              </IconButton>
-            </span>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 40,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              Export
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography
-              variant="caption"
-              align="center"
-              sx={{
-                maxWidth: 60,
-                wordBreak: 'break-word',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.1,
-                mt: 0.2,
-              }}
-            >
-              {showDeactivated ? 'Deactivated' : 'Activated'}
-            </Typography>
-            <Switch
-              checked={showDeactivated}
-              onChange={onToggleShowDeactivated}
-              disabled={importStatus === 'loading' || exportStatus === 'loading'}
-              size="small"
-              sx={{ height: 24 }}
-            />
-          </Box>
-        </Box>
+    <Box className="purchase-reference-actions">
+      {add && (
+        <Button
+          type="button"
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={() => onDialogOpen('add')}
+          className="purchase-reference-action-button"
+        >
+          Add New
+        </Button>
+      )}
+
+      <Button
+        type="button"
+        variant="outlined"
+        startIcon={<SampleIcon />}
+        onClick={onSampleCSV}
+        className="purchase-reference-action-button"
+      >
+        Sample
+      </Button>
+
+      <input
+        id="import-subcategory-csv-file"
+        type="file"
+        accept=".csv"
+        hidden
+        onChange={handleFileChange}
+        disabled={importStatus === 'loading'}
+        ref={fileInputRef}
+      />
+
+      <Button
+        type="button"
+        variant="outlined"
+        startIcon={
+          importStatus === 'loading'
+            ? <CircularProgress size={15} />
+            : <ImportIcon />
+        }
+        onClick={handleImportClick}
+        disabled={importStatus === 'loading'}
+        className="purchase-reference-action-button"
+      >
+        Import
+      </Button>
+
+      <Button
+        type="button"
+        variant="outlined"
+        startIcon={
+          exportStatus === 'loading'
+            ? <CircularProgress size={15} />
+            : <ExportIcon />
+        }
+        onClick={onExportCSV}
+        disabled={exportStatus === 'loading'}
+        className="purchase-reference-action-button"
+      >
+        Export
+      </Button>
+
+      <Box className="purchase-reference-active-toggle">
+        <Typography component="span">
+          Show Active Only
+        </Typography>
+
+        <Switch
+          checked={!showDeactivated}
+          onChange={onToggleShowDeactivated}
+          disabled={
+            importStatus === 'loading' ||
+            exportStatus === 'loading'
+          }
+          size="small"
+        />
       </Box>
+    </Box>
+  </Box>
+
+ 
 
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.modal + 1 }}

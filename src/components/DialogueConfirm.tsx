@@ -1,13 +1,6 @@
 // ConfirmationDialog.tsx
 import React from 'react';
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-} from '@mui/material';
+import { ConfirmDialogView } from '@/components/feedback/ConfirmDialogView';
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -25,20 +18,15 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   message,
 }) => {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={onConfirm} color="primary">
-          Confirm
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <ConfirmDialogView
+      open={open}
+      title={title}
+      message={message}
+      confirmText="Confirm"
+      cancelText="Cancel"
+      onCancel={onClose}
+      onConfirm={onConfirm}
+    />
   );
 };
 

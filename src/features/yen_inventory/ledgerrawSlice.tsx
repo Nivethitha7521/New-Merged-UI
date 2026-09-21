@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { RootState } from "@/redux/store";
 import { parseAxiosError } from "./wharehoueSlice";
-import purchaseApi from "@/utils/api";
+import { API_BASE_URL } from "./OuletePhysicalStockSlice";
 
 /* ======================================================
    🔹 MODELS
@@ -117,6 +117,22 @@ interface AxiosErrorPayload {
   raw?: unknown;
 }
 
+const toErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+
+    if (typeof message === "string" && message.trim().length > 0) {
+      return message;
+    }
+  }
+
+  return fallback;
+};
+
 /* ======================================================
    🔹 ASYNC THUNKS
 ====================================================== */
@@ -134,8 +150,8 @@ export const fetchWarehouses = createAsyncThunk<
       params.append("limit", limit.toString());
       if (search) params.append("search", search);
 
-      const response = await purchaseApi.get(
-        `/warehouseinventory/warehouses`,
+      const response = await axios.get(
+        `${API_BASE_URL}/warehouseinventory/warehouses`,
         { params, timeout: 15000 }
       );
 
@@ -153,13 +169,14 @@ export const fetchWarehouses = createAsyncThunk<
 // 1️⃣ Fetch Daily Stock Ledger
 export const fetchStockLedger = createAsyncThunk<
   StockLedgerResponse,
-  { fromDate: string; toDate: string; itemRandomId?: string; locationName?: string }
+  { fromDate: string; toDate: string; itemRandomId?: string; locationName?: string },
+  { rejectValue: string }
 >(
   "stockSummary/fetchStockLedger",
   async (params, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/warehouseinventoryvariance/stock-ledger`,
+      const response = await axios.get(
+        `${API_BASE_URL}/warehouseinventoryvariance/stock-ledger`,
         {
           params: {
             from_date: params.fromDate,
@@ -171,7 +188,9 @@ export const fetchStockLedger = createAsyncThunk<
       );
 
       // ✅ Transform array to object
-      const ledgerArray = response.data as StockLedgerItem[];
+      const ledgerArray = Array.isArray(response.data)
+        ? (response.data as StockLedgerItem[])
+        : [];
       const ledgerObject: StockLedgerResponse = {};
 
       ledgerArray.forEach(item => {
@@ -181,7 +200,7 @@ export const fetchStockLedger = createAsyncThunk<
       return ledgerObject;
     } catch (error) {
       const err = error as AxiosError;
-      return rejectWithValue(err.response?.data || "Failed to fetch stock ledger");
+      return rejectWithValue(toErrorMessage(err.response?.data, "Failed to fetch stock ledger"));
     }
   }
 );
@@ -190,14 +209,14 @@ export const fetchStockLedger = createAsyncThunk<
 export const searchPurchaseItems = createAsyncThunk<
   { items: PurchaseItem[]; hasMore: boolean },
   { search?: string; page?: number; limit?: number },
-  { state: RootState }
+  { state: RootState; rejectValue: string }
 >("stockSummary/searchPurchaseItems", async (
   { search = "", page = 1, limit = 20 },
   { rejectWithValue }
 ) => {
   try {
-    const response = await purchaseApi.get(
-      `/warehouseinventoryvariance/items`,
+    const response = await axios.get(
+      `${API_BASE_URL}/warehouseinventoryvariance/items`,
       {
         params: {
           search: search.trim() || undefined,
@@ -207,32 +226,32 @@ export const searchPurchaseItems = createAsyncThunk<
       }
     );
 
-    const items = response.data || [];
+    const items = Array.isArray(response.data) ? (response.data as PurchaseItem[]) : [];
     return {
       items,
       hasMore: items.length === limit,
     };
   } catch (error) {
     const err = error as AxiosError;
-    return rejectWithValue(err.response?.data || "Failed to search items");
+    return rejectWithValue(toErrorMessage(err.response?.data, "Failed to search items"));
   }
 });
 
 // 3️⃣ Fetch ALL Purchase Items
-export const fetchAllPurchaseItems = createAsyncThunk<PurchaseItem[]>(
+export const fetchAllPurchaseItems = createAsyncThunk<PurchaseItem[], void, { rejectValue: string }>(
   "stockSummary/fetchAllPurchaseItems",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/warehouseinventoryvariance/items`,
+      const response = await axios.get(
+        `${API_BASE_URL}/warehouseinventoryvariance/items`,
         {
           params: { search: "" },
         }
       );
-      return response.data || [];
+      return Array.isArray(response.data) ? (response.data as PurchaseItem[]) : [];
     } catch (error) {
       const err = error as AxiosError;
-      return rejectWithValue(err.response?.data || "Failed to fetch all items");
+      return rejectWithValue(toErrorMessage(err.response?.data, "Failed to fetch all items"));
     }
   }
 );
@@ -240,13 +259,14 @@ export const fetchAllPurchaseItems = createAsyncThunk<PurchaseItem[]>(
 // 4️⃣ Export Stock Ledger Excel
 export const exportStockLedgerExcel = createAsyncThunk<
   void,
-  { fromDate: string; toDate: string; itemRandomId: string; locationName?: string }
+  { fromDate: string; toDate: string; itemRandomId: string; locationName?: string },
+  { rejectValue: string }
 >(
   "stockSummary/exportStockLedgerExcel",
   async (params, { rejectWithValue }) => {
     try {
-      const response = await purchaseApi.get(
-        `/warehouseinventoryvariance/stock-ledger/excel`,
+      const response = await axios.get(
+        `${API_BASE_URL}/warehouseinventoryvariance/stock-ledger/excel`,
         {
           params: {
             from_date: params.fromDate,
@@ -273,7 +293,7 @@ export const exportStockLedgerExcel = createAsyncThunk<
       window.URL.revokeObjectURL(url);
     } catch (error) {
       const err = error as AxiosError;
-      return rejectWithValue(err.response?.data || "Failed to export Excel");
+      return rejectWithValue(toErrorMessage(err.response?.data, "Failed to export Excel"));
     }
   }
 );
@@ -328,6 +348,7 @@ const stockSummarySlice = createSlice({
         state.error = null;
       })
       .addCase(fetchWarehouses.fulfilled, (state, action) => {
+        state.warehousesLoading = false;
         state.warehouses = action.payload;
       })
       .addCase(fetchWarehouses.rejected, (state, action) => {
@@ -346,7 +367,7 @@ const stockSummarySlice = createSlice({
       })
       .addCase(fetchStockLedger.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = toErrorMessage(action.payload, "Failed to fetch stock ledger");
       })
 
       .addCase(searchPurchaseItems.pending, (state) => {
@@ -358,7 +379,8 @@ const stockSummarySlice = createSlice({
 
         const newItems = action.payload.items;
 
-        const mergedItems = state.currentPage === 1
+        const requestedPage = action.meta.arg.page ?? 1;
+        const mergedItems = requestedPage <= 1
           ? newItems
           : [...state.searchResults, ...newItems];
 
@@ -368,11 +390,11 @@ const stockSummarySlice = createSlice({
 
         state.searchResults = uniqueItems;
         state.hasMore = action.payload.hasMore;
-        state.currentPage += 1;
+        state.currentPage = requestedPage;
       })
       .addCase(searchPurchaseItems.rejected, (state, action) => {
         state.searchLoading = false;
-        state.searchError = action.payload as string;
+        state.searchError = toErrorMessage(action.payload, "Failed to search items");
       })
 
       .addCase(exportStockLedgerExcel.pending, (state) => {
@@ -384,7 +406,7 @@ const stockSummarySlice = createSlice({
       })
       .addCase(exportStockLedgerExcel.rejected, (state, action) => {
         state.exportLoading = false;
-        state.exportError = action.payload as string;
+        state.exportError = toErrorMessage(action.payload, "Failed to export Excel");
       })
 
       .addCase(fetchAllPurchaseItems.pending, (state) => {
@@ -397,7 +419,7 @@ const stockSummarySlice = createSlice({
       })
       .addCase(fetchAllPurchaseItems.rejected, (state, action) => {
         state.allItemsLoading = false;
-        state.allItemsError = action.payload as string;
+        state.allItemsError = toErrorMessage(action.payload, "Failed to fetch all items");
       });
   },
 });

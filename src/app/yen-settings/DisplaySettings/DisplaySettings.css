@@ -1,0 +1,210 @@
+.display-settings-page{width:100%;max-width:1500px!important;margin:0 auto;padding:4px 0 40px}.display-settings-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}.display-settings-heading h1{margin:0 0 5px!important}.display-settings-heading p{margin:0!important}.display-settings-actions{display:flex;gap:10px;flex-wrap:wrap}.display-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.display-settings-card-wide{grid-column:1/-1}.display-settings-card{border-color:var(--erp-border)!important}.display-settings-card .MuiCardContent-root{height:100%}.display-section-title{display:flex;align-items:flex-start;gap:11px;margin-bottom:17px}.display-section-title>svg{width:20px!important;height:20px!important;color:var(--erp-accent)!important;margin-top:2px}.display-section-title .MuiTypography-root{font-size:15px!important;font-weight:750!important;color:var(--erp-text)!important}.display-section-title span{display:block;margin-top:2px;color:var(--erp-muted);font-size:12px}.display-two-options,.display-three-options{display:grid;gap:10px}.display-two-options{grid-template-columns:repeat(2,1fr)}.display-three-options{grid-template-columns:repeat(3,1fr)}.display-option{min-height:48px;padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--erp-border);border-radius:12px;background:var(--erp-surface);color:var(--erp-text);font:inherit;font-size:12px;font-weight:650;cursor:pointer}.display-option:hover,.display-option.is-active{border-color:var(--erp-accent);color:var(--erp-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--erp-accent) 12%,transparent)}.display-color-grid{display:grid;grid-template-columns:repeat(5,minmax(110px,1fr));gap:10px}.display-color-option,.display-custom-color{min-height:48px;padding:9px 11px;display:flex;align-items:center;gap:9px;border:1px solid var(--erp-border);border-radius:12px;background:var(--erp-surface);color:var(--erp-text);font-size:12px;font-weight:600;cursor:pointer}.display-color-option.is-active{border-color:var(--erp-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--erp-accent) 12%,transparent)}.display-color-dot{width:18px;height:18px;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}.display-custom-color{grid-column:span 2}.display-custom-color input{width:24px;height:24px;padding:0;border:0;background:transparent;cursor:pointer}.display-custom-color code{margin-left:auto;color:var(--erp-muted);font-size:10px}.display-style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.display-style-option{min-height:136px;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left}.display-style-option strong{color:inherit}.display-style-option small{color:var(--erp-muted)}.display-style-swatch{width:100%;height:62px;display:flex;align-items:flex-end;gap:6px;padding:10px;border:1px solid var(--erp-border);border-radius:10px;background:#f5f7fa}.display-style-swatch i{display:block;width:30%;height:26px;border-radius:6px;background:#fff;border:1px solid #dfe5ec}.display-style-swatch.is-classic{border-radius:2px;background:#eee}.display-style-swatch.is-classic i{border-radius:1px}.display-style-swatch.is-glass{background:linear-gradient(135deg,#dbeafe,#fae8ff)}.display-style-swatch.is-glass i{background:rgba(255,255,255,.56);backdrop-filter:blur(8px)}.display-preview-card{background:linear-gradient(135deg,color-mix(in srgb,var(--erp-accent) 5%,var(--erp-surface)),var(--erp-surface))!important}.display-preview-surface{min-height:260px;display:flex;overflow:hidden;border:1px solid var(--erp-border);border-radius:15px;background:var(--erp-bg)}.display-preview-sidebar{width:66px;padding:14px 10px;display:flex;flex-direction:column;gap:10px;background:var(--erp-surface);border-right:1px solid var(--erp-border)}.display-preview-sidebar span{height:34px;border-radius:9px;background:#eef2f6}.display-preview-sidebar .is-active{background:color-mix(in srgb,var(--erp-accent) 18%,#fff);border:1px solid color-mix(in srgb,var(--erp-accent) 45%,#fff)}.display-preview-content{flex:1;padding:16px}.display-preview-header{display:flex;align-items:center;justify-content:space-between}.display-preview-header button{padding:9px 13px;border:0;border-radius:10px;background:var(--erp-accent);color:#fff;font-weight:650}.display-preview-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.display-preview-cards article{padding:16px;border:1px solid var(--erp-border);border-radius:12px;background:var(--erp-surface)}.display-preview-cards small{display:block;color:var(--erp-muted);margin-bottom:8px}.display-preview-cards b{font-size:20px}.display-preview-cards em{display:inline-flex;padding:4px 9px;border-radius:999px;background:#d9f8e5;color:#087a3e;font-style:normal}.display-preview-table{overflow:hidden;border:1px solid var(--erp-border);border-radius:12px;background:var(--erp-surface)}.display-preview-table span{display:block;height:38px;border-bottom:1px solid var(--erp-border)}.display-preview-table span:last-child{border-bottom:0}
+.display-contextual-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--erp-border);
+  border-radius: 12px;
+  background: var(--erp-bg);
+  color: var(--erp-text);
+  transition:
+    font-family 0.2s ease,
+    font-size 0.2s ease;
+}
+
+.display-contextual-preview > span {
+  color: var(--erp-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.display-contextual-preview > strong {
+  color: var(--erp-text);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.5;
+  transition: font-size 0.2s ease;
+}
+
+.display-contextual-preview > p {
+  margin: 0 !important;
+  color: var(--erp-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  transition: font-size 0.2s ease;
+}
+@media(max-width:900px){.display-settings-grid{grid-template-columns:1fr}.display-settings-card-wide{grid-column:auto}.display-color-grid{grid-template-columns:repeat(2,1fr)}.display-style-grid{grid-template-columns:1fr}.display-settings-heading{flex-direction:column}.display-settings-actions{width:100%}}
+.display-navigation-segmented {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--erp-border);
+  border-radius: 12px;
+  background: var(--erp-bg);
+  box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.display-navigation-segmented button {
+  min-height: 44px;
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;  color: var(--erp-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.display-navigation-segmented button:hover {
+  color: var(--erp-text);
+  background: color-mix(in srgb, var(--erp-surface) 78%, transparent);
+}
+
+.display-navigation-segmented button.is-active {
+  color: var(--erp-accent);
+  background: var(--erp-surface);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1),
+   0 0 0 1px color-mix(in srgb, var(--erp-accent) 20%, var(--erp-border));
+}
+
+.display-navigation-segmented button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.display-navigation-segmented button small {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--erp-accent-soft);
+  color: var(--erp-accent);
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .display-navigation-segmented {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* Compact display-settings layout ------------------------------------------------ */
+.display-navigation-card,
+.display-theme-card {
+  min-width: 0;
+}
+
+.display-navigation-card .MuiCardContent-root,
+.display-theme-card .MuiCardContent-root {
+  padding: 16px !important;
+}
+
+.display-navigation-card .display-section-title,
+.display-theme-card .display-section-title {
+  margin-bottom: 12px;
+}
+
+.display-navigation-segmented {
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.display-navigation-segmented button {
+  min-width: 0;
+  min-height: 46px;
+}
+
+/* Keep font options and their live preview beside each other on desktop. */
+.display-font-family-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(260px, 1.1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.display-font-family-options {
+  min-width: 0;
+}
+
+.display-font-family-options .MuiFormGroup-root {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+.display-font-family-options .MuiFormControlLabel-root {
+  min-width: 0;
+  min-height: 38px;
+  margin: 0 !important;
+  padding: 2px 8px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+}
+
+.display-font-family-options .MuiFormControlLabel-root:hover {
+  background: color-mix(in srgb, var(--erp-accent) 5%, transparent);
+}
+
+.display-font-family-options .MuiRadio-root {
+  padding: 7px !important;
+}
+
+.display-font-family-options .MuiFormControlLabel-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.display-font-preview {
+  height: 100%;
+  min-height: 0;
+  margin-top: 0;
+  justify-content: center;
+}
+
+/* Tablet: retain side-by-side cards while giving the font section more room. */
+@media (max-width: 1100px) and (min-width: 901px) {
+  .display-font-family-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .display-font-preview {
+    min-height: 104px;
+  }
+}
+
+/* Mobile / narrow content area: stack only where horizontal space is genuinely tight. */
+@media (max-width: 900px) {
+  .display-font-family-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .display-font-preview {
+    min-height: 104px;
+  }
+}
+
+@media (max-width: 520px) {
+  .display-font-family-options .MuiFormGroup-root {
+    grid-template-columns: 1fr;
+  }
+
+  .display-navigation-segmented button {
+    padding-inline: 9px;
+    gap: 6px;
+  }
+}

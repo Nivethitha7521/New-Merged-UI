@@ -82,6 +82,7 @@ import ServiceDialog from '@/app/yen-purchase/ServiceOrder/Components/ServiceDia
 import { fetchServiceById } from '@/app/yen-purchase/ServiceOrder/Features/servicelist';
 import { usePermissions } from "@/hooks/usePermissions";
 import VendorSearchAutocomplete from '@/components/vendorsearchautocomplete';
+import { formatDate, formatDateTime, formatCurrency } from '@/utilities/formatters';
 
 const OutgoingPaymentComponent = React.memo(() => {
   const dispatch = useDispatch<AppDispatch>();
@@ -92,7 +93,7 @@ const OutgoingPaymentComponent = React.memo(() => {
   const { randomIdap, apDialogOpen, selectedinvoiceId, itemwiseap } = useSelector(selectApinvoice);
   const { businesses } = useSelector(selectBusinesses);
   const { selectedPo, poDialogOpen, loading } = useSelector(selectPurchaseListState);
-
+const [selectedPos, setSelectedPos] = useState<PoResponse[]>([]);
   const [selectedOutgoing, setSelectedOutgoing] = useState<any>(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<VendorSearch | null>(null);
@@ -132,11 +133,11 @@ const OutgoingPaymentComponent = React.memo(() => {
   // Replace your useState for visibleColumns with this:
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const defaultColumns = [
-      { id: 'serialNo', label: 'S.No', align: 'center', sortable: false, visible: true },
+      { id: 'serialNo', label: 'S.No', align: 'center', sortable: false, visible: false },
       { id: 'select', label: 'Select', align: 'center', sortable: false, visible: true },
-      { id: 'poNo', label: 'PO.No/SO.No', align: 'left', sortable: false, visible: true },
-      { id: 'grnNo', label: 'GRN No', align: 'left', sortable: false, visible: true },
-      { id: 'apNo', label: 'AP No', align: 'left', sortable: false, visible: true },
+      { id: 'poNo', label: 'PO.No/SO.No', align: 'left', sortable: false, visible: false },
+      { id: 'grnNo', label: 'GRN No', align: 'left', sortable: false, visible: false },
+      { id: 'apNo', label: 'AP No', align: 'left', sortable: false, visible: false },
       { id: 'outgoingNo', label: 'Outgoing No', align: 'left', sortable: false, visible: true },
       { id: 'vendorName', label: 'Vendor Name', align: 'left', sortable: true, visible: true },
       { id: 'type', label: 'Type', align: 'left', sortable: false, visible: true },
@@ -144,14 +145,14 @@ const OutgoingPaymentComponent = React.memo(() => {
       { id: 'invoiceDate', label: 'Invoice Date', align: 'left', sortable: true, visible: true },
       { id: 'invoiceAmount', label: 'Invoice Amount', align: 'right', sortable: false, visible: true },
       { id: 'taxDetails', label: 'Tax Details', align: 'left', sortable: false, visible: true },
-      { id: 'discountAmount', label: 'Discount Amount', align: 'right', sortable: false, visible: true },
+      { id: 'discountAmount', label: 'Discount Amount', align: 'right', sortable: false, visible: false },
       { id: 'total', label: 'Total', align: 'right', sortable: false, visible: true },
       { id: 'paidAmount', label: 'Paid Amount', align: 'right', sortable: false, visible: true },
       { id: 'remainingAmount', label: 'Remaining Amount', align: 'right', sortable: false, visible: true },
       { id: 'dueDays', label: 'Due Days', align: 'center', sortable: true, visible: true },
       { id: 'paymentTerms', label: 'Payment Terms', align: 'center', sortable: true, visible: true },
-      { id: 'verifiedBy', label: 'Verified By', align: 'left', sortable: false, visible: true },
-      { id: 'verifiedDate', label: 'Verified Date', align: 'center', sortable: false, visible: true },
+      { id: 'verifiedBy', label: 'Verified By', align: 'left', sortable: false, visible: false },
+      { id: 'verifiedDate', label: 'Verified Date', align: 'center', sortable: false, visible: false },
       { id: 'action', label: 'Action', align: 'center', sortable: false, visible: true },
     ];
 
@@ -399,41 +400,61 @@ useEffect(() => {
     dispatch(setSelectedinvoiceId(null));
   };
 
-  const handlePoClick = async (poId: string) => {
-    try {
-      const result = await dispatch(fetchPoById(poId)).unwrap();
-      if (result) {
-        const transformedPo: PoResponse = {
-          purchaseOrderId: result.purchaseOrderId,
-          randomId: result.randomId,
-          vendorName: result.vendorName,
-          orderDate: typeof result.orderDate === 'string' ? result.orderDate : result.orderDate?.toISOString() || null,
-          itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
-            itemId: item.itemId ?? 'N/A',
-            itemName: item.itemName ?? 'Unknown',
-            receivedQuantity: Number(item.receivedQuantity) || 0,
-            poQuantity: Number(item.poQuantity) || 0,
-            newPrice: Number(item.newPrice) || 0,
-            totalPrice: Number(item.totalPrice) || 0,
-            purchasetaxName: Number(item.purchasetaxName) || 0,
-            taxPercentage: Number(item.taxPercentage) || 0,
-            taxAmount: Number(item.taxAmount) || 0,
-            discountAmount: Number(item.discountAmount) || 0,
-            finalPrice: Number(item.finalPrice) || 0,
-          })) as ItemDetailResponsePO[],
-        };
-        dispatch(setSelectedPo(transformedPo));
-        setPoDialogOpen(true);
-      } else {
-        dispatch(setSnackbarMessage('Purchase Order not found.'));
-        dispatch(setSnackbarOpen(true));
-      }
-    } catch (error) {
-      dispatch(setSnackbarMessage('Failed to fetch PO details.'));
+const transformPo = (result: any): PoResponse => ({
+  purchaseOrderId: result.purchaseOrderId,
+  randomId: result.randomId,
+  vendorName: result.vendorName,
+  orderDate:
+    typeof result.orderDate === "string"
+      ? result.orderDate
+      : result.orderDate?.toISOString() || null,
+  itemDetails: result.itemDetails.map((item: ItemDetailResponsePO) => ({
+    itemId: item.itemId ?? "N/A",
+    itemName: item.itemName ?? "Unknown",
+    receivedQuantity: Number(item.receivedQuantity) || 0,
+    poQuantity: Number(item.poQuantity) || 0,
+    newPrice: Number(item.newPrice) || 0,
+    totalPrice: Number(item.totalPrice) || 0,
+    purchasetaxName: Number(item.purchasetaxName) || 0,
+    taxPercentage: Number(item.taxPercentage) || 0,
+    taxAmount: Number(item.taxAmount) || 0,
+    discountAmount: Number(item.discountAmount) || 0,
+    finalPrice: Number(item.finalPrice) || 0,
+  })) as ItemDetailResponsePO[],
+});
+
+const handlePoClick = async (poIds: string | string[]) => {
+  const ids = Array.isArray(poIds)
+    ? poIds
+    : poIds.split(",").map((id) => id.trim()).filter(Boolean);
+
+  if (ids.length === 0) {
+    dispatch(setSnackbarMessage("Invalid Purchase Order ID"));
+    dispatch(setSnackbarOpen(true));
+    return;
+  }
+
+  try {
+    const results = await Promise.all(
+      ids.map((id) => dispatch(fetchPoById(id)).unwrap())
+    );
+
+    const transformedPos = results.filter(Boolean).map(transformPo);
+
+    if (transformedPos.length > 0) {
+      setSelectedPos(transformedPos);
+      dispatch(setSelectedPo(transformedPos[0])); // keeps old redux single PO logic safe
+      dispatch(setPoDialogOpen(true));
+    } else {
+      dispatch(setSnackbarMessage("Purchase Order not found."));
       dispatch(setSnackbarOpen(true));
-      console.error('Failed to fetch PO details:', error);
     }
-  };
+  } catch (error) {
+    dispatch(setSnackbarMessage("Failed to fetch PO details."));
+    dispatch(setSnackbarOpen(true));
+    console.error("Failed to fetch PO details:", error);
+  }
+};
 
   const handleCloseServiceDialog = () => {
     setDialogOpen(false);
@@ -822,7 +843,7 @@ useEffect(() => {
         outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo || "N/A",
-        outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
         outgoing.payableAmount?.toFixed(2) || "0.00",
         outgoing.totalPaid?.toFixed(2) || "0.00",
         outgoing.totalPayableAmount?.toFixed(2) || "0.00",
@@ -863,7 +884,7 @@ useEffect(() => {
         outgoing.randomId.toString(),
         outgoing.vendorName.toString(),
         outgoing.invoiceNo || "N/A",
-        outgoing.invoiceDate ? format(new Date(outgoing.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoing.invoiceDate ? formatDate(new Date(outgoing.invoiceDate)) : 'Not Provided',
         outgoing.totalPrice?.toFixed(2) || "0.00",
         outgoing.taxDetails || "N/A",
         outgoing.discountDetails?.toFixed(2) || "0.00",
@@ -944,7 +965,7 @@ useEffect(() => {
     const vendorDetailsRows = [[
       `Vendor Name: ${outgoingdetail.vendorName || ''}\nGSTIN: ${outgoingdetail.gstNumber || ''}\nAddress: ${outgoingdetail.address || ''}\nCity: ${outgoingdetail.city || ''}\nState: ${outgoingdetail.state || ''}\nCountry: ${outgoingdetail.country || ''}\nEmail: ${outgoingdetail.contactpersonEmail || ''}`,
       `Business Name: ${business?.companyName || ''}\nGSTIN: ${business?.gstIn || ''}\nAddress: ${business?.address1 || ''}\nPhone: ${business?.phoneNo || ''}\nEmail: ${business?.emailId || ''}`,
-      `Outgoing No: ${outgoingdetail.randomId}\nPO No: ${outgoingdetail.poRandomId}\nGRN No: ${getRandomId(outgoingdetail.grnId)}\nAP No: ${outgoingdetail.apRandomId}\nDate: ${outgoingdetail.createdDate ? format(new Date(outgoingdetail.createdDate), 'dd-MM-yyyy') : ''}`
+      `Outgoing No: ${outgoingdetail.randomId}\nPO No: ${outgoingdetail.poRandomId}\nGRN No: ${getRandomId(outgoingdetail.grnId)}\nAP No: ${outgoingdetail.apRandomId}\nDate: ${outgoingdetail.createdDate ? formatDate(new Date(outgoingdetail.createdDate)) : ''}`
     ]];
     doc.autoTable({
       head: [['Vendor Details', 'Business Details', 'Outgoing Payment Details']],
@@ -965,7 +986,7 @@ useEffect(() => {
       const taxAmount = withoutTaxValue * (item.purchasetaxName / 100);
       return [
         outgoingdetail.invoiceNo || '-',
-        outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided',
+        outgoingdetail.invoiceDate ? formatDate(new Date(outgoingdetail.invoiceDate)) : 'Not Provided',
         outgoingdetail.vendorName || '-',
         item.itemName,
         `${item.purchasetaxName}%`,
@@ -973,7 +994,7 @@ useEffect(() => {
         outgoingdetail.totalPrice?.toFixed(2),
         outgoingdetail.payableAmount?.toFixed(2),
       ];
-    }) : [[outgoingdetail.invoiceNo || '', outgoingdetail.invoiceDate ? format(new Date(outgoingdetail.invoiceDate), 'dd-MM-yyyy') : 'Not Provided', outgoingdetail.vendorName || '-', '-', '-', '0.00', '0.00', '0.00']];
+    }) : [[outgoingdetail.invoiceNo || '', outgoingdetail.invoiceDate ? formatDate(new Date(outgoingdetail.invoiceDate)) : 'Not Provided', outgoingdetail.vendorName || '-', '-', '-', '0.00', '0.00', '0.00']];
     doc.autoTable({
       head: [itemHeader],
       body: tableRows,
@@ -1144,10 +1165,10 @@ useEffect(() => {
           {/* Total Payable Amount */}
           <Grid item>
             <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '14px' }}>
-              Total Payable: ₹{displayTotalPayableAmount.toFixed(2)}
+              Total Payable: {formatCurrency(displayTotalPayableAmount)}
               {selectedRows.length > 0 && (
                 <span style={{ color: 'blue', marginLeft: '10px', fontSize: '13px' }}>
-                  ( ₹{selectedPaymentsTotal.toFixed(2)} ({selectedOutgoings.length}) )
+                  ( {formatCurrency(selectedPaymentsTotal)} ({selectedOutgoings.length}) )
                 </span>
               )}
             </Typography>
@@ -1354,9 +1375,37 @@ useEffect(() => {
                                           cursor: 'pointer',
                                           textDecoration: 'underline'
                                         }}
-                                        onClick={() => payment.purchaseOrderId && handlePoClick(payment.purchaseOrderId)}
+  onClick={() => {
+  const ids =
+    payment.purchaseOrderIds && payment.purchaseOrderIds.length > 0
+      ? payment.purchaseOrderIds
+      : payment.purchaseOrderId;
+
+  if (ids) handlePoClick(ids);
+}}
                                       >
-                                        {payment.poRandomId}
+{(() => {
+  const poLabels =
+    payment.poRandomIds && payment.poRandomIds.length > 0
+      ? payment.poRandomIds
+      : payment.poRandomId
+        ? [payment.poRandomId]
+        : [];
+
+  const firstPo = poLabels[0];
+  const remainingCount = poLabels.length - 1;
+
+  return (
+    <>
+      {firstPo}
+      {remainingCount > 0 && (
+        <span style={{ marginLeft: 6, fontWeight: 600 }}>
+          +{remainingCount}
+        </span>
+      )}
+    </>
+  );
+})()}
                                       </span>
                                     ) : payment.serviceId ? (
                                       <span
@@ -1426,13 +1475,13 @@ useEffect(() => {
                               case 'invoiceDate':
                                 return (
                                   <TableCell key={column.id} align="left" sx={{ whiteSpace: 'nowrap' }}>
-                                    {payment.invoiceDate ? format(new Date(payment.invoiceDate), 'dd-MM-yyyy') : ''}
+                                    {payment.invoiceDate ? formatDate(new Date(payment.invoiceDate)) : ''}
                                   </TableCell>
                                 );
                               case 'invoiceAmount':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.totalPrice || 0).toFixed(2)}
+                                    {formatCurrency(payment.totalPrice)}
                                   </TableCell>
                                 );
                               case 'taxDetails':
@@ -1456,19 +1505,19 @@ useEffect(() => {
                               case 'total':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.payableAmount || 0).toFixed(2)}
+                                    {formatCurrency(payment.payableAmount)}
                                   </TableCell>
                                 );
                               case 'paidAmount':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.paidAmount || 0).toFixed(2)}
+                                    {formatCurrency(payment.paidAmount ?? 0)}
                                   </TableCell>
                                 );
                               case 'remainingAmount':
                                 return (
                                   <TableCell key={column.id} align="right" sx={{ whiteSpace: 'nowrap' }}>
-                                    {(payment.totalPayableAmount || 0).toFixed(2)}
+                                    {formatCurrency(payment.totalPayableAmount)}
                                   </TableCell>
                                 );
                               case 'dueDays':
@@ -1500,7 +1549,7 @@ useEffect(() => {
                               case 'verifiedDate':
                                 return (
                                   <TableCell key={column.id} align="center" sx={{ whiteSpace: 'nowrap' }}>
-                                    {payment.verifiedDate ? format(new Date(payment.verifiedDate), 'dd-MM-yyyy HH:mm') : '-'}
+                                    {payment.verifiedDate ? formatDateTime(new Date(payment.verifiedDate)) : '-'}
                                   </TableCell>
                                 );
                               case 'action':
@@ -1572,7 +1621,15 @@ useEffect(() => {
 
         {/* Dialogs */}
         <DebitCreditNoteDialog />
-        <PODialog open={poDialogOpen} onClose={() => dispatch(setPoDialogOpen(false))} po={selectedPo} />
+       <PODialog
+  open={poDialogOpen}
+  onClose={() => {
+    dispatch(setPoDialogOpen(false));
+    setSelectedPos([]);
+  }}
+  po={selectedPo}
+  pos={selectedPos}
+/>
         <GrnDialog open={viewItemsDialogOpen} onClose={() => setViewItemsDialogOpen(false)} grn={selectedGrn} />
         <ApInvoiceDialog open={apDialogOpen} onClose={handleCloseApDialog} apInvoice={selectedApInvoice} />
         <BulkPaymentDialog open={isBulkPaymentOpen} onClose={() => setIsBulkPaymentOpen(false)} selectedOutgoings={selectedOutgoings} />

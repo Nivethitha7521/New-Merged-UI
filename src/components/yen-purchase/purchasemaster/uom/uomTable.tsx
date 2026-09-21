@@ -5,7 +5,9 @@ import {
   IconButton, Tooltip,
   Box
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import ConfirmationDialog from '@/components/confirmationDialog';
 import { UOMItem } from '@/Models/uom';
 
@@ -49,7 +51,7 @@ const UOMTable: React.FC<UOMTableProps> = ({
   };
 
   return (
-    <Box>
+    <Box className="purchase-master-table-shell">
           <TableContainer
                component={Paper}
                sx={{
@@ -82,11 +84,38 @@ const UOMTable: React.FC<UOMTableProps> = ({
                 return (
                   <TableRow key={uom.randomId}>
                     <TableCell className='table-number-right'>{index + 1}</TableCell>
-                    <TableCell>{uom.randomId}</TableCell>
-                    <TableCell>{uom.uom}</TableCell>
-                    <TableCell className='table-number-right'>{uom.precisionValue}</TableCell>
-                    <TableCell>{uom.status}</TableCell>
+                   <TableCell>
+  <span className="purchase-master-id-pill">
+    {uom.randomId}
+  </span>
+</TableCell>
+                  <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(uom.uom || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{uom.uom}</span>
+  </Box>
+</TableCell>
+                   <TableCell className="table-number-right">
+  <span className="purchase-master-value-pill">
+    {uom.precisionValue}
+  </span>
+</TableCell>
+                  <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      uom.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {uom.status}
+  </span>
+</TableCell>
                     <TableCell>
+                      <Box className="purchase-master-actions">
                       {uom.status === 'active' ? (
                         <>
                           <Tooltip
@@ -95,6 +124,7 @@ const UOMTable: React.FC<UOMTableProps> = ({
                           >
                             <span>
                               <IconButton
+                              className="purchase-master-action-button is-edit"
                                 onClick={() => handleEdit(uom.purchaseuomId)}
                                  disabled={isFirstFive || !canEdit} // ✅ ADD PERMISSION CHECK
                                    sx={{ 
@@ -115,6 +145,7 @@ const UOMTable: React.FC<UOMTableProps> = ({
                           >
                             <span>
                               <IconButton
+                              className="purchase-master-action-button is-delete"
                                 onClick={() => handleOpenDialog('deactivate', uom.purchaseuomId)}
                                 disabled={isFirstFive|| !canDelete}
                                   sx={{ 
@@ -132,7 +163,9 @@ const UOMTable: React.FC<UOMTableProps> = ({
                         </>
                       ) : (
                         <Tooltip title="Activate UOM" disableInteractive>
-                          <IconButton onClick={() => handleOpenDialog('activate', uom.purchaseuomId)}
+                          <IconButton 
+                          className="purchase-master-action-button is-activate"
+                          onClick={() => handleOpenDialog('activate', uom.purchaseuomId)}
                            disabled={!canDelete} // ✅ ADD PERMISSION CHECK
                             sx={{ 
                               opacity: !canDelete ? 0.5 : 1,
@@ -146,6 +179,7 @@ const UOMTable: React.FC<UOMTableProps> = ({
                           </IconButton>
                         </Tooltip>
                       )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 );

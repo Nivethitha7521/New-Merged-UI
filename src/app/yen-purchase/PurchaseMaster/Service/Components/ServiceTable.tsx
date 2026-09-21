@@ -6,7 +6,9 @@ import {
   IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button,
   Box
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { Service } from '../Models/Service';
@@ -68,8 +70,9 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
   const totalPagesCount = Math.max(1, totalPages || 0);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box className="purchase-master-table-shell" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <TableContainer
+      className="purchase-master-table"
         component={Paper}
         sx={{
           flex: 1,
@@ -102,14 +105,46 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
               displayItems.map((item, index) => (
                 <TableRow key={item.serviceId}>
                   <TableCell className='table-number-right'>{((currentPage - 1) * pageSize) + index + 1}</TableCell>
-                  <TableCell>{item.serviceId}</TableCell>
-                    <TableCell>{item.saccode || ''}</TableCell>
-                  <TableCell>{item.serviceName}</TableCell>
-                  <TableCell>{item.status}</TableCell>
                   <TableCell>
+  <span className="purchase-master-id-pill">
+    {item.serviceId}
+  </span>
+</TableCell>
+                   <TableCell>
+  {item.saccode ? (
+    <span className="purchase-master-value-pill">
+      {item.saccode}
+    </span>
+  ) : (
+    <span>-</span>
+  )}
+</TableCell>
+                <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(item.serviceName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{item.serviceName}</span>
+  </Box>
+</TableCell>
+                <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      item.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {item.status}
+  </span>
+</TableCell>
+                  <TableCell>
+                    <Box className="purchase-master-actions">
                     {item.status === 'active' ? (
                       <>
                        <IconButton
+                       className="purchase-master-action-button is-edit"
   onClick={() => handleEdit(item.mongoId || '')}
   disabled={!canEdit}
   sx={{
@@ -121,6 +156,7 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
                           <EditIcon />
                         </IconButton>
                        <IconButton
+                       className="purchase-master-action-button is-delete"
   onClick={() => handleOpenDialog(item.mongoId || '', 'deactivate')}
   disabled={!canDelete}
   sx={{
@@ -134,6 +170,7 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
                       </>
                     ) : (
                      <IconButton
+                     className="purchase-master-action-button is-activate"
   onClick={() => handleOpenDialog(item.mongoId || '', 'activate')}
   disabled={!canDelete}
   sx={{
@@ -145,7 +182,9 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
                         <RefreshIcon />
                       </IconButton>
                     )}
+                     </Box>
                   </TableCell>
+                 
                 </TableRow>
               ))
             )}

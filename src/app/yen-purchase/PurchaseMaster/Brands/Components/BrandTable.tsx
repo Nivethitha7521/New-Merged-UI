@@ -5,7 +5,9 @@ import {
   IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button,
   Box, Tooltip
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import { Brand } from '../Models/BrandModel';
 
 interface BrandTableProps {
@@ -51,8 +53,9 @@ const BrandTable: React.FC<BrandTableProps> = ({
   };
 
   return (
-    <Box>
+    <Box className="purchase-master-table-shell">
       <TableContainer
+      className="purchase-master-table"
         component={Paper}
         sx={{
           maxHeight: 'calc(100vh - 200px)',
@@ -83,15 +86,40 @@ const BrandTable: React.FC<BrandTableProps> = ({
               items.slice().reverse().map((item, index) => (
                 <TableRow key={item.brandId}>
                   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{item.brandId}</TableCell>
-                  <TableCell>{item.brandName}</TableCell>
-                  <TableCell>{item.status}</TableCell>
+                 <TableCell>
+  <span className="purchase-master-id-pill">
+    {item.brandId}
+  </span>
+</TableCell>
+                <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(item.brandName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{item.brandName}</span>
+  </Box>
+</TableCell>
+                 <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      item.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {item.status}
+  </span>
+</TableCell>
                   <TableCell>
+                    <Box className="purchase-master-actions">
                     {item.status === 'active' ? (
                       <>
                         <Tooltip title={!canEdit ? "No permission to edit" : "Edit Brand"}>
                           <span>
                             <IconButton 
+                            className="purchase-master-action-button is-edit"
+
                               onClick={() => handleEdit(item.mongoId)}
                               disabled={!canEdit}
                               sx={{ opacity: canEdit ? 1 : 0.5 }}
@@ -104,6 +132,7 @@ const BrandTable: React.FC<BrandTableProps> = ({
                         <Tooltip title={!canDelete ? "No permission to deactivate" : "Deactivate Brand"}>
                           <span>
                             <IconButton 
+                            className="purchase-master-action-button is-delete"
                               onClick={() => handleOpenDialog(item.mongoId, 'deactivate')}
                               disabled={!canDelete}
                               sx={{ opacity: canDelete ? 1 : 0.5 }}
@@ -117,6 +146,7 @@ const BrandTable: React.FC<BrandTableProps> = ({
                       <Tooltip title={!canDelete ? "No permission to activate" : "Activate Brand"}>
                         <span>
                           <IconButton 
+                          className="purchase-master-action-button is-activate"
                             onClick={() => handleOpenDialog(item.mongoId, 'activate')}
                             disabled={!canDelete}
                             sx={{ opacity: canDelete ? 1 : 0.5 }}
@@ -126,6 +156,7 @@ const BrandTable: React.FC<BrandTableProps> = ({
                         </span>
                       </Tooltip>
                     )}
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))

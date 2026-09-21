@@ -1,0 +1,249 @@
+/* =========================================================
++   ITEM MASTER LOOKUP DIALOGS — 100% LAPTOP COMPACT FIT
++   Applies only to Sub Category, Item Group, Inventory Type
++   and Order Type Add/Edit dialogs.
++   UI-only: no handlers, validation, Redux or API logic changed.
++   Dialogs are rendered through MUI Portal, so the root dialog
++   gets .item-lookup-form-dialog and is styled from <body>.
++   ========================================================= */
+
+@media (min-width: 561px) {
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-paper-small {
+    width: min(460px, calc(100vw - 48px)) !important;
+    max-width: 460px !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: calc(100dvh - 48px) !important;
+    margin: 24px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+
+    border: 1px solid var(--erp-border, #dfe5ec) !important;
+    border-radius: 10px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    box-shadow: 0 16px 42px rgba(16, 24, 40, 0.18) !important;
+    font-family: inherit !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-title {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 14px 18px 12px !important;
+
+    border-bottom: 1px solid var(--erp-border, #e5e7eb) !important;
+        background: var(--erp-surface, #ffffff) !important;
+    background-image: none !important;
+
+    color: var(--erp-text, #101828) !important;
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-content {
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 18px !important;
+    overflow: visible !important;
+    background: var(--erp-surface, #ffffff) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .form-section,
+  body .MuiDialog-root.item-lookup-form-dialog .form-field {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+   margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield,
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield.MuiFormControl-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiOutlinedInput-root {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    border-radius: 7px !important;
+    background: var(--erp-surface, #ffffff) !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiOutlinedInput-input {
+    height: auto !important;
+    min-width: 0 !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-border-strong, #cbd5e1) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: var(--erp-accent-border, var(--erp-accent, #2563eb)) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-width: 1.5px !important;
+    border-color: var(--erp-accent, #2563eb) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiInputLabel-root {
+    max-width: calc(100% - 24px) !important;
+    color: var(--erp-text-secondary, #475467) !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiInputLabel-root.Mui-focused {
+    color: var(--erp-accent, #2563eb) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield .MuiFormHelperText-root {
+    min-height: 14px !important;
+    margin: 4px 3px 0 !important;
+    font-family: inherit !important;
+    font-size: 10px !important;
+    line-height: 14px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 10px 18px !important;
+    gap: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+
+    border-top: 1px solid var(--erp-border, #e5e7eb) !important;
+    background: var(--erp-surface-2, #f8fafc) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-secondary,
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-primary {
+    min-width: 82px !important;
+    width: auto !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    border-radius: 7px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    font-family: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-secondary {
+    color: var(--erp-text, #101828) !important;
+    background: var(--erp-surface, #ffffff) !important;
+    border: 1px solid var(--erp-border-strong, #cbd5e1) !important;
+    box-shadow: none !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-primary {
+    color: var(--erp-accent-contrast, #ffffff) !important;
+    background: var(--erp-accent, #2563eb) !important;
+    border: 1px solid var(--erp-accent, #2563eb) !important;
+    box-shadow: 0 2px 5px rgba(var(--erp-accent-rgb, 37, 99, 235), 0.20) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-primary:hover:not(:disabled) {
+    background: var(--erp-accent-hover, var(--erp-accent, #1d4ed8)) !important;
+    border-color: var(--erp-accent-hover, var(--erp-accent, #1d4ed8)) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-secondary:hover:not(:disabled) {
+    background: var(--erp-surface-2, #f8fafc) !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions :is(.btn-primary, .btn-secondary):disabled {
+    cursor: not-allowed !important;
+    opacity: 0.55 !important;
+    box-shadow: none !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions .btn-primary .MuiCircularProgress-root {
+    width: 18px !important;
+    height: 18px !important;
+    color: currentColor !important;
+  }
+}
+
+/* Small laptops / narrow desktop windows: keep exactly the same composition,
+   only reduce the modal width and spacing so 100% browser zoom still fits. */
+@media (min-width: 561px) and (max-width: 900px) {
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-paper-small {
+    width: min(420px, calc(100vw - 32px)) !important;
+    margin: 16px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-title {
+    padding: 12px 16px 10px !important;
+    font-size: 14px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-content {
+    padding: 16px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions {
+    padding: 9px 16px !important;
+  }
+}
+
+/* Phones: allow the same dialog component to remain usable without creating
+   a fixed desktop-width modal. */
+@media (max-width: 560px) {
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-paper-small {
+    width: calc(100vw - 24px) !important;
+    max-width: none !important;
+    margin: 12px !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-title {
+    padding: 12px 14px 10px !important;
+    font-size: 14px !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-content {
+    padding: 14px !important;
+    overflow: visible !important;
+  }
+
+  body .MuiDialog-root.item-lookup-form-dialog .form-section,
+  body .MuiDialog-root.item-lookup-form-dialog .form-field,
+  body .MuiDialog-root.item-lookup-form-dialog .custom-textfield {
+    width: 100% !important;
+    margin: 0 !important;
+ }
+
+  body .MuiDialog-root.item-lookup-form-dialog .dialog-actions {
+    padding: 9px 14px !important;
+    gap: 8px !important;
+  }
+}

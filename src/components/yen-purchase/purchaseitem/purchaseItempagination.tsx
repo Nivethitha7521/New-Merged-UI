@@ -1,7 +1,7 @@
 'use client';
+
 import React from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Box, Pagination, Typography } from '@mui/material';
 
 interface PurchasePaginationProps {
   currentPage: number;
@@ -14,41 +14,28 @@ const PurchasePagination: React.FC<PurchasePaginationProps> = ({
   currentPage,
   pageSize,
   totalItems,
-  handlePageChange
+  handlePageChange,
 }) => {
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
   return (
- <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        px: 2,
-        width: '100%',
-      }}
-    >      
-    <Typography>
-        Showing {startItem}-{endItem} of {totalItems} items
+    <Box className="purchase-item-pagination">
+      <Typography className="purchase-item-pagination-label">
+        Showing {totalItems === 0 ? 0 : startItem}-{endItem} of {totalItems} items
       </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <IconButton
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft />
-        </IconButton>
-        <Typography sx={{ mx: 2 }}>
-          Page {currentPage} of {Math.max(1, Math.ceil(totalItems / pageSize))}
-        </Typography>
-        <IconButton
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage >= Math.ceil(totalItems / pageSize)}
-        >
-          <ChevronRight />
-        </IconButton>
-      </Box>
+
+      <Pagination
+        count={totalPages}
+        page={currentPage}
+        onChange={(_event, value) => handlePageChange(value)}
+        color="primary"
+        size="small"
+        shape="rounded"
+        showFirstButton
+        showLastButton
+      />
     </Box>
   );
 };

@@ -26,6 +26,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import CloseIcon from '@mui/icons-material/Close';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ConfirmationDialog from '@/components/confirmationDialog';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface AmountReturnDialogProps {
   open: boolean;
@@ -75,7 +76,7 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
     setBackendError(null); // Clear backend error when user changes amount
     
     if (numValue > maxAmount) {
-      setErrorMessage(`Amount cannot exceed maximum available: ₹${maxAmount.toFixed(2)}`);
+      setErrorMessage(`Amount cannot exceed maximum available: ${formatCurrency(maxAmount)}`);
     } else {
       setErrorMessage('');
     }
@@ -86,7 +87,7 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
       if (debitAmount <= 0) {
         setErrorMessage('Amount must be greater than 0');
       } else if (debitAmount > maxAmount) {
-        setErrorMessage(`Amount cannot exceed maximum available: ₹${maxAmount.toFixed(2)}`);
+        setErrorMessage(`Amount cannot exceed maximum available: ${formatCurrency(maxAmount)}`);
       } else if (!reason.trim()) {
         setErrorMessage('Reason is required');
       }
@@ -263,16 +264,16 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
               </Typography>
               <Box sx={{ mt: 1, fontSize: '0.875rem' }}>
                 {backendError.original_amount !== undefined && (
-                  <div>📄 Original GRN Amount: ₹{backendError.original_amount.toFixed(2)}</div>
+                  <div>📄 Original GRN Amount: {formatCurrency(backendError.original_amount)}</div>
                 )}
                 {backendError.total_existing_debit !== undefined && (
-                  <div>📋 Already Returned Amount: ₹{backendError.total_existing_debit.toFixed(2)}</div>
+                  <div>📋 Already Returned Amount: {formatCurrency(backendError.total_existing_debit)}</div>
                 )}
                 {backendError.available_amount !== undefined && (
-                  <div>✅ Available for Return: ₹{backendError.available_amount.toFixed(2)}</div>
+                  <div>✅ Available for Return: {formatCurrency(backendError.available_amount)}</div>
                 )}
                 {backendError.requested_amount !== undefined && (
-                  <div>❌ Requested Amount: ₹{backendError.requested_amount.toFixed(2)}</div>
+                  <div>❌ Requested Amount: {formatCurrency(backendError.requested_amount)}</div>
                 )}
               </Box>
             </Alert>
@@ -311,7 +312,7 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
                       Available for Return:
                     </Typography>
                     <Typography fontWeight="bold" color="primary" fontSize="1.1rem">
-                      ₹{availableAmount.toFixed(2)}
+                      {formatCurrency(availableAmount)}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -338,7 +339,7 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
                     </InputAdornment>
                   ),
                 }}
-                helperText={`Maximum available: ₹${availableAmount.toFixed(2)}`}
+                helperText={`Maximum available: ${formatCurrency(availableAmount)}`}
                 error={debitAmount > availableAmount || !!errorMessage}
                 autoComplete="off"
                 disabled={isLoading}
@@ -396,10 +397,10 @@ const AmountReturnDialog: React.FC<AmountReturnDialogProps> = ({
             </Typography>
             <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
               <Typography variant="body2"><strong>Document:</strong> {documentNumber}</Typography>
-              <Typography variant="body2"><strong>Amount:</strong> ₹{debitAmount.toFixed(2)}</Typography>
+              <Typography variant="body2"><strong>Amount:</strong> {formatCurrency(debitAmount)}</Typography>
               <Typography variant="body2"><strong>Reason:</strong> {reason}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Remaining available after this: ₹{(availableAmount - debitAmount).toFixed(2)}
+                Remaining available after this: {formatCurrency((availableAmount - debitAmount))}
               </Typography>
             </Box>
           </Box>

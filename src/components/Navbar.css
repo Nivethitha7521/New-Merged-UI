@@ -1,115 +1,275 @@
-/* Main navbar container - ensure it doesn't wrap and allows overflow if needed */
-.navbar {
-  background-color: white !important;
-  padding: 1px !important;
-  margin-left: 5px;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  color: black !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
-  min-width: 0; /* Important: allows flex children to shrink properly */
-  overflow-x: auto; /* Allows horizontal scrolling if content is too wide */
-  overflow-y: hidden;
+.erp-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+
+  width: 100%;
+  height: 64px;
+  min-height: 64px;
+
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+  align-items: center;
+
+  padding: 0 22px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #dfe5ec;
 }
 
-/* The main content wrapper inside navbar */
-.navbar-content {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  min-width: 0; /* Prevents layout break */
-}
+/* Left breadcrumbs */
 
-/* LEFT: Menu + Logo */
-.navbar-left {
-  display: flex !important;
-  align-items: center !important;
-  flex-shrink: 0; /* Don't let this shrink */
-  gap: 12px;
-}
-
-/* CENTER: Module Name - takes available space */
-.navbar-center {
-  flex-grow: 1 !important;
-  display: flex !important;
-  justify-content: center !important;
+.erp-navbar-left {
   min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-/* RIGHT: All right-side items in one horizontal row, no wrapping */
-.navbar-right {
-  display: flex !important;
-  align-items: center !important;
-  flex-wrap: nowrap !important;     /* CRITICAL: Prevents wrapping */
-  flex-shrink: 0 !important;        /* Don't shrink this section */
-  gap: 16px;                        /* Consistent spacing between items */
-  padding-right: 16px;
+.erp-breadcrumbs {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
 
-/* Ensure each item in navbar-right doesn't shrink or wrap */
-.navbar-right > * {
-  flex-shrink: 0 !important;
+.erp-breadcrumb-item {
+  color: #667085 !important;
+
+  font-size: 12px !important;
+  font-weight: 500 !important;
+
+  white-space: nowrap;
 }
 
-/* Session timer styling */
-.session-timer {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px;
+.erp-breadcrumb-current {
+  color: #101828 !important;
+
+  font-size: 12px !important;
+  font-weight: 700 !important;
+
+  white-space: nowrap;
+}
+
+.erp-breadcrumb-separator {
+  flex-shrink: 0;
+
+  color: #98a2b3;
   font-size: 14px;
-  font-weight: bold;
-  white-space: nowrap;
 }
 
-/* User info */
-.user-info {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px;
-  white-space: nowrap;
-}
+/* Center company name */
 
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #1976d2;
-  color: white;
-  border-radius: 50%;
+.erp-navbar-company {
+  min-width: 180px;
+  max-width: 480px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 14px;
+
+  padding: 0 22px;
 }
 
-/* Business logos container - keep them small and in row */
-.navbar-logo {
-  width: 60px !important;
-  height: 40px !important;   /* Slightly taller for better visibility */
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+.erp-navbar-company-name {
+  max-width: 100%;
+
+  color: #101828 !important;
+
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em !important;
+
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right controls */
+
+.erp-navbar-right {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 11px;
+}
+
+/* Business logo */
+
+.erp-navbar-business {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.erp-navbar-business-logo {
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+
+  flex: 0 0 50px;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+
+  color: #155eef;
+  background: #f6f9fc;
+
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 3px 8px rgba(16, 24, 40, 0.06);
+
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.erp-navbar-business-image {
+  width: 100% !important;
+  height: 100% !important;
+
+  display: block;
+
+  object-fit: contain;
+  object-position: center;
+
+  transform: scale(1.18);
+  transform-origin: center;
+
+  background: #ffffff;
+}
+
+/* Modern logout button */
+
+.erp-navbar-logout-button {
+  min-width: 94px;
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 14px;
+
+  color: #b42318;
+  background: #ffffff;
+
+  border: 1px solid #f2c7c3;
+  border-radius: 12px;
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.04);
+
+  font-family:
+    'Source Sans 3',
+    sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.erp-navbar-logout-button svg {
+  width: 17px;
+  height: 17px;
+
   flex-shrink: 0;
 }
 
-.navbar-image {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
+.erp-navbar-logout-button:hover {
+  color: #ffffff;
+  background: #d92d20;
+  border-color: #d92d20;
+
+  box-shadow:
+    0 5px 12px rgba(217, 45, 32, 0.18);
+
+  transform: translateY(-1px);
 }
 
-.no-logo {
-  font-size: 10px !important;
-  color: #666 !important;
-  text-align: center;
-  white-space: nowrap;
+.erp-navbar-logout-button:active {
+  transform: translateY(0);
 }
 
-/* Logout button */
-.navbar-logout button {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px;
-  white-space: nowrap;
+/* Responsive */
+
+@media (max-width: 900px) {
+  .erp-navbar {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+    padding: 0 16px;
+  }
+
+  .erp-navbar-company {
+    position: absolute;
+    left: 50%;
+
+    max-width: 34%;
+
+    padding: 0;
+
+    transform: translateX(-50%);
+  }
+
+  .erp-navbar-company-name {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .erp-navbar {
+    height: 60px;
+    min-height: 60px;
+
+    padding: 0 12px;
+  }
+
+  .erp-breadcrumb-item,
+  .erp-breadcrumb-separator {
+    display: none;
+  }
+
+  .erp-navbar-company {
+    display: none;
+  }
+
+  .erp-navbar-business-logo {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+  }
+
+  .erp-navbar-logout-button {
+    min-width: 38px;
+    width: 38px;
+    height: 36px;
+
+    padding: 0;
+  }
+
+  .erp-navbar-logout-button span {
+    display: none;
+  }
 }

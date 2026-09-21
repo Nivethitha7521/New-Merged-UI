@@ -27,6 +27,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PriceChangeIcon from '@mui/icons-material/PriceChange';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface StockUpdateItem {
   randomId: string;
@@ -254,7 +255,7 @@ const StockUpdateDialog: React.FC<StockUpdateDialogProps> = ({ open, onClose, re
                     return (
                       <TableRow key={index}>
                         <TableCell>{item.itemName}</TableCell>
-                        <TableCell align="right">₹{oldMasterPrice.toFixed(2)}</TableCell>
+                        <TableCell align="right">{formatCurrency(oldMasterPrice)}</TableCell>
                         <TableCell align="right">
                           <Chip
                             label="→ oldPrice"
@@ -265,7 +266,7 @@ const StockUpdateDialog: React.FC<StockUpdateDialogProps> = ({ open, onClose, re
                         </TableCell>
                         <TableCell align="right">
                           <Typography fontWeight="bold" color="success.main">
-                            ₹{newMasterPrice.toFixed(2)}
+                            {formatCurrency(newMasterPrice)}
                           </Typography>
                         </TableCell>
                         <TableCell align="right">

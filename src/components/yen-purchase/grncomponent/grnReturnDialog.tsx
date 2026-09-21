@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -34,6 +34,7 @@ import { ReturnGRNRequest, ItemDetail, ReturnReason } from '@/Models/grnModel';
 import { AppDispatch, RootState } from '@/redux/store';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface EditedItem {
   returnedQuantity: number;
@@ -69,7 +70,7 @@ const GrnReturnDialog: React.FC<GrnReturnDialogProps> = ({
   onCancel,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { returnReasons, snackbarMessageGRN, snackbarOpenGRN, loading } = useSelector((state: RootState) => state.grn);
+  const { returnReasons, snackbarMessageGRN, snackbarOpenGRN, loading,grns } = useSelector((state: RootState) => state.grn);
   const { username } = useSelector((state: RootState) => state.auth);
   const [dialogOpen, setDialogOpen] = useState(true);
   const [dialogReturnOpen, setDialogReturnOpen] = useState(false);
@@ -90,6 +91,44 @@ const hasFetchedRef = useRef(false);
 
   // Filter out "Other" option - only use dropdown reasons
   const dropdownReasons = returnReasons.filter(r => r.reason !== 'Other');
+const selectedGrn = useMemo(() => {
+  return Array.isArray(grns)
+    ? grns.find((g: any) => g.grnId === selectedGrnId)
+    : null;
+}, [grns, selectedGrnId]);
+
+const headerPoRandomId =
+  selectedGrn?.poRandomID ||
+  selectedGrn?.poRandomIds?.[0] ||
+  "Single PO";
+  const groupedDialogItems = useMemo(() => {
+  const groups: Record<string, { poRandomId: string; items: ItemDetail[] }> = {};
+
+  dialogItems.forEach((item: any) => {
+const poRandomId =
+  item.sourcePoRandomId ||
+  item.poRandomID ||
+  item.poRandomId ||
+  item.purchaseOrderRandomId ||
+  item.purchaseOrderNo ||
+  item.poNo ||
+  item.poId ||
+ headerPoRandomId;
+
+const poId =
+  item.sourcePurchaseOrderId ||
+  item.purchaseOrderId ||
+  poRandomId;
+
+    if (!groups[poId]) {
+      groups[poId] = { poRandomId, items: [] };
+    }
+
+    groups[poId].items.push(item);
+  });
+
+  return groups;
+}, [dialogItems, headerPoRandomId]);
 
   const customRound = (value: number): number => {
     return Math.round(value * 100) / 100;
@@ -138,14 +177,14 @@ const hasFetchedRef = useRef(false);
     if (totalReturnAmount > availableReturnAmount && availableReturnAmount > 0) {
       return {
         isExceeded: true,
-        message: `Return amount ₹${totalReturnAmount.toFixed(2)} exceeds available limit ₹${availableReturnAmount.toFixed(2)}. Total returns cannot exceed GRN value ₹${grnOriginalAmount.toFixed(2)}.`
+        message: `Return amount ${formatCurrency(totalReturnAmount)} exceeds available limit ${formatCurrency(availableReturnAmount)}. Total returns cannot exceed GRN value ${formatCurrency(grnOriginalAmount)}.`
       };
     }
     
     if (totalReturnAmount > grnOriginalAmount) {
       return {
         isExceeded: true,
-        message: `Return amount ₹${totalReturnAmount.toFixed(2)} exceeds GRN original value ₹${grnOriginalAmount.toFixed(2)}.`
+        message: `Return amount ${formatCurrency(totalReturnAmount)} exceeds GRN original value ${formatCurrency(grnOriginalAmount)}.`
       };
     }
     
@@ -506,9 +545,9 @@ const hasFetchedRef = useRef(false);
           {availableReturnAmount > 0 && (
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="body2">
-                <strong>Return Limits:</strong> GRN Value: ₹{grnOriginalAmount.toFixed(2)} | 
-                Already Returned: ₹{totalExistingReturns.toFixed(2)} | 
-                Available: ₹{availableReturnAmount.toFixed(2)}
+                <strong>Return Limits:</strong> GRN Value: {formatCurrency(grnOriginalAmount)} | 
+                Already Returned: {formatCurrency(totalExistingReturns)} | 
+                Available: {formatCurrency(availableReturnAmount)}
               </Typography>
             </Alert>
           )}
@@ -520,7 +559,7 @@ const hasFetchedRef = useRef(false);
                 {amountLimitError}
               </Typography>
               <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                Total return amount: ₹{totalReturnAmount.toFixed(2)}
+                Total return amount: {formatCurrency(totalReturnAmount)}
               </Typography>
             </Alert>
           )}
@@ -532,13 +571,13 @@ const hasFetchedRef = useRef(false);
                 {backendErrorDetail.message || 'Return amount limit exceeded'}
               </Typography>
               {backendErrorDetail.original_payable_amount !== undefined && (
-                <Typography variant="body2">GRN Value: ₹{backendErrorDetail.original_payable_amount.toFixed(2)}</Typography>
+                <Typography variant="body2">GRN Value: {formatCurrency(backendErrorDetail.original_payable_amount)}</Typography>
               )}
               {backendErrorDetail.total_existing_debit !== undefined && (
-                <Typography variant="body2">Already Returned: ₹{backendErrorDetail.total_existing_debit.toFixed(2)}</Typography>
+                <Typography variant="body2">Already Returned: {formatCurrency(backendErrorDetail.total_existing_debit)}</Typography>
               )}
               {backendErrorDetail.available_amount !== undefined && (
-                <Typography variant="body2">Available: ₹{backendErrorDetail.available_amount.toFixed(2)}</Typography>
+                <Typography variant="body2">Available: {formatCurrency(backendErrorDetail.available_amount)}</Typography>
               )}
             </Alert>
           )}
@@ -547,12 +586,12 @@ const hasFetchedRef = useRef(false);
           {returnScenario && totalReturnAmount > 0 && !amountLimitError && (
             <Alert severity={totalReturnAmount <= availableReturnAmount ? "success" : "warning"} sx={{ mb: 2 }}>
               <Typography variant="body2">
-                <strong>Return Amount:</strong> ₹{totalReturnAmount.toFixed(2)}
+                <strong>Return Amount:</strong> {formatCurrency(totalReturnAmount)}
                 {totalReturnAmount <= availableReturnAmount && availableReturnAmount > 0 && (
-                  <span> ✓ Within limit (₹{availableReturnAmount.toFixed(2)} available)</span>
+                  <span> ✓ Within limit ({formatCurrency(availableReturnAmount)} available)</span>
                 )}
                 {totalReturnAmount > availableReturnAmount && availableReturnAmount > 0 && (
-                  <span style={{ color: 'red' }}> ✗ Exceeds available limit by ₹{(totalReturnAmount - availableReturnAmount).toFixed(2)}</span>
+                  <span style={{ color: 'red' }}> ✗ Exceeds available limit by {formatCurrency((totalReturnAmount - availableReturnAmount))}</span>
                 )}
               </Typography>
             </Alert>
@@ -612,68 +651,86 @@ const hasFetchedRef = useRef(false);
                   <TableCell>Select</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
-                {dialogItems.map((item) => {
-                  const maxReturnable = getMaxReturnable(item);
-                  const edited = editedItems[item.itemId] || {
-                    returnedQuantity: 0,
-                    nos: 0,
-                    eachQuantity: item.eachQuantity || 1,
-                    returnReason: '',
-                    customReason: '',
-                  };
-                  const totalPrice = calculateItemTotal(item, edited.returnedQuantity);
-                  const isDisabled = returnScenario === 'full' || !selectedItemsForReturn.has(item.itemId) || isLoading;
-                  return (
-                    <TableRow key={item.itemId}>
-                      <TableCell>{item.itemName ?? 'Unknown Item'}</TableCell>
-                      <TableCell>{customRound(item.receivedQuantity || 0)}</TableCell>
-                      <TableCell>{customRound(item.returnedQuantity || 0)}</TableCell>
-                      <TableCell>{customRound(maxReturnable)}</TableCell>
-                      <TableCell>
-                        <TextField
-                          type="number"
-                          value={edited.returnedQuantity}
-                          onChange={(e) => handleEditReturn(item.itemId, 'returnedQuantity', Number(e.target.value))}
-                          variant="outlined"
-                          fullWidth
-                          inputProps={{ min: 0, step: 0.01 }}
-                          disabled={isDisabled}
-                          placeholder="Enter return quantity"
-                          autoComplete="off"
-                        />
-                      </TableCell>
-                      <TableCell>{customRound(edited.nos)}</TableCell>
-                      <TableCell>{customRound(edited.eachQuantity)}</TableCell>
-                      <TableCell>
-                        <FormControl fullWidth>
-                          <InputLabel>Return Reason</InputLabel>
-                          <Select
-                            value={edited.returnReason}
-                            onChange={(e) => handleEditReturn(item.itemId, 'returnReason', e.target.value)}
-                            disabled={isDisabled}
-                          >
-                            {dropdownReasons.map((reasonObj) => (
-                              <MenuItem key={reasonObj.reason} value={reasonObj.reason}>
-                                {reasonObj.reason}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </TableCell>
-                      <TableCell>{customRound(item.unitPrice || 0)}</TableCell>
-                      <TableCell>{customRound(totalPrice)}</TableCell>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedItemsForReturn.has(item.itemId)}
-                          onChange={() => handleCheckboxChange(item.itemId)}
-                          disabled={returnScenario !== 'partial' || maxReturnable <= 0 || isLoading}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
+            <TableBody>
+  {Object.entries(groupedDialogItems).map(([poId, group]) => (
+    <React.Fragment key={poId}>
+      <TableRow>
+        <TableCell
+          colSpan={11}
+          sx={{
+            backgroundColor: "#e3f2fd",
+            fontWeight: "bold",
+            color: "#1565c0",
+          }}
+        >
+          PO ID: {group.poRandomId}
+        </TableCell>
+      </TableRow>
+
+      {group.items.map((item) => {
+        const maxReturnable = getMaxReturnable(item);
+        const edited = editedItems[item.itemId] || {
+          returnedQuantity: 0,
+          nos: 0,
+          eachQuantity: item.eachQuantity || 1,
+          returnReason: '',
+          customReason: '',
+        };
+        const totalPrice = calculateItemTotal(item, edited.returnedQuantity);
+        const isDisabled = returnScenario === 'full' || !selectedItemsForReturn.has(item.itemId) || isLoading;
+
+        return (
+          <TableRow key={`${poId}-${item.itemId}`}>
+            <TableCell>{item.itemName ?? 'Unknown Item'}</TableCell>
+            <TableCell>{customRound(item.receivedQuantity || 0)}</TableCell>
+            <TableCell>{customRound(item.returnedQuantity || 0)}</TableCell>
+            <TableCell>{customRound(maxReturnable)}</TableCell>
+            <TableCell>
+              <TextField
+                type="number"
+                value={edited.returnedQuantity}
+                onChange={(e) => handleEditReturn(item.itemId, 'returnedQuantity', Number(e.target.value))}
+                variant="outlined"
+                fullWidth
+                inputProps={{ min: 0, step: 0.01 }}
+                disabled={isDisabled}
+                placeholder="Enter return quantity"
+                autoComplete="off"
+              />
+            </TableCell>
+            <TableCell>{customRound(edited.nos)}</TableCell>
+            <TableCell>{customRound(edited.eachQuantity)}</TableCell>
+            <TableCell>
+              <FormControl fullWidth>
+                <InputLabel>Return Reason</InputLabel>
+                <Select
+                  value={edited.returnReason}
+                  onChange={(e) => handleEditReturn(item.itemId, 'returnReason', e.target.value)}
+                  disabled={isDisabled}
+                >
+                  {dropdownReasons.map((reasonObj) => (
+                    <MenuItem key={reasonObj.reason} value={reasonObj.reason}>
+                      {reasonObj.reason}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </TableCell>
+            <TableCell>{customRound(item.unitPrice || 0)}</TableCell>
+            <TableCell>{customRound(totalPrice)}</TableCell>
+            <TableCell>
+              <Checkbox
+                checked={selectedItemsForReturn.has(item.itemId)}
+                onChange={() => handleCheckboxChange(item.itemId)}
+                disabled={returnScenario !== 'partial' || maxReturnable <= 0 || isLoading}
+              />
+            </TableCell>
+          </TableRow>
+        );
+      })}
+    </React.Fragment>
+  ))}
+</TableBody>
             </Table>
           </TableContainer>
         </DialogContent>

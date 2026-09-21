@@ -5,7 +5,9 @@ import {
   IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button,
   Box
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { EditOutlined as EditIcon,
+DeleteOutlineRounded as DeleteIcon,
+RestoreRounded as RefreshIcon } from '@mui/icons-material';
 import { Freight } from '../../../../Models/freightModel';
 
 interface FreightTableProps {
@@ -51,8 +53,9 @@ const FreightTable: React.FC<FreightTableProps> = ({
   };
 
   return (
-    <Box>
+    <Box className="purchase-master-table-shell">
       <TableContainer
+      className="purchase-master-table"
         component={Paper}
         sx={{
           maxHeight: 'calc(100vh - 200px)', // Dynamic height based on viewport
@@ -84,13 +87,37 @@ const FreightTable: React.FC<FreightTableProps> = ({
               items.slice().reverse().map((item, index) => (
                 <TableRow key={item.randomId}>
                   <TableCell className='table-number-right'>{index + 1}</TableCell>
-                  <TableCell>{item.randomId}</TableCell>
-                  <TableCell>{item.freightName}</TableCell>
-                  <TableCell>{item.status}</TableCell>
                   <TableCell>
+  <span className="purchase-master-id-pill">
+    {item.randomId}
+  </span>
+</TableCell>
+                 <TableCell>
+  <Box className="purchase-master-name-cell">
+    <span className="purchase-master-avatar">
+      {(item.freightName || '?').charAt(0).toUpperCase()}
+    </span>
+
+    <span>{item.freightName}</span>
+  </Box>
+</TableCell>
+                 <TableCell>
+  <span
+    className={`purchase-master-status-pill ${
+      item.status === 'active'
+        ? 'is-active'
+        : 'is-inactive'
+    }`}
+  >
+    {item.status}
+  </span>
+</TableCell>
+                  <TableCell>
+                     <Box className="purchase-master-actions">
                     {item.status === 'active' ? (
                       <>
                         <IconButton 
+                        className="purchase-master-action-button is-edit"
                           onClick={() => handleEdit(item.freightId)}
                           disabled={!canEdit}
                           sx={{ 
@@ -104,6 +131,7 @@ const FreightTable: React.FC<FreightTableProps> = ({
                           <EditIcon />
                         </IconButton>
                         <IconButton 
+                        className="purchase-master-action-button is-delete"
                           onClick={() => handleOpenDialog(item.freightId, 'deactivate')}
                           disabled={!canDelete}
                           sx={{ 
@@ -120,6 +148,7 @@ const FreightTable: React.FC<FreightTableProps> = ({
                       </>
                     ) : (
                       <IconButton 
+                      className="purchase-master-action-button is-activate"
                         onClick={() => handleOpenDialog(item.freightId, 'activate')}
                         disabled={!canDelete}
                         sx={{ 
@@ -133,6 +162,7 @@ const FreightTable: React.FC<FreightTableProps> = ({
                         <RefreshIcon />
                       </IconButton>
                     )}
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))

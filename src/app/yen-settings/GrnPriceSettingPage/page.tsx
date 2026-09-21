@@ -15,7 +15,6 @@ import {
   FormControlLabel,
   Chip,
   Stack,
-  IconButton,
   Divider,
   Container,
   Slider,
@@ -27,7 +26,6 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import {
@@ -37,11 +35,9 @@ import {
   updateMaxPercentageAbove,
   clearError
 } from '../Features/GRNSettingsSlice';
-import { useRouter } from 'next/navigation';
 
 const GRNPriceSettingPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
   
   const { settings, loading, saving, error, lastUpdated } = useSelector(
     (state: RootState) => state.grnPriceSettings
@@ -96,28 +92,8 @@ const GRNPriceSettingPage = () => {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      bgcolor: '#f5f5f5',
-      p: 3
-    }}>
-      <Container maxWidth="md">
-        
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <IconButton onClick={() => router.push('/yen-settings')} sx={{ mr: 2 }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h4" fontWeight="bold">
-            GRN Price Settings
-          </Typography>
-          <Chip 
-            label={isActive ? "Active" : "Inactive"} 
-            color={isActive ? "success" : "default"}
-            sx={{ ml: 2 }}
-          />
-        </Box>
-
+    <Box sx={{ width: '100%', minWidth: 0 }}>
+      <Container maxWidth={false} disableGutters>
         {/* Alerts */}
         {error && (
           <Alert severity="error" sx={{ mb: 2 }} onClose={() => dispatch(clearError())}>
@@ -133,11 +109,17 @@ const GRNPriceSettingPage = () => {
         {/* Main Settings Card */}
         <Card>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <PriceChangeIcon color="primary" sx={{ fontSize: 32 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 2, flexWrap: 'wrap' }}>
+              <PriceChangeIcon color="primary" sx={{ fontSize: 24 }} />
               <Typography variant="h6" fontWeight="bold">
                 GRN Price Tolerance Rules
               </Typography>
+              <Chip
+                label={isActive ? "Active" : "Inactive"}
+                color={isActive ? "success" : "default"}
+                size="small"
+                sx={{ ml: 'auto' }}
+              />
             </Box>
 
             <Divider sx={{ mb: 3 }} />

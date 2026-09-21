@@ -52,6 +52,7 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import { format } from "date-fns";
 import { fetchBank } from "@/features/yen-purchase/Outgoing/outgoingPaymentSlice";
 import { usePermissions } from "@/hooks/usePermissions";
+import { formatDate, formatCurrency } from '@/utilities/formatters';
 
 const AdvancePaymentPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -394,13 +395,13 @@ const AdvancePaymentPage: React.FC = () => {
                     <TableCell>{payment.randomId || "N/A"}</TableCell>
                     <TableCell>{payment.vendorName || "N/A"}</TableCell>
                     <TableCell>{payment.vendorCode || "N/A"}</TableCell>
-                    <TableCell>₹{(payment.amount || 0).toFixed(2)}</TableCell>
-                    <TableCell>₹{(payment.pendingAmount || 0).toFixed(2)}</TableCell>
+                    <TableCell>{formatCurrency((payment.amount || 0))}</TableCell>
+                    <TableCell>{formatCurrency((payment.pendingAmount || 0))}</TableCell>
                     <TableCell>
-                      {payment.paymentDate ? format(new Date(payment.paymentDate), "dd-MM-yyyy") : "N/A"}
+                      {payment.paymentDate ? formatDate(new Date(payment.paymentDate)) : "N/A"}
                     </TableCell>
                     <TableCell>
-                      {payment.createdDate ? format(new Date(payment.createdDate), "dd-MM-yyyy") : "N/A"}
+                      {payment.createdDate ? formatDate(new Date(payment.createdDate)) : "N/A"}
                     </TableCell>
                     <TableCell>
                       <Typography

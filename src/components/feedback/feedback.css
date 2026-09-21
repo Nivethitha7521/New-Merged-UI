@@ -1,0 +1,396 @@
+/* =========================================================================
+   YEN ERP — GLOBAL FEEDBACK SYSTEM  (confirmation dialog + toast/snackbar)
+   -------------------------------------------------------------------------
+   Why this file is safe to import once at the root:
+   • Every class is namespaced `yen-fb-*` — nothing here matches .dialog-paper,
+     .btn-primary, .MuiDialog-paper, .MuiSnackbar-root, etc., so module CSS
+     (master-admin, recipe, pos …) cannot restyle these components and these
+     components cannot restyle modules.
+   • Colours come from the Display-Settings tokens (--erp-*) with fallbacks, so
+     light / dark theme and the accent colour follow the user's settings.
+   • Sizes are px-based (not --erp-ui) so the look is identical in every module
+     and at every browser zoom / density.
+   ========================================================================= */
+
+:root {
+  --yen-fb-surface: var(--erp-surface, #ffffff);
+  --yen-fb-surface-muted: var(--erp-surface-2, #f6f8fb);
+  --yen-fb-text: var(--erp-text, #101828);
+  --yen-fb-muted: var(--erp-muted, #667085);
+  --yen-fb-border: var(--erp-border, #dfe5ec);
+  --yen-fb-border-strong: var(--erp-border-strong, #c5ced8);
+
+  --yen-fb-accent: var(--erp-accent, #155eef);
+  --yen-fb-accent-contrast: var(--erp-accent-contrast, #ffffff);
+
+  --yen-fb-success: #0b7a42;
+  --yen-fb-danger: #d92d20;
+  --yen-fb-warning: #b54708;
+  --yen-fb-info: var(--yen-fb-accent);
+
+  --yen-fb-overlay: rgba(16, 24, 40, 0.5);
+  --yen-fb-dialog-shadow: 0 24px 64px rgba(16, 24, 40, 0.28), 0 4px 16px rgba(16, 24, 40, 0.12);
+  --yen-fb-toast-shadow: 0 10px 30px rgba(16, 24, 40, 0.16), 0 2px 8px rgba(16, 24, 40, 0.08);
+
+  --yen-fb-scale: var(--erp-type-scale, 1);
+
+  /* Where toasts / legacy snackbars / react-toastify sit: bottom-left. */
+  --yen-fb-bottom: 24px;
+  --yen-fb-left: 24px;
+}
+
+html[data-erp-theme='dark'] {
+  --yen-fb-success: #47cd89;
+  --yen-fb-danger: #f97066;
+  --yen-fb-warning: #fdb022;
+  --yen-fb-overlay: rgba(4, 8, 16, 0.72);
+  --yen-fb-dialog-shadow: 0 28px 80px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --yen-fb-toast-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* tone → accent colour used by icon, stripe and primary button */
+.yen-fb-tone-primary { --yen-fb-tone: var(--yen-fb-accent); --yen-fb-tone-contrast: var(--yen-fb-accent-contrast); }
+.yen-fb-tone-info    { --yen-fb-tone: var(--yen-fb-info);    --yen-fb-tone-contrast: var(--yen-fb-accent-contrast); }
+.yen-fb-tone-success { --yen-fb-tone: var(--yen-fb-success); --yen-fb-tone-contrast: #ffffff; }
+.yen-fb-tone-danger,
+.yen-fb-tone-error   { --yen-fb-tone: var(--yen-fb-danger);  --yen-fb-tone-contrast: #ffffff; }
+.yen-fb-tone-warning { --yen-fb-tone: var(--yen-fb-warning); --yen-fb-tone-contrast: #ffffff; }
+html[data-erp-theme='dark'] .yen-fb-tone-warning,
+html[data-erp-theme='dark'] .yen-fb-tone-danger,
+html[data-erp-theme='dark'] .yen-fb-tone-error,
+html[data-erp-theme='dark'] .yen-fb-tone-success { --yen-fb-tone-contrast: #0b1220; }
+
+.yen-fb-sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* =========================================================================
+   CONFIRMATION DIALOG
+   ========================================================================= */
+
+.yen-fb-modal { outline: none; }
+
+.yen-fb-modal .yen-fb-layer {
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--yen-fb-overlay);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  outline: none;
+  animation: yen-fb-fade 140ms ease-out;
+}
+
+.yen-fb-modal .yen-fb-dialog {
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  margin: 0;
+  padding: 24px 24px 20px;
+  color: var(--yen-fb-text);
+  background: var(--yen-fb-surface);
+  border: 1px solid var(--yen-fb-border);
+  border-radius: 16px;
+  box-shadow: var(--yen-fb-dialog-shadow);
+  font-size: calc(14px * var(--yen-fb-scale));
+  line-height: 1.5;
+  text-align: left;
+  animation: yen-fb-pop 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.yen-fb-modal .yen-fb-dialog-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.yen-fb-modal .yen-fb-dialog-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: var(--yen-fb-tone);
+  background: rgba(21, 94, 239, 0.1);
+  background: color-mix(in srgb, var(--yen-fb-tone) 14%, var(--yen-fb-surface));
+}
+
+.yen-fb-modal .yen-fb-dialog-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.yen-fb-modal .yen-fb-dialog-title {
+  margin: 0;
+  color: var(--yen-fb-text);
+  font-size: calc(17px * var(--yen-fb-scale));
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.yen-fb-modal .yen-fb-dialog-message {
+  margin: 6px 0 0;
+  color: var(--yen-fb-muted);
+  font-size: calc(14px * var(--yen-fb-scale));
+  font-weight: 400;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.yen-fb-modal .yen-fb-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+}
+
+/* ---- buttons (shared by dialog) ---- */
+
+.yen-fb-modal .yen-fb-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 96px;
+  height: 40px;
+  margin: 0;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font: inherit;
+  font-size: calc(14px * var(--yen-fb-scale));
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease,
+    transform 60ms ease, opacity 120ms ease;
+}
+
+.yen-fb-modal .yen-fb-btn:focus-visible {
+  outline: 2px solid var(--yen-fb-tone);
+  outline-offset: 2px;
+}
+
+.yen-fb-modal .yen-fb-btn:active:not(:disabled) { transform: translateY(1px); }
+
+.yen-fb-modal .yen-fb-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.yen-fb-modal .yen-fb-btn-primary {
+  color: var(--yen-fb-tone-contrast);
+  background: var(--yen-fb-tone);
+  border-color: var(--yen-fb-tone);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.12);
+}
+.yen-fb-modal .yen-fb-btn-primary:hover:not(:disabled) {
+  filter: brightness(0.94);
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.18);
+}
+
+.yen-fb-modal .yen-fb-btn-secondary {
+  color: var(--yen-fb-text);
+  background: var(--yen-fb-surface);
+  border-color: var(--yen-fb-border-strong);
+}
+.yen-fb-modal .yen-fb-btn-secondary:hover:not(:disabled) {
+  background: var(--yen-fb-surface-muted);
+}
+
+.yen-fb-spinner {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: yen-fb-spin 700ms linear infinite;
+}
+
+@media (max-width: 420px) {
+  .yen-fb-modal .yen-fb-dialog { padding: 20px 18px 16px; }
+  .yen-fb-modal .yen-fb-dialog-actions { flex-direction: column-reverse; }
+  .yen-fb-modal .yen-fb-btn { width: 100%; }
+}
+
+/* =========================================================================
+   TOASTS  (notify.success / error / warning / info)
+   ========================================================================= */
+
+.yen-fb-toast-host {
+  position: fixed;
+  bottom: var(--yen-fb-bottom);
+  left: var(--yen-fb-left);
+  z-index: 2000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;   /* newest toast at the bottom, older ones move up */
+  justify-content: flex-end;
+  gap: 10px;
+  width: min(420px, calc(100vw - 32px));
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.yen-fb-toast-host .yen-fb-toast {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  overflow: hidden;
+  padding: 12px 10px 12px 14px;
+  color: var(--yen-fb-text);
+  background: var(--yen-fb-surface);
+  border: 1px solid var(--yen-fb-border);
+  border-left: 4px solid var(--yen-fb-tone);
+  border-radius: 12px;
+  box-shadow: var(--yen-fb-toast-shadow);
+  font-size: calc(14px * var(--yen-fb-scale));
+  line-height: 1.45;
+  text-align: left;
+  pointer-events: auto;
+  animation: yen-fb-slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.yen-fb-toast-host .yen-fb-toast-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  margin-top: 1px;
+  color: var(--yen-fb-tone);
+}
+
+.yen-fb-toast-host .yen-fb-toast-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 1px 0;
+}
+
+.yen-fb-toast-host .yen-fb-toast-title {
+  margin: 0 0 2px;
+  color: var(--yen-fb-text);
+  font-size: calc(14px * var(--yen-fb-scale));
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.yen-fb-toast-host .yen-fb-toast-message {
+  margin: 0;
+  color: var(--yen-fb-text);
+  font-size: calc(14px * var(--yen-fb-scale));
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.yen-fb-toast-host .yen-fb-toast-action {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 6px 0 0;
+  padding: 0;
+  color: var(--yen-fb-tone);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: calc(13px * var(--yen-fb-scale));
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.yen-fb-toast-host .yen-fb-toast-close {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -2px 0 0;
+  padding: 0;
+  color: var(--yen-fb-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.yen-fb-toast-host .yen-fb-toast-close:hover {
+  color: var(--yen-fb-text);
+  background: var(--yen-fb-surface-muted);
+}
+.yen-fb-toast-host .yen-fb-toast-close:focus-visible,
+.yen-fb-toast-host .yen-fb-toast-action:focus-visible {
+  outline: 2px solid var(--yen-fb-tone);
+  outline-offset: 1px;
+}
+
+.yen-fb-toast-host .yen-fb-toast-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--yen-fb-tone);
+  opacity: 0.55;
+  transform-origin: left center;
+  animation-name: yen-fb-shrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@media (max-width: 560px) {
+  :root { --yen-fb-bottom: 12px; --yen-fb-left: 12px; }
+  .yen-fb-toast-host {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+}
+
+/* =========================================================================
+   Motion
+   ========================================================================= */
+
+@keyframes yen-fb-fade     { from { opacity: 0; } to { opacity: 1; } }
+@keyframes yen-fb-pop      { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes yen-fb-slide-in { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+@keyframes yen-fb-shrink   { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes yen-fb-spin     { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .yen-fb-modal .yen-fb-layer,
+  .yen-fb-modal .yen-fb-dialog,
+  .yen-fb-toast-host .yen-fb-toast { animation: none; }
+  .yen-fb-spinner { animation-duration: 1600ms; }
+}

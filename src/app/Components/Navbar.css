@@ -1,0 +1,35 @@
+.erp-navbar {
+  height: 64px;
+  min-height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe5ec;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+.erp-navbar-left, .erp-navbar-right { display: flex; align-items: center; }
+.erp-navbar-left { gap: 14px; min-width: 0; }
+.erp-menu-button { width: 36px !important; height: 36px !important; color: #667085 !important; border-radius: 10px !important; }
+.erp-menu-button:hover, .erp-notification-button:hover { background: #f2f5f8 !important; color: #101828 !important; }
+.erp-breadcrumbs { display: flex; align-items: center; min-width: 0; gap: 9px; }
+.erp-breadcrumb-item { font-size: 12px !important; color: #667085; white-space: nowrap; }
+.erp-breadcrumb-current { font-size: 12px !important; font-weight: 700 !important; color: #101828; white-space: nowrap; }
+.erp-breadcrumb-separator { color: #98a2b3; font-size: 14px; }
+.erp-navbar-right { gap: 12px; }
+.erp-notification-button { width: 34px !important; height: 34px !important; color: #475467 !important; position: relative !important; }
+.erp-notification-button svg { font-size: 18px; }
+.erp-notification-dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #ef233c; top: 6px; right: 6px; border: 1.5px solid #fff; }
+.erp-system-status { height: 28px; display: inline-flex; align-items: center; gap: 7px; padding: 0 13px; border: 1px solid #a6e6be; background: #dcfce7; color: #08783f; border-radius: 999px; font-size: 11px; font-weight: 650; cursor: default; }
+.erp-system-status span { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
+.erp-profile-button { width: 34px; height: 34px; padding: 0; border: 1px solid #d0d5dd; border-radius: 50%; overflow: hidden; background: #eef3f8; color: #344054; font-size: 12px; font-weight: 700; display: none; place-items: center; cursor: pointer; }
+.erp-profile-image { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 720px) {
+  .erp-navbar { padding: 0 12px; }
+  .erp-system-status { display: none; }
+  .erp-breadcrumb-item { display: none; }
+  .erp-breadcrumb-separator { display: none; }
+}

@@ -1,84 +1,70 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
-import { Button, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { usePathname } from "next/navigation";
 import YenInventoryPage from "../page";
 import { usePermissions } from "@/hooks/usePermissions";
 
-/* ✅ TYPE DEFINE */
-type SubItem = {
-  label: string;
-  path: string;
-  module: string;
-};
-
-/* ✅ ADD MODULE FIELD */
-const subItems2: SubItem[] = [
+const subItems = [
   {
-    label: "Physical Stock Modification",
+    label: "Outlet Physical Stock",
     path: "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockModification",
-    module: "physicalstockmodification",
+    permissionKey: "outletphysicalstock",
   },
   {
-    label: "Physical Stock Variance Modification",
+    label: "Outlet Stock Variance",
     path: "/yen-inventory/OutletsInventoryManagement/OutletPhysicalStockVarianceModification",
-    module: "physicalstockvariancemodification",
+    permissionKey: "outletstockvariance",
   },
   {
-    label: "Stock Ledger",
+    label: "Outlet Approved Stock",
+    path: "/yen-inventory/OutletsInventoryManagement/ApprovedStock",
+    permissionKey: "outletapprovedstock",
+  },
+  {
+    label: "Outlet Stock Ledger",
     path: "/yen-inventory/OutletsInventoryManagement/ledger",
-    module: "stockledger",
+    permissionKey: "outletstockledger",
   },
 ];
 
 const OutletsInventoryManagementPage = () => {
   const pathname = usePathname();
-
-  /* ✅ PERMISSION HOOK */
   const { isModuleVisible } = usePermissions();
 
+  const visibleSubItems = useMemo(
+    () => subItems.filter((item) => isModuleVisible("yenerp", item.permissionKey)),
+    [isModuleVisible]
+  );
+
+  if (visibleSubItems.length === 0) return null;
+
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
       <YenInventoryPage />
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          paddingLeft: 2,
-          marginTop: 1,
-        }}
-      >
-        {/* ✅ FILTER BASED ON PERMISSION */}
-        {subItems2
-          .filter((item) => isModuleVisible("yenerp", item.module))
-          .map((item) => {
+      <nav className="inventory-section-nav" aria-label="Outlet inventory screens">
+        <div className="inventory-section-nav-list">
+          {visibleSubItems.map((item) => {
             const isActive = pathname?.startsWith(item.path);
 
             return (
-              <Link key={item.label} href={item.path} passHref prefetch={false}>
-                <Button
-                  variant="contained"
-                  component="a"
-                  sx={{
-                    backgroundColor: isActive ? "white" : "primary.main",
-                    color: isActive ? "black" : "white",
-                    "&:hover": {
-                      backgroundColor: isActive
-                        ? "rgba(255,255,255,0.8)"
-                        : "primary.dark",
-                    },
-                  }}
-                >
-                  {item.label}
-                </Button>
+              <Link
+                key={item.path}
+                href={item.path}
+                prefetch={false}
+                className={`inventory-section-tab ${isActive ? "is-active" : ""}`}
+                aria-current={isActive ? "page" : undefined}
+                title={item.label}
+              >
+                {item.label}
               </Link>
             );
           })}
-      </Box>
+        </div>
+      </nav>
     </Box>
   );
 };

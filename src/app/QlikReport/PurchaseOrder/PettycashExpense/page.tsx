@@ -2,8 +2,8 @@
 
 import { PettyCashExpenseReport } from '@/redux/reportRegistry';
 import { RootState } from '@/redux/store';
-import ReportPage from '@/app/QlikReport/engine/ReportPage';
-import { pettyCashExpenseConfig } from '../../configs/pettyCashExpense.config';
+import ReportPage from '@/features/reports-engine/ReportPage';
+import { pettyCashExpenseConfig } from '@/features/purchase-order/reports/pettyCashExpense.config';
 
 // Select 'pettyCashExpense' (the key defined in your config)
 const selector = (s: RootState) => s.pettyCashExpense;

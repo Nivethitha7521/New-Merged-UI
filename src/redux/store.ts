@@ -2,14 +2,15 @@ import { configureStore } from '@reduxjs/toolkit';
 import onlinePartnersReducer from '../features/onlinePartnersSlice';
 import billReceiptsReducer from '../features/billReceiptsSlice';
 import purchaseOrderReducer from '../features/yen-purchase/PurchaseOrder/purchaseOrderSlice';
+import dispatchStoreReducer from '../features/purchase-order/raw-materials/redux/storedispatch';
 import grnReducer from '../features/yen-purchase/GRN/grnSlice';
 import dataReducer from '../features/yen_inventory/OutletPhysicalVarianceSlice';
 import debitNoteReducer from '../features/debitNotesAllSlice';
 import apInvoiceReducer from '../features/yen-purchase/AP/apInvoiceSlice';
+import dailyActivitiesReducer from '../features/purchase-order/raw-materials/redux/branchesSlice';
 import outgoingPaymentReducer from '../features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import vendorReducer from '../features/yen-purchase/PurchaseMaster/vendorSlice';
 import purchaseItemReducer from '../features/yen-purchase/PurchaseMaster/purchaseItemSlice';
-import purchaseRequisitionReducer from '../features/purchaseRequisitionSlice';
 import budgetReducer from '../features/budgetSlice';
 import barcodeReducer from '../features/barcodeSlice';
 import customerReducer from '../features/customerSlice';
@@ -102,14 +103,58 @@ import rawMaterialStoreReducer from "../features/yen_inventory/wharehoueStoreSli
 import stockSummaryReducer from "../features/yen_inventory/ledgerrawSlice";
 import stockSummaryOutletReducer from "../features/yen_inventory/ledgeroutletSlice";
 import itemsReducer from '../features/yen_inventory/OuletePhysicalStockSlice';
-import dailyActivitiesReducer from '../app/QlikReport/PurchaseOrder/RawMaterials/features/branchesSlice';
-import dispatchesReducer from '../app/QlikReport/PurchaseOrder/RawMaterials/features/storedispatch';
+
 import dateFilterReducer from '../glopals/dateFilterSlice';
 import { reportReducers } from '../redux/reportRegistry';
 import expenseCategoryReducer from '../features/yen-book/ExpenseCategorySlice';
 import expenseSubcategoryReducer from '../features/yen-book/ExpenseSubcategorySlice';
 import expenseNameReducer from '../features/yen-book/ExpenseNameSlice';
 import GRNSettingReducer from '../../src/app/yen-settings/Features/GRNSettingsSlice';
+import newrecipeReducer from "../app/yen-recipie/StoreKitchenMaster/newRecipe/Features/newrecipeSlice";
+import recipehistoryReducer from "../app/yen-recipie/StoreKitchenMaster/edit/versionhistory/features/viewrecipehistory";
+import recipesReducer from "../app/yen-recipie/StoreKitchenMaster/Slicefiles/recipeassignSlice";
+import editRecipeReducer from "../app/yen-recipie/StoreKitchenMaster/edit/editing/features/editRecipeSlice";
+import storeKitchenItemReducer from "../app/yen-recipie/StoreKitchenMaster/Slicefiles/storekitchenmaster";
+import recipesectionReducer from "../app/yen-recipie/StoreKitchenMaster/edit/slicefiles/selectsectionslice";
+import categoryReducer from '../app/master-admin/Items/Category/Features/categorySlice';
+import discountReducer from '../app/master-admin/Discount/Features/discountSlice';
+import itemGroupReducer from '../app/master-admin/Items/itemGroup/Features/itemgroupSlice';
+import subcategoryReducer from '../app/master-admin/Items/Subcategory/Features/subcategorySlice';
+import maItemsReducer from '../app/master-admin/Items/Item/Features/itemSlice';
+import addonReducer from '../app/master-admin/KOTMaster/addOn/Features/addOnSlice';
+import variantReducer from '../app/master-admin/KOTMaster/variants/Features/variantsSlice';
+import tableReducer from '../app/master-admin/KOTMaster/TableMaster/Features/tableSlice';
+import mixboxReducer from '../app/master-admin/MixBox/Features/mixBoxSlice';
+import onlinePartnerTemplateReducer from '../app/master-admin/OnlinePartners/OnlinePartnerConfig/OnlinePartnerTemplate/Features/OnlineParnerTemplateSlice';
+import maOnlinePartnerReducer from '../app/master-admin/OnlinePartners/OnlinePartnerMaster/Features/OnlinePartnerSlice';
+import AdvanceAmountReducer from '../app/master-admin/SaleOrder/AdvanceAmount/Features/AdvanceAmountSlice';
+import DeliveryOrderDateReducer from '../app/master-admin/SaleOrder/DeliveryDate/Features/deliveryorderslice';
+import deliveryTypeReducer from '../app/master-admin/SaleOrder/DeliveryType/Features/deliveryTypeslice';
+import EventReducer from '../app/master-admin/SaleOrder/Events/Features/EventSlice';
+import ChargesReducer from '../app/master-admin/SaleOrder/Charges/Features/chargeSlice';
+import maPaymentTypeReducer from '../app/master-admin/SaleOrder/PaymentType/Features/PaymentTypeSlice';
+import taxReducer from '../app/master-admin/Tax/Features/taxSlice';
+import maUomReducer from '../app/master-admin/Uom/Features/uomSlice';
+import vehiclesReducer from '../app/master-admin/Vehicle/Features/vehicleSlice';
+import warehouseReducer from '../app/master-admin/WarehouseMaster/Features/warehouseSlice';
+import locationReducer from '../app/master-admin/Locations/Features/locationSlice';
+import WhatsAppReducer from '../app/WhatsApp/WhatsappAdmin/Features/whatsAppSlice';
+import WhatsappMessageReducer from '../app/WhatsApp/WhatsappMaster/Features/whatsAppMessage';
+
+import maAssetReducer from '../app/yen-pos/assetManagement/Feature/assetSlice';
+import OpeningCashReducer from '../app/yen-pos/CashManagement/OpeningCash/Feature/openingCashSlice';
+import PettyCashReducer from '../app/yen-pos/CashManagement/PettyCash/Feature/PettyCashSlice';
+import posDeviceReducer from '../app/yen-pos/POSDevicePage/Feature/posDeviceSlice';
+import orderTypeReducer from '../app/master-admin/Items/OrderType/Features/orderTypeSlice';
+import measurementTypeReducer from '../app/master-admin/Items/MeasurementType/Features/measurementSlice';
+import inventoryTypeReducer from '../app/master-admin/Items/InventoryType/Features/inventoryTypeSlice';
+import sectionsReducer from '../app/master-admin/SectionMaster/Features/sectionsSlice';
+import sfgReducer from '../app/master-admin/Items/SFG/Features/sfgSlice';
+import dineInTaxesReducer from '../app/master-admin/Tax/Features/dineInTaxSlice';
+import prefixTypeReducer from '../app/yen-pos/prefixMaster/Features/prefixSlice';
+import ReasonsReducer from '../app/yen-pos/reasons/Features/reasonSlice';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import recipeReducer from "../app/yen-recipie/RecipeManagement/Features/recipeSlice";
 const store = configureStore({
   reducer: {
     // locations: locationAreaReducer,
@@ -118,12 +163,10 @@ const store = configureStore({
     billReceipts: billReceiptsReducer,
     purchaseOrder: purchaseOrderReducer,
     grn: grnReducer,
-    apInvoice: apInvoiceReducer,
     outgoingPayment: outgoingPaymentReducer,
     vendor: vendorReducer,
     purchaseItems: purchaseItemReducer,
     masterPurchase:purchaseMasterItemReducer,
-    purchaseRequisition: purchaseRequisitionReducer,
     budget: budgetReducer,
     barcode: barcodeReducer,
     customer: customerReducer,
@@ -197,9 +240,11 @@ const store = configureStore({
   stockSummary: stockSummaryReducer,
   stockSummaryOutlet: stockSummaryOutletReducer,
 
-  dailyActivities: dailyActivitiesReducer,
-    dispatches: dispatchesReducer,
+
     dateFilter: dateFilterReducer,
+    dailyActivities: dailyActivitiesReducer,
+    dispatches: dispatchStoreReducer,
+    apInvoice: apInvoiceReducer,
     ...reportReducers,
         expenseCategory: expenseCategoryReducer,
     expenseName: expenseNameReducer,
@@ -227,7 +272,51 @@ const store = configureStore({
     // freetype: freetypeReducer,
     // locations: locationReducer,
     // posDevice: posDeviceReducer,
- 
+// ---- MASTER-ADMIN REDUCERS ----
+
+Category: categoryReducer,
+Discounts: discountReducer,
+itemGroup: itemGroupReducer,
+subCategory: subcategoryReducer,
+maItems: maItemsReducer,
+addOn: addonReducer,
+variants: variantReducer,
+table: tableReducer,
+mixBox: mixboxReducer,
+onlinePartnerTemplate: onlinePartnerTemplateReducer,
+maOnlinePartners: maOnlinePartnerReducer,
+AdvanceAmount: AdvanceAmountReducer,
+deliveryOrder: DeliveryOrderDateReducer,
+deliveryTypes: deliveryTypeReducer,
+Event: EventReducer,
+Charges: ChargesReducer,
+maPaymentType: maPaymentTypeReducer,
+taxes: taxReducer,
+maUoms: maUomReducer,
+vehicles: vehiclesReducer,
+warehouses: warehouseReducer,
+locations: locationReducer,
+WhatsApp: WhatsAppReducer,
+WhatsappMessage: WhatsappMessageReducer,
+asset: maAssetReducer,
+OpeningCash: OpeningCashReducer,
+PettyCash: PettyCashReducer,
+posDevice: posDeviceReducer,
+orderType: orderTypeReducer,
+measurementType: measurementTypeReducer,
+inventoryType: inventoryTypeReducer,
+sections: sectionsReducer,
+sfg: sfgReducer,
+dineInTaxes: dineInTaxesReducer,
+prefixType: prefixTypeReducer,
+Reasons: ReasonsReducer,
+recipe: recipeReducer,
+newrecipe: newrecipeReducer,
+recipehistory: recipehistoryReducer,
+recipes: recipesReducer,
+editRecipe: editRecipeReducer,
+storeKitchenItem: storeKitchenItemReducer,
+recipesection: recipesectionReducer,
   },
   
 });
@@ -237,7 +326,8 @@ export type RootState = ReturnType<typeof store.getState>;
 
 // Define the AppDispatch type based on the store's dispatch
 export type AppDispatch = typeof store.dispatch;
-
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 export default store;
 
 

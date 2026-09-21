@@ -1,0 +1,755 @@
+/* =========================================================
+   MASTER ADMIN — PURCHASE DESKTOP DENSITY PARITY
+
+   The shared --erp-ui unit is defined by desktopDensity.css.
+   It keeps the Master Admin shell and both generations of
+   Master Admin pages visually aligned with Purchase at desktop
+   browser zoom levels. Mobile behavior below 561px is unchanged.
+
+   Only font-size declarations use --erp-type-scale, so changing
+   Small / Medium / Large never changes component dimensions.
+   ========================================================= */
+
+@media (min-width: 561px) {
+  /* Viewport and shared page wrappers */
+
+  .erp-master-admin-viewport {
+    --master-admin-control-height: var(--erp-control-height);
+    --master-admin-control-gap: calc(var(--erp-ui) * 1.125);
+
+    padding: calc(var(--erp-ui) * 2.5) var(--erp-page-gutter)
+      calc(var(--erp-ui) * 5.25) !important;
+  }
+
+  .erp-master-admin-viewport > *,
+  .master-admin-page-shell,
+  .master-admin-module-page,
+  .master-admin-module-content,
+  .master-admin-table-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Page headings and Master Admin tabs */
+
+  .master-admin-page-header {
+    gap: calc(var(--erp-ui) * 2.5) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  html[data-erp-font-size] .master-admin-eyebrow {
+    margin-bottom: calc(var(--erp-ui) * 0.75) !important;
+    font-size: calc(
+      var(--erp-ui) * 1.5 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size] .master-admin-page-title {
+    font-size: calc(
+      var(--erp-ui) * 3.375 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size] .master-admin-page-description {
+    margin-top: calc(var(--erp-ui) * 0.75) !important;
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .master-admin-submodule-tabs {
+    flex-wrap: nowrap !important;
+    gap: var(--erp-ui) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.25) !important;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .master-admin-submodule-tab {
+    flex: 0 0 auto;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 0.75) calc(var(--erp-ui) * 1.8) !important;
+    border-radius: calc(var(--erp-ui) * 1.375) !important;
+  }
+
+  html[data-erp-font-size] .master-admin-submodule-tab {
+    font-size: calc(
+      var(--erp-ui) * 1.84 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  /* Purchase-reference toolbars reused by Master Admin */
+
+  .erp-master-admin-viewport .purchase-reference-toolbar-shell,
+  .erp-master-admin-viewport .purchase-reference-toolbar-section {
+    margin-top: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-toolbar {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: calc(var(--erp-ui) * 2.25) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-toolbar-spacer {
+    display: block !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-search {
+    width: min(calc(var(--erp-ui) * 51), 100%) !important;
+    flex: 0 1 calc(var(--erp-ui) * 51) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-search
+    .MuiOutlinedInput-root {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-search-icon {
+    margin-left: calc(var(--erp-ui) * 1.5) !important;
+    font-size: calc(var(--erp-ui) * 2.2) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .purchase-reference-search
+    :is(.MuiInputBase-input, .MuiOutlinedInput-input),
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .purchase-reference-search
+    input::placeholder {
+    font-size: calc(
+      var(--erp-ui) * 2 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-actions {
+    flex: 0 0 auto;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-action-button {
+    width: auto !important;
+    min-width: calc(var(--erp-ui) * 13.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+    border-width: 1px !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .purchase-reference-action-button {
+    font-size: calc(
+      var(--erp-ui) * 1.94 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-action-button
+    .MuiButton-startIcon {
+    margin-left: 0 !important;
+    margin-right: calc(var(--erp-ui) * 0.8) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-action-button
+    :is(.MuiButton-startIcon, .MuiButton-endIcon)
+    svg,
+  .erp-master-admin-viewport .purchase-reference-action-button > svg {
+    width: calc(var(--erp-ui) * 2.15) !important;
+    height: calc(var(--erp-ui) * 2.15) !important;
+    font-size: calc(var(--erp-ui) * 2.15) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-active-toggle {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.15) 0
+      calc(var(--erp-ui) * 1.65) !important;
+    gap: calc(var(--erp-ui) * 0.9) !important;
+    border-width: 1px !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .purchase-reference-active-toggle
+    .MuiTypography-root {
+    font-size: calc(
+      var(--erp-ui) * 1.88 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-active-toggle
+    .MuiSwitch-root {
+    width: calc(var(--erp-ui) * 5.75) !important;
+    height: calc(var(--erp-ui) * 3.25) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase {
+    padding: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-active-toggle
+    .MuiSwitch-thumb {
+    width: calc(var(--erp-ui) * 1.875) !important;
+    height: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  .erp-master-admin-viewport
+    .purchase-reference-active-toggle
+    .MuiSwitch-switchBase.Mui-checked {
+    transform: translateX(calc(var(--erp-ui) * 2.375)) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-filter-button {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    border-width: 1px !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-filter-button svg {
+    width: calc(var(--erp-ui) * 2.25) !important;
+    height: calc(var(--erp-ui) * 2.25) !important;
+    font-size: calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  /* Summary cards */
+
+  .erp-master-admin-viewport .purchase-reference-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: calc(var(--erp-ui) * 1.75) !important;
+    margin-bottom: calc(var(--erp-ui) * 2.75) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-summary-card {
+    min-height: calc(var(--erp-ui) * 11.75) !important;
+    padding: calc(var(--erp-ui) * 2.25) calc(var(--erp-ui) * 2.375) !important;
+    gap: calc(var(--erp-ui) * 2) !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .purchase-reference-summary-label {
+    font-size: calc(
+      var(--erp-ui) * 1.5 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .purchase-reference-summary-value {
+    margin-top: calc(var(--erp-ui) * 0.875) !important;
+    font-size: calc(
+      var(--erp-ui) * 3.5 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-summary-icon {
+    width: calc(var(--erp-ui) * 5.25) !important;
+    min-width: calc(var(--erp-ui) * 5.25) !important;
+    height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-summary-icon svg {
+    width: calc(var(--erp-ui) * 2.375) !important;
+    height: calc(var(--erp-ui) * 2.375) !important;
+    font-size: calc(var(--erp-ui) * 2.375) !important;
+  }
+
+  /* Purchase-reference tables reused by Master Admin */
+
+  .erp-master-admin-viewport
+    :is(.purchase-reference-table, .purchase-master-table) {
+    max-height: calc(100vh - (var(--erp-ui) * 45)) !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .purchase-reference-table .MuiTable-root,
+      .purchase-master-table .MuiTable-root,
+      .purchase-native-table
+    ) {
+    min-width: calc(var(--erp-ui) * 84) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .purchase-reference-table .MuiTableCell-head,
+      .purchase-master-table .MuiTableCell-head,
+      .purchase-native-table thead th
+    ) {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 1.375) calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .purchase-reference-table .MuiTableCell-body,
+      .purchase-master-table .MuiTableCell-body,
+      .purchase-native-table tbody td
+    ) {
+    height: calc(var(--erp-ui) * 7.75) !important;
+    min-height: calc(var(--erp-ui) * 7.75) !important;
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .purchase-reference-table .MuiTableCell-head,
+      .purchase-master-table .MuiTableCell-head,
+      .purchase-native-table thead th
+    ) {
+    font-size: calc(
+      var(--erp-ui) * 1.52 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .purchase-reference-table .MuiTableCell-body,
+      .purchase-master-table .MuiTableCell-body,
+      .purchase-native-table tbody td
+    ) {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .purchase-reference-id-pill,
+      .purchase-master-id-pill,
+      .purchase-reference-value-pill,
+      .purchase-master-value-pill,
+      .purchase-reference-status-pill,
+      .purchase-master-status-pill,
+      .purchase-reference-view-pill,
+      .purchase-master-view-pill
+    ) {
+    min-height: calc(var(--erp-ui) * 2.875) !important;
+    padding: calc(var(--erp-ui) * 0.375) calc(var(--erp-ui) * 1.25) !important;
+    border-radius: var(--erp-ui) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .purchase-reference-id-pill,
+      .purchase-master-id-pill,
+      .purchase-reference-value-pill,
+      .purchase-master-value-pill,
+      .purchase-reference-status-pill,
+      .purchase-master-status-pill,
+      .purchase-reference-view-pill,
+      .purchase-master-view-pill
+    ) {
+    font-size: calc(
+      var(--erp-ui) * 1.62 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.purchase-reference-name-cell, .purchase-master-name-cell) {
+    gap: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.purchase-reference-name-cell, .purchase-master-name-cell) {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.purchase-reference-avatar, .purchase-master-avatar) {
+    width: calc(var(--erp-ui) * 3.75) !important;
+    min-width: calc(var(--erp-ui) * 3.75) !important;
+    height: calc(var(--erp-ui) * 3.75) !important;
+    border-radius: calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.purchase-reference-avatar, .purchase-master-avatar) {
+    font-size: calc(
+      var(--erp-ui) * 1.25 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .purchase-reference-status-pill > span,
+  .erp-master-admin-viewport .purchase-master-status-pill::before {
+    width: calc(var(--erp-ui) * 0.625) !important;
+    min-width: calc(var(--erp-ui) * 0.625) !important;
+    height: calc(var(--erp-ui) * 0.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .MuiTableCell-body .MuiIconButton-root,
+      .purchase-reference-table .MuiIconButton-root,
+      .purchase-master-table .MuiIconButton-root,
+      .purchase-master-action-button
+    ) {
+    width: calc(var(--erp-ui) * 4) !important;
+    min-width: calc(var(--erp-ui) * 4) !important;
+    height: calc(var(--erp-ui) * 4) !important;
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .MuiTableCell-body .MuiIconButton-root,
+      .purchase-reference-table .MuiIconButton-root,
+      .purchase-master-table .MuiIconButton-root,
+      .purchase-master-action-button
+    )
+    svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-master-admin-viewport .master-admin-pagination {
+    margin-top: calc(var(--erp-ui) * 2) !important;
+    gap: var(--erp-ui) !important;
+  }
+
+  /* Legacy Master Admin navigation strips */
+
+  .erp-master-admin-viewport :is(.nav-section-label, .subnav-section-label) {
+    margin-top: calc(var(--erp-ui) * 0.5) !important;
+    margin-bottom: calc(var(--erp-ui) * 0.75) !important;
+    margin-left: calc(var(--erp-ui) * 4) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.nav-section-label, .subnav-section-label) {
+    font-size: calc(
+      var(--erp-ui) * 1.32 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.nav-btn-strip-wrapper, .subnav-btn-strip-wrapper) {
+    margin-inline: calc(var(--erp-ui) * 3.25)
+      calc(var(--erp-ui) * 2) !important;
+    padding-bottom: calc(var(--erp-ui) * 1.4) !important;
+  }
+
+  .erp-master-admin-viewport .nav-btn-strip {
+    gap: var(--erp-ui) !important;
+    padding-bottom: calc(var(--erp-ui) * 0.25) !important;
+    padding-right: calc(var(--erp-ui) * 0.5) !important;
+  }
+
+  .erp-master-admin-viewport .nav-btn-pill {
+    gap: calc(var(--erp-ui) * 0.25) !important;
+    padding: calc(var(--erp-ui) * 0.625)
+      calc(var(--erp-ui) * 1.5) !important;
+    border-radius: var(--erp-ui) !important;
+  }
+
+  html[data-erp-font-size] .erp-master-admin-viewport .nav-btn-pill {
+    font-size: calc(
+      var(--erp-ui) * 1.84 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport .nav-btn-pill i {
+    font-size: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  /* Legacy native tables */
+
+  .erp-master-admin-viewport .table-container {
+    width: 100% !important;
+    max-height: calc(100vh - (var(--erp-ui) * 45)) !important;
+    margin: 0 !important;
+    border-radius: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.custom-table, .custom-tables, .custom-tabless) {
+    width: 100% !important;
+    min-width: calc(var(--erp-ui) * 84) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.custom-table, .custom-tables, .custom-tabless)
+    th {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    padding: calc(var(--erp-ui) * 1.375) calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.custom-table, .custom-tables, .custom-tabless)
+    td {
+    height: calc(var(--erp-ui) * 7.75) !important;
+    min-height: calc(var(--erp-ui) * 7.75) !important;
+    padding: calc(var(--erp-ui) * 1.5) calc(var(--erp-ui) * 2.5) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.custom-table, .custom-tables, .custom-tabless)
+    th {
+    font-size: calc(
+      var(--erp-ui) * 1.52 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.custom-table, .custom-tables, .custom-tabless)
+    td,
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.custom-table, .custom-tables, .custom-tabless)
+    td
+    .MuiTypography-root {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size] .erp-master-admin-viewport .empty-state {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  /* Legacy icon actions and status controls */
+
+  .erp-master-admin-viewport .icon-action-wrapper {
+    gap: calc(var(--erp-ui) * 0.75) !important;
+  }
+
+  .erp-master-admin-viewport .icon-action-button {
+    width: calc(var(--erp-ui) * 4) !important;
+    min-width: calc(var(--erp-ui) * 4) !important;
+    height: calc(var(--erp-ui) * 4) !important;
+    padding: calc(var(--erp-ui) * 0.375) !important;
+    border-radius: calc(var(--erp-ui) * 1.125) !important;
+  }
+
+  .erp-master-admin-viewport .icon-action-svg {
+    font-size: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  html[data-erp-font-size] .erp-master-admin-viewport .icon-action-label {
+    font-size: calc(
+      var(--erp-ui) * 1.62 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .edit-btn,
+      .edit-single,
+      .print-btn,
+      .print-btns,
+      .deactivate-btn,
+      .deactivate-btns,
+      .delete-btn,
+      .activate-btn
+    ) {
+    padding: calc(var(--erp-ui) * 0.5) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .edit-btn,
+      .edit-single,
+      .print-btn,
+      .print-btns,
+      .deactivate-btn,
+      .deactivate-btns,
+      .delete-btn,
+      .activate-btn
+    )
+    svg {
+    width: calc(var(--erp-ui) * 2.125) !important;
+    height: calc(var(--erp-ui) * 2.125) !important;
+  }
+
+  .erp-master-admin-viewport :is(.status-active, .status-inactive) {
+    min-height: calc(var(--erp-ui) * 2.875) !important;
+    padding: calc(var(--erp-ui) * 0.375) calc(var(--erp-ui) * 1.25) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.status-active, .status-inactive) {
+    font-size: calc(
+      var(--erp-ui) * 1.62 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  /* Legacy form layout and controls */
+
+  .erp-master-admin-viewport .form-section {
+    margin-bottom: calc(var(--erp-ui) * 1.5) !important;
+    padding: calc(var(--erp-ui) * 2.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.875) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.form-section-title, .form-section-subtitle) {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.form-grid, .form-grid-manager) {
+    gap: calc(var(--erp-ui) * 2) !important;
+  }
+
+  .erp-master-admin-viewport
+    .custom-textfield
+    :is(.MuiInputBase-root, .MuiOutlinedInput-root) {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    border-radius: calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  .erp-master-admin-viewport
+    .custom-input
+    :is(input, .MuiSelect-select) {
+    min-height: calc(var(--erp-ui) * 2.5) !important;
+    padding: calc(var(--erp-ui) * 1.25)
+      calc(var(--erp-ui) * 1.625) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .custom-input
+    :is(input, .MuiSelect-select),
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    .custom-input
+    input::placeholder {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.custom-label, .MuiFormLabel-root, .MuiFormHelperText-root, .checkbox-label) {
+    font-size: calc(
+      var(--erp-ui) * 1.65 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(.btn-primary, .btn-secondary, .btn-delete, .btn-primary-delete) {
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+    padding: 0 calc(var(--erp-ui) * 1.7) !important;
+    border-radius: calc(var(--erp-ui) * 1.35) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(.btn-primary, .btn-secondary, .btn-delete, .btn-primary-delete) {
+    font-size: calc(
+      var(--erp-ui) * 1.94 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  /* Page-specific toolbars use the same Purchase control metrics. */
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-toolbar,
+      .tax-master-toolbar,
+      .uom-master-toolbar,
+      .discount-master-toolbar,
+      .vehicle-master-toolbar
+    ) {
+    align-items: center !important;
+    gap: calc(var(--erp-ui) * 2.25) !important;
+    margin: calc(var(--erp-ui) * 1.75) 0
+      calc(var(--erp-ui) * 2.25) !important;
+  }
+
+  html[data-erp-font-size]
+    .erp-master-admin-viewport
+    :is(
+      .location-master-toolbar-title,
+      .tax-master-toolbar-title,
+      .uom-master-toolbar-title,
+      .discount-master-toolbar-title
+    ) {
+    font-size: calc(
+      var(--erp-ui) * 1.9 * var(--erp-type-scale)
+    ) !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    ) {
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: calc(var(--erp-ui) * 1.125) !important;
+    overflow: visible !important;
+  }
+
+  .erp-master-admin-viewport .vehicle-master-toolbar {
+    display: grid !important;
+    grid-template-columns:
+      minmax(calc(var(--erp-ui) * 15.625), auto)
+      minmax(calc(var(--erp-ui) * 32.5), calc(var(--erp-ui) * 45))
+      minmax(0, 1fr) !important;
+    column-gap: calc(var(--erp-ui) * 2.25) !important;
+    row-gap: calc(var(--erp-ui) * 1.5) !important;
+  }
+
+  .erp-master-admin-viewport .vehicle-master-actions {
+    grid-column: auto !important;
+  }
+
+  .erp-master-admin-viewport
+    :is(
+      .location-master-actions,
+      .tax-master-toolbar-actions,
+      .uom-master-toolbar-actions,
+      .discount-master-toolbar-actions,
+      .vehicle-master-actions
+    )
+    :is(.purchase-reference-action-button, .purchase-reference-active-toggle) {
+    height: calc(var(--erp-ui) * 5.25) !important;
+    min-height: calc(var(--erp-ui) * 5.25) !important;
+  }
+}
+

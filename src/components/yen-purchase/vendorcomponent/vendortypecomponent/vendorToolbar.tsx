@@ -1,7 +1,17 @@
 'use client';
 import React from 'react';
-import { Box, TextField, IconButton, Typography, Switch } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Switch,
+} from '@mui/material';
+
+import {
+  Add as AddIcon,
+  SearchRounded as SearchIcon,
+} from '@mui/icons-material';
 
 interface VendorToolbarProps {
   searchQuery: string;
@@ -20,80 +30,55 @@ const VendorToolbar: React.FC<VendorToolbarProps> = ({
   onToggleDeactivated,
   showAddButton = true,
 }) => {
-  return (
-    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-      {/* Search Field */}
+return (
+  <Box className="purchase-reference-toolbar-section">
+    <Box className="purchase-reference-toolbar">
       <TextField
         autoComplete="off"
-        label="Search"
+        type="search"
+        placeholder="Search by vendor type name or ID..."
         variant="outlined"
-        className="some"
         value={searchQuery}
         onChange={(e) => onSearch(e.target.value)}
-        sx={{ flex: 1, ml: 2 }}
-        size="small"
+        className="purchase-reference-search"
+        InputProps={{
+          startAdornment: (
+            <SearchIcon className="purchase-reference-search-icon" />
+          ),
+        }}
       />
 
-      {/* Action Buttons */}
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box className="purchase-reference-actions">
         {showAddButton && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <IconButton
-            color="primary"
+          <Button
+            type="button"
+            variant="outlined"
+            startIcon={<AddIcon />}
             onClick={onAdd}
-            className="icon-button-outline"
-            size="small"
-            sx={{ p: 0.2 }}
+            className="purchase-reference-action-button"
           >
-            <AddIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 30,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.1,
-            }}
-          >
-            Add
-          </Typography>
-        </Box>
+            Add New
+          </Button>
         )}
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Typography
-            variant="caption"
-            align="center"
-            sx={{
-              maxWidth: 60,
-              wordBreak: 'break-word',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.1,
-              mt: 0.2,
-            }}
-          >
-            {showDeactivated ? 'Deactivated' : 'Activated'}
+
+        <Box className="purchase-reference-active-toggle">
+          <Typography component="span">
+            Show Active Only
           </Typography>
+
           <Switch
-            checked={showDeactivated}
+            checked={!showDeactivated}
             onChange={onToggleDeactivated}
             size="small"
-            sx={{ height: 24 }}
+            inputProps={{
+              'aria-label': 'Show active vendor types only',
+            }}
           />
         </Box>
       </Box>
     </Box>
-  );
+  </Box>
+);
 };
 
 export default VendorToolbar;

@@ -30,6 +30,7 @@ import {
 } from '@/features/yen-purchase/Outgoing/outgoingPaymentSlice';
 import { fetchActiveAdvancesVendorByName } from '@/features/yen-purchase/Outgoing/advancePaymentSlice';
 import { ProcessPaymentRequest } from '@/Models/outgoingModel';
+import { formatCurrency } from '@/utilities/formatters';
 
 interface SinglePaymentDialogProps {
   open: boolean;
@@ -328,7 +329,7 @@ useEffect(() => {
     if (isNaN(numAmount)) return 'Invalid amount format';
     if (numAmount < 0) return 'Amount cannot be negative';
     if (isPartialCheck && numAmount > maxAllowed) {
-      return `Payment amount (₹${numAmount.toFixed(2)}) exceeds total payable amount (₹${maxAllowed.toFixed(2)})`;
+      return `Payment amount (${formatCurrency(numAmount)}) exceeds total payable amount (${formatCurrency(maxAllowed)})`;
     }
     return '';
   };
@@ -750,16 +751,16 @@ if (currentAmount === 0 && paymentDetails.paymentType === 'full') {
         <DialogTitle>Payment Details</DialogTitle>
         <DialogContent>
           <Typography variant="body1" gutterBottom>
-            Total Amount: ₹{totalPayable.toFixed(2)}
+            Total Amount: {formatCurrency(totalPayable)}
           </Typography>
           <Typography>
-            Total Debit Amount: ₹{totalDebitAmount.toFixed(2)}
+            Total Debit Amount: {formatCurrency(totalDebitAmount)}
           </Typography>
           <Typography>
-            Total Advance Amount: ₹{totalAdvanceAmount.toFixed(2)}
+            Total Advance Amount: {formatCurrency(totalAdvanceAmount)}
           </Typography>
           <Typography>
-            Remaining Payable: ₹{(totalPayable - totalDebitAmount - totalAdvanceAmount).toFixed(2)}
+            Remaining Payable: {formatCurrency((totalPayable - totalDebitAmount - totalAdvanceAmount))}
           </Typography>
 
           {/* Debit/Advance Warning
@@ -967,7 +968,7 @@ if (currentAmount === 0 && paymentDetails.paymentType === 'full') {
                       : selected
                           .map((id) => {
                             const debit = debits.find((d: any) => d.randomId === id);
-                            return debit ? `${debit.randomId} (₹${(debit.finalAmount || 0).toFixed(2)})` : '';
+                            return debit ? `${debit.randomId} (${formatCurrency((debit.finalAmount || 0))})` : '';
                           })
                           .join(', ')
                   }
@@ -992,7 +993,7 @@ if (currentAmount === 0 && paymentDetails.paymentType === 'full') {
                     <MenuItem key={debit.randomId} value={debit.randomId}>
                       <Checkbox checked={paymentDetails.selectedDebitNotes.includes(debit.randomId)} />
                       <ListItemText
-                        primary={`${debit.randomId} - ₹${parseFloat(debit.finalAmount || '0').toFixed(2)}`}
+                        primary={`${debit.randomId} - ${formatCurrency(parseFloat(debit.finalAmount || '0'))}`}
                       />
                     </MenuItem>
                   ))}
@@ -1088,7 +1089,7 @@ if (currentAmount === 0 && paymentDetails.paymentType === 'full') {
                             }, 0);
                             const remaining = getBaseRemainingForAdjustments() - prevAdvanceSum;
                             const cappedAmount = advance ? Math.min(advance.pendingAmount || 0, Math.max(0, remaining)) : 0;
-                            return advance ? `${advance.randomId} (₹${cappedAmount.toFixed(2)})` : '';
+                            return advance ? `${advance.randomId} (${formatCurrency(cappedAmount)})` : '';
                           })
                           .join(', ')
                   }
@@ -1123,7 +1124,7 @@ if (currentAmount === 0 && paymentDetails.paymentType === 'full') {
                       <MenuItem key={advance.randomId} value={advance.randomId} disabled={cappedAmount <= 0}>
                         <Checkbox checked={paymentDetails.selectedAdvancePayments.includes(advance.randomId)} />
                         <ListItemText
-                          primary={`${advance.randomId} - ₹${parseFloat(advance.pendingAmount || '0').toFixed(2)} (Available: ₹${cappedAmount.toFixed(2)})`}
+                          primary={`${advance.randomId} - ${formatCurrency(parseFloat(advance.pendingAmount || '0'))} (Available: ${formatCurrency(cappedAmount)})`}
                         />
                       </MenuItem>
                     );
@@ -1221,19 +1222,19 @@ disabled={
             Are you sure you want to process this payment?
           </Typography>
           <Typography gutterBottom>
-            Total Amount: ₹{totalPayable.toFixed(2)}
+            Total Amount: {formatCurrency(totalPayable)}
           </Typography>
           <Typography gutterBottom>
-            Payment Amount: ₹{parseFloat(paymentDetails.amount || '0').toFixed(2)}
+            Payment Amount: {formatCurrency(parseFloat(paymentDetails.amount || '0'))}
           </Typography>
           {totalDebitAmount > 0 && (
             <Typography gutterBottom>
-              Debit Adjustment: ₹{totalDebitAmount.toFixed(2)}
+              Debit Adjustment: {formatCurrency(totalDebitAmount)}
             </Typography>
           )}
           {totalAdvanceAmount > 0 && (
             <Typography gutterBottom>
-              Advance Adjustment: ₹{totalAdvanceAmount.toFixed(2)}
+              Advance Adjustment: {formatCurrency(totalAdvanceAmount)}
             </Typography>
           )}
           <Typography>
