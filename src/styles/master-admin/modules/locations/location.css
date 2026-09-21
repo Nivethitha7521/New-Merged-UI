@@ -714,6 +714,7 @@ td {
 
 .erp-master-admin-viewport
 .location-master-actions {
+  width: 100%;
   min-width: 0;
 
   display: flex !important;
@@ -721,14 +722,14 @@ td {
   justify-content: flex-end !important;
 
   gap: 9px !important;
-  flex-wrap: nowrap !important;
 
-  overflow-x: auto;
-  overflow-y: hidden;
+  /* Allow controls to move instead of hiding Add New */
+  flex-wrap: wrap !important;
+
+  overflow-x: visible !important;
+  overflow-y: visible !important;
 
   padding: 2px 1px 4px;
-
-  scrollbar-width: thin;
 }
 
 .erp-master-admin-viewport
@@ -912,47 +913,56 @@ svg {
   margin-top: 0 !important;
 }
 
-/* Responsive */
+/* =========================================================
+   LOCATION TOOLBAR - SIDEBAR SAFE
+   ========================================================= */
 
-@media (max-width: 1450px) {
+@media (max-width: 1900px) and (min-width: 721px) {
   .erp-master-admin-viewport
   .location-master-toolbar {
-    grid-template-columns:
-      minmax(120px, auto)
-      minmax(240px, 320px)
-      minmax(0, 1fr);
+    display: grid !important;
 
-    column-gap: 14px;
-  }
-
-  .erp-master-admin-viewport
-  .location-master-actions {
-    gap: 7px !important;
-  }
-
-  .erp-master-admin-viewport
-  .location-master-actions
-  .purchase-reference-action-button {
-    padding-left: 11px !important;
-    padding-right: 11px !important;
-  }
-}
-
-@media (max-width: 1180px) {
-  .erp-master-admin-viewport
-  .location-master-toolbar {
     grid-template-columns:
       minmax(125px, auto)
-      minmax(240px, 1fr);
+      minmax(240px, 360px) !important;
 
-    row-gap: 12px;
+    column-gap: 14px !important;
+    row-gap: 12px !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .erp-master-admin-viewport
+  .location-master-toolbar-title {
+    grid-column: 1;
+  }
+
+  .erp-master-admin-viewport
+  .location-master-search {
+    grid-column: 2;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 360px !important;
   }
 
   .erp-master-admin-viewport
   .location-master-actions {
-    grid-column: 1 / -1;
+    grid-column: 1 / -1 !important;
 
+    width: 100% !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
     justify-content: flex-start !important;
+
+    flex-wrap: wrap !important;
+
+    gap: 8px !important;
+
+    overflow: visible !important;
   }
 }
 

@@ -33,8 +33,6 @@
 /* Discount Master page/table styles */
 @import "./modules/discount/master.css";
 
-/* Vehicle toolbar styles */
-@import "./modules/vehicle/toolbar.css";
 /* Discount dialog styles */
 @import "./modules/discount/dialog.css";
 
@@ -93,3 +91,6 @@
 
 /* SubCategory, ItemGroup, InventoryType and OrderType compact dialogs */
 @import "./modules/items/lookup-dialogs.css";
+
+/* Vehicle toolbar fix — KEEP LAST so it wins the cascade over 03/04 density locks */
+@import "./modules/vehicle/toolbar.css";

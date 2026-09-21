@@ -1,81 +1,97 @@
 /* =========================================================
-   VEHICLE MASTER TOOLBAR
-   Fixes Search bar hiding Add New button
+   VEHICLE MASTER TOOLBAR  (MUST STAY THE LAST @import)
+
+   Problem this fixes
+   ------------------
+   Earlier rules (03-desktop-density.css and the "final cascade
+   lock" in 04-portalled-dialog-typography.css) force:
+
+       .vehicle-master-actions {
+         flex-wrap: nowrap   !important;
+         justify-content: flex-end !important;
+         overflow-x: auto    !important;
+       }
+
+   When the two side menus are open, the content area is too
+   narrow for [Add New | Import | Export | Sample | Rollback |
+   Show Active Only]. With nowrap + flex-end the row overflows
+   to the LEFT, so "Add New" slides under the search box and
+   cannot even be scrolled to.
+
+   Fix: title + search stay on the first row; the action buttons
+   take the rest of that row if they fit, otherwise the whole
+   button group drops to its own row (and wraps further if
+   needed). Works for any sidebar state / zoom / density.
+
+   Selectors use two classes on the same element
+   (.location-master-X.vehicle-master-X) so they out-rank the
+   older :is(...) locks regardless of import order.
    ========================================================= */
 
-.erp-master-admin-viewport .vehicle-master-toolbar {
-  width: 100%;
-  min-width: 0;
+@media (min-width: 561px) {
 
-  display: grid;
-  grid-template-columns:
-    minmax(125px, auto)
-    minmax(260px, 360px)
-    minmax(0, 1fr);
+  html .erp-master-admin-viewport
+  .location-master-toolbar.vehicle-master-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    grid-template-columns: none !important;
 
-  align-items: center;
-  column-gap: 18px;
-  row-gap: 12px;
+    width: 100% !important;
+    min-width: 0 !important;
 
-  margin: 14px 0 18px;
-}
-
-.erp-master-admin-viewport .vehicle-master-search {
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 360px !important;
-}
-
-.erp-master-admin-viewport .vehicle-master-actions {
-  width: 100%;
-  min-width: 0;
-
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-
-  gap: 9px !important;
-
-  /* Overrides location-master-actions nowrap */
-  flex-wrap: wrap !important;
-
-  /* Prevents Add New from being clipped */
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-
-  padding: 2px 1px 4px;
-}
-
-.erp-master-admin-viewport
-.vehicle-master-actions
-.purchase-reference-action-button,
-.erp-master-admin-viewport
-.vehicle-master-actions
-.purchase-reference-active-toggle {
-  flex: 0 0 auto;
-}
-
-/* Move buttons below title/search when width becomes insufficient */
-@media (max-width: 1550px) {
-  .erp-master-admin-viewport .vehicle-master-toolbar {
-    grid-template-columns:
-      minmax(125px, auto)
-      minmax(260px, 360px);
+    column-gap: calc(var(--erp-ui) * 2.25) !important;
+    row-gap: calc(var(--erp-ui) * 1.5) !important;
   }
 
-  .erp-master-admin-viewport .vehicle-master-actions {
-    grid-column: 1 / -1;
+  html .erp-master-admin-viewport
+  .location-master-toolbar.vehicle-master-toolbar
+  > .location-master-toolbar-title {
+    flex: 0 0 auto !important;
+    min-width: calc(var(--erp-ui) * 15.625);
+  }
+
+  html .erp-master-admin-viewport
+  .location-master-search.vehicle-master-search {
+    flex: 1 1 calc(var(--erp-ui) * 45) !important;
+    width: auto !important;
+    min-width: calc(var(--erp-ui) * 32.5) !important;
+    max-width: calc(var(--erp-ui) * 45) !important;
+  }
+
+  /* Button group: stays beside the search when it fits (basis =
+     its full one-line width), otherwise wraps to the next row. */
+  html .erp-master-admin-viewport
+  .location-master-actions.vehicle-master-actions {
+    flex: 1 1 max-content !important;
+    grid-column: auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
     justify-content: flex-end !important;
+
+    gap: calc(var(--erp-ui) * 1.125) !important;
+
+    overflow: visible !important;
+  }
+
+  html .erp-master-admin-viewport
+  .location-master-actions.vehicle-master-actions
+  > * {
+    flex: 0 0 auto;
   }
 }
 
 /* Mobile */
-@media (max-width: 720px) {
+@media (max-width: 560px) {
   .erp-master-admin-viewport .vehicle-master-toolbar {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-
     gap: 10px;
   }
 
@@ -86,7 +102,8 @@
 
   .erp-master-admin-viewport .vehicle-master-actions {
     width: 100%;
+    flex-wrap: wrap !important;
     justify-content: flex-start !important;
+    overflow: visible !important;
   }
 }
-

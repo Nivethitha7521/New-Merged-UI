@@ -1,15 +1,6 @@
-
-
-
 'use client';
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-} from "@mui/material";
+import { ConfirmDialogView } from "@/components/feedback/ConfirmDialogView";
 
 interface EditConfirmationDialogProps {
   open: boolean;
@@ -36,43 +27,18 @@ const EditConfirmationDialog: React.FC<EditConfirmationDialogProps> = ({
   };
 
   return (
-    <Dialog
+    <ConfirmDialogView
       open={open}
-      onClose={loading ? undefined : onClose}
-      PaperProps={{
-        className: "dialog-paper",
-      }}
-    >
-      <DialogTitle className="dialog-title">Confirmation</DialogTitle>
-
-      <DialogContent className="dialog-content">
-        <label>Are you sure you want to save the changes?</label>
-      </DialogContent>
-
-      <DialogActions className="dialog-actions">
-        <button
-          onClick={onClose}
-          className="btn-secondary"
-          disabled={loading}
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={handleConfirm}
-          className="btn-primary"
-          disabled={loading}
-        >
-          {loading ? (
-            <CircularProgress size={18} sx={{ color: "#fff" }} />
-          ) : (
-            "Confirm"
-          )}
-        </button>
-      </DialogActions>
-    </Dialog>
+      title="Confirmation"
+      message="Are you sure you want to save the changes?"
+      confirmText="Confirm"
+      cancelText="Cancel"
+      tone="primary"
+      loading={loading}
+      onCancel={onClose}
+      onConfirm={handleConfirm}
+    />
   );
 };
 
 export default EditConfirmationDialog;
-

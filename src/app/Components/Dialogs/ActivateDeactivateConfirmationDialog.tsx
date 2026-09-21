@@ -1,13 +1,6 @@
-
 'use client';
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-} from "@mui/material";
+import { ConfirmDialogView } from "@/components/feedback/ConfirmDialogView";
 
 interface ActivateDeactivateConfirmationDialogProps {
   open: boolean;
@@ -17,9 +10,14 @@ interface ActivateDeactivateConfirmationDialogProps {
   onConfirm: () => Promise<void> | void;
 }
 
+/**
+ * Same props / behaviour as before (async confirm with spinner, locked while
+ * loading). Only the visual layer changed: it now renders the global YEN ERP
+ * confirmation dialog, so it looks identical in every module.
+ */
 const ActivateDeactivateConfirmationDialog: React.FC<
   ActivateDeactivateConfirmationDialogProps
-> = ({ open, actionType, itemName,  onClose, onConfirm }) => {
+> = ({ open, actionType, itemName, onClose, onConfirm }) => {
   const [loading, setLoading] = useState(false);
 
   const handleConfirm = async () => {
@@ -37,54 +35,29 @@ const ActivateDeactivateConfirmationDialog: React.FC<
     const name = itemName ? ` "${itemName}"` : "";
 
     switch (actionType) {
-    case "deactivate":
-      return `Are you sure you want to deactivate this${name}?`;
-    case "activate":
-      return `Are you sure you want to activate this${name}?`;
-    case "delete":
-      return `Are you sure you want to delete this${name}?`;
-    default:
-      return "";
-  }
-
+      case "deactivate":
+        return `Are you sure you want to deactivate this${name}?`;
+      case "activate":
+        return `Are you sure you want to activate this${name}?`;
+      case "delete":
+        return `Are you sure you want to delete this${name}?`;
+      default:
+        return "";
+    }
   };
 
   return (
-    <Dialog
+    <ConfirmDialogView
       open={open}
-      onClose={loading ? undefined : onClose}
-      PaperProps={{
-        className: "dialog-paper",
-      }}
-    >
-      <DialogTitle className="dialog-title">Confirmation</DialogTitle>
-
-      <DialogContent className="dialog-content">
-        <label>{getMessage()}</label>
-      </DialogContent>
-
-      <DialogActions className="dialog-actions">
-        <button
-          onClick={onClose}
-          className="btn-secondary"
-          disabled={loading}
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={handleConfirm}
-          className="btn-primary"
-          disabled={loading}
-        >
-          {loading ? (
-            <CircularProgress size={18} sx={{ color: "#fff" }} />
-          ) : (
-            "Confirm"
-          )}
-        </button>
-      </DialogActions>
-    </Dialog>
+      title="Confirmation"
+      message={getMessage()}
+      confirmText="Confirm"
+      cancelText="Cancel"
+      tone={actionType === "activate" ? "primary" : "danger"}
+      loading={loading}
+      onCancel={onClose}
+      onConfirm={handleConfirm}
+    />
   );
 };
 

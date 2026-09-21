@@ -6,6 +6,7 @@ import store from '../redux/store';
 import ClientLayout from './ClientLayout';
 import { ToastContainer } from 'react-toastify';
 import { DisplaySettingsProvider } from '@/contexts/DisplaySettingsContext';
+import { FeedbackProvider } from '@/components/feedback';
 import './globals.css';
 
 import '@/styles/purchase/purchaseTable.css';
@@ -16,6 +17,10 @@ import '@/styles/desktopDensity.css';
 import '@/styles/account-settings/account-settings.css';
 
 import '@/styles/yenDialog.css';
+
+// Global confirmation dialog + toast system (keep these LAST so they win the cascade).
+import '@/components/feedback/feedback.css';
+import '@/components/feedback/legacy-bridge.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -35,8 +40,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Provider store={store}>
           <DisplaySettingsProvider>
-            <ClientLayout>{children}</ClientLayout>
-            <ToastContainer position="top-right" autoClose={1000} hideProgressBar={false} />
+            <FeedbackProvider>
+              <ClientLayout>{children}</ClientLayout>
+            </FeedbackProvider>
+            <ToastContainer position="bottom-left" autoClose={1000} hideProgressBar={false} />
           </DisplaySettingsProvider>
         </Provider>
       </body>

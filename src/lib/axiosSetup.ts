@@ -13,17 +13,22 @@ export const setupAxios = () => {
   isInterceptorAdded = true;
 
   // ⬅️ INTHA REQUEST INTERCEPTOR PUTHUSA ADD PANNUNGA
-  axios.interceptors.request.use(
-    (config) => {
-      const token = sessionStorage.getItem("accessToken");
-      if (token) {
-        config.headers = config.headers || {};
-        config.headers["Authorization"] = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+axios.interceptors.request.use(
+  (config) => {
+    const token = sessionStorage.getItem("accessToken");
+
+    const isPostalApi =
+      config.url?.includes("api.postalpincode.in");
+
+    if (token && !isPostalApi) {
+      config.headers = config.headers || {};
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
   axios.interceptors.response.use(
     (response) => response,

@@ -1,6 +1,6 @@
 'use client';
 import React from "react";
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from "@mui/material";
+import { ConfirmDialogView } from "@/components/feedback/ConfirmDialogView";
 
 interface CloseConfirmationDialogProps {
   open: boolean;
@@ -8,33 +8,22 @@ interface CloseConfirmationDialogProps {
   onConfirm: () => void;
 }
 
-const   CloseConfirmationDialog: React.FC<CloseConfirmationDialogProps> = ({
+const CloseConfirmationDialog: React.FC<CloseConfirmationDialogProps> = ({
   open,
   onClose,
   onConfirm,
 }) => {
   return (
-    <Dialog 
-    open={open} 
-    onClose={onClose}
-     PaperProps={{
-          className: "dialog-paper",
-        }}
-    >
-      <DialogTitle className="dialog-title">Confirmation</DialogTitle>
-      <DialogContent className="dialog-content">
-        <label> Are you sure you want to close the form? Any unsaved changes will be lost. </label>
-        
-      </DialogContent>
-      <DialogActions className="dialog-actions">
-        <button onClick={onClose} color="primary" className="btn-secondary">
-          Keep Editing
-        </button>
-        <button onClick={onConfirm} color="primary" className="btn-primary">
-          Confirm
-        </button>
-      </DialogActions>
-    </Dialog>
+    <ConfirmDialogView
+      open={open}
+      title="Confirmation"
+      message="Are you sure you want to close the form? Any unsaved changes will be lost."
+      confirmText="Confirm"
+      cancelText="Keep Editing"
+      tone="warning"
+      onCancel={onClose}
+      onConfirm={onConfirm}
+    />
   );
 };
 
